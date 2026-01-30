@@ -16,6 +16,9 @@ import { Badge } from '@/components/ui/badge';
 import { mockNotifications } from '@/lib/mockData';
 
 export function Navbar() {
+
+
+  
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();

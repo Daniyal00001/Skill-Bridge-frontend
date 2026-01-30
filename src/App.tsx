@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 
 // Public Pages
 import LandingPage from "./pages/LandingPage";
+import AboutPage from "./pages/AboutPage";
+import HowItWorksPage from "./pages/HowItWorksPage";
 
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -32,6 +34,8 @@ const App = () => (
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
             
             {/* Auth Routes */}
             <Route path="/login" element={<LoginPage />} />

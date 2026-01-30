@@ -83,6 +83,7 @@ export default function LandingPage() {
       <Navbar />
       
       {/* Hero Section */}
+      {/* ------------------------------------------------------------------------------------ */}
       <section className="pt-32 pb-20 px-4 relative overflow-hidden">
         <div className="absolute inset-0 gradient-hero opacity-5" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl" />
@@ -103,7 +104,8 @@ export default function LandingPage() {
               SkillBridge connects businesses with pre-vetted developers through AI-powered matching. 
               Get accurate project scoping, smart matching, and secure payments.
             </p>
-            
+            {/* --------------------------------------------------------------------------------- */}
+            {/* --------------------------------------------------------------------------------- */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="hero" size="xl" asChild>
                 <Link to="/signup">
@@ -115,7 +117,8 @@ export default function LandingPage() {
                 <Link to="/signup?role=developer">Find Work</Link>
               </Button>
             </div>
-            
+            {/* ----------------------------------------------------------------------------------------- */}
+
             <div className="mt-12 flex items-center justify-center gap-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-success" />
@@ -271,6 +274,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+
+
+  {/* --------------------------------------------------------------------------------------- */}
       <Footer />
     </div>
   );
