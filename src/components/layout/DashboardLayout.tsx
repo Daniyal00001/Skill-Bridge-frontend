@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { mockNotifications } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo/logo.png';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -108,9 +109,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 gradient-hero rounded-lg flex items-center justify-center flex-shrink-0">
-              <Zap className="w-5 h-5 text-white" />
+          <Link to="/" className="flex items-center">
+            <div className=" h-11 flex items-center justify-center flex-shrink-0">
+              <img src={logo} alt="SkillBridge" className="w-full h-full object-contain" />
             </div>
             {!sidebarCollapsed && (
               <span className="text-lg font-bold gradient-text">SkillBridge</span>

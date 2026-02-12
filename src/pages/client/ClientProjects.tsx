@@ -118,6 +118,11 @@ const ClientProjectsPage = () => {
                             <Plus className="h-4 w-4" /> Post New Project
                         </Link>
                     </Button>
+                    <Button variant="outline" asChild>
+                        <Link to="/client/drafts">
+                            View Drafts
+                        </Link>
+                    </Button>
                 </div>
 
                 {/* Filters and Search */}

@@ -19,7 +19,12 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PostProjectPage from "./pages/client/PostProject";
 import ClientProjectsPage from "./pages/client/ClientProjects";
+import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import ProjectProposalsPage from "./pages/client/ProjectProposals";
+import ClientMessagesPage from "./pages/client/ClientMessages";
+import ClientReviewsPage from "./pages/client/ClientReviews";
+import ClientSettingsPage from "./pages/client/ClientSettings";
+import ClientDraftsPage from "./pages/client/ClientDrafts";
 import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
@@ -49,13 +54,19 @@ const App = () => (
             <Route path="/client" element={<ClientDashboard />} />
             <Route path="/client/post-project" element={<PostProjectPage />} />
             <Route path="/client/projects" element={<ClientProjectsPage />} />
+            <Route path="/client/drafts" element={<ClientDraftsPage />} />
+            <Route path="/client/projects/:projectId" element={<ClientProjectDetailsPage />} />
             <Route path="/client/projects/:projectId/proposals" element={<ProjectProposalsPage />} />
+            <Route path="/client/messages" element={<ClientMessagesPage />} />
+            <Route path="/client/reviews" element={<ClientReviewsPage />} />
 
             {/* Developer Routes */}
             <Route path="/developer" element={<DeveloperDashboard />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
+
+            <Route path="/settings" element={<ClientSettingsPage />} />
 
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
