@@ -1,14 +1,14 @@
 // TypeScript interfaces for SkillBridge Client Side Module
 // Extends existing interfaces from mockData.ts with additional client-specific types
 
-export type ProjectCategory = 
-  | 'web-development' 
-  | 'mobile-development' 
-  | 'ui-ux-design' 
-  | 'backend-development' 
-  | 'ai-ml' 
-  | 'devops' 
-  | 'data-science' 
+export type ProjectCategory =
+  | 'web-development'
+  | 'mobile-development'
+  | 'ui-ux-design'
+  | 'backend-development'
+  | 'ai-ml'
+  | 'devops'
+  | 'data-science'
   | 'blockchain';
 
 export type ProjectComplexity = 'Simple' | 'Medium' | 'Complex';
@@ -157,6 +157,8 @@ export interface ProposalCardProps {
   developer: Developer;
   onAccept: (proposalId: string) => void;
   onReject: (proposalId: string) => void;
+  onViewProfile?: (developerId: string) => void;
+  onMessage?: (developerId: string) => void;
   isProcessing?: boolean;
 }
 

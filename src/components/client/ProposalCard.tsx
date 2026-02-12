@@ -6,12 +6,14 @@ import { ProposalCardProps } from '@/types/client';
 import { Star, Clock, DollarSign, Calendar, CheckCircle, X, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
-export function ProposalCard({ 
-  proposal, 
-  developer, 
-  onAccept, 
-  onReject, 
-  isProcessing = false 
+export function ProposalCard({
+  proposal,
+  developer,
+  onAccept,
+  onReject,
+  onViewProfile,
+  onMessage,
+  isProcessing = false
 }: ProposalCardProps) {
   const experienceColors: Record<string, string> = {
     'Junior': 'bg-blue/20 text-blue border-blue/20',
@@ -36,9 +38,8 @@ export function ProposalCard({
               <AvatarFallback>{developer.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <span
-              className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-card ${
-                availabilityColors[developer.availability]
-              }`}
+              className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-card ${availabilityColors[developer.availability]
+                }`}
             />
           </div>
 
@@ -47,14 +48,14 @@ export function ProposalCard({
               <h3 className="font-semibold text-lg truncate">{developer.name}</h3>
               <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
             </div>
-            
+
             <div className="flex items-center gap-3 mt-1">
               <span className="flex items-center gap-1 text-sm">
                 <Star className="w-4 h-4 text-warning fill-warning" />
                 {developer.rating.toFixed(1)} ({developer.reviewCount} reviews)
               </span>
-              <Badge 
-                className={experienceColors[developer.experienceLevel]} 
+              <Badge
+                className={experienceColors[developer.experienceLevel]}
                 variant="outline"
               >
                 {developer.experienceLevel}
@@ -126,10 +127,29 @@ export function ProposalCard({
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0 gap-3">
-        <Button 
-          variant="outline" 
-          className="flex-1" 
+      <CardFooter className="pt-0 gap-3 grid grid-cols-2 md:grid-cols-4">
+        {/* View Profile */}
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => onViewProfile && onViewProfile(developer.id)}
+        >
+          View Profile
+        </Button>
+
+        {/* Message */}
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => onMessage && onMessage(developer.id)}
+        >
+          Message
+        </Button>
+
+        {/* Reject */}
+        <Button
+          variant="ghost"
+          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => onReject(proposal.id)}
           disabled={isProcessing}
         >
@@ -140,8 +160,10 @@ export function ProposalCard({
           )}
           Reject
         </Button>
-        <Button 
-          className="flex-1" 
+
+        {/* Accept */}
+        <Button
+          className="w-full"
           onClick={() => onAccept(proposal.id)}
           disabled={isProcessing}
         >
@@ -150,7 +172,7 @@ export function ProposalCard({
           ) : (
             <CheckCircle className="w-4 h-4 mr-2" />
           )}
-          Accept Proposal
+          Accept
         </Button>
       </CardFooter>
     </Card>

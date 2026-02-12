@@ -19,6 +19,7 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PostProjectPage from "./pages/client/PostProject";
 import ClientProjectsPage from "./pages/client/ClientProjects";
+import ProjectProposalsPage from "./pages/client/ProjectProposals";
 import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/client" element={<ClientDashboard />} />
             <Route path="/client/post-project" element={<PostProjectPage />} />
             <Route path="/client/projects" element={<ClientProjectsPage />} />
+            <Route path="/client/projects/:projectId/proposals" element={<ProjectProposalsPage />} />
 
             {/* Developer Routes */}
             <Route path="/developer" element={<DeveloperDashboard />} />

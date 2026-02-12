@@ -60,7 +60,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         return [
           { icon: Home, label: 'Dashboard', href: '/client' },
           { icon: PlusCircle, label: 'Post a New Project', href: '/client/post-project' },
-          { icon: PlusCircle, label: 'Create Project', href: '/client/projects/create' },
           { icon: FolderOpen, label: 'My Projects', href: '/client/projects' },
           { icon: MessageSquare, label: 'Messages', href: '/client/messages', badge: 2 },
           { icon: Star, label: 'Reviews', href: '/client/reviews' },
