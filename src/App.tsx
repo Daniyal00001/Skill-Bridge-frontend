@@ -17,6 +17,8 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 
 // Dashboard Pages
 import ClientDashboard from "./pages/client/ClientDashboard";
+import PostProjectPage from "./pages/client/PostProject";
+import ClientProjectsPage from "./pages/client/ClientProjects";
 import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
@@ -36,21 +38,23 @@ const App = () => (
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
-            
+
             {/* Auth Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            
+
             {/* Client Routes */}
             <Route path="/client" element={<ClientDashboard />} />
-            
+            <Route path="/client/post-project" element={<PostProjectPage />} />
+            <Route path="/client/projects" element={<ClientProjectsPage />} />
+
             {/* Developer Routes */}
             <Route path="/developer" element={<DeveloperDashboard />} />
-            
+
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
-            
+
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
