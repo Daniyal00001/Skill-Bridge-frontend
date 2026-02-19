@@ -5,19 +5,19 @@ import { DeveloperCard } from '@/components/common/DeveloperCard';
 import { ProjectCard } from '@/components/common/ProjectCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  FolderOpen, 
-  DollarSign, 
-  FileText, 
+import {
+  FolderOpen,
+  DollarSign,
+  FileText,
   CheckCircle,
   PlusCircle,
   ArrowRight,
   TrendingUp
 } from 'lucide-react';
-import { 
-  clientDashboardStats, 
-  mockDevelopers, 
-  mockProjects 
+import {
+  clientDashboardStats,
+  mockDevelopers,
+  mockProjects
 } from '@/lib/mockData';
 
 export default function ClientDashboard() {

@@ -16,24 +16,34 @@ import { mockProjects } from '@/lib/mockData';
 export default function DeveloperBrowseProjects() {
     const [searchTerm, setSearchTerm] = useState('');
     const [complexityFilter, setComplexityFilter] = useState<string>('all');
-    const [minBudget, setMinBudget] = useState<string>('');
+    const [minBudget, setMinBudget] = useState<string>('all'); // ✅ updated
 
     const filteredProjects = mockProjects.filter(project => {
-        const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const matchesSearch =
+            project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            project.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+            project.skills.some(skill =>
+                skill.toLowerCase().includes(searchTerm.toLowerCase())
+            );
 
-        const matchesComplexity = complexityFilter === 'all' || project.complexity === complexityFilter;
+        const matchesComplexity =
+            complexityFilter === 'all' || project.complexity === complexityFilter;
 
-        const matchesBudget = !minBudget || project.budget.min >= parseInt(minBudget);
+        const matchesBudget =
+            minBudget === 'all' || project.budget.min >= parseInt(minBudget);
 
-        return project.status === 'open' && matchesSearch && matchesComplexity && matchesBudget;
+        return (
+            project.status === 'open' &&
+            matchesSearch &&
+            matchesComplexity &&
+            matchesBudget
+        );
     });
 
     const clearFilters = () => {
         setSearchTerm('');
         setComplexityFilter('all');
-        setMinBudget('');
+        setMinBudget('all'); // ✅ updated
     };
 
     return (
@@ -57,7 +67,9 @@ export default function DeveloperBrowseProjects() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+
                     <div className="flex gap-2">
+                        {/* Complexity */}
                         <Select value={complexityFilter} onValueChange={setComplexityFilter}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Complexity" />
@@ -70,19 +82,20 @@ export default function DeveloperBrowseProjects() {
                             </SelectContent>
                         </Select>
 
+                        {/* Budget */}
                         <Select value={minBudget} onValueChange={setMinBudget}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Min Budget" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">Any Budget</SelectItem>
+                                <SelectItem value="all">Any Budget</SelectItem>
                                 <SelectItem value="1000">$1,000+</SelectItem>
                                 <SelectItem value="5000">$5,000+</SelectItem>
                                 <SelectItem value="10000">$10,000+</SelectItem>
                             </SelectContent>
                         </Select>
 
-                        {(searchTerm || complexityFilter !== 'all' || minBudget) && (
+                        {(searchTerm || complexityFilter !== 'all' || minBudget !== 'all') && (
                             <Button variant="ghost" size="icon" onClick={clearFilters}>
                                 <X className="h-4 w-4" />
                             </Button>
@@ -93,13 +106,16 @@ export default function DeveloperBrowseProjects() {
                 {/* Results */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-semibold text-muted-foreground">
-                        {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'} found
+                        {filteredProjects.length}{' '}
+                        {filteredProjects.length === 1 ? 'project' : 'projects'} found
                     </h2>
+
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredProjects.map((project) => (
                             <ProjectCard key={project.id} project={project} viewAs="developer" />
                         ))}
                     </div>
+
                     {filteredProjects.length === 0 && (
                         <div className="text-center py-12">
                             <div className="bg-muted h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-4">
