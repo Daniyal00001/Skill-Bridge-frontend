@@ -25,6 +25,10 @@ import ClientMessagesPage from "./pages/client/ClientMessages";
 import ClientReviewsPage from "./pages/client/ClientReviews";
 import ClientSettingsPage from "./pages/client/ClientSettings";
 import ClientDraftsPage from "./pages/client/ClientDrafts";
+import BrowseProjectsPage from "./pages/client/BrowseProjects";
+import MyProposalsPage from "./pages/client/MyProposals";
+import ActiveProjectsPage from "./pages/client/ActiveProjects";
+import ClientProfilePage from "./pages/client/ClientProfile";
 import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
 import BrowseProjectsPage from "./pages/developer/BrowseProjects";
 import DeveloperProposalsPage from "./pages/developer/DeveloperProposals";
@@ -63,6 +67,11 @@ const App = () => (
             <Route path="/client/projects/:projectId" element={<ClientProjectDetailsPage />} />
             <Route path="/client/projects/:projectId/proposals" element={<ProjectProposalsPage />} />
             <Route path="/client/messages" element={<ClientMessagesPage />} />
+            <Route path="/client/browse" element={<BrowseProjectsPage />} />
+            <Route path="/client/proposals" element={<MyProposalsPage />} />
+            <Route path="/client/active-projects" element={<ActiveProjectsPage />} />
+            <Route path="/client/active-projects" element={<ActiveProjectsPage />} />
+            <Route path="/client/profile" element={<ClientProfilePage />} />
             <Route path="/client/reviews" element={<ClientReviewsPage />} />
 
             {/* Developer Routes */}

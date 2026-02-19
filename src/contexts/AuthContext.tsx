@@ -13,28 +13,33 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('skillbridge_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   const login = async (email: string, password: string, role?: 'client' | 'developer' | 'admin') => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
     // Mock login - in real app, this would validate credentials
-    const mockUser = role === 'admin' 
+    const mockUser = role === 'admin'
       ? mockUsers.find(u => u.role === 'admin')
       : role === 'developer'
         ? mockUsers.find(u => u.role === 'developer')
         : mockUsers.find(u => u.role === 'client');
-    
+
     if (mockUser) {
-      setUser({ ...mockUser, email });
+      const userWithEmail = { ...mockUser, email };
+      setUser(userWithEmail);
+      localStorage.setItem('skillbridge_user', JSON.stringify(userWithEmail));
     }
   };
 
   const signup = async (name: string, email: string, password: string, role: 'client' | 'developer') => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
     const newUser: User = {
       id: `user-${Date.now()}`,
       name,
@@ -43,17 +48,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role,
       createdAt: new Date().toISOString(),
     };
-    
+
     setUser(newUser);
+    localStorage.setItem('skillbridge_user', JSON.stringify(newUser));
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('skillbridge_user');
   };
 
   const setUserRole = (role: 'client' | 'developer' | 'admin') => {
     if (user) {
-      setUser({ ...user, role });
+      const updatedUser = { ...user, role };
+      setUser(updatedUser);
+      localStorage.setItem('skillbridge_user', JSON.stringify(updatedUser));
     }
   };
 
