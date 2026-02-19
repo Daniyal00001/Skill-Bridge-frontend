@@ -141,7 +141,7 @@ export default function ClientDashboard() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold">AI Recommended Developers</h2>
+              <h2 className="text-xl font-semibold">Developers I’ve Worked With</h2>
               <p className="text-sm text-muted-foreground">
                 Based on your project history and requirements
               </p>

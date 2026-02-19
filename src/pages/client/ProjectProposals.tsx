@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProposalCard } from "@/components/client/ProposalCard";
 import { ArrowLeft, Calendar, DollarSign, Clock } from "lucide-react";
-import { Developer, Proposal } from "@/types/client"; // Assuming types exist, otherwise I will mock locally or use any
+import { Developer, Proposal } from "@/types/client";
+import { toast } from "sonner";
 
 // Mock Data
 const MOCK_PROJECT = {
@@ -110,13 +111,19 @@ const ProjectProposalsPage = () => {
     const project = MOCK_PROJECT;
 
     const handleAccept = (proposalId: string) => {
-        console.log("Accepted proposal:", proposalId);
-        // Implement accept logic
+        toast.promise(
+            new Promise((resolve) => setTimeout(resolve, 1500)),
+            {
+                loading: 'Drafting contract and securing funds...',
+                success: 'Hired successfully! Project moved to Working phase.',
+                error: 'Failed to process deal.',
+            }
+        );
+        // In a real app, this would navigate or refresh with new status
     };
 
     const handleReject = (proposalId: string) => {
-        console.log("Rejected proposal:", proposalId);
-        // Implement reject logic
+        toast.error("Proposal rejected.");
     };
 
     return (
