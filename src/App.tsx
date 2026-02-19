@@ -30,7 +30,7 @@ import MyProposalsPage from "./pages/client/MyProposals";
 import ActiveProjectsPage from "./pages/client/ActiveProjects";
 import ClientProfilePage from "./pages/client/ClientProfile";
 import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
-import { default as DeveloperBrowseProjects } from "./pages/developer/BrowseProjects";
+import DeveloperBrowseProjects from "./pages/developer/DeveloperBrowseProjects";
 import { default as DeveloperProposalsPage } from "./pages/developer/DeveloperProposals";
 import { default as DeveloperProjectsPage } from "./pages/developer/DeveloperProjects";
 import { default as DeveloperMessagesPage } from "./pages/developer/DeveloperMessages";

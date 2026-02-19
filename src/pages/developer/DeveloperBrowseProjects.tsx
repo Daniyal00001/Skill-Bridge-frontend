@@ -13,7 +13,7 @@ import {
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { mockProjects } from '@/lib/mockData';
 
-export default function BrowseProjects() {
+export default function DeveloperBrowseProjects() {
     const [searchTerm, setSearchTerm] = useState('');
     const [complexityFilter, setComplexityFilter] = useState<string>('all');
     const [minBudget, setMinBudget] = useState<string>('');
