@@ -30,11 +30,11 @@ import MyProposalsPage from "./pages/client/MyProposals";
 import ActiveProjectsPage from "./pages/client/ActiveProjects";
 import ClientProfilePage from "./pages/client/ClientProfile";
 import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
-import BrowseProjectsPage from "./pages/developer/BrowseProjects";
-import DeveloperProposalsPage from "./pages/developer/DeveloperProposals";
-import DeveloperProjectsPage from "./pages/developer/DeveloperProjects";
-import DeveloperMessagesPage from "./pages/developer/DeveloperMessages";
-import DeveloperProfilePage from "./pages/developer/DeveloperProfile";
+import { default as DeveloperBrowseProjects } from "./pages/developer/BrowseProjects";
+import { default as DeveloperProposalsPage } from "./pages/developer/DeveloperProposals";
+import { default as DeveloperProjectsPage } from "./pages/developer/DeveloperProjects";
+import { default as DeveloperMessagesPage } from "./pages/developer/DeveloperMessages";
+import { default as DeveloperProfilePage } from "./pages/developer/DeveloperProfile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
 import NotFound from "./pages/NotFound";
@@ -76,7 +76,7 @@ const App = () => (
 
             {/* Developer Routes */}
             <Route path="/developer" element={<DeveloperDashboard />} />
-            <Route path="/developer/browse" element={<BrowseProjectsPage />} />
+            <Route path="/developer/browse" element={<DeveloperBrowseProjects />} />
             <Route path="/developer/proposals" element={<DeveloperProposalsPage />} />
             <Route path="/developer/projects" element={<DeveloperProjectsPage />} />
             <Route path="/developer/messages" element={<DeveloperMessagesPage />} />

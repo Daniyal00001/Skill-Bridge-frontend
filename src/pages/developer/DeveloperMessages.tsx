@@ -84,7 +84,15 @@ export default function DeveloperMessages() {
                 {/* Chat Area */}
                 <div className="flex-1">
                     <ChatUI
-                        messages={messages}
+                        messages={messages.map(m => ({
+                            id: m.id,
+                            content: m.content,
+                            senderId: m.senderId,
+                            timestamp: new Date(m.createdAt),
+                            conversationId: 'mock-conv-id', // Placeholder
+                            seen: m.read,
+                            messageType: 'text'
+                        }))}
                         currentUser={currentUser}
                         otherUser={{
                             id: otherUser.id,
