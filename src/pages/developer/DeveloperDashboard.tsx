@@ -6,9 +6,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
+import {
   Briefcase,
-  DollarSign, 
+  DollarSign,
   Star,
   CheckCircle,
   Search,
@@ -16,8 +16,8 @@ import {
   TrendingUp,
   Clock
 } from 'lucide-react';
-import { 
-  developerDashboardStats, 
+import {
+  developerDashboardStats,
   mockProjects,
   mockProposals
 } from '@/lib/mockData';
@@ -127,6 +127,9 @@ export default function DeveloperDashboard() {
                       No pending proposals
                     </p>
                   )}
+                  <Button variant="outline" className="w-full mt-2" asChild>
+                    <Link to="/developer/proposals">View All Proposals</Link>
+                  </Button>
                 </CardContent>
               </Card>
             </div>

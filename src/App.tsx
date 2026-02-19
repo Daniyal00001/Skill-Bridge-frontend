@@ -26,6 +26,11 @@ import ClientReviewsPage from "./pages/client/ClientReviews";
 import ClientSettingsPage from "./pages/client/ClientSettings";
 import ClientDraftsPage from "./pages/client/ClientDrafts";
 import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
+import BrowseProjectsPage from "./pages/developer/BrowseProjects";
+import DeveloperProposalsPage from "./pages/developer/DeveloperProposals";
+import DeveloperProjectsPage from "./pages/developer/DeveloperProjects";
+import DeveloperMessagesPage from "./pages/developer/DeveloperMessages";
+import DeveloperProfilePage from "./pages/developer/DeveloperProfile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
 import NotFound from "./pages/NotFound";
@@ -62,6 +67,11 @@ const App = () => (
 
             {/* Developer Routes */}
             <Route path="/developer" element={<DeveloperDashboard />} />
+            <Route path="/developer/browse" element={<BrowseProjectsPage />} />
+            <Route path="/developer/proposals" element={<DeveloperProposalsPage />} />
+            <Route path="/developer/projects" element={<DeveloperProjectsPage />} />
+            <Route path="/developer/messages" element={<DeveloperMessagesPage />} />
+            <Route path="/developer/profile" element={<DeveloperProfilePage />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
