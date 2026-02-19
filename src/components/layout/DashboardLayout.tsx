@@ -32,6 +32,7 @@ import {
   Zap,
   LogOut,
   User,
+  Sparkles,
 } from 'lucide-react';
 import { mockNotifications } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
@@ -62,6 +63,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           { icon: Home, label: 'Dashboard', href: '/client' },
           { icon: PlusCircle, label: 'Post a New Project', href: '/client/post-project' },
           { icon: FolderOpen, label: 'My Projects', href: '/client/projects' },
+          { icon: Sparkles, label: 'Help Me Find', href: '/client/help-me-find' },
           { icon: MessageSquare, label: 'Messages', href: '/client/messages', badge: 2 },
           { icon: Star, label: 'Reviews', href: '/client/reviews' },
           { icon: Settings, label: 'Settings', href: '/settings' },

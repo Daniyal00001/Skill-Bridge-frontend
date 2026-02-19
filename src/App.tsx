@@ -23,6 +23,7 @@ import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import ProjectProposalsPage from "./pages/client/ProjectProposals";
 import ClientMessagesPage from "./pages/client/ClientMessages";
 import ClientReviewsPage from "./pages/client/ClientReviews";
+import HelpMeFindPage from "./pages/client/HelpMeFind";
 import ClientSettingsPage from "./pages/client/ClientSettings";
 import ClientDraftsPage from "./pages/client/ClientDrafts";
 import BrowseProjectsPage from "./pages/client/BrowseProjects";
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/client" element={<ClientDashboard />} />
             <Route path="/client/post-project" element={<PostProjectPage />} />
             <Route path="/client/projects" element={<ClientProjectsPage />} />
+            <Route path="/client/help-me-find" element={<HelpMeFindPage />} />
             <Route path="/client/drafts" element={<ClientDraftsPage />} />
             <Route path="/client/projects/:projectId" element={<ClientProjectDetailsPage />} />
             <Route path="/client/projects/:projectId/proposals" element={<ProjectProposalsPage />} />

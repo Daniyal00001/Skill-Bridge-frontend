@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import {
     Calendar as CalendarIcon,
@@ -14,7 +14,12 @@ import {
     Code2,
     AlertCircle,
     Gem,
-    Briefcase
+    Briefcase,
+    Link as LinkIcon,
+    MessageSquare,
+    FileText,
+    MousePointer2,
+    Zap
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -62,11 +67,9 @@ const SKILL_SUGGESTIONS = [
 const PostProjectPage = () => {
     const [step, setStep] = useState(1);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [aiResults, setAiResults] = useState<null | {
-        scope: string;
-        complexity: string;
-        budgetRange: string;
-        skills: string[];
+    const [aiSuggestions, setAiSuggestions] = useState<null | {
+        requirements: string[];
+        techStack: string[];
     }>(null);
 
     const [formData, setFormData] = useState({
@@ -74,9 +77,14 @@ const PostProjectPage = () => {
         category: "",
         shortDesc: "",
         fullDesc: "",
+        functionalReq: "",
+        referenceLinks: "",
         budget: [5000],
-        type: "fixed",
+        budgetType: "fixed", // fixed, hourly
+        projectSize: "medium", // small, medium, large
         skills: [] as string[],
+        experienceLevel: "intermediate", // entry, intermediate, expert
+        hiringMethod: "bidding", // bidding, direct
         deadline: undefined as Date | undefined,
     });
 
@@ -84,38 +92,38 @@ const PostProjectPage = () => {
         setFormData(prev => ({ ...prev, ...updates }));
     };
 
-    const nextStep = () => setStep(s => Math.min(s + 1, 4));
+    const nextStep = () => setStep(s => Math.min(s + 1, 5));
     const prevStep = () => setStep(s => Math.max(s - 1, 1));
+    const goToStep = (s: number) => setStep(s);
 
-    const handleAnalyzeAI = () => {
-        if (!formData.fullDesc || formData.fullDesc.length < 50) {
-            toast.error("Please provide a more detailed description for better AI analysis (at least 50 characters).");
+    const handleGetAISuggestions = () => {
+        if (!formData.fullDesc || formData.fullDesc.length < 20) {
+            toast.error("Please provide a vision description first for AI to suggest.");
             return;
         }
 
         setIsAnalyzing(true);
         setTimeout(() => {
             setIsAnalyzing(false);
-            const mockAi = {
-                scope: "Full-stack development of a feature-rich application including user authentication, real-time updates, and an intuitive dashboard interface.",
-                complexity: "Advanced / High Complexity",
-                budgetRange: "$4,500 - $7,200",
-                skills: ["React", "TypeScript", "Node.js", "Tailwind CSS"]
-            };
-            setAiResults(mockAi);
-            updateFormData({
-                skills: Array.from(new Set([...formData.skills, ...mockAi.skills])),
-                budget: [5000]
+            setAiSuggestions({
+                requirements: [
+                    "User Authentication & Role Management",
+                    "Real-time Dashboard Analytics",
+                    "Responsive Mobile-First UI",
+                    "API Integration with Payment Gateway"
+                ],
+                techStack: ["React", "TypeScript", "Tailwind CSS", "Node.js"]
             });
-            toast.success("AI Scope Analysis Complete!");
-        }, 2500);
+            toast.success("AI Suggestions Generated!");
+        }, 2000);
     };
 
     const steps = [
         { id: 1, name: "Basics" },
-        { id: 2, name: "AI Scoping" },
-        { id: 3, name: "Details" },
-        { id: 4, name: "Review" },
+        { id: 2, name: "Description" },
+        { id: 3, name: "Budget" },
+        { id: 4, name: "Skills" },
+        { id: 5, name: "Review" },
     ];
 
     return (
@@ -128,10 +136,10 @@ const PostProjectPage = () => {
                             SkillBridge Project Builder
                         </Badge>
                         <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                            Post your masterpiece
+                            Post a New Project
                         </h1>
                         <p className="text-muted-foreground text-lg max-w-lg">
-                            Follow our AI-guided process to find the perfect developers for your vision.
+                            Find the best talent by defining your project clearly.
                         </p>
                     </div>
 
@@ -157,35 +165,33 @@ const PostProjectPage = () => {
                                 </div>
                             ))}
                         </div>
-                        {/* Connecting LineBackground */}
                         <div className="absolute top-9 left-10 right-10 h-0.5 bg-muted -z-0" />
-                        {/* Active Line Progress */}
                         <div
                             className="absolute top-9 left-10 h-0.5 bg-primary transition-all duration-500 ease-in-out -z-0"
-                            style={{ width: `${((step - 1) / (steps.length - 1)) * 92}%` }}
+                            style={{ width: `${((step - 1) / (steps.length - 1)) * 95}%` }}
                         />
                     </div>
 
-                    {/* Content Section */}
+                    {/* Step 1: Basics */}
                     <div className="animate-fade-up">
                         {step === 1 && (
                             <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                                 <CardHeader>
                                     <CardTitle className="text-2xl">Project Basics</CardTitle>
-                                    <CardDescription>Start with the high-level details of your project.</CardDescription>
+                                    <CardDescription>Start with a clear title and category.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold">Project Title</label>
                                         <Input
-                                            placeholder="e.g., Build a modern SaaS Analytics Dashboard"
+                                            placeholder="e.g., E-commerce App Redesign"
                                             value={formData.title}
                                             onChange={(e) => updateFormData({ title: e.target.value })}
                                             className="h-12 text-lg focus-visible:ring-primary/30"
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-sm font-semibold">Project Category</label>
+                                        <label className="text-sm font-semibold">Category</label>
                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                             {CATEGORIES.map((cat) => {
                                                 const Icon = cat.icon;
@@ -216,7 +222,7 @@ const PostProjectPage = () => {
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold">One-line Summary</label>
                                         <Input
-                                            placeholder="A brief hook for developers"
+                                            placeholder="Capture attention in one sentence"
                                             value={formData.shortDesc}
                                             onChange={(e) => updateFormData({ shortDesc: e.target.value })}
                                             className="h-12"
@@ -225,148 +231,203 @@ const PostProjectPage = () => {
                                 </CardContent>
                                 <CardFooter className="flex justify-end pt-6 border-t">
                                     <Button onClick={nextStep} disabled={!formData.title || !formData.category} className="gap-2 px-8 h-12">
-                                        Continue to AI Scoping <ArrowRight className="w-4 h-4" />
+                                        Next: Description <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 </CardFooter>
                             </Card>
                         )}
 
+                        {/* Step 2: Description */}
                         {step === 2 && (
-                            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm shadow-xl relative overflow-hidden">
-                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+                            <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                                 <CardHeader>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Sparkles className="w-5 h-5 text-primary" />
-                                        <span className="text-xs font-bold uppercase tracking-widest text-primary">AI Powered Assistant</span>
-                                    </div>
-                                    <CardTitle className="text-2xl">Describe your vision</CardTitle>
-                                    <CardDescription>Our AI will analyze your description to generate target scoping, skills, and budget estimates.</CardDescription>
+                                    <CardTitle className="text-2xl">Project Description</CardTitle>
+                                    <CardDescription>Tell us your vision and requirements.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-8">
                                     <div className="space-y-2">
+                                        <label className="text-sm font-semibold">Describe your vision</label>
                                         <Textarea
-                                            placeholder="Tell us exactly what you want to build. What are the core features? What problem does it solve? What's the tech vision?"
-                                            className="min-h-[220px] text-base leading-relaxed p-6 focus-visible:ring-primary/30"
+                                            placeholder="What's the big picture? Why are you building this?"
+                                            className="min-h-[120px] p-4"
                                             value={formData.fullDesc}
                                             onChange={(e) => updateFormData({ fullDesc: e.target.value })}
                                         />
-                                        <div className="flex justify-between items-center text-xs text-muted-foreground px-1">
-                                            <span>Minimum 50 characters for AI analysis</span>
-                                            <span>{formData.fullDesc.length} characters</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold">Functional Requirements</label>
+                                        <Textarea
+                                            placeholder="List specific features or modules you need..."
+                                            className="min-h-[120px] p-4"
+                                            value={formData.functionalReq}
+                                            onChange={(e) => updateFormData({ functionalReq: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold flex items-center gap-2">
+                                            Reference Links <span className="text-xs font-normal text-muted-foreground">(Optional)</span>
+                                        </label>
+                                        <div className="relative">
+                                            <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="e.g., Figma links, competitors, inspiration..."
+                                                className="pl-10"
+                                                value={formData.referenceLinks}
+                                                onChange={(e) => updateFormData({ referenceLinks: e.target.value })}
+                                            />
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-center">
-                                        <Button
-                                            variant="outline"
-                                            className={cn(
-                                                "relative overflow-hidden group px-8 h-12 border-primary/50 text-foreground transition-all hover:bg-primary hover:text-primary-foreground",
-                                                isAnalyzing && "bg-primary/5"
-                                            )}
-                                            onClick={handleAnalyzeAI}
-                                            disabled={isAnalyzing}
-                                        >
-                                            {isAnalyzing ? (
+                                    {/* Optional AI Suggestions Helper */}
+                                    <div className="pt-4 border-t border-dashed">
+                                        <div className="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-4 h-4 border-2 border-t-transparent border-primary-foreground animate-spin rounded-full" />
-                                                    <span>AI is thinking...</span>
+                                                    <Sparkles className="w-5 h-5 text-primary" />
+                                                    <div>
+                                                        <h4 className="text-sm font-bold">Need help with requirements?</h4>
+                                                        <p className="text-xs text-muted-foreground">Our AI can suggest typical features based on your vision.</p>
+                                                    </div>
                                                 </div>
-                                            ) : (
-                                                <>
-                                                    <Sparkles className="w-4 h-4 mr-2 transition-transform group-hover:rotate-12" />
-                                                    {aiResults ? "Re-analyze Project" : "Analyze with AI"}
-                                                </>
-                                            )}
-                                        </Button>
-                                    </div>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-10 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
+                                                    onClick={handleGetAISuggestions}
+                                                    disabled={isAnalyzing}
+                                                >
+                                                    {isAnalyzing ? "AI Thinking..." : "Get AI Suggestions"}
+                                                </Button>
+                                            </div>
 
-                                    {aiResults && (
-                                        <div className="grid md:grid-cols-2 gap-4 animate-in fade-in zoom-in-95 duration-700">
-                                            <Card className="bg-primary/5 border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.05)]">
-                                                <CardHeader className="pb-2">
-                                                    <div className="flex items-center gap-2 text-primary">
-                                                        <Briefcase className="w-4 h-4" />
-                                                        <span className="text-xs font-bold uppercase tracking-widest">Suggested Scope</span>
+                                            {aiSuggestions && (
+                                                <div className="mt-4 grid md:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2">
+                                                    <div className="bg-background/80 rounded-lg p-3 text-[11px] border border-primary/10 space-y-2">
+                                                        <span className="font-bold text-primary block uppercase tracking-wider">Suggested Features:</span>
+                                                        <ul className="space-y-1">
+                                                            {aiSuggestions.requirements.map((req, i) => (
+                                                                <li key={i} className="flex items-center gap-2">
+                                                                    <div className="w-1 h-1 rounded-full bg-primary" /> {req}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
                                                     </div>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <p className="text-sm leading-relaxed">{aiResults.scope}</p>
-                                                </CardContent>
-                                            </Card>
-                                            <Card className="bg-primary/5 border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.05)]">
-                                                <CardHeader className="pb-2">
-                                                    <div className="flex items-center gap-2 text-primary">
-                                                        <Clock className="w-4 h-4" />
-                                                        <span className="text-xs font-bold uppercase tracking-widest">Estimation</span>
+                                                    <div className="bg-background/80 rounded-lg p-3 text-[11px] border border-primary/10 space-y-2">
+                                                        <span className="font-bold text-primary block uppercase tracking-wider">Tech Recommendations:</span>
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {aiSuggestions.techStack.map((tech, i) => (
+                                                                <Badge key={i} variant="skill" className="text-[9px] py-0 px-2">{tech}</Badge>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                </CardHeader>
-                                                <CardContent className="space-y-4">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-xs text-muted-foreground">Complexity:</span>
-                                                        <span className="text-sm font-semibold">{aiResults.complexity}</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-xs text-muted-foreground">Budget Range:</span>
-                                                        <span className="text-sm font-semibold text-primary">{aiResults.budgetRange}</span>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                 </CardContent>
-                                <CardFooter className="flex justify-between pt-6 border-t bg-muted/20">
+                                <CardFooter className="flex justify-between pt-6 border-t">
                                     <Button variant="ghost" onClick={prevStep} className="gap-2">
                                         <ArrowLeft className="w-4 h-4" /> Back
                                     </Button>
-                                    <Button onClick={nextStep} disabled={!aiResults} className="gap-2 px-8">
-                                        Next: Finalize Details <ArrowRight className="w-4 h-4" />
+                                    <Button onClick={nextStep} disabled={!formData.fullDesc || !formData.functionalReq} className="gap-2 px-8">
+                                        Next: Budget <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 </CardFooter>
                             </Card>
                         )}
 
+                        {/* Step 3: Budget & Timeline */}
                         {step === 3 && (
                             <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                                 <CardHeader>
-                                    <CardTitle className="text-2xl">Project Details</CardTitle>
-                                    <CardDescription>Fine-tune the specifics for your project.</CardDescription>
+                                    <CardTitle className="text-2xl">Budget & Timeline</CardTitle>
+                                    <CardDescription>Define your budget expectations and target deadline.</CardDescription>
                                 </CardHeader>
-                                <CardContent className="space-y-8">
+                                <CardContent className="space-y-10">
+                                    {/* Budget Type Toggle */}
                                     <div className="space-y-4">
+                                        <label className="text-sm font-semibold block text-center">How do you want to pay?</label>
+                                        <div className="flex justify-center p-1 bg-muted rounded-xl max-w-xs mx-auto">
+                                            <button
+                                                className={cn(
+                                                    "flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all",
+                                                    formData.budgetType === "fixed" ? "bg-background shadow-sm text-primary" : "text-muted-foreground"
+                                                )}
+                                                onClick={() => updateFormData({ budgetType: "fixed" })}
+                                            >
+                                                Fixed Price
+                                            </button>
+                                            <button
+                                                className={cn(
+                                                    "flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all",
+                                                    formData.budgetType === "hourly" ? "bg-background shadow-sm text-primary" : "text-muted-foreground"
+                                                )}
+                                                onClick={() => updateFormData({ budgetType: "hourly" })}
+                                            >
+                                                Hourly Rate
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-6">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-sm font-semibold">Budget (US$)</label>
-                                            <Badge variant="secondary" className="text-lg font-mono">
-                                                ${formData.budget[0].toLocaleString()}
-                                            </Badge>
+                                            <label className="text-sm font-semibold">Budget Amount (US$)</label>
+                                            <Input
+                                                type="number"
+                                                value={formData.budget[0]}
+                                                onChange={(e) => updateFormData({ budget: [Number(e.target.value)] })}
+                                                className="w-32 h-10 font-mono text-right"
+                                            />
                                         </div>
                                         <Slider
                                             value={formData.budget}
                                             onValueChange={(val) => updateFormData({ budget: val })}
                                             max={20000}
                                             step={100}
-                                            className="py-4 cursor-pointer"
+                                            className="py-4"
                                         />
-                                        <div className="flex justify-between text-[10px] text-muted-foreground uppercase font-bold px-1">
-                                            <span>$100 (Minimal)</span>
-                                            <span>$10,000 (Standard)</span>
-                                            <span>$20,000+ (Premium)</span>
-                                        </div>
                                     </div>
 
                                     <div className="grid md:grid-cols-2 gap-8">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold">Target Deadline</label>
+                                        <div className="space-y-3">
+                                            <label className="text-sm font-semibold">Project Size</label>
+                                            <div className="flex flex-col gap-2">
+                                                {[
+                                                    { id: 'small', label: 'Small', desc: '1-2 weeks, clear tasks' },
+                                                    { id: 'medium', label: 'Medium', desc: '1-2 months, feature set' },
+                                                    { id: 'large', label: 'Large', desc: '3+ months, complex app' }
+                                                ].map((size) => (
+                                                    <button
+                                                        key={size.id}
+                                                        onClick={() => updateFormData({ projectSize: size.id })}
+                                                        className={cn(
+                                                            "flex items-center justify-between p-3 rounded-xl border-2 transition-all",
+                                                            formData.projectSize === size.id ? "border-primary bg-primary/5 shadow-sm" : "border-muted/50 hover:bg-muted/30"
+                                                        )}
+                                                    >
+                                                        <div className="text-left">
+                                                            <span className={cn("text-xs font-bold block", formData.projectSize === size.id ? "text-primary" : "text-foreground")}>{size.label}</span>
+                                                            <span className="text-[10px] text-muted-foreground">{size.desc}</span>
+                                                        </div>
+                                                        {formData.projectSize === size.id && <Check className="w-4 h-4 text-primary" />}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-sm font-semibold">Target Completion</label>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <Button
-                                                        variant={"outline"}
+                                                        variant="outline"
                                                         className={cn(
                                                             "w-full h-12 justify-start text-left font-normal",
                                                             !formData.deadline && "text-muted-foreground"
                                                         )}
                                                     >
                                                         <CalendarIcon className="mr-3 h-4 w-4 opacity-50" />
-                                                        {formData.deadline ? format(formData.deadline, "PPP") : "Pick a completion date"}
+                                                        {formData.deadline ? format(formData.deadline, "PPP") : "Select a date"}
                                                     </Button>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-auto p-0" align="start">
@@ -379,37 +440,35 @@ const PostProjectPage = () => {
                                                     />
                                                 </PopoverContent>
                                             </Popover>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold">Project Type</label>
-                                            <div className="grid grid-cols-2 gap-2 h-12">
-                                                <button
-                                                    onClick={() => updateFormData({ type: "fixed" })}
-                                                    className={cn(
-                                                        "rounded-lg border-2 text-xs font-bold transition-all",
-                                                        formData.type === "fixed" ? "bg-primary text-primary-foreground border-primary" : "bg-background border-muted text-muted-foreground"
-                                                    )}
-                                                >
-                                                    Fixed Price
-                                                </button>
-                                                <button
-                                                    onClick={() => updateFormData({ type: "hourly" })}
-                                                    className={cn(
-                                                        "rounded-lg border-2 text-xs font-bold transition-all",
-                                                        formData.type === "hourly" ? "bg-primary text-primary-foreground border-primary" : "bg-background border-muted text-muted-foreground"
-                                                    )}
-                                                >
-                                                    Hourly Rate
-                                                </button>
+                                            <div className="bg-amber-500/5 p-3 rounded-lg border border-amber-500/10 flex gap-2">
+                                                <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+                                                <p className="text-[10px] text-amber-700 leading-tight">Setting a realistic deadline ensures higher quality proposals.</p>
                                             </div>
                                         </div>
                                     </div>
+                                </CardContent>
+                                <CardFooter className="flex justify-between pt-6 border-t">
+                                    <Button variant="ghost" onClick={prevStep} className="gap-2">
+                                        <ArrowLeft className="w-4 h-4" /> Back
+                                    </Button>
+                                    <Button onClick={nextStep} disabled={!formData.deadline} className="gap-2 px-8">
+                                        Next: Skills <ArrowRight className="w-4 h-4" />
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        )}
 
-                                    <div className="space-y-3">
+                        {/* Step 4: Skills & Preferences */}
+                        {step === 4 && (
+                            <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
+                                <CardHeader>
+                                    <CardTitle className="text-2xl">Skills & Preferences</CardTitle>
+                                    <CardDescription>Specify the level of expertise you are looking for.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-8">
+                                    <div className="space-y-4">
                                         <label className="text-sm font-semibold">Required Tech Stack</label>
-                                        <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-4 bg-muted/20 rounded-xl border border-dashed border-muted">
-                                            {formData.skills.length === 0 && <span className="text-muted-foreground text-xs italic">No skills selected yet...</span>}
+                                        <div className="flex flex-wrap gap-2 min-h-[50px] p-4 bg-muted/20 rounded-xl border border-dashed border-muted">
                                             {formData.skills.map((skill) => (
                                                 <Badge key={skill} variant="skill" className="pl-3 pr-1 py-1 h-8 text-sm gap-2">
                                                     {skill}
@@ -421,20 +480,82 @@ const PostProjectPage = () => {
                                                     </button>
                                                 </Badge>
                                             ))}
+                                            {formData.skills.length === 0 && <span className="text-xs text-muted-foreground italic">Add skills below...</span>}
                                         </div>
-                                        <div className="space-y-2">
-                                            <span className="text-[10px] uppercase font-bold text-muted-foreground/70 tracking-widest">Quick Add Skills</span>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {SKILL_SUGGESTIONS.filter(s => !formData.skills.includes(s)).slice(0, 8).map(skill => (
+                                        <div className="flex flex-wrap gap-1.5 pt-2">
+                                            {SKILL_SUGGESTIONS.filter(s => !formData.skills.includes(s)).map(skill => (
+                                                <button
+                                                    key={skill}
+                                                    onClick={() => updateFormData({ skills: [...formData.skills, skill] })}
+                                                    className="text-[11px] bg-background hover:bg-muted py-1.5 px-3 rounded-full transition-colors border border-border/40"
+                                                >
+                                                    + {skill}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <label className="text-sm font-semibold">Experience Level</label>
+                                            <div className="flex flex-col gap-2">
+                                                {[
+                                                    { id: 'entry', label: 'Entry Level', desc: 'Great for simple tasks' },
+                                                    { id: 'intermediate', label: 'Intermediate', desc: 'Standard industrial quality' },
+                                                    { id: 'expert', label: 'Expert', desc: 'Premium architectural work' }
+                                                ].map((exp) => (
                                                     <button
-                                                        key={skill}
-                                                        onClick={() => updateFormData({ skills: [...formData.skills, skill] })}
-                                                        className="text-xs bg-muted/40 hover:bg-muted py-1.5 px-3 rounded-full transition-colors border border-border/40"
+                                                        key={exp.id}
+                                                        onClick={() => updateFormData({ experienceLevel: exp.id })}
+                                                        className={cn(
+                                                            "flex items-center gap-3 p-3 rounded-xl border-2 transition-all",
+                                                            formData.experienceLevel === exp.id ? "border-primary bg-primary/5" : "border-muted/50 hover:bg-muted/30"
+                                                        )}
                                                     >
-                                                        + {skill}
+                                                        <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0", formData.experienceLevel === exp.id ? "border-primary" : "border-muted")}>
+                                                            {formData.experienceLevel === exp.id && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <span className="text-xs font-bold block">{exp.label}</span>
+                                                            <span className="text-[10px] text-muted-foreground">{exp.desc}</span>
+                                                        </div>
                                                     </button>
                                                 ))}
                                             </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <label className="text-sm font-semibold">Hiring Method</label>
+                                            <Card className="bg-muted/20 border-border/40 overflow-hidden">
+                                                <button
+                                                    className={cn(
+                                                        "w-full flex items-center gap-4 p-4 text-left transition-all border-b border-border/40",
+                                                        formData.hiringMethod === "bidding" ? "bg-background" : "opacity-60"
+                                                    )}
+                                                    onClick={() => updateFormData({ hiringMethod: "bidding" })}
+                                                >
+                                                    <MousePointer2 className={cn("w-5 h-5", formData.hiringMethod === "bidding" ? "text-primary" : "text-muted-foreground")} />
+                                                    <div>
+                                                        <span className="text-xs font-bold block">Open Bidding</span>
+                                                        <span className="text-[10px] text-muted-foreground">Receive proposals from anyone</span>
+                                                    </div>
+                                                    {formData.hiringMethod === "bidding" && <Check className="ml-auto w-4 h-4 text-primary" />}
+                                                </button>
+                                                <button
+                                                    className={cn(
+                                                        "w-full flex items-center gap-4 p-4 text-left transition-all",
+                                                        formData.hiringMethod === "direct" ? "bg-background" : "opacity-60"
+                                                    )}
+                                                    onClick={() => updateFormData({ hiringMethod: "direct" })}
+                                                >
+                                                    <Zap className={cn("w-5 h-5", formData.hiringMethod === "direct" ? "text-primary" : "text-muted-foreground")} />
+                                                    <div>
+                                                        <span className="text-xs font-bold block">Direct Invite</span>
+                                                        <span className="text-[10px] text-muted-foreground">Invite specific developers only</span>
+                                                    </div>
+                                                    {formData.hiringMethod === "direct" && <Check className="ml-auto w-4 h-4 text-primary" />}
+                                                </button>
+                                            </Card>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -442,83 +563,117 @@ const PostProjectPage = () => {
                                     <Button variant="ghost" onClick={prevStep} className="gap-2">
                                         <ArrowLeft className="w-4 h-4" /> Back
                                     </Button>
-                                    <Button onClick={nextStep} disabled={formData.skills.length === 0 || !formData.deadline} className="gap-2 px-8">
+                                    <Button onClick={nextStep} disabled={formData.skills.length === 0} className="gap-2 px-8">
                                         Final Review <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 </CardFooter>
                             </Card>
                         )}
 
-                        {step === 4 && (
+                        {/* Step 5: Review & Post */}
+                        {step === 5 && (
                             <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl relative overflow-hidden">
-                                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0" />
-
-                                <CardHeader className="text-center">
+                                <CardHeader className="text-center pb-2">
                                     <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                                        <Sparkles className="w-8 h-8 text-primary" />
+                                        <Check className="w-8 h-8 text-primary" />
                                     </div>
-                                    <CardTitle className="text-3xl">Ready for Launch</CardTitle>
-                                    <CardDescription>Everything looks set. Launching this project will make it visible to top-tier developers.</CardDescription>
+                                    <CardTitle className="text-3xl">Review Your Project</CardTitle>
+                                    <CardDescription>Everything looks set to launch.</CardDescription>
                                 </CardHeader>
 
                                 <CardContent className="space-y-6">
-                                    <div className="grid md:grid-cols-3 gap-4">
-                                        <div className="p-6 rounded-xl bg-muted/30 border border-border/40 md:col-span-2">
-                                            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Project Overview</h4>
-                                            <h2 className="text-2xl font-extrabold mb-3">{formData.title}</h2>
-                                            <Badge variant="secondary" className="mb-6 px-3 py-1">
-                                                {CATEGORIES.find(c => c.id === formData.category)?.name}
-                                            </Badge>
-                                            <p className="text-sm text-foreground/80 leading-relaxed italic border-l-2 border-primary/30 pl-4 py-1">
-                                                "{formData.shortDesc}"
-                                            </p>
+                                    {/* Summary Grid */}
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        {/* Basics Section */}
+                                        <div className="p-5 rounded-xl bg-muted/30 border border-border/40 relative group">
+                                            <button
+                                                onClick={() => goToStep(1)}
+                                                className="absolute right-4 top-4 text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                EDIT
+                                            </button>
+                                            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Basics</h4>
+                                            <h2 className="text-xl font-bold mb-1">{formData.title}</h2>
+                                            <Badge variant="outline" className="mb-3">{CATEGORIES.find(c => c.id === formData.category)?.name}</Badge>
+                                            <p className="text-xs text-muted-foreground italic">"{formData.shortDesc}"</p>
                                         </div>
-                                        <div className="p-6 rounded-xl bg-primary/5 border border-primary/20 flex flex-col justify-center space-y-6">
-                                            <div>
-                                                <h4 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">Total Budget</h4>
-                                                <p className="text-2xl font-black">${formData.budget[0].toLocaleString()}</p>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-bold">{formData.type} CONTRACT</p>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">Deadline</h4>
-                                                <p className="text-sm font-bold">{formData.deadline ? format(formData.deadline, "MMM d, yyyy") : "N/A"}</p>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="space-y-3 p-6 rounded-xl border border-dashed border-muted bg-background/30">
-                                        <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-                                            <Code2 className="w-4 h-4 text-primary" />
-                                            Confirmed Tech Stack
-                                        </h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {formData.skills.map(s => (
-                                                <Badge key={s} variant="skill" className="bg-background border-primary/30">{s}</Badge>
-                                            ))}
+                                        {/* Budget/Time Section */}
+                                        <div className="p-5 rounded-xl bg-primary/5 border border-primary/20 relative group">
+                                            <button
+                                                onClick={() => goToStep(3)}
+                                                className="absolute right-4 top-4 text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                EDIT
+                                            </button>
+                                            <h4 className="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Budget & Timeline</h4>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <span className="text-[10px] text-muted-foreground block">ESTIMATED BUDGET</span>
+                                                    <span className="text-sm font-bold">${formData.budget[0].toLocaleString()}</span>
+                                                    <span className="text-[9px] block uppercase font-bold text-primary">{formData.budgetType}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] text-muted-foreground block">DEADLINE</span>
+                                                    <span className="text-sm font-bold">{formData.deadline ? format(formData.deadline, "MMM d, yyyy") : "N/A"}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex items-start gap-4 p-5 rounded-xl bg-primary/5 border border-primary/10 text-primary">
-                                        <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
-                                        <div className="text-xs space-y-1">
-                                            <p className="font-bold uppercase tracking-wider">SkillBridge Strategy:</p>
-                                            <p className="opacity-80">This project matches current trends. Following the AI suggestions for tech stack increases conversion by up to 40%.</p>
+                                        {/* Requirements Section */}
+                                        <div className="p-5 rounded-xl bg-muted/30 border border-border/40 md:col-span-2 relative group">
+                                            <button
+                                                onClick={() => goToStep(2)}
+                                                className="absolute right-4 top-4 text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                EDIT
+                                            </button>
+                                            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <FileText className="w-3 h-3" /> Description & Requirements
+                                            </h4>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <span className="text-[10px] font-bold block mb-1">VISION:</span>
+                                                    <p className="text-xs line-clamp-2 text-foreground/80 leading-relaxed">{formData.fullDesc}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-bold block mb-1">FUNCTIONAL NEEDS:</span>
+                                                    <p className="text-xs line-clamp-2 text-foreground/80 leading-relaxed">{formData.functionalReq}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Skills Section */}
+                                        <div className="p-5 rounded-xl bg-muted/30 border border-border/40 md:col-span-2 relative group">
+                                            <button
+                                                onClick={() => goToStep(4)}
+                                                className="absolute right-4 top-4 text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                EDIT
+                                            </button>
+                                            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <Code2 className="w-3 h-3" /> Tech Stack & Experience
+                                            </h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {formData.skills.map(s => <Badge key={s} variant="skill" className="bg-background">{s}</Badge>)}
+                                                <Badge variant="secondary" className="uppercase text-[9px] ml-auto">{formData.experienceLevel} Level</Badge>
+                                            </div>
                                         </div>
                                     </div>
                                 </CardContent>
 
                                 <CardFooter className="flex flex-col md:flex-row gap-3 pt-6 border-t bg-muted/20 p-8">
-                                    <Button variant="ghost" onClick={prevStep} className="w-full md:w-auto h-12 px-8 font-bold">
-                                        Edit Details
-                                    </Button>
+                                    <div className="flex-1 flex items-center gap-2 text-xs text-muted-foreground pr-4">
+                                        <AlertCircle className="w-4 h-4 text-primary shrink-0" />
+                                        <span>Launching this project will notify matching developers immediately.</span>
+                                    </div>
                                     <Button
-                                        className="w-full md:flex-1 h-12 text-lg font-black gap-3 shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.4)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                        className="w-full md:w-auto min-w-[200px] h-12 text-lg font-black gap-3 shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                                         onClick={() => {
-                                            toast.success("Project posted to SkillBridge marketplace!");
-                                            // Redirect or reset logic here
+                                            toast.success("Success! Project is now live on SkillBridge.");
                                         }}
                                     >
-                                        POST PROJECT NOW <Sparkles className="w-5 h-5" />
+                                        Post Project <MousePointer2 className="w-5 h-5" />
                                     </Button>
                                 </CardFooter>
                             </Card>
