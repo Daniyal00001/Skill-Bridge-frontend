@@ -1,6 +1,8 @@
+// import react items
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+
+// import components
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Zap, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+// import auth context
+import { useAuth } from '@/contexts/AuthContext';
+
+
+// component name
 export default function LoginPage() {
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +25,8 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -59,6 +69,7 @@ export default function LoginPage() {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left Panel - Form */}
@@ -87,6 +98,8 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+
+                 {/* // form  */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -99,6 +112,8 @@ export default function LoginPage() {
                     required
                   />
                 </div>
+
+           
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -185,37 +200,37 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Visual */}
-      <div className="hidden lg:flex lg:flex-1 gradient-hero items-center justify-center p-12">
-        <div className="max-w-lg text-white">
-          <h2 className="text-3xl font-bold mb-4">
-            Build your dream projects with top talent
-          </h2>
-          <p className="text-white/80 text-lg mb-8">
-            Connect with skilled developers, leverage AI-powered project scoping, 
-            and bring your ideas to life with SkillBridge.
-          </p>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                ✓
-              </div>
-              <span>AI-powered project matching</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                ✓
-              </div>
-              <span>Secure escrow payments</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                ✓
-              </div>
-              <span>Vetted professional developers</span>
-            </div>
-          </div>
+   <div className="hidden lg:flex lg:flex-1 gradient-hero items-center justify-center p-12">
+  <div className="max-w-lg text-white">
+    <h2 className="text-3xl font-bold mb-4">
+      Turn your ideas into reality with the right freelance talent
+    </h2>
+    <p className="text-white/80 text-lg mb-8">
+      Connect with skilled freelancers across multiple domains, use AI-powered project guidance, 
+      and bring any type of project to life with SkillBridge.
+    </p>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+          ✓
         </div>
+        <span>AI-powered project assistance</span>
       </div>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+          ✓
+        </div>
+        <span>Smart freelancer matching</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+          ✓
+        </div>
+        <span>Secure collaboration & payments</span>
+      </div>
+    </div>
+  </div>
+</div>
     </div>
   );
 }
