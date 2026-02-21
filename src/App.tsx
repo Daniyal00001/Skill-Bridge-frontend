@@ -36,6 +36,7 @@ import { default as DeveloperProposalsPage } from "./pages/developer/DeveloperPr
 import { default as DeveloperProjectsPage } from "./pages/developer/DeveloperProjects";
 import { default as DeveloperMessagesPage } from "./pages/developer/DeveloperMessages";
 import { default as DeveloperProfilePage } from "./pages/developer/DeveloperProfile";
+import DeveloperProjectDetails from "./pages/developer/DeveloperProjectDetails";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
 import NotFound from "./pages/NotFound";
@@ -83,6 +84,7 @@ const App = () => (
             <Route path="/developer/projects" element={<DeveloperProjectsPage />} />
             <Route path="/developer/messages" element={<DeveloperMessagesPage />} />
             <Route path="/developer/profile" element={<DeveloperProfilePage />} />
+            <Route path="/developer/projects/:projectId" element={<DeveloperProjectDetails />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
