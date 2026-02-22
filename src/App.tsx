@@ -38,6 +38,11 @@ import { default as FreelancerMessagesPage } from "./pages/freelancer/Freelancer
 import { default as FreelancerProfilePage } from "./pages/freelancer/FreelancerProfile";
 import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetails";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import ProjectModeration from "./pages/admin/ProjectModeration";
+import DisputeManagement from "./pages/admin/DisputeManagement";
+import Analytics from "./pages/admin/Analytics";
+import Security from "./pages/admin/Security";
 
 import NotFound from "./pages/NotFound";
 
@@ -88,6 +93,11 @@ const App = () => (
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/projects" element={<ProjectModeration />} />
+            <Route path="/admin/disputes" element={<DisputeManagement />} />
+            <Route path="/admin/analytics" element={<Analytics />} />
+            <Route path="/admin/security" element={<Security />} />
 
             <Route path="/settings" element={<ClientSettingsPage />} />
 
