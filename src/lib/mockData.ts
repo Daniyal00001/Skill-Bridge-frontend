@@ -5,11 +5,11 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
-  role: 'client' | 'developer' | 'admin';
+  role: 'client' | 'freelancer' | 'admin';
   createdAt: string;
 }
 
-export interface Developer {
+export interface Freelancer {
   id: string;
   name: string;
   avatar: string;
@@ -42,7 +42,7 @@ export interface Project {
   skills: string[];
   status: 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled';
   clientId: string;
-  developerId?: string;
+  freelancerId?: string;
   createdAt: string;
   deadline?: string;
   proposalCount: number;
@@ -51,8 +51,8 @@ export interface Project {
 export interface Proposal {
   id: string;
   projectId: string;
-  developerId: string;
-  developer: Developer;
+  freelancerId: string;
+  freelancer: Freelancer;
   coverLetter: string;
   proposedBudget: number;
   estimatedDuration: string;
@@ -111,7 +111,7 @@ export const mockUsers: User[] = [
     name: 'Alex Chen',
     email: 'alex@example.com',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    role: 'developer',
+    role: 'freelancer',
     createdAt: '2024-02-20',
   },
   {
@@ -124,8 +124,8 @@ export const mockUsers: User[] = [
   },
 ];
 
-// Mock Developers
-export const mockDevelopers: Developer[] = [
+// Mock Freelancers
+export const mockFreelancers: Freelancer[] = [
   {
     id: 'dev-1',
     name: 'Alex Chen',
@@ -227,7 +227,7 @@ export const mockProjects: Project[] = [
     skills: ['React Native', 'Firebase', 'Node.js'],
     status: 'in_progress',
     clientId: 'user-1',
-    developerId: 'dev-4',
+    freelancerId: 'dev-4',
     createdAt: '2024-01-05',
     deadline: '2024-04-01',
     proposalCount: 12,
@@ -267,7 +267,7 @@ export const mockProjects: Project[] = [
     skills: ['React', 'D3.js', 'PostgreSQL', 'GraphQL'],
     status: 'completed',
     clientId: 'user-1',
-    developerId: 'dev-1',
+    freelancerId: 'dev-1',
     createdAt: '2023-11-01',
     deadline: '2024-01-15',
     proposalCount: 9,
@@ -279,8 +279,8 @@ export const mockProposals: Proposal[] = [
   {
     id: 'prop-1',
     projectId: 'proj-1',
-    developerId: 'dev-1',
-    developer: mockDevelopers[0],
+    freelancerId: 'dev-1',
+    freelancer: mockFreelancers[0],
     coverLetter: 'I have extensive experience in e-commerce platforms and would love to bring your vision to life with modern technologies and best practices.',
     proposedBudget: 8500,
     estimatedDuration: '6 weeks',
@@ -290,8 +290,8 @@ export const mockProposals: Proposal[] = [
   {
     id: 'prop-2',
     projectId: 'proj-1',
-    developerId: 'dev-2',
-    developer: mockDevelopers[1],
+    freelancerId: 'dev-2',
+    freelancer: mockFreelancers[1],
     coverLetter: 'As a UI/UX focused developer, I can ensure your platform not only functions well but looks stunning and provides an exceptional user experience.',
     proposedBudget: 7800,
     estimatedDuration: '5 weeks',
@@ -301,8 +301,8 @@ export const mockProposals: Proposal[] = [
   {
     id: 'prop-3',
     projectId: 'proj-3',
-    developerId: 'dev-2',
-    developer: mockDevelopers[1],
+    freelancerId: 'dev-2',
+    freelancer: mockFreelancers[1],
     coverLetter: 'Landing pages are my specialty! I can create an eye-catching, conversion-optimized page with smooth animations.',
     proposedBudget: 2200,
     estimatedDuration: '1 week',
@@ -367,7 +367,7 @@ export const clientDashboardStats = {
   completedProjects: 8,
 };
 
-export const developerDashboardStats = {
+export const freelancerDashboardStats = {
   activeBids: 5,
   totalEarnings: 45200,
   completedProjects: 52,

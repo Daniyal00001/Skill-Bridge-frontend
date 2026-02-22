@@ -35,7 +35,7 @@ const MOCK_ALL_PROPOSALS = [
         id: "prop-1",
         projectId: "1",
         projectTitle: "E-Commerce Mobile App Redesign",
-        developer: {
+        freelancer: {
             id: "dev-1",
             name: "Alex Chen",
             avatar: "https://i.pravatar.cc/150?u=alex",
@@ -50,7 +50,7 @@ const MOCK_ALL_PROPOSALS = [
         id: "prop-2",
         projectId: "1",
         projectTitle: "E-Commerce Mobile App Redesign",
-        developer: {
+        freelancer: {
             id: "dev-2",
             name: "Sarah Jones",
             avatar: "https://i.pravatar.cc/150?u=sarah",
@@ -65,7 +65,7 @@ const MOCK_ALL_PROPOSALS = [
         id: "prop-3",
         projectId: "2",
         projectTitle: "AI-Powered Customer Support Chatbot",
-        developer: {
+        freelancer: {
             id: "dev-3",
             name: "Michael Brown",
             avatar: "https://i.pravatar.cc/150?u=mike",
@@ -80,7 +80,7 @@ const MOCK_ALL_PROPOSALS = [
         id: "prop-4",
         projectId: "3",
         projectTitle: "Corporate Website Migration",
-        developer: {
+        freelancer: {
             id: "dev-4",
             name: "Emily Davis",
             avatar: "https://i.pravatar.cc/150?u=emily",
@@ -95,7 +95,7 @@ const MOCK_ALL_PROPOSALS = [
         id: "prop-5",
         projectId: "1",
         projectTitle: "E-Commerce Mobile App Redesign",
-        developer: {
+        freelancer: {
             id: "dev-5",
             name: "David Wilson",
             avatar: "https://i.pravatar.cc/150?u=david",
@@ -115,7 +115,7 @@ const MyProposalsPage = () => {
     const filteredProposals = MOCK_ALL_PROPOSALS.filter((proposal) => {
         const matchesSearch =
             proposal.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            proposal.developer.name.toLowerCase().includes(searchTerm.toLowerCase());
+            proposal.freelancer.name.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesStatus = statusFilter === "all" || proposal.status === statusFilter;
 
@@ -152,7 +152,7 @@ const MyProposalsPage = () => {
                     <div className="relative w-full md:w-96">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search by project or developer..."
+                            placeholder="Search by project or freelancer..."
                             className="pl-9"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -186,7 +186,7 @@ const MyProposalsPage = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="pl-6">Developer</TableHead>
+                                    <TableHead className="pl-6">Freelancer</TableHead>
                                     <TableHead>Project</TableHead>
                                     <TableHead>Budget & Time</TableHead>
                                     <TableHead>Date</TableHead>
@@ -200,12 +200,12 @@ const MyProposalsPage = () => {
                                         <TableCell className="pl-6 font-medium">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-9 w-9 border">
-                                                    <AvatarImage src={proposal.developer.avatar} />
-                                                    <AvatarFallback>{proposal.developer.name.charAt(0)}</AvatarFallback>
+                                                    <AvatarImage src={proposal.freelancer.avatar} />
+                                                    <AvatarFallback>{proposal.freelancer.name.charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="font-medium text-sm">{proposal.developer.name}</p>
-                                                    <p className="text-xs text-muted-foreground">{proposal.developer.title}</p>
+                                                    <p className="font-medium text-sm">{proposal.freelancer.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{proposal.freelancer.title}</p>
                                                 </div>
                                             </div>
                                         </TableCell>

@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface ProjectCardProps {
   project: Project;
-  viewAs: 'client' | 'developer';
+  viewAs: 'client' | 'freelancer';
 }
 
 export function ProjectCard({ project, viewAs }: ProjectCardProps) {
@@ -29,7 +29,7 @@ export function ProjectCard({ project, viewAs }: ProjectCardProps) {
   const detailLink =
     viewAs === 'client'
       ? `/client/projects/${project.id}`
-      : `/developer/projects/${project.id}`;
+      : `/freelancer/projects/${project.id}`;
 
   return (
     <Card variant="interactive" className="h-full flex flex-col">

@@ -46,7 +46,7 @@ export function ProjectCardSkeleton() {
   );
 }
 
-export function DeveloperCardSkeleton() {
+export function FreelancerCardSkeleton() {
   return (
     <Card>
       <CardContent className="p-6">

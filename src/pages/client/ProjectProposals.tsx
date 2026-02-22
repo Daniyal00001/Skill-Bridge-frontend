@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProposalCard } from "@/components/client/ProposalCard";
 import { ArrowLeft, Calendar, DollarSign, Clock } from "lucide-react";
-import { Developer, Proposal } from "@/types/client";
+import { Freelancer, Proposal } from "@/lib/mockData";
 import { toast } from "sonner";
 
 // Mock Data
@@ -19,54 +19,51 @@ const MOCK_PROJECT = {
     proposalCount: 12,
 };
 
-const MOCK_DEVELOPERS: Record<string, Developer> = {
+const MOCK_FREELANCERS: Record<string, Freelancer> = {
     "dev-1": {
         id: "dev-1",
         name: "Alex Chen",
-        email: "alex@example.com",
-        profileImage: "https://i.pravatar.cc/150?u=alex",
+        avatar: "https://i.pravatar.cc/150?u=alex",
         bio: "Senior Full Stack Dev",
         skills: ["React", "Node.js", "AWS"],
         rating: 4.9,
         reviewCount: 47,
         completedProjects: 52,
         hourlyRate: 85,
-        experienceLevel: "Senior",
+        title: "Senior Full Stack Dev",
         portfolio: [],
-        availability: "Available",
-        joinedAt: new Date(),
+        availability: "available",
+        location: "Dallas, TX",
     },
     "dev-2": {
         id: "dev-2",
         name: "Sarah Jones",
-        email: "sarah@example.com",
-        profileImage: "https://i.pravatar.cc/150?u=sarah",
+        avatar: "https://i.pravatar.cc/150?u=sarah",
         bio: "UI/UX Specialist",
         skills: ["Figma", "React", "Tailwind"],
         rating: 4.7,
         reviewCount: 23,
         completedProjects: 18,
         hourlyRate: 65,
-        experienceLevel: "Mid",
+        title: "UI/UX Specialist",
         portfolio: [],
-        availability: "Available",
-        joinedAt: new Date(),
+        availability: "available",
+        location: "Remote",
     },
     "dev-3": {
         id: "dev-3",
         name: "Michael Brown",
-        email: "mike@example.com",
-        profileImage: "https://i.pravatar.cc/150?u=mike",
+        avatar: "https://i.pravatar.cc/150?u=mike",
         bio: "Backend Architect",
         skills: ["Python", "Django", "PostgreSQL"],
         rating: 5.0,
         reviewCount: 12,
         completedProjects: 10,
         hourlyRate: 95,
-        experienceLevel: "Senior",
+        title: "Backend Architect",
         portfolio: [],
-        availability: "Busy",
-        joinedAt: new Date(),
+        availability: "busy",
+        location: "Remote",
     },
 };
 
@@ -74,32 +71,35 @@ const MOCK_PROPOSALS: Proposal[] = [
     {
         id: "prop-1",
         projectId: "1",
-        developerId: "dev-1",
-        proposedPrice: 7500,
-        deliveryTime: 45,
+        freelancerId: "dev-1",
+        freelancer: MOCK_FREELANCERS["dev-1"],
+        proposedBudget: 7500,
+        estimatedDuration: "45 days",
         coverLetter: "I have built 3 similar e-commerce apps in the last year. I can ensure high performance and smooth animations. Check my portfolio for examples.",
-        status: "Pending",
-        submittedAt: new Date(),
+        status: "pending",
+        createdAt: new Date().toISOString(),
     },
     {
         id: "prop-2",
         projectId: "1",
-        developerId: "dev-2",
-        proposedPrice: 6000,
-        deliveryTime: 30,
+        freelancerId: "dev-2",
+        freelancer: MOCK_FREELANCERS["dev-2"],
+        proposedBudget: 6000,
+        estimatedDuration: "30 days",
         coverLetter: "I focus heavily on UX/UI. I can make your app look stunning and user-friendly. I'm available to start immediately.",
-        status: "Pending",
-        submittedAt: new Date(),
+        status: "pending",
+        createdAt: new Date().toISOString(),
     },
     {
         id: "prop-3",
         projectId: "1",
-        developerId: "dev-3",
-        proposedPrice: 8000,
-        deliveryTime: 40,
+        freelancerId: "dev-3",
+        freelancer: MOCK_FREELANCERS["dev-3"],
+        proposedBudget: 8000,
+        estimatedDuration: "40 days",
         coverLetter: "My robust backend background ensures your app will be secure and scalable. I use best practices for API development.",
-        status: "Rejected",
-        submittedAt: new Date(),
+        status: "rejected",
+        createdAt: new Date().toISOString(),
     },
 ];
 
@@ -176,7 +176,7 @@ const ProjectProposalsPage = () => {
                             <ProposalCard
                                 key={proposal.id}
                                 proposal={proposal}
-                                developer={MOCK_DEVELOPERS[proposal.developerId]}
+                                freelancer={MOCK_FREELANCERS[proposal.freelancerId]}
                                 onAccept={handleAccept}
                                 onReject={handleReject}
                                 onViewProfile={(id) => console.log('View profile:', id)}

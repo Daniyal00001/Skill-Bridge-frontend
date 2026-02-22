@@ -34,7 +34,7 @@ export function Navbar() {
     if (!user) return '/';
     switch (user.role) {
       case 'admin': return '/admin';
-      case 'developer': return '/developer';
+      case 'freelancer': return '/freelancer';
       default: return '/client';
     }
   };

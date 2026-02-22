@@ -53,7 +53,7 @@ const INITIAL_PROJECTS = [
         proposals: 12,
         deadline: "2024-04-15",
         skills: ["React Native", "UI/UX"],
-        lastActivity: "Developer submitted v1.2 for review",
+        lastActivity: "Freelancer submitted v1.2 for review",
         priority: true
     },
     {

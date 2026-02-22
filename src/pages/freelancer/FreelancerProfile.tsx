@@ -5,12 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { mockDevelopers } from '@/lib/mockData';
+import { mockFreelancers } from '@/lib/mockData';
 import { MapPin, Mail, Globe, Github, Linkedin, Camera } from 'lucide-react';
 
-export default function DeveloperProfile() {
-    // Using Alex Chen (dev-1) as the mock logged-in developer
-    const developer = mockDevelopers[0];
+export default function FreelancerProfile() {
+    // Using Alex Chen (dev-1) as the mock logged-in freelancer
+    const freelancer = mockFreelancers[0];
 
     return (
         <DashboardLayout>
@@ -20,16 +20,16 @@ export default function DeveloperProfile() {
                     <div className="absolute -bottom-12 left-8 flex items-end gap-6">
                         <div className="relative group">
                             <Avatar className="w-32 h-32 border-4 border-background shadow-xl">
-                                <AvatarImage src={developer.avatar} />
-                                <AvatarFallback>{developer.name.charAt(0)}</AvatarFallback>
+                                <AvatarImage src={freelancer.avatar} />
+                                <AvatarFallback>{freelancer.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <button className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Camera className="w-4 h-4" />
                             </button>
                         </div>
                         <div className="mb-4">
-                            <h1 className="text-3xl font-bold text-white">{developer.name}</h1>
-                            <p className="text-blue-100">{developer.title}</p>
+                            <h1 className="text-3xl font-bold text-white">{freelancer.name}</h1>
+                            <p className="text-blue-100">{freelancer.title}</p>
                         </div>
                     </div>
 
@@ -45,7 +45,7 @@ export default function DeveloperProfile() {
                             <CardContent className="p-6 space-y-4">
                                 <div className="flex items-center gap-3 text-muted-foreground">
                                     <MapPin className="w-4 h-4" />
-                                    <span>{developer.location}</span>
+                                    <span>{freelancer.location}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-muted-foreground">
                                     <Mail className="w-4 h-4" />
@@ -86,14 +86,14 @@ export default function DeveloperProfile() {
                                     <label className="text-sm font-medium">Bio</label>
                                     <Textarea
                                         className="min-h-[120px]"
-                                        defaultValue={developer.bio}
+                                        defaultValue={freelancer.bio}
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
                                         <label className="text-sm font-medium">Hourly Rate ($)</label>
-                                        <Input type="number" defaultValue={developer.hourlyRate} />
+                                        <Input type="number" defaultValue={freelancer.hourlyRate} />
                                     </div>
                                     <div className="grid gap-2">
                                         <label className="text-sm font-medium">Years of Exp.</label>
@@ -110,7 +110,7 @@ export default function DeveloperProfile() {
                             </CardHeader>
                             <CardContent>
                                 <div className="flex flex-wrap gap-2">
-                                    {developer.skills.map(skill => (
+                                    {freelancer.skills.map(skill => (
                                         <Badge key={skill} variant="secondary" className="px-3 py-1 text-sm bg-muted hover:bg-muted-foreground/20">
                                             {skill}
                                             <button className="ml-2 text-muted-foreground hover:text-foreground">×</button>

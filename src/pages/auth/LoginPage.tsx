@@ -49,7 +49,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = async (role: 'client' | 'developer' | 'admin') => {
+  const handleDemoLogin = async (role: 'client' | 'freelancer' | 'admin') => {
     setIsLoading(true);
     try {
       await login('demo@example.com', 'password', role);
@@ -57,7 +57,7 @@ export default function LoginPage() {
         title: 'Welcome!',
         description: `Logged in as ${role} demo user.`,
       });
-      navigate(role === 'admin' ? '/admin' : role === 'developer' ? '/developer' : '/client');
+      navigate(role === 'admin' ? '/admin' : role === 'freelancer' ? '/freelancer' : '/client');
     } catch (error) {
       toast({
         title: 'Error',
@@ -172,11 +172,11 @@ export default function LoginPage() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  size="sm" 
-                  onClick={() => handleDemoLogin('developer')}
+                   size="sm" 
+                   onClick={() => handleDemoLogin('freelancer')}
                   disabled={isLoading}
                 >
-                  Developer
+                  Freelancer
                 </Button>
                 <Button 
                   variant="outline" 

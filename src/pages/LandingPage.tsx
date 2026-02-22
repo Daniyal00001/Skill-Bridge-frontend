@@ -27,7 +27,7 @@ export default function LandingPage() {
     {
       icon: Target,
       title: 'Smart Matching',
-      description: 'Get matched with the perfect developers based on skills, experience, and project requirements.',
+      description: 'Get matched with the perfect freelancers based on skills, experience, and project requirements.',
     },
     {
       icon: Shield,
@@ -42,7 +42,7 @@ export default function LandingPage() {
   ];
 
   const stats = [
-    { value: '50K+', label: 'Skilled Developers' },
+    { value: '50K+', label: 'Skilled Freelancers' },
     { value: '98%', label: 'Success Rate' },
     { value: '$25M+', label: 'Paid to Freelancers' },
     { value: '4.9', label: 'Average Rating' },
@@ -50,7 +50,7 @@ export default function LandingPage() {
 
   const steps = [
     { number: '01', title: 'Describe Your Project', description: 'Tell us what you need. Our AI will help define scope and requirements.' },
-    { number: '02', title: 'Get Matched', description: 'Receive proposals from pre-vetted developers matched to your needs.' },
+    { number: '02', title: 'Get Matched', description: 'Receive proposals from pre-vetted freelancers matched to your needs.' },
     { number: '03', title: 'Collaborate & Pay', description: 'Work together with secure payments and milestone tracking.' },
   ];
 
@@ -59,14 +59,14 @@ export default function LandingPage() {
       name: 'Sarah Chen',
       role: 'CTO at TechStart',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
-      content: 'SkillBridge transformed how we hire developers. The AI scoping feature alone saved us weeks of back-and-forth.',
+      content: 'SkillBridge transformed how we hire freelancers. The AI scoping feature alone saved us weeks of back-and-forth.',
       rating: 5,
     },
     {
       name: 'Marcus Williams',
       role: 'Founder at DevShop',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
-      content: 'As a developer, I love how the platform matches me with projects that fit my skills perfectly.',
+      content: 'As a freelancer, I love how the platform matches me with projects that fit my skills perfectly.',
       rating: 5,
     },
     {
@@ -101,7 +101,7 @@ export default function LandingPage() {
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              SkillBridge connects businesses with pre-vetted developers through AI-powered matching. 
+              SkillBridge connects businesses with pre-vetted freelancers through AI-powered matching. 
               Get accurate project scoping, smart matching, and secure payments.
             </p>
             {/* --------------------------------------------------------------------------------- */}
@@ -114,7 +114,7 @@ export default function LandingPage() {
                 </Link>
               </Button>
               <Button variant="outline" size="xl" asChild>
-                <Link to="/signup?role=developer">Find Work</Link>
+                <Link to="/signup?role=freelancer">Find Work</Link>
               </Button>
             </div>
             {/* ----------------------------------------------------------------------------------------- */}
@@ -212,7 +212,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Loved by Teams Worldwide</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              See what our clients and developers have to say
+              See what our clients and freelancers have to say
             </p>
           </div>
           
@@ -255,7 +255,7 @@ export default function LandingPage() {
                   Ready to Build Something Amazing?
                 </h2>
                 <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-                  Join thousands of businesses and developers who trust SkillBridge for their projects
+                  Join thousands of businesses and freelancers who trust SkillBridge for their projects
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button size="xl" variant="secondary" asChild>

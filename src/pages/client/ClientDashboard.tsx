@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatsCard } from '@/components/common/StatsCard';
-import { DeveloperCard } from '@/components/common/DeveloperCard';
+import { FreelancerCard } from '@/components/common/FreelancerCard';
 import { ProjectCard } from '@/components/common/ProjectCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,13 +16,13 @@ import {
 } from 'lucide-react';
 import {
   clientDashboardStats,
-  mockDevelopers,
+  mockFreelancers,
   mockProjects
 } from '@/lib/mockData';
 
 export default function ClientDashboard() {
   const recentProjects = mockProjects.filter(p => p.status === 'open').slice(0, 2);
-  const recommendedDevelopers = mockDevelopers.slice(0, 3);
+  const recommendedFreelancers = mockFreelancers.slice(0, 3);
 
   return (
     <DashboardLayout>
@@ -30,7 +30,7 @@ export default function ClientDashboard() {
         {/* Welcome Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, Sarah! 👋</h1>
+            <h1 className="text-3xl font-bold">Welcome back! 👋</h1>
             <p className="text-muted-foreground mt-1">
               Here's what's happening with your projects
             </p>
@@ -137,11 +137,11 @@ export default function ClientDashboard() {
           </div>
         </div>
 
-        {/* AI Recommended Developers */}
+        {/* AI Recommended Freelancers */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold">Developers I’ve Worked With</h2>
+              <h2 className="text-xl font-semibold">Freelancers I’ve Worked With</h2>
               <p className="text-sm text-muted-foreground">
                 Based on your project history and requirements
               </p>
@@ -149,8 +149,8 @@ export default function ClientDashboard() {
             <Button variant="outline">Browse All</Button>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommendedDevelopers.map((developer) => (
-              <DeveloperCard key={developer.id} developer={developer} />
+            {recommendedFreelancers.map((freelancer) => (
+              <FreelancerCard key={freelancer.id} freelancer={freelancer} />
             ))}
           </div>
         </div>

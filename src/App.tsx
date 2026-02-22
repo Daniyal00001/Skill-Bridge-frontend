@@ -30,13 +30,13 @@ import BrowseProjectsPage from "./pages/client/BrowseProjects";
 import MyProposalsPage from "./pages/client/MyProposals";
 import ActiveProjectsPage from "./pages/client/ActiveProjects";
 import ClientProfilePage from "./pages/client/ClientProfile";
-import DeveloperDashboard from "./pages/developer/DeveloperDashboard";
-import DeveloperBrowseProjects from "./pages/developer/DeveloperBrowseProjects";
-import { default as DeveloperProposalsPage } from "./pages/developer/DeveloperProposals";
-import { default as DeveloperProjectsPage } from "./pages/developer/DeveloperProjects";
-import { default as DeveloperMessagesPage } from "./pages/developer/DeveloperMessages";
-import { default as DeveloperProfilePage } from "./pages/developer/DeveloperProfile";
-import DeveloperProjectDetails from "./pages/developer/DeveloperProjectDetails";
+import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
+import FreelancerBrowseProjects from "./pages/freelancer/FreelancerBrowseProjects";
+import { default as FreelancerProposalsPage } from "./pages/freelancer/FreelancerProposals";
+import { default as FreelancerProjectsPage } from "./pages/freelancer/FreelancerProjects";
+import { default as FreelancerMessagesPage } from "./pages/freelancer/FreelancerMessages";
+import { default as FreelancerProfilePage } from "./pages/freelancer/FreelancerProfile";
+import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetails";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
 import NotFound from "./pages/NotFound";
@@ -77,14 +77,14 @@ const App = () => (
             <Route path="/client/profile" element={<ClientProfilePage />} />
             <Route path="/client/reviews" element={<ClientReviewsPage />} />
 
-            {/* Developer Routes */}
-            <Route path="/developer" element={<DeveloperDashboard />} />
-            <Route path="/developer/browse" element={<DeveloperBrowseProjects />} />
-            <Route path="/developer/proposals" element={<DeveloperProposalsPage />} />
-            <Route path="/developer/projects" element={<DeveloperProjectsPage />} />
-            <Route path="/developer/messages" element={<DeveloperMessagesPage />} />
-            <Route path="/developer/profile" element={<DeveloperProfilePage />} />
-            <Route path="/developer/projects/:projectId" element={<DeveloperProjectDetails />} />
+            {/* Freelancer Routes */}
+            <Route path="/freelancer" element={<FreelancerDashboard />} />
+            <Route path="/freelancer/browse" element={<FreelancerBrowseProjects />} />
+            <Route path="/freelancer/proposals" element={<FreelancerProposalsPage />} />
+            <Route path="/freelancer/projects" element={<FreelancerProjectsPage />} />
+            <Route path="/freelancer/messages" element={<FreelancerMessagesPage />} />
+            <Route path="/freelancer/profile" element={<FreelancerProfilePage />} />
+            <Route path="/freelancer/projects/:projectId" element={<FreelancerProjectDetails />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />

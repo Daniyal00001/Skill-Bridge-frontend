@@ -1,24 +1,31 @@
+// react items 
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Zap, Eye, EyeOff, ArrowLeft, Loader2, Briefcase, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+// use context
+import { useAuth } from '@/contexts/AuthContext';
+// utils
 import { cn } from '@/lib/utils';
 
+
+// component name
 export default function SignupPage() {
   const [searchParams] = useSearchParams();
-  const initialRole = searchParams.get('role') === 'developer' ? 'developer' : 'client';
+  const initialRole = searchParams.get('role') === 'freelancer' ? 'freelancer' : 'client';
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'client' | 'developer'>(initialRole);
+  const [role, setRole] = useState<'client' | 'freelancer'>(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+
   const { signup } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,7 +40,7 @@ export default function SignupPage() {
         title: 'Account created!',
         description: 'Welcome to SkillBridge.',
       });
-      navigate(role === 'developer' ? '/developer' : '/client');
+      navigate(role === 'freelancer' ? '/freelancer' : '/client');
     } catch (error) {
       toast({
         title: 'Error',
@@ -98,23 +105,23 @@ export default function SignupPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setRole('developer')}
+                  onClick={() => setRole('freelancer')}
                   className={cn(
                     'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all',
-                    role === 'developer'
+                    role === 'freelancer'
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   )}
                 >
-                  <Code className={cn(
+                  <Briefcase className={cn(
                     'w-6 h-6',
-                    role === 'developer' ? 'text-primary' : 'text-muted-foreground'
+                    role === 'freelancer' ? 'text-primary' : 'text-muted-foreground'
                   )} />
                   <span className={cn(
                     'text-sm font-medium',
-                    role === 'developer' ? 'text-primary' : 'text-muted-foreground'
+                    role === 'freelancer' ? 'text-primary' : 'text-muted-foreground'
                   )}>
-                    I'm a developer
+                    I'm a freelancer
                   </span>
                 </button>
               </div>
@@ -203,11 +210,11 @@ export default function SignupPage() {
           <h2 className="text-3xl font-bold mb-4">
             {role === 'client' 
               ? 'Find the perfect talent for your projects'
-              : 'Join our community of skilled developers'}
+              : 'Join our community of skilled freelancers'}
           </h2>
           <p className="text-white/80 text-lg mb-8">
             {role === 'client'
-              ? 'Post your project and get matched with pre-vetted developers. Our AI helps scope your project and estimate costs accurately.'
+              ? 'Post your project and get matched with pre-vetted freelancers. Our AI helps scope your project and estimate costs accurately.'
               : 'Get matched with projects that fit your skills. Work with great clients and grow your freelance career.'}
           </p>
           <div className="space-y-4">
@@ -223,7 +230,7 @@ export default function SignupPage() {
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                     ✓
                   </div>
-                  <span>Pre-vetted developers only</span>
+                  <span>Pre-vetted freelancers only</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">

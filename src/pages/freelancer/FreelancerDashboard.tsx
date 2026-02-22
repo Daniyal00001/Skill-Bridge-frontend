@@ -17,12 +17,12 @@ import {
   Clock
 } from 'lucide-react';
 import {
-  developerDashboardStats,
+  freelancerDashboardStats,
   mockProjects,
   mockProposals
 } from '@/lib/mockData';
 
-export default function DeveloperDashboard() {
+export default function FreelancerDashboard() {
   const openProjects = mockProjects.filter(p => p.status === 'open').slice(0, 3);
   const pendingProposals = mockProposals.filter(p => p.status === 'pending');
 
@@ -32,13 +32,13 @@ export default function DeveloperDashboard() {
         {/* Welcome Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, Alex! 🚀</h1>
+            <h1 className="text-3xl font-bold">Welcome back! 🚀</h1>
             <p className="text-muted-foreground mt-1">
               Let's find your next great project
             </p>
           </div>
           <Button variant="hero" asChild>
-            <Link to="/developer/browse">
+            <Link to="/freelancer/browse">
               <Search className="mr-2 h-5 w-5" />
               Browse Projects
             </Link>
@@ -49,29 +49,29 @@ export default function DeveloperDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
             title="Active Bids"
-            value={developerDashboardStats.activeBids}
+            value={freelancerDashboardStats.activeBids}
             change="3 pending responses"
             changeType="neutral"
             icon={Briefcase}
           />
           <StatsCard
             title="Total Earnings"
-            value={`$${developerDashboardStats.totalEarnings.toLocaleString()}`}
+            value={`$${freelancerDashboardStats.totalEarnings.toLocaleString()}`}
             change="+$3,200 this month"
             changeType="positive"
             icon={DollarSign}
           />
           <StatsCard
             title="Completed Projects"
-            value={developerDashboardStats.completedProjects}
+            value={freelancerDashboardStats.completedProjects}
             change="+4 this month"
             changeType="positive"
             icon={CheckCircle}
           />
           <StatsCard
             title="Average Rating"
-            value={developerDashboardStats.averageRating}
-            change="Top 5% developer"
+            value={freelancerDashboardStats.averageRating}
+            change="Top 5% freelancer"
             changeType="positive"
             icon={Star}
           />
@@ -84,14 +84,14 @@ export default function DeveloperDashboard() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Recommended for You</h2>
               <Button variant="ghost" asChild>
-                <Link to="/developer/browse">
+                <Link to="/freelancer/browse">
                   View all <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
             <div className="space-y-4">
               {openProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} viewAs="developer" />
+                <ProjectCard key={project.id} project={project} viewAs="freelancer" />
               ))}
             </div>
           </div>
@@ -128,7 +128,7 @@ export default function DeveloperDashboard() {
                     </p>
                   )}
                   <Button variant="outline" className="w-full mt-2" asChild>
-                    <Link to="/developer/proposals">View All Proposals</Link>
+                    <Link to="/freelancer/proposals">View All Proposals</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -146,7 +146,7 @@ export default function DeveloperDashboard() {
                   Complete your profile to get more visibility
                 </p>
                 <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link to="/developer/profile">Complete Profile</Link>
+                  <Link to="/freelancer/profile">Complete Profile</Link>
                 </Button>
               </CardContent>
             </Card>

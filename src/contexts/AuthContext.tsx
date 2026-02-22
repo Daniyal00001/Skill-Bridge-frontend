@@ -1,32 +1,46 @@
+// use context hook ---> for global state management
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { User, mockUsers } from '@/lib/mockData';
+
+
+
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string, role?: 'client' | 'developer' | 'admin') => Promise<void>;
-  signup: (name: string, email: string, password: string, role: 'client' | 'developer') => Promise<void>;
+  login: (email: string, password: string, role?: 'client' | 'freelancer' | 'admin') => Promise<void>;
+  signup: (name: string, email: string, password: string, role: 'client' | 'freelancer') => Promise<void>;
   logout: () => void;
-  setUserRole: (role: 'client' | 'developer' | 'admin') => void;
+  setUserRole: (role: 'client' | 'freelancer' | 'admin') => void;
 }
 
+
+
+// syntax for context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+
+
+// syntax for provider
 export function AuthProvider({ children }: { children: ReactNode }) {
+
+
+// syntax for useState ---> global state management
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('skillbridge_user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = async (email: string, password: string, role?: 'client' | 'developer' | 'admin') => {
+  const login = async (email: string, password: string, role?: 'client' | 'freelancer' | 'admin') => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Mock login - in real app, this would validate credentials
     const mockUser = role === 'admin'
       ? mockUsers.find(u => u.role === 'admin')
-      : role === 'developer'
-        ? mockUsers.find(u => u.role === 'developer')
+      : role === 'freelancer'
+        ? mockUsers.find(u => u.role === 'freelancer')
         : mockUsers.find(u => u.role === 'client');
 
     if (mockUser) {
@@ -36,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (name: string, email: string, password: string, role: 'client' | 'developer') => {
+  const signup = async (name: string, email: string, password: string, role: 'client' | 'freelancer') => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -58,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('skillbridge_user');
   };
 
-  const setUserRole = (role: 'client' | 'developer' | 'admin') => {
+  const setUserRole = (role: 'client' | 'freelancer' | 'admin') => {
     if (user) {
       const updatedUser = { ...user, role };
       setUser(updatedUser);
