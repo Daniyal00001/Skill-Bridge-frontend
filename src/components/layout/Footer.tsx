@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Zap, Github, Twitter, Linkedin } from 'lucide-react';
-
+// import logo 
+import logo from '@/assets/logo/logo.png';
 export function Footer() {
   const footerLinks = {
     Product: [
@@ -35,10 +36,12 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 gradient-hero rounded-lg flex items-center justify-center">
+              {/* <div className="w-8 h-8 gradient-hero rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold gradient-text">SkillBridge</span>
+              </div> */}
+              {/* // used logo here  */}
+              <img src={logo} alt="Logo" className="w-8 -8 flex items-center justify-center"/>
+                 <span className="text-xl font-bold gradient-text">SkillBridge</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
               AI-powered platform connecting businesses with top freelance talent.

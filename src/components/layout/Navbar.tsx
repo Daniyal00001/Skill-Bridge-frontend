@@ -14,6 +14,7 @@ import { Bell, Menu, X, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { mockNotifications } from '@/lib/mockData';
+import logo from '@/assets/logo/logo.png';
 
 export function Navbar() {
 
@@ -45,9 +46,11 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 gradient-hero rounded-lg flex items-center justify-center">
+            {/* <div className="w-8 h-8 gradient-hero rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
-            </div>
+            </div> */}
+            {/* // used logo here  */}
+            <img src={logo} alt="Logo" className="w-8 h-8 flex items-center justify-center" />
             <span className="text-xl font-bold gradient-text">SkillBridge</span>
           </Link>
 
