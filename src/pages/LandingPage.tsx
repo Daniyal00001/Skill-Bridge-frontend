@@ -71,11 +71,11 @@ export default function LandingPage() {
               AI-Powered Freelance Platform
             </Badge>
             
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-[1.1] animate-slide-up">
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-[1.1]">
               The AI That <span className="gradient-text">Builds Your Team</span>
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
               SkillBridge is the first freelance platform where an Intelligent AI Consultant 
               discusses your vision, defines your scope, and matches you with the perfect developers.
             </p>
@@ -131,7 +131,7 @@ export default function LandingPage() {
         <div className="absolute top-1/2 left-0 w-64 h-64 bg-accent/5 rounded-full blur-[100px] -ml-32" />
         
         <div className="container mx-auto relative">
-          <div className="text-center mb-20 animate-slide-up">
+          <div className="text-center mb-20">
             <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">How SkillBridge Works</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               From initial project vision to successful delivery in three unified steps.
@@ -140,7 +140,7 @@ export default function LandingPage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((step, index) => (
-              <div key={step.number} className="relative group animate-slide-up" style={{ animationDelay: `${index * 150}ms` }}>
+              <div key={step.number} className="relative group">
                 <Card variant="elevated" className="h-full border-white/40 hover:border-primary/20 transition-all duration-500 hover:shadow-2xl">
                   <CardContent className="p-10">
                     <div className="text-7xl font-extrabold text-primary/5 mb-6 group-hover:text-primary/10 transition-colors">{step.number}</div>
@@ -162,7 +162,7 @@ export default function LandingPage() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px]" />
         
         <div className="container mx-auto relative">
-          <div className="text-center mb-16 animate-slide-up">
+          <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">The AI-First Ecosystem</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               We've redesigned the freelance experience from the ground up, placing artificial intelligence 
@@ -175,8 +175,7 @@ export default function LandingPage() {
               <Card 
                 key={feature.title} 
                 variant="interactive" 
-                className="h-full group animate-slide-up"
-                style={{ animationDelay: `${(i + 1) * 100}ms` }}
+                className="h-full group"
               >
                 <CardContent className="p-8">
                   <div className="w-14 h-14 rounded-2xl gradient-hero flex items-center justify-center mb-6 shadow-glow group-hover:scale-110 transition-transform">
@@ -195,7 +194,7 @@ export default function LandingPage() {
       <section className="py-32 px-4 relative">
         <div className="container mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="animate-slide-up">
+            <div>
               <Badge variant="outline" className="mb-6 border-primary/30 text-primary py-1.5 px-4 font-bold">
                 Smart Scoping
               </Badge>
@@ -233,7 +232,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="relative animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="relative">
               <div className="absolute inset-0 bg-primary/10 rounded-[3rem] blur-2xl -rotate-6" />
               <div className="relative glass rounded-[2.5rem] p-8 border-white/20 shadow-2xl overflow-hidden min-h-[450px]">
                 {/* SkillBridge AI Roadmap UI */}
@@ -260,7 +259,7 @@ export default function LandingPage() {
                       { title: "Stripe Integration", time: "5 Days", cost: "$1,200" },
                       { title: "Inventory Engine", time: "7 Days", cost: "$2,400" }
                     ].map((m, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/40 dark:bg-card/40 border border-white/50 shadow-sm animate-slide-up" style={{ animationDelay: `${(i+3)*150}ms` }}>
+                      <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/40 dark:bg-card/40 border border-white/50 shadow-sm">
                         <div className="flex items-center gap-4">
                           <div className="w-2 h-2 rounded-full bg-primary" />
                           <span className="text-sm font-bold">{m.title}</span>
@@ -304,18 +303,19 @@ export default function LandingPage() {
       {/* Trust & Security Section */}
       <section className="py-24 px-4 bg-muted/30 border-y">
         <div className="container mx-auto">
-          <div className="text-center mb-16 animate-slide-up">
+          <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">Built on Foundational Trust</h2>
             <p className="text-muted-foreground text-lg">Your security and peace of mind are our priority.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-12">
-            {[
-              { title: "Escrow Protection", desc: "Funds stay in secure escrow and are only released when milestones are explicitly approved." },
-              { title: "AI Roadmap Compliance", desc: "Every deliverable is automatically verified against the technical scope and requirements discussed with your AI Consultant." },
-              { title: "Vetted Expert Network", desc: "Our AI analyzes performance data and technical assessments to ensure you only match with the best specialized professional talent." }
-            ].map((item, i) => (
-              <div key={i} className="text-center space-y-4 animate-slide-up" style={{ animationDelay: `${i*150}ms` }}>
+            {
+              [
+                { title: "Escrow Protection", desc: "Funds stay in secure escrow and are only released when milestones are explicitly approved." },
+                { title: "AI Roadmap Compliance", desc: "Every deliverable is automatically verified against the technical scope and requirements discussed with your AI Consultant." },
+                { title: "Vetted Expert Network", desc: "Our AI analyzes performance data and technical assessments to ensure you only match with the best specialized professional talent." }
+              ].map((item, i) => (
+                <div key={i} className="text-center space-y-4">
                 <div className="mx-auto w-12 h-12 rounded-full bg-success/10 flex items-center justify-center text-success">
                   <CheckCircle className="w-6 h-6" />
                 </div>

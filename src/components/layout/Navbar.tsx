@@ -34,8 +34,8 @@ export function Navbar() {
   const getDashboardLink = () => {
     if (!user) return '/';
     switch (user.role) {
-      case 'admin': return '/admin';
-      case 'freelancer': return '/freelancer';
+      case 'ADMIN': return '/admin';
+      case 'FREELANCER': return '/freelancer';
       default: return '/client';
     }
   };

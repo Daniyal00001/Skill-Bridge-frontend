@@ -11,6 +11,7 @@ import AboutPage from "./pages/AboutPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import TermsOfService from "./pages/legal/TermsOfService";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -57,6 +58,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />

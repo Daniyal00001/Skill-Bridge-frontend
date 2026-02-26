@@ -58,7 +58,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const getNavItems = (): NavItem[] => {
     switch (user?.role) {
-      case 'client':
+      case 'CLIENT':
         return [
           { icon: Home, label: 'Dashboard', href: '/client' },
           { icon: PlusCircle, label: 'Post a New Project', href: '/client/post-project' },
@@ -68,17 +68,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           { icon: Star, label: 'Reviews', href: '/client/reviews' },
           { icon: Settings, label: 'Settings', href: '/settings' },
         ];
-      case 'developer':
+      case 'FREELANCER':
         return [
-          { icon: Home, label: 'Dashboard', href: '/developer' },
-          { icon: Search, label: 'Browse Projects', href: '/developer/browse' },
-          { icon: FileText, label: 'My Proposals', href: '/developer/proposals' },
-          { icon: Briefcase, label: 'Active Projects', href: '/developer/projects' },
-          { icon: MessageSquare, label: 'Messages', href: '/developer/messages', badge: 3 },
-          { icon: User, label: 'Profile', href: '/developer/profile' },
+          { icon: Home, label: 'Dashboard', href: '/freelancer' },
+          { icon: Search, label: 'Browse Projects', href: '/freelancer/browse' },
+          { icon: FileText, label: 'My Proposals', href: '/freelancer/proposals' },
+          { icon: Briefcase, label: 'Active Projects', href: '/freelancer/projects' },
+          { icon: MessageSquare, label: 'Messages', href: '/freelancer/messages', badge: 3 },
+          { icon: User, label: 'Profile', href: '/freelancer/profile' },
           { icon: Settings, label: 'Settings', href: '/settings' },
         ];
-      case 'admin':
+      case 'ADMIN':
         return [
           { icon: Home, label: 'Dashboard', href: '/admin' },
           { icon: Users, label: 'Users', href: '/admin/users' },

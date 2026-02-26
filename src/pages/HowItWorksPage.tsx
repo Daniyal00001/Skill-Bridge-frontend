@@ -36,14 +36,14 @@ export default function HowItWorksPage() {
         
         <div className="container mx-auto relative group">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="secondary" className="mb-6 px-4 py-2 animate-fade-in">
+            <Badge variant="secondary" className="mb-6 px-4 py-2">
               <SparkleIcon className="w-4 h-4 mr-2 text-primary fill-primary" />
               The AI-Assisted Journey
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 transition-all duration-700">
+            <h1 className="text-5xl md:text-7xl font-extrabold mb-6">
               Simplify the <span className="gradient-text">Complex</span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-slide-up">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
               From initial vision to final delivery, SkillBridge uses intelligent automation 
               to ensure every project is built with precision and trust.
             </p>
@@ -62,7 +62,7 @@ export default function HowItWorksPage() {
             </TabsList>
           </div>
 
-          <TabsContent value="client" className="space-y-12 animate-fade-in outline-none">
+          <TabsContent value="client" className="space-y-12 outline-none">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-8">
                 <StepItem 
@@ -113,7 +113,7 @@ export default function HowItWorksPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="freelancer" className="space-y-12 animate-fade-in outline-none">
+          <TabsContent value="freelancer" className="space-y-12 outline-none">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-8">
                 <StepItem 

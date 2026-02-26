@@ -26,14 +26,14 @@ export default function AboutPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-primary/10 rounded-full blur-3xl" />
 
         <div className="container mx-auto relative z-10">
-          <Badge variant="secondary" className="mb-6 px-4 py-2 animate-fade-in">
+          <Badge variant="secondary" className="mb-6 px-4 py-2">
             <Zap className="w-4 h-4 mr-2 text-primary" />
             Redefining the Freelance Economy
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-8 tracking-tight animate-slide-up">
+          <h1 className="text-5xl md:text-7xl font-extrabold mb-8 tracking-tight">
             The Future of Freelancing is <span className="gradient-text">Intelligent</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
             SkillBridge was born from a simple observation: traditional freelance platforms 
             are broken by technical gaps and communication friction. We built the solution.
           </p>
@@ -44,7 +44,7 @@ export default function AboutPage() {
       <section className="py-24 px-4 relative">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="animate-slide-up">
+            <div>
               <h2 className="text-4xl md:text-5xl font-extrabold mb-8 leading-tight">
                 Our Vision: A Bridge Over the <span className="gradient-text">Technical Gap</span>
               </h2>
@@ -77,7 +77,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="relative animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-[100px] opacity-30" />
               <div className="glass p-8 rounded-[2.5rem] border-white/20 shadow-2xl relative">
                 <blockquote className="text-2xl font-medium italic text-foreground leading-relaxed mb-6">
@@ -126,7 +126,7 @@ export default function AboutPage() {
                 color: "text-accent bg-accent/10"
               }
             ].map((value, i) => (
-              <Card key={i} variant="interactive" className="animate-slide-up" style={{ animationDelay: `${i*150}ms` }}>
+              <Card key={i} variant="interactive" className="">
                 <CardContent className="p-10">
                   <div className={`w-14 h-14 rounded-2xl ${value.color} flex items-center justify-center mb-6`}>
                     <value.icon className="w-7 h-7" />
