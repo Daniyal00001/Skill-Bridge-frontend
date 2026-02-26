@@ -82,14 +82,7 @@ export default function PrivacyPolicy() {
                 ))}
               </div>
 
-              {/* <div className="mt-16 pt-8 border-t border-border/40">
-                <h2 className="text-2xl font-bold mb-4 text-foreground">Contact Us</h2>
-                <p className="text-muted-foreground">
-                  If you have any questions about this Privacy Policy, please contact us at:
-                  <br />
-                  <span className="text-primary font-medium">privacy@skillbridge.com</span>
-                </p>
-              </div> */}
+
             </div>
           </div>
         </div>

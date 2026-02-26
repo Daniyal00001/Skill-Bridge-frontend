@@ -66,7 +66,7 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse-slow" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse-slow" />
 
-      <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-2xl overflow-hidden relative z-10 animate-fade-in">
+      <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-2xl overflow-hidden relative z-10">
         
         {/* Left Side: Form */}
         <div className="p-8 md:p-12 flex flex-col justify-center">
@@ -167,16 +167,16 @@ export default function LoginPage() {
                 Growth Focused
               </Badge>
             </div>
-            <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] mb-6 animate-slide-up">
+            <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] mb-6">
               The smartest way to hire <span className="text-white/70">freelance talent.</span>
             </h2>
-            <p className="text-white/80 text-lg max-w-md animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <p className="text-white/80 text-lg max-w-md">
               SkillBridge connects world-class experts with forward-thinking companies 
               through AI-powered matching and secure workflows.
             </p>
           </div>
 
-          <div className="relative z-10 space-y-6 pt-12 border-t border-white/20 animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="relative z-10 space-y-6 pt-12 border-t border-white/20">
             {[
               "AI-driven project scoping",
               "Smart talent matching",
@@ -192,7 +192,7 @@ export default function LoginPage() {
           </div>
 
           {/* Social Proof/Stat */}
-          <div className="relative z-10 mt-12 animate-slide-up" style={{ animationDelay: '300ms' }}>
+          <div className="relative z-10 mt-12">
             <div className="p-6 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl">
               <div className="text-3xl font-bold text-white mb-1 Greenland">Quality first</div>
               <div className="text-sm text-white/70">Join a platform built on transparency, trust, and AI-powered precision.</div>

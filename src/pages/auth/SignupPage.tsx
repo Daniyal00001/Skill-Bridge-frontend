@@ -70,7 +70,7 @@ export default function SignupPage() {
       <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-primary/10 rounded-full blur-[130px] animate-pulse-slow" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-accent/10 rounded-full blur-[130px] animate-pulse-slow" />
 
-      <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10 animate-fade-in">
+      <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10">
         
         {/* Left Side: Branding/Visual */}
         <div className="hidden lg:flex flex-col justify-between p-12 gradient-hero relative overflow-hidden group order-2 lg:order-1">
@@ -86,10 +86,10 @@ export default function SignupPage() {
                 Early Access
               </Badge>
             </div>
-            <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] mb-8 animate-slide-up">
+            <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] mb-8">
               Build your future <span className="text-white/70">with SkillBridge.</span>
             </h2>
-            <div className="space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div className="space-y-6">
               {[
                 { title: "Smart Scoping", desc: "AI tools to define your project perfectly" },
                 { title: "Early Bird Benefits", desc: "Join early to get exclusive platform benefits" },
@@ -108,7 +108,7 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <div className="relative z-10 pt-8 border-t border-white/20 animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="relative z-10 pt-8 border-t border-white/20">
             <p className="text-white/80 text-sm font-medium mb-4">Join our growing community</p>
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">

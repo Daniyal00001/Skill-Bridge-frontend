@@ -41,10 +41,10 @@ export default function LandingPage() {
   ];
 
   const stats = [
-    { value: 'Early Access', label: 'Invite-only Beta' },
-    { value: 'Verified', label: 'Hand-picked Talent' },
-    { value: 'Secure', label: 'Escrow Protected' },
-    { value: 'AI-Ready', label: 'Powered by GPT-4' },
+    { value: 'AI Discovery', label: '24/7 Chat-to-Roadmap' },
+    { value: 'Smart Matching', label: 'Precision Talent Vetting' },
+    { value: 'Protected', label: 'AI-Verified Payments' },
+    { value: 'Interactive', label: 'Smart Project Consultant' },
   ];
 
   const steps = [
