@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from 'react'
 import { api, setAccessToken, clearAccessToken } from '@/lib/api'
-import { signupAPI, AuthUser, SignupPayload } from '@/lib/auth.service'
+import { signupAPI, loginAPI, AuthUser, SignupPayload } from '@/lib/auth.service'
 
 // ── Context Shape ─────────────────────────────────────────────
 interface AuthContextType {
@@ -14,6 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   signup: (payload: SignupPayload) => Promise<void>
+  login: (email: string, password: string, role?: string) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -51,17 +52,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Signup ────────────────────────────────────────────────
   const signup = async (payload: SignupPayload) => {
-    // api call 
     const response = await signupAPI(payload)
-
-    // store accessToken in memory
     setAccessToken(response.data.accessToken)
-
-    // store user in React state
     setUser(response.data.user)
+  }
 
-    // refreshToken is automatically saved as cookie by browser
-   
+  // ── Login ─────────────────────────────────────────────────
+  const login = async (email: string, password: string, role?: string) => {
+    const response = await loginAPI(email, password, role)
+    setAccessToken(response.data.accessToken)
+    setUser(response.data.user)
   }
 
   // ── Logout ────────────────────────────────────────────────
@@ -84,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         signup,
+        login,
         logout,
       }}
     >

@@ -27,13 +27,14 @@ export interface AuthResponse {
   }
 }
 
-// ── Signup ────────────────────────────────────────────────────
+// ── Actions ───────────────────────────────────────────────────
+
 export const signupAPI = async (payload: SignupPayload): Promise<AuthResponse> => {
   const response = await api.post<AuthResponse>('/auth/signup', payload)
   return response.data
 }
 
-// these will be added soon:
-// export const loginAPI = ...
-// export const logoutAPI = ...
-// export const refreshAPI = ...
+export const loginAPI = async (email: string, password: string, role?: string): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/auth/login', { email, password, role })
+  return response.data
+}
