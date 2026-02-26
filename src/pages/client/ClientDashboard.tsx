@@ -143,7 +143,7 @@ export default function ClientDashboard() {
             <div>
               <h2 className="text-xl font-semibold">Freelancers I’ve Worked With</h2>
               <p className="text-sm text-muted-foreground">
-                Based on your project history and requirements
+                zzzzzzzzzzzzzzzzzzzzzzzzzz
               </p>
             </div>
             <Button variant="outline">Browse All</Button>
