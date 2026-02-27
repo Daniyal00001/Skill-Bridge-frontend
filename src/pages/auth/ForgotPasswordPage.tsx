@@ -6,6 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Zap, ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+// import logo
+import logo from '@/assets/logo/logo.png';
+
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -40,9 +43,7 @@ export default function ForgotPasswordPage() {
         </Link>
 
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 gradient-hero rounded-lg flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
+          <img src={logo} alt="Logo" className="w-10 h-10" />
           <span className="text-2xl font-bold gradient-text">SkillBridge</span>
         </div>
 

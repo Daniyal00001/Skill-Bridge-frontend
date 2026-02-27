@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,15 +30,17 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   // ── Password Requirements Check ──────────────────────────────
-  const passwordRequirements = [
+  const passwordRequirements = useMemo(() => [
     { label: 'At least 8 characters', met: password.length >= 8 },
     { label: 'At least one uppercase letter', met: /[A-Z]/.test(password) },
     { label: 'At least one lowercase letter', met: /[a-z]/.test(password) },
     { label: 'At least one number', met: /[0-9]/.test(password) },
     { label: 'At least one special character (@$!%*?&)', met: /[@$!%*?&]/.test(password) },
-  ]
+  ], [password])
 
-  const isPasswordValid = passwordRequirements.every(req => req.met)
+  const isPasswordValid = useMemo(() => 
+    passwordRequirements.every(req => req.met),
+  [passwordRequirements])
 
   const { signup } = useAuth()
   const navigate = useNavigate()
@@ -93,10 +95,10 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Dynamic Background Elements */}
-      <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-primary/10 rounded-full blur-[130px] animate-pulse-slow" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-accent/10 rounded-full blur-[130px] animate-pulse-slow" />
+      <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-primary/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-accent/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
 
-      <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10">
+      <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-md border border-white/20 rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10">
         
         {/* Left Side: Branding/Visual */}
         <div className="hidden lg:flex flex-col justify-between p-12 gradient-hero relative overflow-hidden group order-2 lg:order-1">
