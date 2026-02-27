@@ -95,9 +95,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navItems = getNavItems();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch {
+      navigate('/login');
+    }
   };
 
   return (
@@ -166,7 +170,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* User Info */}
         {!sidebarCollapsed && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-card">
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-card space-y-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={user?.avatar} alt={user?.name} />
@@ -176,10 +180,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <p className="text-sm font-medium truncate">{user?.name}</p>
                 <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="w-4 h-4" />
-              </Button>
             </div>
+            
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors w-full p-2 rounded-lg hover:bg-destructive/10"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
           </div>
         )}
       </aside>
