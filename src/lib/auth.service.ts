@@ -32,6 +32,8 @@ export interface AuthResponse {
   }
 }
 
+
+// Api calls
 // ── Signup ────────────────────────────────────────────────────
 export const signupAPI = async (
   payload: SignupPayload

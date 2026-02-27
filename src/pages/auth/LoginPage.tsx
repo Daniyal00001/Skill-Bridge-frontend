@@ -49,7 +49,7 @@ export default function LoginPage() {
 
       toast({
         title: 'Welcome back!',
-        description: 'You have successfully logged in.',
+        description: `Successfully logged in as ${user.name}. Redirecting to your dashboard...`,
       })
 
       // redirect based on role returned from backend
@@ -57,14 +57,20 @@ export default function LoginPage() {
 
     } catch (error) {
       // show exact backend error message
-      let message = 'Invalid credentials. Please try again.'
+      let message = 'Invalid email or password. Please check your credentials and try again.'
+      let title = 'Login failed'
 
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.message || message
+        if (error.response?.status === 401) {
+          title = "Authentication Error"
+        } else if (error.response?.status === 404) {
+          title = "Account Not Found"
+        }
       }
 
       toast({
-        title: 'Login failed',
+        title: title,
         description: message,
         variant: 'destructive',
       })

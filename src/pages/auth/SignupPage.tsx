@@ -29,12 +29,33 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // ── Password Requirements Check ──────────────────────────────
+  const passwordRequirements = [
+    { label: 'At least 8 characters', met: password.length >= 8 },
+    { label: 'At least one uppercase letter', met: /[A-Z]/.test(password) },
+    { label: 'At least one lowercase letter', met: /[a-z]/.test(password) },
+    { label: 'At least one number', met: /[0-9]/.test(password) },
+    { label: 'At least one special character (@$!%*?&)', met: /[@$!%*?&]/.test(password) },
+  ]
+
+  const isPasswordValid = passwordRequirements.every(req => req.met)
+
   const { signup } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!isPasswordValid) {
+      toast({
+        title: "Weak password",
+        description: "Please meet all password requirements before signing up.",
+        variant: "destructive"
+      })
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -42,20 +63,25 @@ export default function SignupPage() {
 
       toast({
         title: 'Account created!',
-        description: 'Welcome to SkillBridge.',
+        description: `Welcome to SkillBridge, ${name}! Your account has been successfully set up.`,
       })
 
       navigate(role === 'freelancer' ? '/freelancer' : '/client')
 
     } catch (error) {
       let message = 'Failed to create account. Please try again.'
+      let title = 'Signup failed'
 
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.message || message
+        // If it's a validation error, we can be more specific
+        if (error.response?.status === 400) {
+          title = "Validation Error"
+        }
       }
 
       toast({
-        title: 'Signup failed',
+        title: title,
         description: message,
         variant: 'destructive',
       })
@@ -190,7 +216,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
                 <div className="relative group">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -206,7 +232,7 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email Address</Label>
                 <div className="relative group">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -223,7 +249,7 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</Label>
                 <div className="relative group">
                   <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -231,28 +257,57 @@ export default function SignupPage() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl"
+                    className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl transition-all focus:ring-1 focus:ring-primary/20"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={8}
                     disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                {/* Password Requirements Checklist */}
+                {password.length > 0 && (
+                  <div className="mt-3 p-3 bg-muted/30 rounded-xl border border-border/50 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Security Score</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                      {passwordRequirements.map((req, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className={cn(
+                            "w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-300",
+                            req.met ? "bg-primary text-white scale-110" : "bg-muted-foreground/20"
+                          )}>
+                            {req.met && <CheckCircle2 className="w-2.5 h-2.5" />}
+                          </div>
+                          <span className={cn(
+                            "text-[10px] transition-colors duration-300",
+                            req.met ? "text-foreground font-medium" : "text-muted-foreground"
+                          )}>
+                            {req.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full h-12 text-base font-bold rounded-xl gradient-hero shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98] mt-2"
-              disabled={isLoading}
+              className={cn(
+                "w-full h-12 text-base font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] mt-2",
+                isPasswordValid 
+                  ? "gradient-hero hover:shadow-primary/20" 
+                  : "bg-muted text-muted-foreground cursor-not-allowed opacity-70"
+              )}
+              disabled={isLoading || (password.length > 0 && !isPasswordValid)}
             >
               {isLoading ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Setting up...</>
