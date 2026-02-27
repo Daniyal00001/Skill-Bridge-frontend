@@ -9,6 +9,11 @@ export interface SignupPayload {
   role: 'client' | 'freelancer'
 }
 
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
 export interface AuthUser {
   id: string
   name: string
@@ -27,14 +32,23 @@ export interface AuthResponse {
   }
 }
 
-// ── Actions ───────────────────────────────────────────────────
-
-export const signupAPI = async (payload: SignupPayload): Promise<AuthResponse> => {
+// ── Signup ────────────────────────────────────────────────────
+export const signupAPI = async (
+  payload: SignupPayload
+): Promise<AuthResponse> => {
   const response = await api.post<AuthResponse>('/auth/signup', payload)
   return response.data
 }
 
-export const loginAPI = async (email: string, password: string, role?: string): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', { email, password, role })
+// ── Login ─────────────────────────────────────────────────────
+export const loginAPI = async (
+  payload: LoginPayload
+): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/auth/login', payload)
   return response.data
+}
+
+// ── Logout ────────────────────────────────────────────────────
+export const logoutAPI = async (): Promise<void> => {
+  await api.post('/auth/logout')
 }

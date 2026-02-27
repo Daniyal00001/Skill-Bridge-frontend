@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 
+// Protected Route Guards
+import { ProtectedRoute, RoleRoute, GuestRoute } from "@/components/ProtectedRoute";
+
 // Public Pages
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
@@ -18,7 +21,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 
-// Dashboard Pages
+// Client Pages
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PostProjectPage from "./pages/client/PostProject";
 import ClientProjectsPage from "./pages/client/ClientProjects";
@@ -33,6 +36,8 @@ import BrowseProjectsPage from "./pages/client/BrowseProjects";
 import MyProposalsPage from "./pages/client/MyProposals";
 import ActiveProjectsPage from "./pages/client/ActiveProjects";
 import ClientProfilePage from "./pages/client/ClientProfile";
+
+// Freelancer Pages
 import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
 import FreelancerBrowseProjects from "./pages/freelancer/FreelancerBrowseProjects";
 import { default as FreelancerProposalsPage } from "./pages/freelancer/FreelancerProposals";
@@ -40,6 +45,8 @@ import { default as FreelancerProjectsPage } from "./pages/freelancer/Freelancer
 import { default as FreelancerMessagesPage } from "./pages/freelancer/FreelancerMessages";
 import { default as FreelancerProfilePage } from "./pages/freelancer/FreelancerProfile";
 import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetails";
+
+// Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ProjectModeration from "./pages/admin/ProjectModeration";
@@ -60,55 +67,70 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
-            {/* Public Routes */}
+
+            {/* ── Public Routes ─────────────────────────────────── */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
 
-            {/* Auth Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            {/* ── Guest Routes ───────────────────────────────────── */}
+            {/* Already logged in? → redirected to their dashboard  */}
+            <Route element={<GuestRoute />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            </Route>
 
-            {/* Client Routes */}
-            <Route path="/client" element={<ClientDashboard />} />
-            <Route path="/client/post-project" element={<PostProjectPage />} />
-            <Route path="/client/projects" element={<ClientProjectsPage />} />
-            <Route path="/client/help-me-find" element={<HelpMeFindPage />} />
-            <Route path="/client/drafts" element={<ClientDraftsPage />} />
-            <Route path="/client/projects/:projectId" element={<ClientProjectDetailsPage />} />
-            <Route path="/client/projects/:projectId/proposals" element={<ProjectProposalsPage />} />
-            <Route path="/client/messages" element={<ClientMessagesPage />} />
-            <Route path="/client/browse" element={<BrowseProjectsPage />} />
-            <Route path="/client/proposals" element={<MyProposalsPage />} />
-            <Route path="/client/active-projects" element={<ActiveProjectsPage />} />
-            <Route path="/client/active-projects" element={<ActiveProjectsPage />} />
-            <Route path="/client/profile" element={<ClientProfilePage />} />
-            <Route path="/client/reviews" element={<ClientReviewsPage />} />
+            {/* ── Protected Routes ───────────────────────────────── */}
+            {/* Not logged in? → redirected to /login               */}
+            <Route element={<ProtectedRoute />}>
 
-            {/* Freelancer Routes */}
-            <Route path="/freelancer" element={<FreelancerDashboard />} />
-            <Route path="/freelancer/browse" element={<FreelancerBrowseProjects />} />
-            <Route path="/freelancer/proposals" element={<FreelancerProposalsPage />} />
-            <Route path="/freelancer/projects" element={<FreelancerProjectsPage />} />
-            <Route path="/freelancer/messages" element={<FreelancerMessagesPage />} />
-            <Route path="/freelancer/profile" element={<FreelancerProfilePage />} />
-            <Route path="/freelancer/projects/:projectId" element={<FreelancerProjectDetails />} />
+              {/* ── Client Only ──────────────────────────────────── */}
+              <Route element={<RoleRoute allowedRole="CLIENT" />}>
+                <Route path="/client" element={<ClientDashboard />} />
+                <Route path="/client/post-project" element={<PostProjectPage />} />
+                <Route path="/client/projects" element={<ClientProjectsPage />} />
+                <Route path="/client/projects/:projectId" element={<ClientProjectDetailsPage />} />
+                <Route path="/client/projects/:projectId/proposals" element={<ProjectProposalsPage />} />
+                <Route path="/client/messages" element={<ClientMessagesPage />} />
+                <Route path="/client/reviews" element={<ClientReviewsPage />} />
+                <Route path="/client/help-me-find" element={<HelpMeFindPage />} />
+                <Route path="/client/drafts" element={<ClientDraftsPage />} />
+                <Route path="/client/browse" element={<BrowseProjectsPage />} />
+                <Route path="/client/proposals" element={<MyProposalsPage />} />
+                <Route path="/client/active-projects" element={<ActiveProjectsPage />} />
+                <Route path="/client/profile" element={<ClientProfilePage />} />
+                <Route path="/settings" element={<ClientSettingsPage />} />
+              </Route>
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<UserManagement />} />
-            <Route path="/admin/projects" element={<ProjectModeration />} />
-            <Route path="/admin/disputes" element={<DisputeManagement />} />
-            <Route path="/admin/analytics" element={<Analytics />} />
-            <Route path="/admin/security" element={<Security />} />
+              {/* ── Freelancer Only ───────────────────────────────── */}
+              <Route element={<RoleRoute allowedRole="FREELANCER" />}>
+                <Route path="/freelancer" element={<FreelancerDashboard />} />
+                <Route path="/freelancer/browse" element={<FreelancerBrowseProjects />} />
+                <Route path="/freelancer/proposals" element={<FreelancerProposalsPage />} />
+                <Route path="/freelancer/projects" element={<FreelancerProjectsPage />} />
+                <Route path="/freelancer/messages" element={<FreelancerMessagesPage />} />
+                <Route path="/freelancer/profile" element={<FreelancerProfilePage />} />
+                <Route path="/freelancer/projects/:projectId" element={<FreelancerProjectDetails />} />
+              </Route>
 
-            <Route path="/settings" element={<ClientSettingsPage />} />
+              {/* ── Admin Only ────────────────────────────────────── */}
+              <Route element={<RoleRoute allowedRole="ADMIN" />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/projects" element={<ProjectModeration />} />
+                <Route path="/admin/disputes" element={<DisputeManagement />} />
+                <Route path="/admin/analytics" element={<Analytics />} />
+                <Route path="/admin/security" element={<Security />} />
+              </Route>
 
-            {/* Catch-all */}
+            </Route>
+
+            {/* ── 404 ──────────────────────────────────────────────── */}
             <Route path="*" element={<NotFound />} />
+
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
