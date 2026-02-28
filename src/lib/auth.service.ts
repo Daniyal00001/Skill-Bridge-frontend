@@ -18,7 +18,7 @@ export interface AuthUser {
   id: string
   name: string
   email: string
-  role: 'CLIENT' | 'FREELANCER' | 'ADMIN'
+  role: 'CLIENT' | 'FREELANCER' | 'ADMIN' | null
   profileImage: string | null
   isEmailVerified: boolean
 }

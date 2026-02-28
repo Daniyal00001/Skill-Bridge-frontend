@@ -6,7 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 // Protected Route Guards
-import { ProtectedRoute, RoleRoute, GuestRoute } from "@/components/ProtectedRoute";
+import {
+  ProtectedRoute,
+  RoleRoute,
+  GuestRoute,
+} from "@/components/ProtectedRoute";
 
 // Public Pages
 import LandingPage from "./pages/LandingPage";
@@ -20,6 +24,8 @@ import ScrollToTop from "./components/layout/ScrollToTop";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import GoogleSuccess from "./pages/auth/GoogleSuccess";
+import SelectRole from "./pages/auth/SelectRole";
 
 // Client Pages
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -67,13 +73,14 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
-
             {/* ── Public Routes ─────────────────────────────────── */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
+            {/* Google OAuth callback page */}
+            <Route path="/auth/google/success" element={<GoogleSuccess />} />
 
             {/* ── Guest Routes ───────────────────────────────────── */}
             {/* Already logged in? → redirected to their dashboard  */}
@@ -86,21 +93,42 @@ const App = () => (
             {/* ── Protected Routes ───────────────────────────────── */}
             {/* Not logged in? → redirected to /login               */}
             <Route element={<ProtectedRoute />}>
-
+              <Route path="/select-role" element={<SelectRole />} />
               {/* ── Client Only ──────────────────────────────────── */}
               <Route element={<RoleRoute allowedRole="CLIENT" />}>
                 <Route path="/client" element={<ClientDashboard />} />
-                <Route path="/client/post-project" element={<PostProjectPage />} />
-                <Route path="/client/projects" element={<ClientProjectsPage />} />
-                <Route path="/client/projects/:projectId" element={<ClientProjectDetailsPage />} />
-                <Route path="/client/projects/:projectId/proposals" element={<ProjectProposalsPage />} />
-                <Route path="/client/messages" element={<ClientMessagesPage />} />
+                <Route
+                  path="/client/post-project"
+                  element={<PostProjectPage />}
+                />
+                <Route
+                  path="/client/projects"
+                  element={<ClientProjectsPage />}
+                />
+                <Route
+                  path="/client/projects/:projectId"
+                  element={<ClientProjectDetailsPage />}
+                />
+                <Route
+                  path="/client/projects/:projectId/proposals"
+                  element={<ProjectProposalsPage />}
+                />
+                <Route
+                  path="/client/messages"
+                  element={<ClientMessagesPage />}
+                />
                 <Route path="/client/reviews" element={<ClientReviewsPage />} />
-                <Route path="/client/help-me-find" element={<HelpMeFindPage />} />
+                <Route
+                  path="/client/help-me-find"
+                  element={<HelpMeFindPage />}
+                />
                 <Route path="/client/drafts" element={<ClientDraftsPage />} />
                 <Route path="/client/browse" element={<BrowseProjectsPage />} />
                 <Route path="/client/proposals" element={<MyProposalsPage />} />
-                <Route path="/client/active-projects" element={<ActiveProjectsPage />} />
+                <Route
+                  path="/client/active-projects"
+                  element={<ActiveProjectsPage />}
+                />
                 <Route path="/client/profile" element={<ClientProfilePage />} />
                 <Route path="/settings" element={<ClientSettingsPage />} />
               </Route>
@@ -108,12 +136,30 @@ const App = () => (
               {/* ── Freelancer Only ───────────────────────────────── */}
               <Route element={<RoleRoute allowedRole="FREELANCER" />}>
                 <Route path="/freelancer" element={<FreelancerDashboard />} />
-                <Route path="/freelancer/browse" element={<FreelancerBrowseProjects />} />
-                <Route path="/freelancer/proposals" element={<FreelancerProposalsPage />} />
-                <Route path="/freelancer/projects" element={<FreelancerProjectsPage />} />
-                <Route path="/freelancer/messages" element={<FreelancerMessagesPage />} />
-                <Route path="/freelancer/profile" element={<FreelancerProfilePage />} />
-                <Route path="/freelancer/projects/:projectId" element={<FreelancerProjectDetails />} />
+                <Route
+                  path="/freelancer/browse"
+                  element={<FreelancerBrowseProjects />}
+                />
+                <Route
+                  path="/freelancer/proposals"
+                  element={<FreelancerProposalsPage />}
+                />
+                <Route
+                  path="/freelancer/projects"
+                  element={<FreelancerProjectsPage />}
+                />
+                <Route
+                  path="/freelancer/messages"
+                  element={<FreelancerMessagesPage />}
+                />
+                <Route
+                  path="/freelancer/profile"
+                  element={<FreelancerProfilePage />}
+                />
+                <Route
+                  path="/freelancer/projects/:projectId"
+                  element={<FreelancerProjectDetails />}
+                />
               </Route>
 
               {/* ── Admin Only ────────────────────────────────────── */}
@@ -125,12 +171,10 @@ const App = () => (
                 <Route path="/admin/analytics" element={<Analytics />} />
                 <Route path="/admin/security" element={<Security />} />
               </Route>
-
             </Route>
 
             {/* ── 404 ──────────────────────────────────────────────── */}
             <Route path="*" element={<NotFound />} />
-
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
