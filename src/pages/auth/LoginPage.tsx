@@ -88,8 +88,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[60px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[60px]" />
 
       <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-md border border-white/20 rounded-[2rem] shadow-2xl overflow-hidden relative z-10">
         {/* Left Side: Form */}
@@ -98,7 +98,7 @@ export default function LoginPage() {
             to="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group w-fit"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-medium">Back to Home</span>
           </Link>
 
@@ -185,7 +185,7 @@ export default function LoginPage() {
             {/* Submit */}
             <Button
               type="submit"
-              className="w-full h-12 text-base font-semibold rounded-xl gradient-hero shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]"
+              className="w-full h-12 text-base font-semibold rounded-xl gradient-hero shadow-lg shadow-primary/20"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -254,8 +254,8 @@ export default function LoginPage() {
         {/* Right Side: Branding */}
         <div className="hidden lg:flex flex-col justify-between p-12 gradient-hero relative overflow-hidden group">
           <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-0 right-0 w-64 h-64 border-8 border-white rounded-full -mr-32 -mt-32 transition-transform duration-1000 group-hover:scale-110" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 border-8 border-white/50 rounded-full -ml-48 -mb-48 transition-transform duration-1000 group-hover:scale-110" />
+            <div className="absolute top-0 right-0 w-64 h-64 border-8 border-white rounded-full -mr-32 -mt-32" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 border-8 border-white/50 rounded-full -ml-48 -mb-48" />
           </div>
 
           <div className="relative z-10">

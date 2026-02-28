@@ -26,6 +26,7 @@ import SignupPage from "./pages/auth/SignupPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import GoogleSuccess from "./pages/auth/GoogleSuccess";
 import SelectRole from "./pages/auth/SelectRole";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Client Pages
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -88,6 +89,7 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
             </Route>
 
             {/* ── Protected Routes ───────────────────────────────── */}

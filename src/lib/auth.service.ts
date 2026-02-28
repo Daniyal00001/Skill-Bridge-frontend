@@ -54,3 +54,17 @@ export const loginAPI = async (
 export const logoutAPI = async (): Promise<void> => {
   await api.post('/auth/logout')
 }
+
+
+// ── Forgot Password ───────────────────────────────────────────
+export const forgotPasswordAPI = async (email: string): Promise<void> => {
+  await api.post('/auth/forgot-password', { email })
+}
+
+// ── Reset Password ────────────────────────────────────────────
+export const resetPasswordAPI = async (
+  token: string,
+  password: string
+): Promise<void> => {
+  await api.post('/auth/reset-password', { token, password })
+}

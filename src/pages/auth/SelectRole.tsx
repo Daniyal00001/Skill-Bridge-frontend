@@ -58,8 +58,8 @@ export default function SelectRole() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[60px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[60px]" />
 
       <div className="w-full max-w-2xl bg-card/50 backdrop-blur-md border border-white/20 rounded-[2rem] shadow-2xl p-8 md:p-12 relative z-10 flex flex-col items-center text-center">
         {/* Logo */}
@@ -94,7 +94,7 @@ export default function SelectRole() {
             }`}
           >
             {selectedRole === "CLIENT" && (
-              <CheckCircle2 className="absolute top-4 right-4 w-6 h-6 text-primary animate-in zoom-in" />
+              <CheckCircle2 className="absolute top-4 right-4 w-6 h-6 text-primary" />
             )}
             <div
               className={`p-4 rounded-2xl mb-4 transition-colors ${
@@ -121,7 +121,7 @@ export default function SelectRole() {
             }`}
           >
             {selectedRole === "FREELANCER" && (
-              <CheckCircle2 className="absolute top-4 right-4 w-6 h-6 text-primary animate-in zoom-in" />
+              <CheckCircle2 className="absolute top-4 right-4 w-6 h-6 text-primary" />
             )}
             <div
               className={`p-4 rounded-2xl mb-4 transition-colors ${
@@ -142,7 +142,7 @@ export default function SelectRole() {
         <Button
           onClick={handleCompleteSignup}
           disabled={!selectedRole || isLoading}
-          className="w-full max-w-sm h-14 text-lg font-bold rounded-2xl gradient-hero shadow-xl hover:shadow-primary/20 transition-all active:scale-[0.98]"
+          className="w-full max-w-sm h-14 text-lg font-bold rounded-2xl gradient-hero shadow-xl shadow-primary/20"
         >
           {isLoading ? (
             <>

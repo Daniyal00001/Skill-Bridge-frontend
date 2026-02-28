@@ -112,15 +112,15 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Dynamic Background Elements */}
-      <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-primary/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-accent/10 rounded-full blur-[60px] animate-pulse-ultra-slow smooth-gpu" />
+      <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] bg-primary/10 rounded-full blur-[60px]" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-accent/10 rounded-full blur-[60px]" />
 
       <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-card/50 backdrop-blur-md border border-white/20 rounded-[2.5rem] shadow-2xl overflow-hidden relative z-10">
         {/* Left Side: Branding/Visual */}
         <div className="hidden lg:flex flex-col justify-between p-12 gradient-hero relative overflow-hidden group order-2 lg:order-1">
           {/* Animated Patterns */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 w-[500px] h-[500px] border-[20px] border-white rounded-full -translate-x-1/2 -translate-y-1/2 opacity-20 transition-transform duration-1000 group-hover:scale-110" />
+            <div className="absolute top-1/2 left-1/2 w-[500px] h-[500px] border-[20px] border-white rounded-full -translate-x-1/2 -translate-y-1/2 opacity-20" />
             <div className="absolute top-0 left-0 w-40 h-40 bg-white/30 rounded-full -ml-20 -mt-20 blur-2xl" />
           </div>
 
@@ -198,7 +198,7 @@ export default function SignupPage() {
             to="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 group w-fit"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-medium">Back to Home</span>
           </Link>
 
@@ -250,7 +250,7 @@ export default function SignupPage() {
                   Post jobs & find talent
                 </span>
                 {role === "client" && (
-                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
                 )}
               </button>
 
@@ -279,7 +279,7 @@ export default function SignupPage() {
                   Find work & build career
                 </span>
                 {role === "freelancer" && (
-                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
                 )}
               </button>
             </div>
@@ -341,7 +341,7 @@ export default function SignupPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl transition-all focus:ring-1 focus:ring-primary/20"
+                    className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl focus:ring-1 focus:ring-primary/20"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -362,7 +362,7 @@ export default function SignupPage() {
 
                 {/* Password Requirements Checklist */}
                 {password.length > 0 && (
-                  <div className="mt-3 p-3 bg-muted/30 rounded-xl border border-border/50 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="mt-3 p-3 bg-muted/30 rounded-xl border border-border/50 space-y-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                       Security Score
                     </p>
@@ -402,7 +402,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               className={cn(
-                "w-full h-12 text-base font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] mt-2",
+                "w-full h-12 text-base font-bold rounded-xl shadow-lg mt-2",
                 isPasswordValid
                   ? "gradient-hero hover:shadow-primary/20"
                   : "bg-muted text-muted-foreground cursor-not-allowed opacity-70",
