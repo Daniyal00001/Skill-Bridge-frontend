@@ -209,7 +209,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-card/70 backdrop-blur-md border-r transition-all duration-300 ease-in-out",
+          "fixed left-0 top-0 z-40 h-screen bg-card/70 backdrop-blur-md border-r transition-all duration-300 ease-in-out flex flex-col",
           sidebarCollapsed ? "w-16" : "w-60",
         )}
       >
@@ -232,7 +232,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Main Navigation */}
-        <nav className="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-280px)] scrollbar-none">
+        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-none">
           {navGroups
             .filter((g) => g.label !== "Account" && g.label !== "System")
             .map((group, idx) => (
@@ -250,16 +250,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.href}
                         to={item.href}
                         className={cn(
-                          "group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 outline-none",
+                          "group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 outline-none border-l-[3px]",
                           isActive
-                            ? "bg-primary/8 text-primary font-semibold"
-                            : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground",
+                            ? "bg-primary/8 text-primary font-semibold border-primary"
+                            : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
                         )}
                       >
-                        {isActive && (
-                          <div className="absolute left-0 w-[3px] h-5 bg-primary rounded-r-full" />
-                        )}
-
                         <item.icon
                           className={cn(
                             "w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110",
@@ -307,7 +303,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Persistent Bottom Section (Account & Profile) */}
         <div
           className={cn(
-            "absolute bottom-0 left-0 right-0 border-t bg-card/50 backdrop-blur-md transition-all duration-300 flex flex-col items-center",
+            "border-t bg-card/50 backdrop-blur-md transition-all duration-300 flex flex-col items-center",
             sidebarCollapsed ? "p-2 space-y-2" : "p-4 space-y-4",
           )}
         >
@@ -324,18 +320,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.href}
                         to={item.href}
                         className={cn(
-                          "group relative flex items-center rounded-lg transition-all duration-200 outline-none w-full",
+                          "group flex items-center rounded-lg transition-all duration-200 outline-none w-full border-l-[3px]",
                           sidebarCollapsed
-                            ? "justify-center h-10 w-10 mx-auto"
+                            ? "justify-center h-10 w-10 mx-auto border-transparent"
                             : "gap-3 px-3 py-2",
                           isActive
-                            ? "bg-primary/8 text-primary font-semibold"
-                            : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground",
+                            ? "bg-primary/8 text-primary font-semibold border-primary"
+                            : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
                         )}
                       >
-                        {isActive && (
-                          <div className="absolute left-0 w-[3px] h-5 bg-primary rounded-r-full" />
-                        )}
                         <item.icon
                           className={cn(
                             "w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110",
