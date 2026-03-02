@@ -232,7 +232,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-none">
+        <nav
+          className={cn(
+            "flex-1 space-y-6 overflow-y-auto scrollbar-none",
+            sidebarCollapsed ? "py-4 px-2" : "p-4",
+          )}
+        >
           {navGroups
             .filter((g) => g.label !== "Account" && g.label !== "System")
             .map((group, idx) => (
@@ -250,10 +255,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.href}
                         to={item.href}
                         className={cn(
-                          "group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 outline-none border-l-[3px]",
+                          "group flex items-center rounded-lg transition-all duration-200 outline-none",
+                          sidebarCollapsed
+                            ? "justify-center w-10 h-10 mx-auto"
+                            : "gap-3 px-3 py-2 border-l-[3px]",
                           isActive
-                            ? "bg-primary/8 text-primary font-semibold border-primary"
-                            : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
+                            ? sidebarCollapsed
+                              ? "bg-primary/8 text-primary font-semibold"
+                              : "bg-primary/8 text-primary font-semibold border-primary"
+                            : sidebarCollapsed
+                              ? "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground"
+                              : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
                         )}
                       >
                         <item.icon
