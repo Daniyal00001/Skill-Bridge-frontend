@@ -36,7 +36,6 @@ import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import ProjectProposalsPage from "./pages/client/ProjectProposals";
 import ClientMessagesPage from "./pages/client/ClientMessages";
 import ClientReviewsPage from "./pages/client/ClientReviews";
-import ClientProfilePage from "./pages/client/ClientProfile";
 import BrowseFreelancersPage from "./pages/client/BrowseFreelancers";
 import AIAssistantPage from "./pages/client/AIAssistant";
 import ClientSettingsPage from "./pages/client/ClientSettings";
@@ -49,7 +48,6 @@ import FreelancerBrowseProjects from "./pages/freelancer/FreelancerBrowseProject
 import { default as FreelancerProposalsPage } from "./pages/freelancer/FreelancerProposals";
 import { default as FreelancerProjectsPage } from "./pages/freelancer/FreelancerProjects";
 import { default as FreelancerMessagesPage } from "./pages/freelancer/FreelancerMessages";
-import { default as FreelancerProfilePage } from "./pages/freelancer/FreelancerProfile";
 import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetails";
 
 // Admin Pages
@@ -132,7 +130,10 @@ const App = () => (
                   element={<BrowseFreelancersPage />}
                 />
                 <Route path="/client/proposals" element={<MyProposalsPage />} />
-                <Route path="/client/profile" element={<ClientProfilePage />} />
+                <Route
+                  path="/client/profile"
+                  element={<Navigate to="/settings" replace />}
+                />
                 <Route path="/settings" element={<ClientSettingsPage />} />
                 {/* Redirect legacy route */}
                 <Route
@@ -162,7 +163,7 @@ const App = () => (
                 />
                 <Route
                   path="/freelancer/profile"
-                  element={<FreelancerProfilePage />}
+                  element={<Navigate to="/settings" replace />}
                 />
                 <Route
                   path="/freelancer/projects/:projectId"

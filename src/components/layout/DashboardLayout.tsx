@@ -88,7 +88,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           { icon: Star, label: "Reviews", href: "/client/reviews" },
 
           // ACCOUNT
-          { icon: User, label: "Profile", href: "/client/profile" },
           { icon: Settings, label: "Settings", href: "/settings" },
         ];
       case "FREELANCER":
@@ -115,7 +114,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             href: "/freelancer/messages",
             badge: 3,
           },
-          { icon: User, label: "Profile", href: "/freelancer/profile" },
           { icon: Settings, label: "Settings", href: "/settings" },
         ];
       case "ADMIN":
@@ -226,7 +224,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-card space-y-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
+                <AvatarImage src={user?.profileImage} alt={user?.name} />
                 <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
@@ -311,7 +309,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarImage src={user?.profileImage} alt={user?.name} />
                     <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </Button>
