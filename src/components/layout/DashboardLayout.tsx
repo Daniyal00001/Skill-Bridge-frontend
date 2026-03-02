@@ -307,12 +307,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Persistent Bottom Section (Account & Profile) */}
         <div
           className={cn(
-            "absolute bottom-0 left-0 right-0 border-t bg-card/50 backdrop-blur-md transition-all duration-300",
-            sidebarCollapsed ? "p-2" : "p-4",
+            "absolute bottom-0 left-0 right-0 border-t bg-card/50 backdrop-blur-md transition-all duration-300 flex flex-col items-center",
+            sidebarCollapsed ? "p-2 space-y-2" : "p-4 space-y-4",
           )}
         >
           {/* Account Group */}
-          <div className={cn(sidebarCollapsed ? "mb-2" : "mb-0")}>
+          <div className="w-full">
             {navGroups
               .filter((g) => g.label === "Account" || g.label === "System")
               .map((group, idx) => (
@@ -324,9 +324,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.href}
                         to={item.href}
                         className={cn(
-                          "group relative flex items-center rounded-lg transition-all duration-200 outline-none",
+                          "group relative flex items-center rounded-lg transition-all duration-200 outline-none w-full",
                           sidebarCollapsed
-                            ? "justify-center p-2"
+                            ? "justify-center h-10 w-10 mx-auto"
                             : "gap-3 px-3 py-2",
                           isActive
                             ? "bg-primary/8 text-primary font-semibold"
@@ -356,57 +356,56 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               ))}
           </div>
 
-          {/* User Profile & Logout */}
-          <div className={cn("space-y-4", sidebarCollapsed ? "pt-2" : "pt-0")}>
-            <div
+          {/* User Profile */}
+          <div
+            className={cn(
+              "flex items-center transition-all duration-300 w-full",
+              sidebarCollapsed ? "justify-center h-10 w-10" : "gap-3 px-1",
+            )}
+          >
+            <Avatar
               className={cn(
-                "flex items-center gap-3",
-                sidebarCollapsed ? "justify-center" : "px-1",
+                "border-2 border-primary/10 shadow-sm transition-all",
+                sidebarCollapsed ? "h-8 w-8" : "h-9 w-9",
               )}
             >
-              <Avatar
-                className={cn(
-                  "border-2 border-primary/10 shadow-sm transition-all",
-                  sidebarCollapsed ? "h-8 w-8" : "h-9 w-9",
-                )}
-              >
-                <AvatarImage src={user?.profileImage} alt={user?.name} />
-                <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
-                  {user?.name?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              {!sidebarCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate leading-none mb-1">
-                    {user?.name}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-bold">
-                    {user?.role}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={handleLogout}
-              className={cn(
-                "flex items-center font-medium text-muted-foreground hover:text-destructive transition-all duration-200 rounded-lg hover:bg-destructive/8 group",
-                sidebarCollapsed
-                  ? "justify-center p-2"
-                  : "gap-2 text-[12px] w-full px-3 py-2",
-              )}
-            >
-              <LogOut
-                className={cn(
-                  "transition-transform",
-                  sidebarCollapsed
-                    ? "w-4 h-4"
-                    : "w-3.5 h-3.5 group-hover:-translate-x-0.5",
-                )}
-              />
-              {!sidebarCollapsed && <span>Logout</span>}
-            </button>
+              <AvatarImage src={user?.profileImage} alt={user?.name} />
+              <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
+                {user?.name?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold truncate leading-none mb-1">
+                  {user?.name}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-bold">
+                  {user?.role}
+                </p>
+              </div>
+            )}
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "flex items-center font-semibold text-muted-foreground hover:text-destructive transition-all duration-200 rounded-lg hover:bg-destructive/8 group w-full",
+              sidebarCollapsed
+                ? "justify-center h-10 w-10 mx-auto"
+                : "gap-3 text-[13px] px-3 py-2",
+            )}
+          >
+            <LogOut
+              className={cn(
+                "transition-transform",
+                sidebarCollapsed
+                  ? "w-4 h-4"
+                  : "w-4 h-4 group-hover:-translate-x-0.5",
+              )}
+            />
+            {!sidebarCollapsed && <span>Logout</span>}
+          </button>
         </div>
       </aside>
 
