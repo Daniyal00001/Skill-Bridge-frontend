@@ -9,14 +9,13 @@ import {
   Sparkles,
   Send,
   Mic,
-  User,
   Bot,
-  CheckCircle2,
-  Loader2,
-  MessageSquare,
   Search,
-  TrendingUp,
   Star,
+  Zap,
+  Globe,
+  Clock,
+  BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mockFreelancers, Freelancer } from "@/lib/mockData";
@@ -123,54 +122,95 @@ const AIAssistantPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-120px)] gap-6 overflow-hidden animate-fade-in">
-        {/* Chat Interface (Left - 60%) */}
-        <div className="flex-1 flex flex-col bg-card/50 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center shadow-lg">
-                <Sparkles className="h-5 w-5 text-white animate-pulse" />
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-100px)] gap-6 p-4 lg:p-6 bg-background">
+        {/* Chat Interface (Left) */}
+        <div className="flex-1 flex flex-col bg-card rounded-3xl border border-border shadow-sm overflow-hidden relative">
+          {/* Enhanced Header */}
+          <div className="px-6 py-5 border-b border-white/10 bg-white/40 dark:bg-black/20 backdrop-blur-md flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+                <Bot className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-lg leading-tight">
-                  SkillBridge AI
+                <h2 className="font-bold text-lg tracking-tight text-foreground">
+                  AI Project Assistant
                 </h2>
-                <div className="flex items-center gap-1.5 ">
-                  <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
                   <span className="text-xs text-muted-foreground font-medium">
-                    Online • Your intelligent talent finder
+                    Ready to help find your matches
                   </span>
                 </div>
               </div>
             </div>
+            <div className="hidden md:flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg text-xs font-semibold"
+                onClick={() => setMessages([])}
+              >
+                Clear Chat
+              </Button>
+            </div>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gradient-to-b from-transparent to-primary/5">
+          <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar relative">
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-8 max-w-md mx-auto">
-                <div className="space-y-2">
-                  <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Bot className="h-8 w-8 text-primary" />
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-10 max-w-2xl mx-auto py-10 animate-slide-up">
+                <div className="space-y-4">
+                  <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Sparkles className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-bold gradient-text">
-                    How can I help you today?
+                  <h3 className="text-3xl font-bold tracking-tight text-foreground">
+                    How can I help with your project?
                   </h3>
-                  <p className="text-muted-foreground">
-                    Describe your project and I'll find the perfect freelancers
-                    from our global talent pool.
+                  <p className="text-muted-foreground text-lg max-w-lg mx-auto">
+                    Tell me about the project you're working on, and I'll find
+                    the best freelancers for your specific needs.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
-                  {suggestionChips.map((chip) => (
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-4">
+                  {[
+                    {
+                      text: "Architecture lead for React Native scaling",
+                      icon: Zap,
+                      desc: "Expert technical oversight",
+                    },
+                    {
+                      text: "UI/UX Specialist under $60/hr",
+                      icon: Globe,
+                      desc: "Visual design & research",
+                    },
+                    {
+                      text: "Rapid MVP build in under 3 weeks",
+                      icon: Clock,
+                      desc: "High-velocity development",
+                    },
+                    {
+                      text: "Senior ML Engineer for NLP project",
+                      icon: BrainCircuit,
+                      desc: "Specialized AI expertise",
+                    },
+                  ].map((chip) => (
                     <button
-                      key={chip}
-                      onClick={() => handleSend(chip)}
-                      className="p-3 text-sm text-left rounded-xl border border-white/10 bg-white/5 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 group flex items-center gap-2"
+                      key={chip.text}
+                      onClick={() => handleSend(chip.text)}
+                      className="group p-4 text-left rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start gap-4"
                     >
-                      <MessageSquare className="h-3 w-3 text-primary opacity-50 group-hover:opacity-100" />
-                      {chip}
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                        <chip.icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm leading-snug text-foreground">
+                          {chip.text}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {chip.desc}
+                        </p>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -180,39 +220,49 @@ const AIAssistantPage = () => {
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex w-full animate-in slide-in-from-bottom-2 duration-300",
+                    "flex w-full animate-in slide-in-from-bottom-4 duration-500",
                     msg.role === "user" ? "justify-end" : "justify-start",
                   )}
                 >
                   <div
                     className={cn(
-                      "max-w-[80%] flex gap-3",
+                      "max-w-[80%] flex gap-4",
                       msg.role === "user" ? "flex-row-reverse" : "flex-row",
                     )}
                   >
-                    <Avatar className="h-8 w-8 border border-white/10 flex-shrink-0">
-                      {msg.role === "ai" ? (
-                        <div className="h-full w-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center">
-                          <Sparkles className="h-4 w-4 text-white" />
-                        </div>
-                      ) : (
-                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                          ME
-                        </AvatarFallback>
+                    <div className="relative flex-shrink-0">
+                      <Avatar className="h-10 w-10 border-2 border-white/20 shadow-lg">
+                        {msg.role === "ai" ? (
+                          <div className="h-full w-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-white" />
+                          </div>
+                        ) : (
+                          <AvatarFallback className="bg-primary/20 text-primary text-xs font-black">
+                            ME
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      {msg.role === "ai" && (
+                        <div className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-success border-2 border-white dark:border-[#1e293b]" />
                       )}
-                    </Avatar>
-                    <div className="space-y-1">
+                    </div>
+                    <div className="space-y-2">
                       <div
                         className={cn(
-                          "p-4 rounded-2xl text-sm shadow-sm",
+                          "p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
                           msg.role === "user"
                             ? "bg-primary text-primary-foreground rounded-tr-none"
-                            : "bg-white/10 backdrop-blur-md border border-white/10 text-foreground rounded-tl-none",
+                            : "bg-muted text-foreground rounded-tl-none border border-border",
                         )}
                       >
                         {msg.content}
                       </div>
-                      <p className="text-[10px] text-muted-foreground px-1">
+                      <p
+                        className={cn(
+                          "text-[10px] font-medium text-muted-foreground px-1",
+                          msg.role === "user" ? "text-right" : "text-left",
+                        )}
+                      >
                         {msg.timestamp.toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -229,17 +279,17 @@ const AIAssistantPage = () => {
                   <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center">
                     <Sparkles className="h-4 w-4 text-white" />
                   </div>
-                  <div className="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl rounded-tl-none flex gap-1">
+                  <div className="bg-muted p-4 rounded-2xl rounded-tl-none flex gap-1">
                     <span
-                      className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 bg-foreground/30 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
                     />
                     <span
-                      className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 bg-foreground/30 rounded-full animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     />
                     <span
-                      className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 bg-foreground/30 rounded-full animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     />
                   </div>
@@ -250,69 +300,65 @@ const AIAssistantPage = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-white/5 border-t border-white/5">
-            <div className="relative flex items-end gap-2 max-w-4xl mx-auto">
-              <div className="relative flex-1">
+          <div className="p-6 bg-white/40 dark:bg-black/20 border-t border-white/10 backdrop-blur-md">
+            <div className="relative flex items-center gap-3 max-w-5xl mx-auto">
+              <div className="relative flex-1 group">
                 <Input
-                  placeholder="Describe your project or ask anything..."
-                  className="pr-20 py-6 bg-card border-none ring-1 ring-white/10 focus-visible:ring-primary/50 transition-all"
+                  placeholder="Tell me about your project needs..."
+                  className="pr-12 h-12 bg-background border-border rounded-xl focus-visible:ring-primary/20"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary rounded-lg"
                   >
                     <Mic className="h-4 w-4" />
                   </Button>
-                  <span className="text-[10px] text-muted-foreground pr-2 tabular-nums">
-                    {input.length}/500
-                  </span>
                 </div>
               </div>
               <Button
-                className="h-12 w-12 rounded-xl bg-primary hover:scale-105 transition-transform shadow-lg shadow-primary/20"
-                size="icon"
+                className="h-12 px-6 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center gap-2"
                 onClick={() => handleSend()}
                 disabled={!input.trim()}
               >
-                <Send className="h-5 w-5" />
+                Send <Send className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Results Panel (Right - 40%) */}
-        <div className="w-full lg:w-[40%] flex flex-col bg-card/30 backdrop-blur-sm rounded-2xl border border-white/5 transition-all duration-500 overflow-hidden">
-          <div className="p-5 border-b border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <h2 className="font-bold">Matched Freelancers</h2>
+        {/* Results Panel (Right) */}
+        <div className="w-full lg:w-[350px] flex flex-col bg-card rounded-3xl border border-border shadow-sm overflow-hidden relative">
+          <div className="px-6 py-5 border-b border-border bg-card/50 backdrop-blur-md flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h2 className="font-bold text-lg text-foreground">
+                Recommendations
+              </h2>
             </div>
             {matches.length > 0 && (
-              <Badge
-                variant="secondary"
-                className="bg-primary/20 text-primary hover:bg-primary/20"
-              >
-                {matches.length} Matches Found
+              <Badge variant="secondary" className="font-semibold">
+                {matches.length} Matches
               </Badge>
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
             {!showResults ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
-                <div className="h-20 w-20 bg-primary/5 rounded-full flex items-center justify-center animate-pulse">
-                  <Search className="h-10 w-10 text-primary/20" />
+                <div className="h-16 w-16 bg-muted rounded-2xl flex items-center justify-center">
+                  <Search className="h-8 w-8 text-muted-foreground/50" />
                 </div>
                 <div>
-                  <p className="font-medium text-lg">Analysis Pending</p>
+                  <p className="font-semibold text-foreground">
+                    No recommendations yet
+                  </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Chat with SkillBridge AI to analyze your requirements and
-                    find the perfect match.
+                    Start a conversation to find the right freelancers for your
+                    project.
                   </p>
                 </div>
               </div>
@@ -320,73 +366,64 @@ const AIAssistantPage = () => {
               matches.map((f, idx) => (
                 <Card
                   key={f.id}
-                  className="group overflow-hidden border-white/5 bg-white/5 hover:bg-white/10 transition-all duration-300 animate-in fade-in slide-in-from-right-4"
-                  style={{ animationDelay: `${idx * 150}ms` }}
+                  className="group overflow-hidden border-border bg-card hover:border-primary/30 transition-all duration-200 rounded-2xl shadow-sm"
                 >
-                  <CardContent className="p-4">
+                  <CardContent className="p-5">
                     <div className="flex gap-4">
-                      <div className="relative">
-                        <div className="absolute inset-0 rounded-full border-2 border-primary animate-ping opacity-20" />
-                        <Avatar className="h-14 w-14 ring-2 ring-primary/20">
-                          <AvatarImage src={f.avatar} />
-                          <AvatarFallback>{f.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="absolute -top-1 -right-1 bg-success text-[8px] font-bold text-white px-1 rounded-full border border-card">
-                          9{8 - idx}% Match
-                        </div>
-                      </div>
+                      <Avatar className="h-14 w-14 rounded-xl">
+                        <AvatarImage src={f.avatar} />
+                        <AvatarFallback>{f.name[0]}</AvatarFallback>
+                      </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1 underline-offset-4 decoration-primary/50 group-hover:underline">
-                          <h3 className="font-bold truncate">{f.name}</h3>
-                          <CheckCircle2 className="h-3 w-3 text-primary" />
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-semibold text-base truncate text-foreground">
+                            {f.name}
+                          </h3>
+                          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                            9{8 - idx}% match
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="text-sm text-muted-foreground mt-0.5">
                           {f.title}
                         </p>
-                        <div className="flex items-center gap-3 mt-2">
-                          <div className="flex items-center gap-1 text-[11px] font-medium">
-                            <Star className="h-3 w-3 text-warning fill-warning" />
-                            {f.rating}
+
+                        <div className="mt-3 flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                            <span className="text-xs font-semibold">
+                              {f.rating}
+                            </span>
                           </div>
-                          <div className="text-[11px] text-muted-foreground">
-                            ${f.hourlyRate}/hr
-                          </div>
-                          <div className="text-[11px] flex items-center gap-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                            Available
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <span className="text-xs font-medium">
+                              ${f.hourlyRate}/hr
+                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+
+                    <div className="mt-4 flex flex-wrap gap-1.5">
                       {f.skills.slice(0, 3).map((skill) => (
                         <Badge
                           key={skill}
                           variant="secondary"
-                          className="text-[10px] py-0 px-1.5 bg-white/5 border-none"
+                          className="text-[10px] py-0 px-2 font-medium"
                         >
                           {skill}
                         </Badge>
                       ))}
-                      {f.skills.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground font-medium pl-1">
-                          +{f.skills.length - 3} more
-                        </span>
-                      )}
                     </div>
-                    <div className="mt-4 flex gap-2">
+
+                    <div className="mt-5 flex gap-2">
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 h-8 text-[11px] bg-transparent border-white/10 hover:bg-primary/10"
+                        variant="secondary"
+                        className="flex-1 h-9 rounded-lg text-xs font-semibold"
                       >
-                        View Profile
+                        Profile
                       </Button>
-                      <Button
-                        size="sm"
-                        className="flex-1 h-8 text-[11px] bg-primary/80 hover:bg-primary"
-                      >
-                        Start Conversation
+                      <Button className="flex-1 h-9 rounded-lg text-xs font-semibold">
+                        Hire
                       </Button>
                     </div>
                   </CardContent>

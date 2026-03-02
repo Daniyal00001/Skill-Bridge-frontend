@@ -41,12 +41,6 @@ export default function ClientDashboard() {
               Here's what's happening with your projects
             </p>
           </div>
-          <Button variant="hero" asChild>
-            <Link to="/client/projects/create">
-              <PlusCircle className="mr-2 h-5 w-5" />
-              Create New Project
-            </Link>
-          </Button>
         </div>
 
         {/* Stats Grid */}
@@ -162,16 +156,6 @@ export default function ClientDashboard() {
             <h2 className="text-xl font-semibold">Quick Actions</h2>
             <Card>
               <CardContent className="p-4 space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  asChild
-                >
-                  <Link to="/client/projects/create">
-                    <PlusCircle className="mr-3 h-4 w-4" />
-                    Post a New Project
-                  </Link>
-                </Button>
                 <Button
                   variant="outline"
                   className="w-full justify-start"

@@ -32,7 +32,6 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PostProjectPage from "./pages/client/PostProject";
 import ClientProjectsPage from "./pages/client/ClientProjects";
-import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import ProjectProposalsPage from "./pages/client/ProjectProposals";
 import ClientMessagesPage from "./pages/client/ClientMessages";
 import ClientReviewsPage from "./pages/client/ClientReviews";
@@ -103,10 +102,6 @@ const App = () => (
                 <Route
                   path="/client/projects"
                   element={<ClientProjectsPage />}
-                />
-                <Route
-                  path="/client/projects/:projectId"
-                  element={<ClientProjectDetailsPage />}
                 />
                 <Route
                   path="/client/projects/:projectId/proposals"

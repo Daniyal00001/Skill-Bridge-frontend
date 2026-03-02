@@ -241,10 +241,12 @@ const ClientProjectsPage = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link to={`/client/projects/${project.id}`}>
-                    View Details
-                  </Link>
+                <DropdownMenuItem
+                  onClick={() =>
+                    toast.info("Project details view is under maintenance.")
+                  }
+                >
+                  View Details
                 </DropdownMenuItem>
                 {project.status === "open" && (
                   <DropdownMenuItem
@@ -355,23 +357,21 @@ const ClientProjectsPage = () => {
           <Button
             variant="outline"
             className="h-10 font-bold border-border/60 hover:bg-muted"
-            asChild
+            onClick={() =>
+              toast.info("Project details view is under maintenance.")
+            }
           >
-            <Link to={`/client/projects/${project.id}`}>Overview</Link>
+            Overview
           </Button>
           <Button
             className="h-10 font-bold shadow-lg shadow-primary/20"
-            asChild
+            onClick={() =>
+              project.hiredDeveloper
+                ? toast.info("Workspace is under maintenance.")
+                : toast.info("Hiring Hub is under maintenance.")
+            }
           >
-            <Link
-              to={
-                project.hiredDeveloper
-                  ? `/workspace/${project.id}`
-                  : `/client/projects/${project.id}/proposals`
-              }
-            >
-              {project.hiredDeveloper ? "Workspace" : "Hiring Hub"}
-            </Link>
+            {project.hiredDeveloper ? "Workspace" : "Hiring Hub"}
           </Button>
         </CardFooter>
       </Card>
