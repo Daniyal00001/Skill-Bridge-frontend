@@ -1,9 +1,9 @@
-import { ReactNode, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { ReactNode, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Bell,
   ChevronLeft,
@@ -33,10 +33,10 @@ import {
   LogOut,
   User,
   Sparkles,
-} from 'lucide-react';
-import { mockNotifications } from '@/lib/mockData';
-import { cn } from '@/lib/utils';
-import logo from '@/assets/logo/logo.png';
+} from "lucide-react";
+import { mockNotifications } from "@/lib/mockData";
+import { cn } from "@/lib/utils";
+import logo from "@/assets/logo/logo.png";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -58,35 +58,80 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const getNavItems = (): NavItem[] => {
     switch (user?.role) {
-      case 'CLIENT':
+      case "CLIENT":
         return [
-          { icon: Home, label: 'Dashboard', href: '/client' },
-          { icon: PlusCircle, label: 'Post a New Project', href: '/client/post-project' },
-          { icon: FolderOpen, label: 'My Projects', href: '/client/projects' },
-          { icon: Sparkles, label: 'Help Me Find', href: '/client/help-me-find' },
-          { icon: MessageSquare, label: 'Messages', href: '/client/messages', badge: 2 },
-          { icon: Star, label: 'Reviews', href: '/client/reviews' },
-          { icon: Settings, label: 'Settings', href: '/settings' },
+          // MAIN
+          { icon: Home, label: "Dashboard", href: "/client" },
+          {
+            icon: PlusCircle,
+            label: "Post Project",
+            href: "/client/post-project",
+          },
+          { icon: FolderOpen, label: "My Projects", href: "/client/projects" },
+
+          // FIND TALENT
+          { icon: Search, label: "Browse Freelancers", href: "/client/browse" },
+          {
+            icon: Sparkles,
+            label: "AI Assistant",
+            href: "/client/ai-assistant",
+          },
+
+          // MANAGE
+          { icon: FileText, label: "Proposals", href: "/client/proposals" },
+          {
+            icon: MessageSquare,
+            label: "Messages",
+            href: "/client/messages",
+            badge: 2,
+          },
+          { icon: Star, label: "Reviews", href: "/client/reviews" },
+
+          // ACCOUNT
+          { icon: User, label: "Profile", href: "/client/profile" },
+          { icon: Settings, label: "Settings", href: "/settings" },
         ];
-      case 'FREELANCER':
+      case "FREELANCER":
         return [
-          { icon: Home, label: 'Dashboard', href: '/freelancer' },
-          { icon: Search, label: 'Browse Projects', href: '/freelancer/browse' },
-          { icon: FileText, label: 'My Proposals', href: '/freelancer/proposals' },
-          { icon: Briefcase, label: 'Active Projects', href: '/freelancer/projects' },
-          { icon: MessageSquare, label: 'Messages', href: '/freelancer/messages', badge: 3 },
-          { icon: User, label: 'Profile', href: '/freelancer/profile' },
-          { icon: Settings, label: 'Settings', href: '/settings' },
+          { icon: Home, label: "Dashboard", href: "/freelancer" },
+          {
+            icon: Search,
+            label: "Browse Projects",
+            href: "/freelancer/browse",
+          },
+          {
+            icon: FileText,
+            label: "My Proposals",
+            href: "/freelancer/proposals",
+          },
+          {
+            icon: Briefcase,
+            label: "Active Projects",
+            href: "/freelancer/projects",
+          },
+          {
+            icon: MessageSquare,
+            label: "Messages",
+            href: "/freelancer/messages",
+            badge: 3,
+          },
+          { icon: User, label: "Profile", href: "/freelancer/profile" },
+          { icon: Settings, label: "Settings", href: "/settings" },
         ];
-      case 'ADMIN':
+      case "ADMIN":
         return [
-          { icon: Home, label: 'Dashboard', href: '/admin' },
-          { icon: Users, label: 'Users', href: '/admin/users' },
-          { icon: FolderOpen, label: 'Projects', href: '/admin/projects' },
-          { icon: AlertTriangle, label: 'Disputes', href: '/admin/disputes', badge: 3 },
-          { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-          { icon: Shield, label: 'Security', href: '/admin/security' },
-          { icon: Settings, label: 'Settings', href: '/settings' },
+          { icon: Home, label: "Dashboard", href: "/admin" },
+          { icon: Users, label: "Users", href: "/admin/users" },
+          { icon: FolderOpen, label: "Projects", href: "/admin/projects" },
+          {
+            icon: AlertTriangle,
+            label: "Disputes",
+            href: "/admin/disputes",
+            badge: 3,
+          },
+          { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
+          { icon: Shield, label: "Security", href: "/admin/security" },
+          { icon: Settings, label: "Settings", href: "/settings" },
         ];
       default:
         return [];
@@ -98,9 +143,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate("/login");
     } catch {
-      navigate('/login');
+      navigate("/login");
     }
   };
 
@@ -109,18 +154,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300',
-          sidebarCollapsed ? 'w-16' : 'w-64'
+          "fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300",
+          sidebarCollapsed ? "w-16" : "w-64",
         )}
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b">
           <Link to="/" className="flex items-center">
             <div className=" h-11 flex items-center justify-center flex-shrink-0">
-              <img src={logo} alt="SkillBridge" className="w-full h-full object-contain" />
+              <img
+                src={logo}
+                alt="SkillBridge"
+                className="w-full h-full object-contain"
+              />
             </div>
             {!sidebarCollapsed && (
-              <span className="text-lg font-bold gradient-text">SkillBridge</span>
+              <span className="text-lg font-bold gradient-text">
+                SkillBridge
+              </span>
             )}
           </Link>
         </div>
@@ -134,16 +185,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+                  "flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200",
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                 )}
               >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
+                <item.icon className="w-4 h-4 flex-shrink-0" />
                 {!sidebarCollapsed && (
                   <>
-                    <span className="flex-1 font-medium">{item.label}</span>
+                    <span className="flex-1 font-bold text-sm">
+                      {item.label}
+                    </span>
                     {item.badge && (
                       <Badge variant="destructive" className="h-5 px-1.5">
                         {item.badge}
@@ -178,10 +231,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                <p className="text-xs text-muted-foreground capitalize">
+                  {user?.role}
+                </p>
               </div>
             </div>
-            
+
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors w-full p-2 rounded-lg hover:bg-destructive/10"
@@ -196,15 +251,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <div
         className={cn(
-          'flex-1 transition-all duration-300',
-          sidebarCollapsed ? 'ml-16' : 'ml-64'
+          "flex-1 transition-all duration-300",
+          sidebarCollapsed ? "ml-16" : "ml-56",
         )}
       >
         {/* Top Bar */}
         <header className="h-16 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-semibold">
-              {navItems.find((item) => item.href === location.pathname)?.label || 'Dashboard'}
+              {navItems.find((item) => item.href === location.pathname)
+                ?.label || "Dashboard"}
             </h1>
           </div>
 
@@ -240,7 +296,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/notifications" className="w-full text-center text-primary">
+                  <Link
+                    to="/notifications"
+                    className="w-full text-center text-primary"
+                  >
                     View all notifications
                   </Link>
                 </DropdownMenuItem>
@@ -271,7 +330,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Link to="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive"
+                >
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 // Protected Route Guards
@@ -36,13 +36,12 @@ import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import ProjectProposalsPage from "./pages/client/ProjectProposals";
 import ClientMessagesPage from "./pages/client/ClientMessages";
 import ClientReviewsPage from "./pages/client/ClientReviews";
-import HelpMeFindPage from "./pages/client/HelpMeFind";
+import ClientProfilePage from "./pages/client/ClientProfile";
+import BrowseFreelancersPage from "./pages/client/BrowseFreelancers";
+import AIAssistantPage from "./pages/client/AIAssistant";
 import ClientSettingsPage from "./pages/client/ClientSettings";
 import ClientDraftsPage from "./pages/client/ClientDrafts";
-import BrowseProjectsPage from "./pages/client/BrowseProjects";
 import MyProposalsPage from "./pages/client/MyProposals";
-import ActiveProjectsPage from "./pages/client/ActiveProjects";
-import ClientProfilePage from "./pages/client/ClientProfile";
 
 // Freelancer Pages
 import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
@@ -121,18 +120,25 @@ const App = () => (
                 />
                 <Route path="/client/reviews" element={<ClientReviewsPage />} />
                 <Route
-                  path="/client/help-me-find"
-                  element={<HelpMeFindPage />}
+                  path="/client/ai-assistant"
+                  element={<AIAssistantPage />}
                 />
-                <Route path="/client/drafts" element={<ClientDraftsPage />} />
-                <Route path="/client/browse" element={<BrowseProjectsPage />} />
-                <Route path="/client/proposals" element={<MyProposalsPage />} />
                 <Route
                   path="/client/active-projects"
-                  element={<ActiveProjectsPage />}
+                  element={<Navigate to="/client/projects" replace />}
                 />
+                <Route
+                  path="/client/browse"
+                  element={<BrowseFreelancersPage />}
+                />
+                <Route path="/client/proposals" element={<MyProposalsPage />} />
                 <Route path="/client/profile" element={<ClientProfilePage />} />
                 <Route path="/settings" element={<ClientSettingsPage />} />
+                {/* Redirect legacy route */}
+                <Route
+                  path="/client/help-me-find"
+                  element={<AIAssistantPage />}
+                />
               </Route>
 
               {/* ── Freelancer Only ───────────────────────────────── */}
