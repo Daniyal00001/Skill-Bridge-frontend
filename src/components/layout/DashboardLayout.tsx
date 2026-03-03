@@ -163,7 +163,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           },
           {
             label: "Account",
-            items: [{ icon: Settings, label: "Settings", href: "/settings" }],
+            items: [
+              { icon: User, label: "Profile", href: "/freelancer/profile" },
+              {
+                icon: Settings,
+                label: "Settings",
+                href: "/freelancer/settings",
+              },
+            ],
           },
         ];
       case "ADMIN":

@@ -50,6 +50,8 @@ import { default as FreelancerProposalsPage } from "./pages/freelancer/Freelance
 import { default as FreelancerProjectsPage } from "./pages/freelancer/FreelancerProjects";
 import { default as FreelancerMessagesPage } from "./pages/freelancer/FreelancerMessages";
 import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetails";
+import FreelancerProfile from "./pages/freelancer/FreelancerProfile";
+import FreelancerSettings from "./pages/freelancer/FreelancerSettings";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -162,11 +164,15 @@ const App = () => (
                 />
                 <Route
                   path="/freelancer/profile"
-                  element={<Navigate to="/settings" replace />}
+                  element={<FreelancerProfile />}
                 />
                 <Route
                   path="/freelancer/projects/:projectId"
                   element={<FreelancerProjectDetails />}
+                />
+                <Route
+                  path="/freelancer/settings"
+                  element={<FreelancerSettings />}
                 />
               </Route>
 

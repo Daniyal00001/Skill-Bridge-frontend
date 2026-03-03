@@ -105,16 +105,7 @@ export function ProjectCard({ project, viewAs }: ProjectCardProps) {
       </CardContent>
 
       <CardFooter className="pt-0">
-        <Button
-          className="w-full"
-          onClick={(e) => {
-            if (viewAs === "client") {
-              e.preventDefault();
-              toast.info("Project details view is under maintenance.");
-            }
-          }}
-          asChild
-        >
+        <Button className="w-full" asChild>
           <Link to={detailLink}>
             {viewAs === "client" ? "View Details" : "View & Apply"}
           </Link>
