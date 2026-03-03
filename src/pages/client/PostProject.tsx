@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -75,6 +75,7 @@ const SKILL_SUGGESTIONS = [
 ];
 
 const PostProjectPage = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
@@ -100,6 +101,13 @@ const PostProjectPage = () => {
   const nextStep = () => setStep((s) => Math.min(s + 1, 5));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
   const goToStep = (s: number) => setStep(s);
+
+  const handleSaveDraft = () => {
+    toast.info("Project saved as draft", {
+      description: "You can continue editing this project from your drafts.",
+    });
+    navigate("/client/drafts");
+  };
 
   const steps = [
     { id: 1, name: "Basics" },
@@ -239,7 +247,14 @@ const PostProjectPage = () => {
                     />
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-end pt-6 border-t">
+                <CardFooter className="flex justify-between pt-6 border-t items-center">
+                  <Button
+                    variant="ghost"
+                    onClick={handleSaveDraft}
+                    className="gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <FileText className="w-4 h-4" /> Save as Draft
+                  </Button>
                   <Button
                     onClick={nextStep}
                     disabled={!formData.title || !formData.category}
@@ -313,13 +328,22 @@ const PostProjectPage = () => {
                   <Button variant="ghost" onClick={prevStep} className="gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
                   </Button>
-                  <Button
-                    onClick={nextStep}
-                    disabled={!formData.fullDesc || !formData.functionalReq}
-                    className="gap-2 px-8"
-                  >
-                    Next: Budget <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={handleSaveDraft}
+                      className="gap-2 border-border/40"
+                    >
+                      <FileText className="w-4 h-4" /> Save as Draft
+                    </Button>
+                    <Button
+                      onClick={nextStep}
+                      disabled={!formData.fullDesc || !formData.functionalReq}
+                      className="gap-2 px-8"
+                    >
+                      Next: Budget <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             )}
@@ -489,13 +513,22 @@ const PostProjectPage = () => {
                   <Button variant="ghost" onClick={prevStep} className="gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
                   </Button>
-                  <Button
-                    onClick={nextStep}
-                    disabled={!formData.deadline}
-                    className="gap-2 px-8"
-                  >
-                    Next: Skills <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={handleSaveDraft}
+                      className="gap-2 border-border/40"
+                    >
+                      <FileText className="w-4 h-4" /> Save as Draft
+                    </Button>
+                    <Button
+                      onClick={nextStep}
+                      disabled={!formData.deadline}
+                      className="gap-2 px-8"
+                    >
+                      Next: Skills <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             )}
@@ -698,13 +731,22 @@ const PostProjectPage = () => {
                   <Button variant="ghost" onClick={prevStep} className="gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
                   </Button>
-                  <Button
-                    onClick={nextStep}
-                    disabled={formData.skills.length === 0}
-                    className="gap-2 px-8"
-                  >
-                    Final Review <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={handleSaveDraft}
+                      className="gap-2 border-border/40"
+                    >
+                      <FileText className="w-4 h-4" /> Save as Draft
+                    </Button>
+                    <Button
+                      onClick={nextStep}
+                      disabled={formData.skills.length === 0}
+                      className="gap-2 px-8"
+                    >
+                      Final Review <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             )}
@@ -860,16 +902,25 @@ const PostProjectPage = () => {
                       immediately.
                     </span>
                   </div>
-                  <Button
-                    className="w-full md:w-auto min-w-[200px] h-12 text-lg font-black gap-3 shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    onClick={() => {
-                      toast.success(
-                        "Success! Project is now live on SkillBridge.",
-                      );
-                    }}
-                  >
-                    Post Project <MousePointer2 className="w-5 h-5" />
-                  </Button>
+                  <div className="flex items-center gap-3 w-full md:w-auto">
+                    <Button
+                      variant="outline"
+                      onClick={handleSaveDraft}
+                      className="h-12 px-6 gap-2 border-border/40 flex-1 md:flex-none"
+                    >
+                      <FileText className="w-4 h-4" /> Save as Draft
+                    </Button>
+                    <Button
+                      className="w-full md:w-auto min-w-[200px] h-12 text-lg font-black gap-3 shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] transition-all hover:scale-[1.02] active:scale-[0.98] flex-1 md:flex-none"
+                      onClick={() => {
+                        toast.success(
+                          "Success! Project is now live on SkillBridge.",
+                        );
+                      }}
+                    >
+                      Post Project <MousePointer2 className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             )}

@@ -42,6 +42,10 @@ import {
   MessageSquare,
   PlayCircle,
   Layout,
+  AlertTriangle,
+  Briefcase,
+  ChevronRight,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -50,13 +54,13 @@ import { toast } from "sonner";
 const INITIAL_PROJECTS = [
   {
     id: "1",
-    title: "E-Commerce Mobile App Redesign",
+    title: "client projects Mobile App Redesign",
     description:
       "We need a complete overhaul of our existing React Native app to improve user experience and sales conversion.",
-    status: "under_review",
+    status: "in_progress",
     budget: 7500,
     proposals: 12,
-    deadline: "2024-04-15",
+    deadline: "Apr 15, 2024",
     skills: ["React Native", "UI/UX"],
     lastActivity: "2 hours ago",
     progress: 65,
@@ -64,7 +68,44 @@ const INITIAL_PROJECTS = [
       name: "Alex Chen",
       avatar: "https://i.pravatar.cc/150?u=alex",
       title: "Senior Full Stack Dev",
+      isOnline: true,
     },
+    milestones: [
+      {
+        id: 1,
+        name: "UI Mockups",
+        status: "completed",
+        date: "Mar 10",
+        amount: "$1,500",
+      },
+      {
+        id: 2,
+        name: "Backend API",
+        status: "under_review",
+        date: "Mar 25",
+        amount: "$2,000",
+        notes:
+          "Completed all REST API endpoints as discussed in the documentation.",
+      },
+      {
+        id: 3,
+        name: "Frontend Development",
+        status: "pending",
+        date: "Apr 05",
+        amount: "$2,000",
+      },
+      {
+        id: 4,
+        name: "Testing & Deployment",
+        status: "pending",
+        date: "Apr 15",
+        amount: "$2,000",
+      },
+    ],
+    currentMilestone: 2,
+    totalMilestones: 4,
+    inEscrow: "$4,000",
+    needsAttention: false,
   },
   {
     id: "2",
@@ -74,7 +115,7 @@ const INITIAL_PROJECTS = [
     status: "in_progress",
     budget: 4500,
     proposals: 8,
-    deadline: "2024-03-30",
+    deadline: "Mar 30, 2024",
     skills: ["Python", "OpenAI API"],
     lastActivity: "1 day ago",
     progress: 30,
@@ -82,7 +123,35 @@ const INITIAL_PROJECTS = [
       name: "Michael Brown",
       avatar: "https://i.pravatar.cc/150?u=mike",
       title: "AI Engineer",
+      isOnline: false,
     },
+    milestones: [
+      {
+        id: 1,
+        name: "Model Selection",
+        status: "completed",
+        date: "Mar 05",
+        amount: "$1,000",
+      },
+      {
+        id: 2,
+        name: "Training Pipeline",
+        status: "pending",
+        date: "Mar 20",
+        amount: "$1,500",
+      },
+      {
+        id: 3,
+        name: "Integration",
+        status: "pending",
+        date: "Mar 30",
+        amount: "$2,000",
+      },
+    ],
+    currentMilestone: 1,
+    totalMilestones: 3,
+    inEscrow: "$3,500",
+    needsAttention: true,
   },
   {
     id: "3",
@@ -146,6 +215,14 @@ const ClientProjectsPage = () => {
       prev.map((p) => (p.id === id ? { ...p, status: newStatus as any } : p)),
     );
     toast.success(`Status updated to ${newStatus.replace("_", " ")}`);
+  };
+
+  const handleApprove = (projectName: string) => {
+    toast.success(`Milestone for ${projectName} approved! Funds released.`);
+  };
+
+  const handleRequestChanges = (projectName: string) => {
+    toast.info(`Revision request sent for ${projectName}.`);
   };
 
   const getStatusConfig = (status: string) => {
@@ -219,6 +296,276 @@ const ClientProjectsPage = () => {
       project.status,
     );
 
+    // If we are in the "Active" tab, show the high-detail active project card
+    if (activeTab === "active" && project.hiredDeveloper) {
+      return (
+        <Card
+          key={project.id}
+          className="border-border/40 bg-card/60 backdrop-blur-md overflow-hidden hover:shadow-2xl transition-all duration-500 group col-span-full"
+        >
+          {/* Card Header */}
+          <CardHeader className="p-8 pb-4 flex flex-row items-start justify-between">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl font-black tracking-tight underline-offset-4 decoration-primary/30 group-hover:underline">
+                  <Link to={`/client/projects/${project.id}`}>
+                    {project.title}
+                  </Link>
+                </h2>
+                <Badge
+                  className={cn(
+                    "font-bold uppercase tracking-widest text-[10px] py-1 px-3",
+                    config.color,
+                  )}
+                >
+                  {config.label.toUpperCase()}
+                </Badge>
+                {(project as any).needsAttention && (
+                  <Badge
+                    variant="destructive"
+                    className="gap-1.5 font-bold uppercase tracking-widest text-[10px] py-1 px-3"
+                  >
+                    <AlertTriangle className="w-3 h-3" /> Needs Attention
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 rounded-full hover:bg-muted/80"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to={`/client/projects/${project.id}`}>
+                    View Full Details
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>Message Specialist</DropdownMenuItem>
+                <DropdownMenuItem>View Legal Contract</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive">
+                  Pause Project
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </CardHeader>
+
+          <CardContent className="p-8 pt-4 space-y-8">
+            {/* Freelancer Row */}
+            <div className="flex items-center justify-between p-5 rounded-[1.5rem] bg-primary/5 border border-primary/10 transition-colors group-hover:bg-primary/8">
+              <div className="flex items-center gap-5">
+                <div className="relative">
+                  <Avatar className="h-14 w-14 ring-4 ring-primary/10">
+                    <AvatarImage src={project.hiredDeveloper.avatar} />
+                    <AvatarFallback>
+                      {project.hiredDeveloper.name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  {(project.hiredDeveloper as any).isOnline && (
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-background rounded-full" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-black tracking-tight">
+                    {project.hiredDeveloper.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {(project.hiredDeveloper as any).title}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="font-bold rounded-xl gap-2 h-10 px-6"
+                  asChild
+                >
+                  <Link to="/client/messages">
+                    <MessageSquare className="w-4 h-4" /> Message
+                  </Link>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="font-bold rounded-xl h-10 px-6"
+                >
+                  View Profile
+                </Button>
+              </div>
+            </div>
+
+            {/* Progress Section */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center bg-card p-3 px-5 rounded-2xl border border-border/40 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <Briefcase className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold tracking-tight">
+                    Current: Milestone {(project as any).currentMilestone || 1}{" "}
+                    of {(project as any).totalMilestones || 1}
+                  </span>
+                </div>
+                <span className="text-sm font-black text-primary">
+                  {project.progress}% Complete
+                </span>
+              </div>
+              <Progress
+                value={project.progress}
+                className="h-4 bg-muted/60 relative overflow-hidden rounded-full"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+              </Progress>
+            </div>
+
+            {/* Milestone List */}
+            {((project as any).milestones || []).length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(project as any).milestones.map((milestone: any) => (
+                  <div
+                    key={milestone.id}
+                    className={cn(
+                      "p-5 rounded-2xl border transition-all flex items-center justify-between group/milestone",
+                      milestone.status === "completed"
+                        ? "bg-emerald-500/5 border-emerald-500/20"
+                        : milestone.status === "under_review"
+                          ? "bg-amber-500/10 border-amber-500/30 shadow-lg shadow-amber-500/5"
+                          : "bg-muted/20 border-border/40",
+                    )}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={cn(
+                          "w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover/milestone:scale-110",
+                          milestone.status === "completed"
+                            ? "bg-emerald-500 text-white"
+                            : milestone.status === "under_review"
+                              ? "bg-amber-500 text-white"
+                              : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {milestone.status === "completed" ? (
+                          <CheckCircle2 className="w-5 h-5" />
+                        ) : milestone.status === "under_review" ? (
+                          <Clock className="w-5 h-5" />
+                        ) : (
+                          <span className="font-black text-xs">
+                            {milestone.id}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-black text-sm tracking-tight">
+                          {milestone.name}
+                        </p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                          {milestone.status.replace("_", " ")} ·{" "}
+                          {milestone.date} · {milestone.amount}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Review Section */}
+            {((project as any).milestones || []).some(
+              (m: any) => m.status === "under_review",
+            ) && (
+              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-2 border-amber-500/30 space-y-6 shadow-xl shadow-amber-500/5 transition-all hover:border-amber-500/50">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500 font-black text-xs uppercase tracking-[0.2em]">
+                      <Clock className="w-3.5 h-3.5" /> Pending Review
+                    </div>
+                    <h4 className="text-xl font-black tracking-tight">
+                      {project.hiredDeveloper.name} submitted work for Milestone{" "}
+                      {(project as any).currentMilestone}
+                    </h4>
+                  </div>
+                  <span className="text-xs font-bold text-muted-foreground">
+                    Submitted: March 23, 2024
+                  </span>
+                </div>
+
+                <div className="bg-background/40 backdrop-blur-sm p-5 rounded-2xl border border-amber-500/20">
+                  <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">
+                    Submission Notes:
+                  </p>
+                  <p className="text-sm font-medium leading-relaxed italic">
+                    "
+                    {
+                      (project as any).milestones.find(
+                        (m: any) => m.status === "under_review",
+                      )?.notes
+                    }
+                    "
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-black h-14 rounded-2xl flex-1 text-lg shadow-lg shadow-emerald-500/30 gap-3 group"
+                    onClick={() => handleApprove(project.title)}
+                  >
+                    <CheckCircle2 className="w-6 h-6 transition-transform group-hover:scale-110" />
+                    Approve & Release{" "}
+                    {
+                      (project as any).milestones.find(
+                        (m: any) => m.status === "under_review",
+                      )?.amount
+                    }
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-2 border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 font-black h-14 rounded-2xl px-10 text-lg"
+                    onClick={() => handleRequestChanges(project.title)}
+                  >
+                    Request Changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+
+          <CardFooter className="p-8 pt-0 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border/40 bg-muted/10">
+            <div className="flex items-center gap-8">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                  In Escrow
+                </p>
+                <p className="text-lg font-black text-primary">
+                  {(project as any).inEscrow || "$0"}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                  Final Deadline
+                </p>
+                <div className="flex items-center gap-2 text-foreground font-black">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <span>{project.deadline}</span>
+                </div>
+              </div>
+            </div>
+            <Button
+              asChild
+              className="font-black h-12 px-8 rounded-xl gap-2 shadow-lg shadow-primary/20"
+            >
+              <Link to={`/client/projects/${project.id}`}>
+                View Full Details <ChevronRight className="w-5 h-5" />
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      );
+    }
+
     return (
       <Card className="group overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:shadow-2xl hover:border-primary/20 transition-all duration-500 flex flex-col">
         <CardHeader className="p-5 pb-0">
@@ -241,12 +588,10 @@ const ClientProjectsPage = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={() =>
-                    toast.info("Project details view is under maintenance.")
-                  }
-                >
-                  View Details
+                <DropdownMenuItem asChild>
+                  <Link to={`/client/projects/${project.id}`}>
+                    View Details
+                  </Link>
                 </DropdownMenuItem>
                 {project.status === "open" && (
                   <DropdownMenuItem
@@ -272,7 +617,7 @@ const ClientProjectsPage = () => {
             </DropdownMenu>
           </div>
           <CardTitle className="text-xl mt-4 line-clamp-1 decoration-primary/30 underline-offset-4 group-hover:underline">
-            {project.title}
+            <Link to={`/client/projects/${project.id}`}>{project.title}</Link>
           </CardTitle>
         </CardHeader>
 
@@ -357,11 +702,9 @@ const ClientProjectsPage = () => {
           <Button
             variant="outline"
             className="h-10 font-bold border-border/60 hover:bg-muted"
-            onClick={() =>
-              toast.info("Project details view is under maintenance.")
-            }
+            asChild
           >
-            Overview
+            <Link to={`/client/projects/${project.id}`}>Overview</Link>
           </Button>
           <Button
             className="h-10 font-bold shadow-lg shadow-primary/20"
@@ -399,11 +742,6 @@ const ClientProjectsPage = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="font-bold gap-2" asChild>
-              <Link to="/client/drafts">
-                <Layout className="w-4 h-4" /> Drafts
-              </Link>
-            </Button>
             <Button
               asChild
               size="lg"

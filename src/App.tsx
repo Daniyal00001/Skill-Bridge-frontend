@@ -40,6 +40,8 @@ import AIAssistantPage from "./pages/client/AIAssistant";
 import ClientSettingsPage from "./pages/client/ClientSettings";
 import ClientDraftsPage from "./pages/client/ClientDrafts";
 import MyProposalsPage from "./pages/client/MyProposals";
+import ClientProfilePage from "./pages/client/ClientProfile";
+import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 
 // Freelancer Pages
 import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
@@ -99,9 +101,14 @@ const App = () => (
                   path="/client/post-project"
                   element={<PostProjectPage />}
                 />
+                <Route path="/client/drafts" element={<ClientDraftsPage />} />
                 <Route
                   path="/client/projects"
                   element={<ClientProjectsPage />}
+                />
+                <Route
+                  path="/client/projects/:projectId"
+                  element={<ClientProjectDetailsPage />}
                 />
                 <Route
                   path="/client/projects/:projectId/proposals"
@@ -125,10 +132,7 @@ const App = () => (
                   element={<BrowseFreelancersPage />}
                 />
                 <Route path="/client/proposals" element={<MyProposalsPage />} />
-                <Route
-                  path="/client/profile"
-                  element={<Navigate to="/settings" replace />}
-                />
+                <Route path="/client/profile" element={<ClientProfilePage />} />
                 <Route path="/settings" element={<ClientSettingsPage />} />
                 {/* Redirect legacy route */}
                 <Route

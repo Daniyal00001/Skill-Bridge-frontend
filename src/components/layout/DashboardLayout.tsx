@@ -79,6 +79,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 label: "My Projects",
                 href: "/client/projects",
               },
+              {
+                icon: FileText,
+                label: "Drafts",
+                href: "/client/drafts",
+              },
             ],
           },
           {
@@ -111,7 +116,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           },
           {
             label: "Account",
-            items: [{ icon: Settings, label: "Settings", href: "/settings" }],
+            items: [
+              { icon: User, label: "Profile", href: "/client/profile" },
+              { icon: Settings, label: "Settings", href: "/settings" },
+            ],
           },
         ];
       case "FREELANCER":
