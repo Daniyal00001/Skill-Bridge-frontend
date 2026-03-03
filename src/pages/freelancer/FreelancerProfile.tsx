@@ -25,8 +25,12 @@ import {
   Briefcase,
   TrendingUp,
   MessageSquare,
+  Globe,
+  Verified,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 // Mock Data
 const MOCK_PROFILE = {
@@ -156,588 +160,428 @@ const MOCK_PROFILE = {
 export default function FreelancerProfile() {
   const [isAvailable, setIsAvailable] = useState(true);
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* LEFT COLUMN */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* PROFILE HERO CARD */}
-            <Card className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-md">
-              <div className="h-40 bg-gradient-to-r from-primary/80 to-purple-600/80 relative" />
-              <CardContent className="relative pt-0 pb-8 px-8">
-                <div className="flex flex-col md:flex-row md:items-end -mt-16 gap-6">
-                  <div className="relative">
-                    <Avatar className="h-32 w-32 border-4 border-background shadow-2xl">
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>AC</AvatarFallback>
-                    </Avatar>
-                    <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-4 border-background rounded-full animate-pulse" />
-                  </div>
+      <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-8"
+        >
+          {/* HEADER SECTION - NO CARD ENCLOSURE FOR A LIGHTER FEEL */}
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 border-b pb-10 border-border/50">
+            <div className="relative group">
+              <Avatar className="h-40 w-40 ring-4 ring-primary/10 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
+                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarFallback className="text-4xl font-black">
+                  AC
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute bottom-4 right-4 w-8 h-8 bg-background rounded-xl flex items-center justify-center shadow-lg border border-border">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+              </div>
+            </div>
 
-                  <div className="flex-1 space-y-2 pb-2">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight">
-                          {MOCK_PROFILE.name}
-                        </h1>
-                        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                          {MOCK_PROFILE.title}
-                        </p>
-                      </div>
-                      <div className="flex gap-3">
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 rounded-full border-primary/20 hover:bg-primary/5"
-                        >
-                          <Link to="/freelancer/settings">
-                            <Pencil className="w-4 h-4" /> Edit Profile
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-2 text-muted-foreground hover:text-foreground"
-                        >
-                          <Eye className="w-4 h-4" /> Preview Public View
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground mt-4">
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <MapPin className="w-4 h-4 text-primary/60" />{" "}
-                        {MOCK_PROFILE.location} · {MOCK_PROFILE.timezone}
-                      </span>
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <Calendar className="w-4 h-4 text-primary/60" /> Member
-                        since {MOCK_PROFILE.memberSince}
-                      </span>
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <Clock className="w-4 h-4 text-primary/60" /> Last
-                        active {MOCK_PROFILE.lastActive}
-                      </span>
-                    </div>
-                  </div>
+            <div className="flex-1 text-center md:text-left space-y-4">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                  <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
+                    {MOCK_PROFILE.name}
+                  </h1>
+                  <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
+                    Top Rated
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* ABOUT CARD */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xl font-bold">About Me</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
-                >
-                  <Pencil className="w-4 h-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground leading-relaxed text-base italic">
-                  "{MOCK_PROFILE.bio}"
+                <p className="text-xl font-medium text-muted-foreground italic">
+                  {MOCK_PROFILE.title}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* SKILLS CARD */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold">
-                  Skills & Expertise
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <SkillGroup
-                  title="Frontend"
-                  skills={MOCK_PROFILE.skills.frontend}
-                />
-                <Separator className="bg-border/50" />
-                <SkillGroup
-                  title="Backend"
-                  skills={MOCK_PROFILE.skills.backend}
-                />
-                <Separator className="bg-border/50" />
-                <SkillGroup title="Tools" skills={MOCK_PROFILE.skills.tools} />
-
-                <div className="pt-4">
-                  <button className="w-full h-24 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-all duration-300">
-                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-                      <Plus className="w-6 h-6" />
-                    </div>
-                    <span className="text-sm font-semibold">Add New Skill</span>
-                  </button>
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  {MOCK_PROFILE.location}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* PORTFOLIO CARD */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold">Portfolio</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {MOCK_PROFILE.portfolio.map((item) => (
-                    <div
-                      key={item.id}
-                      className="group relative rounded-2xl overflow-hidden bg-accent/30 border border-border hover:border-primary/50 transition-all duration-300 shadow-sm"
-                    >
-                      <div
-                        className="h-44 w-full"
-                        style={{ background: item.image }}
-                      />
-                      <div className="p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-lg">{item.name}</h4>
-                          <ExternalLink className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-primary transition-colors" />
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {item.tech.map((t) => (
-                            <Badge
-                              key={t}
-                              variant="secondary"
-                              className="text-[10px] uppercase font-bold px-2 py-0 bg-primary/10 text-primary border-none"
-                            >
-                              {t}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <button className="h-full min-h-[250px] border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-all duration-300 bg-accent/10">
-                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                      <Plus className="w-7 h-7" />
-                    </div>
-                    <span className="font-bold">Add Portfolio Item</span>
-                  </button>
+                <div className="flex items-center gap-2">
+                  <Verified className="w-4 h-4 text-emerald-500" />
+                  Payment Verified
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  {MOCK_PROFILE.reviews_stats.average} (
+                  {MOCK_PROFILE.reviews_stats.total} reviews)
+                </div>
+              </div>
 
-            {/* WORK HISTORY CARD */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold">
-                  Work History on SkillBridge
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                {MOCK_PROFILE.workHistory.map((work, idx) => (
-                  <div
-                    key={work.id}
-                    className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-0.5 before:bg-border last:before:hidden"
+              <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
+                <Button className="rounded-xl h-12 px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all">
+                  Contact for Project
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-xl h-12 px-6 font-bold hover:bg-accent active:scale-95 transition-all"
+                >
+                  <Link
+                    to="/freelancer/settings"
+                    className="flex items-center gap-2"
                   >
-                    <div className="absolute left-[-4px] top-1 w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-4">
-                        <h4 className="text-lg font-bold hover:text-primary transition-colors cursor-pointer">
-                          {work.title}
-                        </h4>
-                        <span className="text-sm font-bold text-primary">
-                          ${work.amount.toLocaleString()} earned
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground font-medium">
-                        <span className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-green-500" />{" "}
-                          Completed
-                        </span>
-                        <span>•</span>
-                        <span>
-                          Client:{" "}
-                          <span className="text-foreground">{work.client}</span>
-                        </span>
-                        <span>•</span>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                          <span className="text-foreground">
-                            {work.rating.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground/80 leading-relaxed italic">
-                        "{work.comment}"
-                      </p>
-                      <p className="text-xs text-muted-foreground/60 uppercase font-bold tracking-widest">
-                        {work.date}
+                    <Pencil className="w-4 h-4" /> Edit Profile
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="hidden lg:flex flex-col items-end gap-3">
+              <div className="text-right">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">
+                  Hourly Rate
+                </p>
+                <p className="text-4xl font-black text-foreground">
+                  ${MOCK_PROFILE.rate}{" "}
+                  <span className="text-base text-muted-foreground font-medium">
+                    / hr
+                  </span>
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-bold text-green-500 bg-green-500/5 px-4 py-2 rounded-full border border-green-500/10">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                Available Now
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* MAIN CONTENT AREA */}
+            <div className="lg:col-span-8 space-y-12">
+              {/* DESCRIPTION SECTION */}
+              <section className="space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Overview
+                </h3>
+                <p className="text-lg text-muted-foreground leading-relaxed font-medium">
+                  {MOCK_PROFILE.bio}
+                </p>
+              </section>
+
+              {/* STATS ROW */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  {
+                    label: "Job Success",
+                    value: `${MOCK_PROFILE.jobSuccess}%`,
+                    icon: ShieldCheck,
+                    color: "text-blue-500",
+                  },
+                  {
+                    label: "Completed",
+                    value: MOCK_PROFILE.projectsCompleted,
+                    icon: CheckCircle2,
+                    color: "text-emerald-500",
+                  },
+                  {
+                    label: "Repeat Hires",
+                    value: `${MOCK_PROFILE.repeatClientRate}%`,
+                    icon: Zap,
+                    color: "text-amber-500",
+                  },
+                  {
+                    label: "Level",
+                    value: "Expert",
+                    icon: TrendingUp,
+                    color: "text-purple-500",
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-accent/50 transition-colors"
+                  >
+                    <stat.icon className={cn("w-6 h-6", stat.color)} />
+                    <div>
+                      <p className="text-2xl font-black">{stat.value}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        {stat.label}
                       </p>
                     </div>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* REVIEWS CARD */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold">
-                  Client Reviews
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                <div className="flex flex-col md:flex-row gap-10 items-center">
-                  <div className="text-center md:text-left space-y-1">
-                    <div className="text-5xl font-black text-primary">
-                      {MOCK_PROFILE.reviews_stats.average}
-                    </div>
-                    <div className="flex justify-center md:justify-start gap-1">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Star
-                          key={i}
-                          className={cn(
-                            "w-5 h-5",
-                            i <= 5
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-muted",
-                          )}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-widest">
-                      ({MOCK_PROFILE.reviews_stats.total} reviews)
-                    </p>
-                  </div>
-
-                  <div className="flex-1 w-full space-y-2">
-                    {MOCK_PROFILE.reviews_stats.breakdown
-                      .filter((b) => b.stars >= 3)
-                      .map((item) => (
-                        <div
-                          key={item.stars}
-                          className="flex items-center gap-4"
-                        >
-                          <span className="text-sm font-bold w-4">
-                            {item.stars}
-                          </span>
-                          <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                          <div className="flex-1 h-2.5 bg-accent/50 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.3)] transition-all duration-1000"
-                              style={{ width: `${item.percentage}%` }}
-                            />
-                          </div>
-                          <span className="text-sm font-medium text-muted-foreground w-12 text-right">
-                            {item.percentage}%
-                          </span>
-                        </div>
-                      ))}
-                  </div>
+              {/* PORTFOLIO SECTION */}
+              <section className="space-y-8">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                    Portfolio
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="font-bold gap-2 text-primary hover:bg-primary/5"
+                  >
+                    View All <ChevronRight className="w-4 h-4" />
+                  </Button>
                 </div>
 
-                <div className="space-y-6">
-                  {/* Reuse some data from workHistory for review cards */}
-                  {MOCK_PROFILE.workHistory.map((review) => (
-                    <div
-                      key={review.id}
-                      className="p-5 rounded-2xl bg-accent/20 border border-border/50 space-y-4"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {MOCK_PROFILE.portfolio.slice(0, 4).map((item) => (
+                    <motion.div
+                      key={item.id}
+                      whileHover={{ y: -5 }}
+                      className="group cursor-pointer rounded-3xl overflow-hidden border border-border/40 bg-card/40 hover:bg-card hover:shadow-2xl hover:shadow-foreground/5 transition-all duration-500"
                     >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
-                            {review.client.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-bold">{review.client}</p>
-                          <div className="flex gap-0.5 mt-0.5">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                              <Star
-                                key={i}
-                                className={cn(
-                                  "w-3 h-3",
-                                  i <= review.rating
-                                    ? "text-yellow-500 fill-yellow-500"
-                                    : "text-muted",
-                                )}
-                              />
-                            ))}
+                      <div
+                        className="aspect-[16/10] w-full"
+                        style={{ background: item.image }}
+                      />
+                      <div className="p-6 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-black">{item.name}</h4>
+                          <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {item.tech.map((t) => (
+                            <span
+                              key={t}
+                              className="text-[10px] font-bold text-muted-foreground uppercase bg-accent/50 px-2.5 py-1 rounded-md"
+                            >
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+
+              {/* REVIEWS SECTION */}
+              <section className="space-y-8">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Work History & Reviews
+                </h3>
+                <div className="space-y-6">
+                  {MOCK_PROFILE.workHistory.map((work) => (
+                    <div
+                      key={work.id}
+                      className="p-8 rounded-[2.5rem] bg-card border border-border/40 hover:border-primary/20 transition-all space-y-6"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-2">
+                          <h4 className="text-xl font-black group-hover:text-primary transition-colors">
+                            {work.title}
+                          </h4>
+                          <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground/60 tracking-wider uppercase">
+                            <span className="flex items-center gap-2">
+                              {work.rating.toFixed(1)}{" "}
+                              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                            </span>
+                            <span>{work.date}</span>
                           </div>
                         </div>
-                        <span className="ml-auto text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
-                          {review.date}
-                        </span>
+                        <div className="text-left md:text-right">
+                          <p className="text-2xl font-black text-foreground">
+                            ${work.amount.toLocaleString()}
+                          </p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                            Fixed Price
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-sm text-foreground/80 leading-relaxed font-medium">
-                        "{review.comment}"
-                      </p>
+
+                      <div className="bg-accent/30 p-6 rounded-2xl md:ml-4 border-l-4 border-primary/40 italic">
+                        <p className="text-muted-foreground font-medium text-sm leading-relaxed">
+                          "{work.comment}"
+                        </p>
+                        <div className="mt-4 flex items-center gap-2 text-xs font-black uppercase text-foreground">
+                          <div className="h-px w-6 bg-border" />
+                          {work.client}
+                        </div>
+                      </div>
                     </div>
                   ))}
                   <Button
                     variant="outline"
-                    className="w-full rounded-full border-primary/20 hover:bg-primary/5 font-bold transition-all"
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-primary/5 hover:border-primary/40 shadow-sm transition-all active:scale-[0.98]"
                   >
-                    Load More Reviews
+                    Load More Projects
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </section>
+            </div>
 
-          {/* RIGHT SIDEBAR */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* AVAILABILITY CARD */}
-            <Card className="border-none shadow-lg bg-card/60 backdrop-blur-xl ring-1 ring-primary/20 sticky top-24">
-              <CardContent className="p-6 space-y-6">
-                <div className="flex items-center justify-between p-4 bg-green-500/10 rounded-2xl border border-green-500/20">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                    <span className="font-bold text-green-600 dark:text-green-400 uppercase tracking-tight text-xs">
-                      {MOCK_PROFILE.availability}
-                    </span>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant={isAvailable ? "default" : "outline"}
-                    className={cn(
-                      "rounded-full h-8 text-xs font-bold",
-                      isAvailable ? "bg-green-600 hover:bg-green-700" : "",
-                    )}
-                    onClick={() => setIsAvailable(!isAvailable)}
-                  >
-                    {isAvailable ? "Active" : "Away"}
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-4xl font-black text-foreground">
-                        ${MOCK_PROFILE.rate}
-                        <span className="text-lg font-medium text-muted-foreground/60">
-                          {" "}
-                          / hr
-                        </span>
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-full border-border"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center gap-3 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                        <Clock className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-xs uppercase tracking-tighter text-muted-foreground/70">
-                          Availability
-                        </p>
-                        <p className="font-semibold">
-                          {MOCK_PROFILE.availabilityType}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
-                        <Briefcase className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-xs uppercase tracking-tighter text-muted-foreground/70">
-                          Preferred
-                        </p>
-                        <p className="font-semibold">
-                          {MOCK_PROFILE.preferredContract}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Button className="w-full rounded-2xl h-12 bg-primary hover:shadow-lg hover:shadow-primary/20 transition-all font-bold text-lg">
-                  Hire Now
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* PERFORMANCE STATS CARD */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-primary" /> Performance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm font-bold">
-                    <span>Job Success</span>
-                    <span className="text-primary">
-                      {MOCK_PROFILE.jobSuccess}%
-                    </span>
-                  </div>
-                  <Progress
-                    value={MOCK_PROFILE.jobSuccess}
-                    className="h-2 bg-accent shadow-inner"
+            {/* SIDEBAR AREA */}
+            <aside className="lg:col-span-4 space-y-10 lg:pl-4">
+              {/* SKILLS SECTION */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Technical Expertise
+                </h3>
+                <div className="space-y-8">
+                  <CompactSkillGroup
+                    title="Frontend Development"
+                    skills={MOCK_PROFILE.skills.frontend}
+                  />
+                  <CompactSkillGroup
+                    title="Backend Systems"
+                    skills={MOCK_PROFILE.skills.backend}
+                  />
+                  <CompactSkillGroup
+                    title="Tools & DevOps"
+                    skills={MOCK_PROFILE.skills.tools}
                   />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-accent/30 rounded-xl border border-border/50">
-                    <p className="text-xl font-black">
-                      {MOCK_PROFILE.projectsCompleted}
-                    </p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                      Projects
-                    </p>
-                  </div>
-                  <div className="p-3 bg-accent/30 rounded-xl border border-border/50">
-                    <p className="text-xl font-black">
-                      {MOCK_PROFILE.repeatClientRate}%
-                    </p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                      Repeat
-                    </p>
-                  </div>
-                </div>
+              <Separator className="bg-border/40" />
 
-                <div className="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                      Response
-                    </span>
-                  </div>
-                  <span className="text-sm font-black">
-                    {MOCK_PROFILE.responseTime}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* TOP SKILLS CHART */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base font-bold">
-                  Top Skills
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <TopSkillRow name="React" projects={32} percentage={85} />
-                <TopSkillRow name="Node.js" projects={28} percentage={75} />
-                <TopSkillRow name="AWS" projects={20} percentage={55} />
-                <TopSkillRow name="Python" projects={15} percentage={45} />
-                <TopSkillRow name="Docker" projects={12} percentage={35} />
-              </CardContent>
-            </Card>
-
-            {/* INFO CARD */}
-            <Card className="border-none shadow-lg bg-card/40 backdrop-blur-sm overflow-hidden">
-              <CardContent className="p-6 space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <Languages className="w-5 h-5 text-primary mt-1" />
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                        Languages
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {MOCK_PROFILE.languages.map((lang) => (
-                          <span
-                            key={lang.name}
-                            className="text-sm font-semibold"
-                          >
-                            {lang.name}{" "}
-                            <span className="text-muted-foreground font-medium">
-                              ({lang.level})
-                            </span>
-                          </span>
-                        ))}
+              {/* DETAILS SECTION */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Education & Certs
+                </h3>
+                <div className="space-y-6">
+                  {MOCK_PROFILE.education.map((edu) => (
+                    <div key={edu.school} className="flex gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
+                        <GraduationCap className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-sm leading-tight">
+                          {edu.school}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {edu.degree}
+                        </p>
+                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">
+                          {edu.year}
+                        </p>
                       </div>
                     </div>
-                  </div>
+                  ))}
 
-                  <div className="flex items-start gap-4">
-                    <GraduationCap className="w-5 h-5 text-primary mt-1" />
-                    <div className="space-y-1 text-sm font-semibold">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                        Education
-                      </p>
-                      {MOCK_PROFILE.education.map((edu) => (
-                        <div key={edu.school}>
-                          <p>{edu.school}</p>
-                          <p className="text-muted-foreground font-medium text-xs">
-                            {edu.degree} · {edu.year}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <Award className="w-5 h-5 text-primary mt-1" />
-                    <div className="space-y-2 text-sm font-semibold flex-1">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                        Certifications
-                      </p>
-                      {MOCK_PROFILE.certifications.map((cert) => (
-                        <div
-                          key={cert.name}
-                          className="p-2 bg-accent/30 rounded-lg border border-border/50 flex items-center justify-between group"
-                        >
-                          <span>{cert.name}</span>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* PROFILE COMPLETION CARD */}
-            <Card className="border-none shadow-lg bg-primary/5 ring-1 ring-primary/20">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-bold">
-                    Boost Your Profile
-                  </CardTitle>
-                  <span className="text-lg font-black text-primary">
-                    {MOCK_PROFILE.completion.percentage}%
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Progress
-                  value={MOCK_PROFILE.completion.percentage}
-                  className="h-3 bg-accent"
-                />
-
-                <div className="space-y-3 pt-2">
-                  {MOCK_PROFILE.completion.missing.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-3 group cursor-pointer"
-                    >
-                      <div className="w-5 h-5 rounded-md border-2 border-primary/30 flex items-center justify-center transition-all group-hover:border-primary">
-                        <div className="w-2.5 h-2.5 rounded-sm bg-primary scale-0 group-hover:scale-100 transition-transform" />
+                  {MOCK_PROFILE.certifications.map((cert) => (
+                    <div key={cert.name} className="flex gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
+                        <Award className="h-6 w-6 text-primary" />
                       </div>
-                      <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                        {item}
-                      </span>
+                      <div className="space-y-1 text-sm font-semibold">
+                        <p className="font-bold text-sm leading-tight">
+                          {cert.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {cert.issuer}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
+              </div>
 
-                <p className="text-[10px] text-muted-foreground italic mt-4 text-center">
-                  "Complete your profile to rank higher in search results and
-                  attract more clients."
+              {/* LANGUAGES */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Languages
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {MOCK_PROFILE.languages.map((lang) => (
+                    <Badge
+                      key={lang.name}
+                      variant="secondary"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-accent/50 hover:bg-accent border-none"
+                    >
+                      {lang.name} ·{" "}
+                      <span className="text-muted-foreground">
+                        {lang.level}
+                      </span>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* AVAILABILITY CALENDAR MOCKUP */}
+              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <h4 className="font-black text-sm uppercase tracking-widest">
+                    Availability
+                  </h4>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed">
+                  Open for new contracts. Typical response time is{" "}
+                  <b>{"< 1 hour"}</b>.
                 </p>
-              </CardContent>
-            </Card>
+                <Button className="w-full rounded-xl font-bold active:scale-[0.98] transition-transform">
+                  Check Calendar
+                </Button>
+              </div>
+            </aside>
           </div>
-        </div>
+        </motion.div>
       </div>
     </DashboardLayout>
+  );
+}
+
+function CompactSkillGroup({
+  title,
+  skills,
+}: {
+  title: string;
+  skills: { name: string; level: number }[];
+}) {
+  return (
+    <div className="space-y-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">
+        {title}
+      </p>
+      <div className="space-y-3">
+        {skills.map((skill) => (
+          <div key={skill.name} className="group">
+            <div className="flex justify-between items-center mb-1.5 px-1">
+              <span className="text-sm font-bold text-foreground/80 group-hover:text-primary transition-colors">
+                {skill.name}
+              </span>
+              <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-tighter">
+                {skill.level === 5
+                  ? "Expert"
+                  : skill.level === 4
+                    ? "Advanced"
+                    : "Proficient"}
+              </span>
+            </div>
+            <div className="h-2 w-full bg-accent/30 rounded-full overflow-hidden border border-border/20">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${(skill.level / 5) * 100}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="h-full bg-primary relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20 animate-pulse" />
+              </motion.div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -799,7 +643,7 @@ function TopSkillRow({
       </div>
       <div className="h-2 bg-accent/50 rounded-full overflow-hidden">
         <div
-          className="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.3)] transition-all duration-1000"
+          className="h-full bg-primary rounded-full transition-all duration-1000"
           style={{ width: `${percentage}%` }}
         />
       </div>

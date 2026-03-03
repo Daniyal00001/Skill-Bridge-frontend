@@ -597,7 +597,13 @@ const DetailGridItem = ({
   value,
   subValue,
   accent,
-}: any) => (
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  subValue: string;
+  accent?: string;
+}) => (
   <div className="space-y-2 group/item">
     <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] group-hover/item:text-primary transition-colors">
       <Icon className="w-3.5 h-3.5" /> {label}

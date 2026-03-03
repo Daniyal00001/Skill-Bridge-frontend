@@ -42,6 +42,29 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface Proposal {
+  id: string;
+  projectId: string;
+  projectTitle: string;
+  client: {
+    name: string;
+    avatar: string;
+    rating: number;
+  };
+  category: string;
+  status: string;
+  dateSubmitted: string;
+  yourBid: number;
+  clientBudget: {
+    min: number;
+    max: number;
+  };
+  deliveryTime: string;
+  coverLetter: string;
+  viewedByClient?: boolean;
+  contractCreatedDate?: string;
+}
+
 // Mock Data
 const MOCK_PROPOSALS = [
   {
@@ -335,13 +358,13 @@ function ProposalCard({
   isExpanded,
   onToggleExpand,
 }: {
-  proposal: any;
+  proposal: Proposal;
   isExpanded: boolean;
   onToggleExpand: () => void;
 }) {
   const statusConfig: Record<
     string,
-    { label: string; className: string; icon: any }
+    { label: string; className: string; icon: React.ElementType }
   > = {
     pending: {
       label: "Pending",

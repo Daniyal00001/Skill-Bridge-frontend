@@ -510,7 +510,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/settings">Settings</Link>
+                  <Link
+                    to={
+                      user?.role === "FREELANCER"
+                        ? "/freelancer/settings"
+                        : "/settings"
+                    }
+                  >
+                    Settings
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
