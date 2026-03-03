@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { StatsCard } from '@/components/common/StatsCard';
-import { FreelancerCard } from '@/components/common/FreelancerCard';
-import { ProjectCard } from '@/components/common/ProjectCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Link } from "react-router-dom";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { StatsCard } from "@/components/common/StatsCard";
+import { FreelancerCard } from "@/components/common/FreelancerCard";
+import { ProjectCard } from "@/components/common/ProjectCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   FolderOpen,
   DollarSign,
@@ -12,16 +13,21 @@ import {
   CheckCircle,
   PlusCircle,
   ArrowRight,
-  TrendingUp
-} from 'lucide-react';
+  TrendingUp,
+  Search,
+  Sparkles,
+  Bot,
+} from "lucide-react";
 import {
   clientDashboardStats,
   mockFreelancers,
-  mockProjects
-} from '@/lib/mockData';
+  mockProjects,
+} from "@/lib/mockData";
 
 export default function ClientDashboard() {
-  const recentProjects = mockProjects.filter(p => p.status === 'open').slice(0, 2);
+  const recentProjects = mockProjects
+    .filter((p) => p.status === "open")
+    .slice(0, 2);
   const recommendedFreelancers = mockFreelancers.slice(0, 3);
 
   return (
@@ -35,12 +41,6 @@ export default function ClientDashboard() {
               Here's what's happening with your projects
             </p>
           </div>
-          <Button variant="hero" asChild>
-            <Link to="/client/projects/create">
-              <PlusCircle className="mr-2 h-5 w-5" />
-              Create New Project
-            </Link>
-          </Button>
         </div>
 
         {/* Stats Grid */}
@@ -75,6 +75,59 @@ export default function ClientDashboard() {
           />
         </div>
 
+        {/* Find Talent Section */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="group overflow-hidden border-primary/20 bg-gradient-to-br from-card to-primary/5 hover:to-primary/10 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="space-y-4">
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Search className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Browse Freelancers</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Search and filter from our curated talent pool
+                    </p>
+                  </div>
+                  <Button variant="default" asChild>
+                    <Link to="/client/browse">Browse Talent</Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="group overflow-hidden border-primary/30 bg-gradient-to-br from-card to-purple-500/5 hover:to-purple-500/10 transition-all duration-300 relative">
+            <div className="absolute top-2 right-2">
+              <Badge className="bg-gradient-to-r from-primary to-purple-600 border-none">
+                Recommended
+              </Badge>
+            </div>
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="space-y-4">
+                  <div className="h-12 w-12 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Sparkles className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">AI Talent Finder</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Let AI find the perfect match for your requirements
+                    </p>
+                  </div>
+                  <Button
+                    className="bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 border-none"
+                    asChild
+                  >
+                    <Link to="/client/ai-assistant">Chat with AI</Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Two Column Layout */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Recent Projects */}
@@ -89,7 +142,11 @@ export default function ClientDashboard() {
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {recentProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} viewAs="client" />
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  viewAs="client"
+                />
               ))}
             </div>
           </div>
@@ -99,19 +156,21 @@ export default function ClientDashboard() {
             <h2 className="text-xl font-semibold">Quick Actions</h2>
             <Card>
               <CardContent className="p-4 space-y-2">
-                <Button variant="outline" className="w-full justify-start" asChild>
-                  <Link to="/client/projects/create">
-                    <PlusCircle className="mr-3 h-4 w-4" />
-                    Post a New Project
-                  </Link>
-                </Button>
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  asChild
+                >
                   <Link to="/client/projects">
                     <FolderOpen className="mr-3 h-4 w-4" />
                     Manage Projects
                   </Link>
                 </Button>
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  asChild
+                >
                   <Link to="/client/messages">
                     <FileText className="mr-3 h-4 w-4" />
                     View Messages
@@ -128,7 +187,8 @@ export default function ClientDashboard() {
                   <div>
                     <h3 className="font-medium text-white">Pro Tip</h3>
                     <p className="text-sm text-white/80 mt-1">
-                      Use our AI Scoping Assistant to get accurate budget estimates for your next project.
+                      Use our AI Scoping Assistant to get accurate budget
+                      estimates for your next project.
                     </p>
                   </div>
                 </div>
@@ -141,7 +201,9 @@ export default function ClientDashboard() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold">Freelancers I’ve Worked With</h2>
+              <h2 className="text-xl font-semibold">
+                Freelancers I’ve Worked With
+              </h2>
               <p className="text-sm text-muted-foreground">
                 Based on your project history and requirements
               </p>

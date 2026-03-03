@@ -1,132 +1,652 @@
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { mockFreelancers } from '@/lib/mockData';
-import { MapPin, Mail, Globe, Github, Linkedin, Camera } from 'lucide-react';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import {
+  Pencil,
+  MapPin,
+  Calendar,
+  Clock,
+  Star,
+  ExternalLink,
+  Plus,
+  CheckCircle2,
+  ChevronRight,
+  Languages,
+  GraduationCap,
+  Award,
+  Zap,
+  Eye,
+  Briefcase,
+  TrendingUp,
+  MessageSquare,
+  Globe,
+  Verified,
+  ShieldCheck,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+
+// Mock Data
+const MOCK_PROFILE = {
+  name: "Alex Chen",
+  title: "Senior Full Stack Developer",
+  location: "Dallas, TX",
+  timezone: "UTC-6",
+  memberSince: "Jan 2023",
+  lastActive: "Today",
+  bio: "Passionate full-stack developer with over 8 years of experience building scalable web applications. I specialize in React, Node.js, and cloud architecture. My goal is to deliver clean, maintainable code and exceptional user experiences. I've helped numerous startups launch their MVPs and scale to thousands of users. Always eager to tackle complex technical challenges and learn new technologies.",
+  availability: "Available for Work",
+  rate: 85,
+  availabilityType: "Full-time (40hrs/week)",
+  preferredContract: "Fixed + Hourly",
+  jobSuccess: 94,
+  projectsCompleted: 52,
+  repeatClientRate: 78,
+  responseTime: "< 1 hour",
+  languages: [
+    { name: "English", level: "Native" },
+    { name: "Urdu", level: "Native" },
+  ],
+  education: [
+    { school: "FAST NUCES", degree: "BS in Computer Science", year: "2022" },
+  ],
+  certifications: [
+    { name: "AWS Certified Developer", issuer: "Amazon Web Services" },
+    { name: "Meta Front-End Certificate", issuer: "Meta" },
+  ],
+  skills: {
+    frontend: [
+      { name: "React", level: 5 },
+      { name: "TypeScript", level: 4 },
+      { name: "Next.js", level: 5 },
+      { name: "Tailwind", level: 5 },
+    ],
+    backend: [
+      { name: "Node.js", level: 4 },
+      { name: "Python", level: 3 },
+      { name: "PostgreSQL", level: 4 },
+    ],
+    tools: [
+      { name: "AWS", level: 3 },
+      { name: "Docker", level: 3 },
+      { name: "Git", level: 5 },
+    ],
+  },
+  portfolio: [
+    {
+      id: "p1",
+      name: "SaaS Analytics Dashboard",
+      tech: ["Next.js", "Tailwind", "Recharts"],
+      image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    },
+    {
+      id: "p2",
+      name: "E-commerce Mobile App",
+      tech: ["React Native", "Firebase"],
+      image: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)",
+    },
+    {
+      id: "p3",
+      name: "Real-time Chat Platform",
+      tech: ["Socket.io", "Node.js", "Redis"],
+      image: "linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)",
+    },
+    {
+      id: "p4",
+      name: "Crypto Trading Bot",
+      tech: ["Python", "FastAPI", "PostgreSQL"],
+      image: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    },
+  ],
+  workHistory: [
+    {
+      id: "w1",
+      title: "Full Stack Dashboard Development",
+      client: "TechCorp",
+      rating: 5.0,
+      date: "March 2024",
+      amount: 4500,
+      comment:
+        "Alex is an exceptional developer. He delivered the project ahead of schedule and the quality of code was top-notch. Highly recommended!",
+    },
+    {
+      id: "w2",
+      title: "React Components Library",
+      client: "DesignMasters",
+      rating: 4.8,
+      date: "Jan 2024",
+      amount: 2800,
+      comment:
+        "Great work on the UI components. Very responsive and easy to work with.",
+    },
+    {
+      id: "w3",
+      title: "Backend API Optimization",
+      client: "DataFlow",
+      rating: 5.0,
+      date: "Nov 2023",
+      amount: 3500,
+      comment:
+        "Significantly improved our system performance. Alex knows his way around databases and caching.",
+    },
+  ],
+  reviews_stats: {
+    average: 4.9,
+    total: 47,
+    breakdown: [
+      { stars: 5, count: 38, percentage: 81 },
+      { stars: 4, count: 7, percentage: 15 },
+      { stars: 3, count: 2, percentage: 4 },
+      { stars: 2, count: 0, percentage: 0 },
+      { stars: 1, count: 0, percentage: 0 },
+    ],
+  },
+  completion: {
+    percentage: 85,
+    missing: [
+      "Add phone verification",
+      "Add 2 more portfolio items",
+      "Complete work history",
+    ],
+  },
+};
 
 export default function FreelancerProfile() {
-    // Using Alex Chen (dev-1) as the mock logged-in freelancer
-    const freelancer = mockFreelancers[0];
+  const [isAvailable, setIsAvailable] = useState(true);
 
-    return (
-        <DashboardLayout>
-            <div className="space-y-8 max-w-5xl mx-auto">
-                {/* Header / Cover */}
-                <div className="relative h-48 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600">
-                    <div className="absolute -bottom-12 left-8 flex items-end gap-6">
-                        <div className="relative group">
-                            <Avatar className="w-32 h-32 border-4 border-background shadow-xl">
-                                <AvatarImage src={freelancer.avatar} />
-                                <AvatarFallback>{freelancer.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <button className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Camera className="w-4 h-4" />
-                            </button>
-                        </div>
-                        <div className="mb-4">
-                            <h1 className="text-3xl font-bold text-white">{freelancer.name}</h1>
-                            <p className="text-blue-100">{freelancer.title}</p>
-                        </div>
-                    </div>
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
-                    <div className="absolute bottom-4 right-8 flex gap-2">
-                        <Button variant="secondary">View Public Profile</Button>
-                    </div>
-                </div>
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
 
-                <div className="pt-16 grid gap-8 md:grid-cols-3">
-                    {/* Sidebar Info */}
-                    <div className="space-y-6">
-                        <Card>
-                            <CardContent className="p-6 space-y-4">
-                                <div className="flex items-center gap-3 text-muted-foreground">
-                                    <MapPin className="w-4 h-4" />
-                                    <span>{freelancer.location}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-muted-foreground">
-                                    <Mail className="w-4 h-4" />
-                                    <span>alex@example.com</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-muted-foreground">
-                                    <Globe className="w-4 h-4" />
-                                    <a href="#" className="hover:text-primary">alexchen.dev</a>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg">Socials</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <Github className="w-5 h-5" />
-                                    <Input defaultValue="github.com/alexchen" className="h-8" />
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Linkedin className="w-5 h-5 text-blue-600" />
-                                    <Input defaultValue="linkedin.com/in/alexchen" className="h-8" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Main Edit Form */}
-                    <div className="md:col-span-2 space-y-8">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>About Me</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium">Bio</label>
-                                    <Textarea
-                                        className="min-h-[120px]"
-                                        defaultValue={freelancer.bio}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="grid gap-2">
-                                        <label className="text-sm font-medium">Hourly Rate ($)</label>
-                                        <Input type="number" defaultValue={freelancer.hourlyRate} />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <label className="text-sm font-medium">Years of Exp.</label>
-                                        <Input type="number" defaultValue="8" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <CardTitle>Skills</CardTitle>
-                                <Button variant="outline" size="sm">Add Skill</Button>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex flex-wrap gap-2">
-                                    {freelancer.skills.map(skill => (
-                                        <Badge key={skill} variant="secondary" className="px-3 py-1 text-sm bg-muted hover:bg-muted-foreground/20">
-                                            {skill}
-                                            <button className="ml-2 text-muted-foreground hover:text-foreground">×</button>
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <div className="flex justify-end gap-4">
-                            <Button variant="outline">Cancel</Button>
-                            <Button>Save Changes</Button>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <DashboardLayout>
+      <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-8"
+        >
+          {/* HEADER SECTION - NO CARD ENCLOSURE FOR A LIGHTER FEEL */}
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 border-b pb-10 border-border/50">
+            <div className="relative group">
+              <Avatar className="h-40 w-40 ring-4 ring-primary/10 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
+                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarFallback className="text-4xl font-black">
+                  AC
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute bottom-4 right-4 w-8 h-8 bg-background rounded-xl flex items-center justify-center shadow-lg border border-border">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+              </div>
             </div>
-        </DashboardLayout>
-    );
+
+            <div className="flex-1 text-center md:text-left space-y-4">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                  <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
+                    {MOCK_PROFILE.name}
+                  </h1>
+                  <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
+                    Top Rated
+                  </Badge>
+                </div>
+                <p className="text-xl font-medium text-muted-foreground italic">
+                  {MOCK_PROFILE.title}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  {MOCK_PROFILE.location}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Verified className="w-4 h-4 text-emerald-500" />
+                  Payment Verified
+                </div>
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  {MOCK_PROFILE.reviews_stats.average} (
+                  {MOCK_PROFILE.reviews_stats.total} reviews)
+                </div>
+              </div>
+
+              <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
+                <Button className="rounded-xl h-12 px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all">
+                  Contact for Project
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-xl h-12 px-6 font-bold hover:bg-accent active:scale-95 transition-all"
+                >
+                  <Link
+                    to="/freelancer/settings"
+                    className="flex items-center gap-2"
+                  >
+                    <Pencil className="w-4 h-4" /> Edit Profile
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="hidden lg:flex flex-col items-end gap-3">
+              <div className="text-right">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">
+                  Hourly Rate
+                </p>
+                <p className="text-4xl font-black text-foreground">
+                  ${MOCK_PROFILE.rate}{" "}
+                  <span className="text-base text-muted-foreground font-medium">
+                    / hr
+                  </span>
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-bold text-green-500 bg-green-500/5 px-4 py-2 rounded-full border border-green-500/10">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                Available Now
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* MAIN CONTENT AREA */}
+            <div className="lg:col-span-8 space-y-12">
+              {/* DESCRIPTION SECTION */}
+              <section className="space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Overview
+                </h3>
+                <p className="text-lg text-muted-foreground leading-relaxed font-medium">
+                  {MOCK_PROFILE.bio}
+                </p>
+              </section>
+
+              {/* STATS ROW */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  {
+                    label: "Job Success",
+                    value: `${MOCK_PROFILE.jobSuccess}%`,
+                    icon: ShieldCheck,
+                    color: "text-blue-500",
+                  },
+                  {
+                    label: "Completed",
+                    value: MOCK_PROFILE.projectsCompleted,
+                    icon: CheckCircle2,
+                    color: "text-emerald-500",
+                  },
+                  {
+                    label: "Repeat Hires",
+                    value: `${MOCK_PROFILE.repeatClientRate}%`,
+                    icon: Zap,
+                    color: "text-amber-500",
+                  },
+                  {
+                    label: "Level",
+                    value: "Expert",
+                    icon: TrendingUp,
+                    color: "text-purple-500",
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-accent/50 transition-colors"
+                  >
+                    <stat.icon className={cn("w-6 h-6", stat.color)} />
+                    <div>
+                      <p className="text-2xl font-black">{stat.value}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        {stat.label}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* PORTFOLIO SECTION */}
+              <section className="space-y-8">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                    Portfolio
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="font-bold gap-2 text-primary hover:bg-primary/5"
+                  >
+                    View All <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {MOCK_PROFILE.portfolio.slice(0, 4).map((item) => (
+                    <motion.div
+                      key={item.id}
+                      whileHover={{ y: -5 }}
+                      className="group cursor-pointer rounded-3xl overflow-hidden border border-border/40 bg-card/40 hover:bg-card hover:shadow-2xl hover:shadow-foreground/5 transition-all duration-500"
+                    >
+                      <div
+                        className="aspect-[16/10] w-full"
+                        style={{ background: item.image }}
+                      />
+                      <div className="p-6 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-black">{item.name}</h4>
+                          <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {item.tech.map((t) => (
+                            <span
+                              key={t}
+                              className="text-[10px] font-bold text-muted-foreground uppercase bg-accent/50 px-2.5 py-1 rounded-md"
+                            >
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+
+              {/* REVIEWS SECTION */}
+              <section className="space-y-8">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Work History & Reviews
+                </h3>
+                <div className="space-y-6">
+                  {MOCK_PROFILE.workHistory.map((work) => (
+                    <div
+                      key={work.id}
+                      className="p-8 rounded-[2.5rem] bg-card border border-border/40 hover:border-primary/20 transition-all space-y-6"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-2">
+                          <h4 className="text-xl font-black group-hover:text-primary transition-colors">
+                            {work.title}
+                          </h4>
+                          <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground/60 tracking-wider uppercase">
+                            <span className="flex items-center gap-2">
+                              {work.rating.toFixed(1)}{" "}
+                              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                            </span>
+                            <span>{work.date}</span>
+                          </div>
+                        </div>
+                        <div className="text-left md:text-right">
+                          <p className="text-2xl font-black text-foreground">
+                            ${work.amount.toLocaleString()}
+                          </p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                            Fixed Price
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-accent/30 p-6 rounded-2xl md:ml-4 border-l-4 border-primary/40 italic">
+                        <p className="text-muted-foreground font-medium text-sm leading-relaxed">
+                          "{work.comment}"
+                        </p>
+                        <div className="mt-4 flex items-center gap-2 text-xs font-black uppercase text-foreground">
+                          <div className="h-px w-6 bg-border" />
+                          {work.client}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-primary/5 hover:border-primary/40 shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    Load More Projects
+                  </Button>
+                </div>
+              </section>
+            </div>
+
+            {/* SIDEBAR AREA */}
+            <aside className="lg:col-span-4 space-y-10 lg:pl-4">
+              {/* SKILLS SECTION */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Technical Expertise
+                </h3>
+                <div className="space-y-8">
+                  <CompactSkillGroup
+                    title="Frontend Development"
+                    skills={MOCK_PROFILE.skills.frontend}
+                  />
+                  <CompactSkillGroup
+                    title="Backend Systems"
+                    skills={MOCK_PROFILE.skills.backend}
+                  />
+                  <CompactSkillGroup
+                    title="Tools & DevOps"
+                    skills={MOCK_PROFILE.skills.tools}
+                  />
+                </div>
+              </div>
+
+              <Separator className="bg-border/40" />
+
+              {/* DETAILS SECTION */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Education & Certs
+                </h3>
+                <div className="space-y-6">
+                  {MOCK_PROFILE.education.map((edu) => (
+                    <div key={edu.school} className="flex gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
+                        <GraduationCap className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-sm leading-tight">
+                          {edu.school}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {edu.degree}
+                        </p>
+                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">
+                          {edu.year}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {MOCK_PROFILE.certifications.map((cert) => (
+                    <div key={cert.name} className="flex gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
+                        <Award className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="space-y-1 text-sm font-semibold">
+                        <p className="font-bold text-sm leading-tight">
+                          {cert.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {cert.issuer}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* LANGUAGES */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
+                  Languages
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {MOCK_PROFILE.languages.map((lang) => (
+                    <Badge
+                      key={lang.name}
+                      variant="secondary"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-accent/50 hover:bg-accent border-none"
+                    >
+                      {lang.name} ·{" "}
+                      <span className="text-muted-foreground">
+                        {lang.level}
+                      </span>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* AVAILABILITY CALENDAR MOCKUP */}
+              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <h4 className="font-black text-sm uppercase tracking-widest">
+                    Availability
+                  </h4>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed">
+                  Open for new contracts. Typical response time is{" "}
+                  <b>{"< 1 hour"}</b>.
+                </p>
+                <Button className="w-full rounded-xl font-bold active:scale-[0.98] transition-transform">
+                  Check Calendar
+                </Button>
+              </div>
+            </aside>
+          </div>
+        </motion.div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function CompactSkillGroup({
+  title,
+  skills,
+}: {
+  title: string;
+  skills: { name: string; level: number }[];
+}) {
+  return (
+    <div className="space-y-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">
+        {title}
+      </p>
+      <div className="space-y-3">
+        {skills.map((skill) => (
+          <div key={skill.name} className="group">
+            <div className="flex justify-between items-center mb-1.5 px-1">
+              <span className="text-sm font-bold text-foreground/80 group-hover:text-primary transition-colors">
+                {skill.name}
+              </span>
+              <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-tighter">
+                {skill.level === 5
+                  ? "Expert"
+                  : skill.level === 4
+                    ? "Advanced"
+                    : "Proficient"}
+              </span>
+            </div>
+            <div className="h-2 w-full bg-accent/30 rounded-full overflow-hidden border border-border/20">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${(skill.level / 5) * 100}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="h-full bg-primary relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20 animate-pulse" />
+              </motion.div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SkillGroup({
+  title,
+  skills,
+}: {
+  title: string;
+  skills: { name: string; level: number }[];
+}) {
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+        {title}
+      </h3>
+      <div className="flex flex-wrap gap-4">
+        {skills.map((skill) => (
+          <div
+            key={skill.name}
+            className="flex flex-col gap-1.5 p-3 rounded-xl bg-accent/20 border border-border/50 hover:bg-accent/40 transition-colors cursor-default"
+          >
+            <span className="text-sm font-bold">{skill.name}</span>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "w-2 h-2 rounded-full",
+                    i <= skill.level
+                      ? "bg-primary shadow-[0_0_5px_rgba(var(--primary),0.5)]"
+                      : "bg-muted",
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TopSkillRow({
+  name,
+  projects,
+  percentage,
+}: {
+  name: string;
+  projects: number;
+  percentage: number;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between items-end text-sm">
+        <span className="font-bold">{name}</span>
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
+          {projects} projects
+        </span>
+      </div>
+      <div className="h-2 bg-accent/50 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-primary rounded-full transition-all duration-1000"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
 }

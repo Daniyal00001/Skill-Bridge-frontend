@@ -1,354 +1,818 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import {
-    ArrowLeft,
-    Calendar,
-    DollarSign,
-    CheckCircle,
-    MessageSquare,
-    Clock,
-    MapPin,
-    Star,
-    MoreVertical,
-    Share2,
-    AlertCircle,
-    FileText,
-    Download,
-    RefreshCw,
-    ShieldCheck,
-    CreditCard,
-    Users
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ChevronLeft,
+  Edit,
+  Calendar,
+  Clock,
+  DollarSign,
+  Users,
+  Eye,
+  Bookmark,
+  MessageSquare,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+  MoreVertical,
+  Briefcase,
+  ExternalLink,
+  PlusCircle,
+  Zap,
+  Trash2,
+  Archive,
+  Pause,
+  ChevronDown,
+  Layout,
+  ChevronRight,
+  Star,
 } from "lucide-react";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
-// Mock Data for the specific project
-const MOCK_PROJECT_DETAILS = {
+// Mock Data for the project
+const MOCK_PROJECTS = {
+  "1": {
     id: "1",
-    title: "E-Commerce Mobile App Redesign",
-    description: `Complete UI/UX overhaul based on provided Figma designs. Performance optimization and integration with REST API.`,
-    status: "under_review", // Current status for demo
-    budget: { min: 5000, max: 8000 },
-    deadline: "2024-04-15",
-    createdAt: "2024-01-10",
-    skills: ["React Native", "TypeScript", "UI/UX"],
+    title: "E-Commercee Mobile App Redesign",
+    description:
+      "We need a complete overhaul of our existing React Native app to improve user experience and sales conversion. The project focuses on streamlining the checkout process, integrating new payment gateways, and implementing a more social-driven shopping experience. We are looking for a developer who understands both technical implementation and UX best practices.",
+    category: "Mobile Development",
+    experienceLevel: "Expert",
+    status: "in_progress",
+    budget: "$7,500",
+    budgetType: "Fixed Price",
+    postedDate: "March 20, 2024",
+    deadline: "April 15, 2024",
+    daysRemaining: 12,
+    progress: 65,
+    functionalRequirements: [
+      "Seamless integration with Stripe and PayPal",
+      "Dynamic social feed for product discovery",
+      "Push notification system for order updates",
+      "Optimized image loading for slower connections",
+    ],
+    skills: ["React Native", "UI/UX", "Stripe API", "Node.js", "Firebase"],
+    projectSize: "Large",
+    hiringMethod: "Direct Hire",
+    devsNeeded: 1,
+    views: 47,
+    proposals: 8,
+    shortlisted: 2,
     hiredDeveloper: {
-        id: "dev-1",
-        name: "Alex Chen",
-        title: "Senior Full Stack Developer",
-        rating: 4.9,
-        reviewCount: 47,
-        avatar: "https://i.pravatar.cc/150?u=alex",
+      name: "Alex Chen",
+      avatar: "https://i.pravatar.cc/150?u=alex",
+      title: "Senior Full Stack Dev",
+      rating: 4.9,
     },
-    lastSubmission: {
-        version: "1.2",
-        submittedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 24 hours ago
-        notes: "I've completed the login flow and product listing animations. Please check the checkout page logic.",
-        files: ["Design_Specs.pdf", "Main_App_Bundle.zip"]
-    }
+    milestones: [
+      {
+        id: 1,
+        name: "Discovery & Wireframing",
+        date: "Mar 25",
+        amount: "$1,500",
+        status: "completed",
+      },
+      {
+        id: 2,
+        name: "Core Feature Development",
+        date: "Apr 05",
+        amount: "$4,000",
+        status: "active",
+      },
+      {
+        id: 3,
+        name: "Testing & Launch",
+        date: "Apr 15",
+        amount: "$2,000",
+        status: "pending",
+      },
+    ],
+    proposalsList: [
+      {
+        name: "Sarah Jones",
+        avatar: "https://i.pravatar.cc/150?u=sarah",
+        bid: "$6,800",
+        time: "25 days",
+        rating: 4.8,
+      },
+      {
+        name: "Michael Brown",
+        avatar: "https://i.pravatar.cc/150?u=mike",
+        bid: "$7,200",
+        time: "30 days",
+        rating: 5.0,
+      },
+      {
+        name: "David Lee",
+        avatar: "https://i.pravatar.cc/150?u=david",
+        bid: "$8,000",
+        time: "20 days",
+        rating: 4.7,
+      },
+    ],
+    activity: [
+      {
+        type: "posted",
+        text: "Project posted",
+        time: "5 days ago",
+        icon: PlusCircle,
+        color: "text-emerald-500",
+      },
+      {
+        type: "proposal",
+        text: "Alex Chen submitted proposal",
+        time: "3 days ago",
+        icon: Users,
+        color: "text-blue-500",
+      },
+      {
+        type: "proposal",
+        text: "Sarah Jones submitted proposal",
+        time: "2 days ago",
+        icon: Users,
+        color: "text-blue-500",
+      },
+      {
+        type: "view",
+        text: "12 freelancers viewed your project",
+        time: "Today",
+        icon: Eye,
+        color: "text-amber-500",
+      },
+    ],
+  },
+  "4": {
+    id: "4",
+    title: "Real-time Data Visualization Dashboard",
+    description:
+      "Build a dashboard for visualizing IoT sensor data in real-time. The project requires expertise in D3.js and WebSocket communication.",
+    category: "Data Visualization",
+    experienceLevel: "Expert",
+    status: "open",
+    budget: "$5,000 - $8,000",
+    budgetType: "Fixed Price",
+    postedDate: "March 28, 2024",
+    deadline: "May 01, 2024",
+    daysRemaining: 28,
+    progress: 0,
+    functionalRequirements: [
+      "Real-time data streaming",
+      "Interactive D3 charts",
+      "Alerting system",
+    ],
+    skills: ["React", "D3.js", "WebSockets"],
+    projectSize: "Medium",
+    hiringMethod: "Competitive Bidding",
+    devsNeeded: 2,
+    views: 112,
+    proposals: 15,
+    shortlisted: 4,
+    activity: [
+      {
+        type: "posted",
+        text: "Project posted",
+        time: "2 days ago",
+        icon: PlusCircle,
+        color: "text-emerald-500",
+      },
+      {
+        type: "view",
+        text: "45 freelancers viewed your project",
+        time: "Yesterday",
+        icon: Eye,
+        color: "text-amber-500",
+      },
+    ],
+    milestones: [
+      {
+        id: 1,
+        name: "Initial Prototype",
+        date: "Apr 10",
+        amount: "$2,000",
+        status: "pending",
+      },
+      {
+        id: 2,
+        name: "Final Delivery",
+        date: "May 01",
+        amount: "$4,000",
+        status: "pending",
+      },
+    ],
+    proposalsList: [
+      {
+        name: "John Doe",
+        avatar: "https://i.pravatar.cc/150?u=john",
+        bid: "$5,500",
+        time: "15 days",
+        rating: 4.9,
+      },
+    ],
+  },
 };
 
 const ClientProjectDetailsPage = () => {
-    const { projectId } = useParams();
-    const [project, setProject] = useState(MOCK_PROJECT_DETAILS);
-    const [timeLeft, setTimeLeft] = useState("23:59:59"); // Mock 48h limit (24h left)
-    const [showPayment, setShowPayment] = useState(false);
-    const [processing, setProcessing] = useState(false);
+  const { projectId } = useParams();
+  const project =
+    MOCK_PROJECTS[projectId as keyof typeof MOCK_PROJECTS] ||
+    MOCK_PROJECTS["1"];
 
-    // Mock Timer Logic
-    useEffect(() => {
-        const timer = setInterval(() => {
-            // Just a visual simulation
-            setTimeLeft(prev => {
-                const parts = prev.split(':').map(Number);
-                if (parts[2] > 0) parts[2]--;
-                else if (parts[1] > 0) { parts[1]--; parts[2] = 59; }
-                else if (parts[0] > 0) { parts[0]--; parts[1] = 59; parts[2] = 59; }
-                return parts.map(v => v.toString().padStart(2, '0')).join(':');
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "open":
+        return (
+          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+            OPEN
+          </Badge>
+        );
+      case "in_progress":
+        return (
+          <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+            IN PROGRESS
+          </Badge>
+        );
+      case "completed":
+        return (
+          <Badge className="bg-violet-500/10 text-violet-500 border-violet-500/20">
+            COMPLETED
+          </Badge>
+        );
+      default:
+        return <Badge variant="secondary">{status.toUpperCase()}</Badge>;
+    }
+  };
 
-    const handleAcceptAndPay = () => {
-        setProcessing(true);
-        setTimeout(() => {
-            setProject(prev => ({ ...prev, status: 'completed' }));
-            setShowPayment(false);
-            setProcessing(false);
-            toast.success("Payment successful! Project marked as completed.");
-        }, 2000);
-    };
+  return (
+    <DashboardLayout>
+      <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in max-w-7xl">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          asChild
+          className="gap-2 -ml-4 hover:bg-transparent text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Link to="/client/projects">
+            <ChevronLeft className="w-4 h-4" />
+            Back to My Projects
+          </Link>
+        </Button>
 
-    const handleRequestRevision = () => {
-        toast.info("Opening revision request dialog...");
-        setProject(prev => ({ ...prev, status: 'needs_revision' }));
-    };
-
-    const getStatusBadgeClass = (status: string) => {
-        switch (status) {
-            case "open": return "bg-green-500/10 text-green-600 border-green-500/20";
-            case "in_progress": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-            case "under_review": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
-            case "needs_revision": return "bg-rose-500/10 text-rose-600 border-rose-500/20";
-            case "completed": return "bg-gray-500/10 text-gray-600 border-gray-500/20";
-            default: return "";
-        }
-    };
-
-    return (
-        <DashboardLayout>
-            <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in relative">
-
-                {/* Payment Mockup Overlay */}
-                {showPayment && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-                        <Card className="w-full max-w-md shadow-2xl border-primary/20 bg-card overflow-hidden">
-                            <CardHeader className="bg-primary/5 pb-6">
-                                <CardTitle className="flex items-center gap-2">
-                                    <ShieldCheck className="w-6 h-6 text-primary" />
-                                    Secure Release Payment
-                                </CardTitle>
-                                <CardDescription>Confirm and transfer funds to the freelancer.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="pt-6 space-y-4">
-                                <div className="p-4 rounded-xl bg-muted/30 border border-border/40 space-y-3">
-                                    <div className="flex justify-between font-medium">
-                                        <span className="text-muted-foreground">Contract Amount</span>
-                                        <span>$7,500.00</span>
-                                    </div>
-                                    <div className="flex justify-between font-medium text-green-600">
-                                        <span>Service Fee</span>
-                                        <span>$0.00 (SkillBridge Promo)</span>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex justify-between text-lg font-bold">
-                                        <span>Total Release</span>
-                                        <span className="text-primary">$7,500.00</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Fund Source</Label>
-                                    <div className="flex items-center gap-3 p-3 border rounded-lg bg-background/50">
-                                        <div className="h-10 w-12 bg-muted rounded flex items-center justify-center">
-                                            <CreditCard className="w-6 h-6 text-muted-foreground" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold">SkillBridge Escrow</p>
-                                            <p className="text-xs text-muted-foreground">Funds currently held securely</p>
-                                        </div>
-                                        <CheckCircle className="ml-auto w-5 h-5 text-primary" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="flex flex-col gap-3 pb-8 px-6">
-                                <Button
-                                    className="w-full h-12 text-lg font-bold shadow-lg shadow-primary/20"
-                                    onClick={handleAcceptAndPay}
-                                    disabled={processing}
-                                >
-                                    {processing ? <RefreshCw className="mr-2 h-5 w-5 animate-spin" /> : "Confirm & Release Funds"}
-                                </Button>
-                                <Button variant="ghost" className="w-full" onClick={() => setShowPayment(false)} disabled={processing}>Cancel</Button>
-                            </CardFooter>
-                        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Content (65%) */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Project Header Card */}
+            <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
+              <CardHeader className="p-8 pb-4">
+                <div className="flex justify-between items-start mb-6">
+                  {getStatusBadge(project.status)}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 font-bold h-9"
+                  >
+                    <Edit className="w-4 h-4" /> Edit Project
+                  </Button>
+                </div>
+                <CardTitle className="text-3xl font-black tracking-tight leading-tight">
+                  {project.title}
+                </CardTitle>
+                <div className="flex flex-wrap items-center gap-4 mt-6">
+                  <Badge
+                    variant="outline"
+                    className="bg-primary/5 text-primary border-primary/20"
+                  >
+                    {project.category}
+                  </Badge>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Zap className="w-4 h-4 text-amber-500" />
+                    <span className="font-medium">
+                      {project.experienceLevel} Level
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>Posted {project.postedDate}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span
+                      className={cn(
+                        project.daysRemaining < 7
+                          ? "text-destructive font-bold"
+                          : "",
+                      )}
+                    >
+                      {project.deadline} ({project.daysRemaining} days left)
+                    </span>
+                  </div>
+                </div>
+                {project.status === "in_progress" && (
+                  <div className="mt-8 space-y-3">
+                    <div className="flex justify-between items-center text-xs font-black uppercase tracking-wider text-muted-foreground">
+                      <span>Execution Progress</span>
+                      <span className="text-primary">{project.progress}%</span>
                     </div>
+                    <Progress
+                      value={project.progress}
+                      className="h-2.5 bg-muted/60"
+                    />
+                  </div>
                 )}
+              </CardHeader>
 
-                {/* Back Link */}
-                <div className="flex items-center justify-between">
-                    <Button variant="ghost" className="pl-0 gap-2 text-muted-foreground" asChild>
-                        <Link to="/client/projects"><ArrowLeft className="h-4 w-4" /> Management Dashboard</Link>
-                    </Button>
-                </div>
+              <CardContent className="p-0">
+                <Tabs defaultValue="overview" className="w-full">
+                  <TabsList className="w-full justify-start rounded-none border-b bg-transparent h-14 px-8 gap-8">
+                    <TabsTrigger
+                      value="overview"
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 gap-2"
+                    >
+                      Overview
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="requirements"
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 gap-2"
+                    >
+                      Requirements
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="milestones"
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 gap-2"
+                    >
+                      Milestones
+                    </TabsTrigger>
+                  </TabsList>
 
-                <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-                    <div className="space-y-8">
-                        {/* Status Alert for Reviews */}
-                        {project.status === 'under_review' && (
-                            <div className="bg-orange-500/5 border border-orange-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 animate-pulse-subtle">
-                                <div className="h-14 w-14 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-600 shadow-inner">
-                                    <Clock className="w-8 h-8" />
-                                </div>
-                                <div className="flex-1 text-center md:text-left">
-                                    <h3 className="text-lg font-bold text-orange-900 dark:text-orange-100">Pending Verification</h3>
-                                    <p className="text-sm text-orange-800/70 dark:text-orange-400">
-                                        A freelancer has submitted work. You have **48 hours** to verify or request revisions before auto-acceptance.
-                                    </p>
-                                </div>
-                                <div className="bg-orange-500 text-white px-6 py-2 rounded-xl font-mono font-bold text-xl shadow-lg border-b-2 border-orange-700">
-                                    {timeLeft}
-                                </div>
-                            </div>
-                        )}
+                  <TabsContent
+                    value="overview"
+                    className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  >
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-bold">Project Description</h4>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {project.description}
+                      </p>
+                    </div>
 
-                        <Card className="overflow-hidden border-border/40 shadow-xl bg-card/50 backdrop-blur-sm">
-                            <CardHeader className="bg-muted/30 border-b p-8">
-                                <div className="flex flex-col md:flex-row justify-between gap-6">
-                                    <div className="space-y-3">
-                                        <Badge variant="outline" className={cn("px-4 py-1 text-xs font-black uppercase tracking-widest", getStatusBadgeClass(project.status))}>
-                                            {project.status.replace("_", " ")}
-                                        </Badge>
-                                        <h1 className="text-4xl font-extrabold tracking-tight">{project.title}</h1>
-                                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                            <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Jan 10</span>
-                                            <span className="flex items-center gap-1 font-bold text-foreground underline underline-offset-4 decoration-primary/30">
-                                                <Users className="w-4 h-4" /> {project.hiredDeveloper.name}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 self-start md:self-center">
-                                        <Button variant="outline" size="icon" className="rounded-full"><Share2 className="w-4 h-4" /></Button>
-                                        <Button variant="outline" size="icon" className="rounded-full"><MoreVertical className="w-4 h-4" /></Button>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-8 space-y-8">
-                                <div className="grid sm:grid-cols-2 gap-4">
-                                    <div className="p-5 rounded-2xl bg-primary/5 border border-primary/10 flex items-center gap-4">
-                                        <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
-                                            <DollarSign className="w-6 h-6" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-primary uppercase tracking-widest">Total Budget</p>
-                                            <p className="text-2xl font-black">${project.budget.max}</p>
-                                        </div>
-                                    </div>
-                                    <div className="p-5 rounded-2xl bg-muted/50 border border-border/40 flex items-center gap-4">
-                                        <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground shadow-sm">
-                                            <Calendar className="w-6 h-6" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Deadline</p>
-                                            <p className="text-2xl font-black">Apr 15</p>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-bold">
+                        Functional Requirements
+                      </h4>
+                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {project.functionalRequirements.map((req, i) => (
+                          <li
+                            key={i}
+                            className="flex gap-3 items-start p-3 rounded-xl bg-muted/30 border border-border/50"
+                          >
+                            <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+                            <span className="text-sm font-medium">{req}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                                <div className="space-y-4">
-                                    <h3 className="text-xl font-bold flex items-center gap-2">
-                                        <FileText className="w-5 h-5 text-primary" /> Project Overview
-                                    </h3>
-                                    <p className="text-muted-foreground leading-relaxed text-lg italic">
-                                        "{project.description}"
-                                    </p>
-                                    <div className="flex flex-wrap gap-2 pt-2">
-                                        {project.skills.map(s => (
-                                            <Badge key={s} variant="secondary" className="bg-primary/5 hover:bg-primary/10 transition-colors uppercase text-[10px] font-bold tracking-tighter">
-                                                {s}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </div>
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-bold">Reference Links</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Figma Design",
+                          "Product Specs",
+                          "Competitor Reference",
+                        ].map((link, i) => (
+                          <Badge
+                            key={i}
+                            variant="secondary"
+                            className="gap-2 py-2 px-4 cursor-pointer hover:bg-muted transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            {link}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
 
-                                {project.lastSubmission && (
-                                    <div className="p-6 rounded-2xl border-2 border-primary/20 bg-primary/5 space-y-6 relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                                            <CheckCircle className="w-24 h-24" />
-                                        </div>
-                                        <div className="flex justify-between items-start relative z-10">
-                                            <h3 className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
-                                                <RefreshCw className="w-5 h-5" /> Submission v{project.lastSubmission.version}
-                                            </h3>
-                                            <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">Recently Submitted</Badge>
-                                        </div>
-                                        <p className="text-muted-foreground bg-background/50 p-4 rounded-xl border border-border/40 italic">
-                                            "{project.lastSubmission.notes}"
-                                        </p>
-                                        <div className="grid sm:grid-cols-2 gap-3">
-                                            {project.lastSubmission.files.map(f => (
-                                                <Button key={f} variant="outline" className="justify-between bg-background/50 border-border/60 hover:bg-background">
-                                                    <span className="flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> {f}</span>
-                                                    <Download className="w-4 h-4" />
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
+                  <TabsContent
+                    value="requirements"
+                    className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <h4 className="text-lg font-bold">Required Skills</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {project.skills.map((skill, i) => (
+                            <Badge
+                              key={i}
+                              variant="outline"
+                              className="font-bold py-1.5 px-3"
+                            >
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-6">
+                        {[
+                          {
+                            label: "Experience",
+                            value: project.experienceLevel,
+                            icon: Zap,
+                            color: "text-amber-500",
+                          },
+                          {
+                            label: "Project Size",
+                            value: project.projectSize,
+                            icon: Layout,
+                            color: "text-blue-500",
+                          },
+                          {
+                            label: "Budget Type",
+                            value: project.budgetType,
+                            icon: DollarSign,
+                            color: "text-emerald-500",
+                          },
+                          {
+                            label: "Developers",
+                            value: project.devsNeeded,
+                            icon: Users,
+                            color: "text-violet-500",
+                          },
+                        ].map((item, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={cn(
+                                  "p-2 rounded-lg bg-card border shadow-sm",
+                                  item.color,
                                 )}
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="space-y-6">
-                        {/* Quick Actions Side Card */}
-                        <Card className="bg-primary text-primary-foreground shadow-2xl overflow-hidden relative">
-                            <div className="absolute -right-8 -bottom-8 opacity-20 pointer-events-none">
-                                <ShieldCheck className="w-48 h-48" />
+                              >
+                                <item.icon className="w-4 h-4" />
+                              </div>
+                              <span className="text-sm font-medium text-muted-foreground">
+                                {item.label}
+                              </span>
                             </div>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">Contract Controls</CardTitle>
-                                <CardDescription className="text-primary-foreground/70">Review and finalize work</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4 pt-4">
-                                <Button
-                                    className="w-full bg-white text-primary hover:bg-white/90 h-14 text-lg font-black shadow-xl"
-                                    onClick={() => setShowPayment(true)}
-                                    disabled={project.status !== 'under_review'}
-                                >
-                                    Approve & Release Funds
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    className="w-full border-white/40 hover:bg-white/10 h-14 font-bold"
-                                    onClick={handleRequestRevision}
-                                    disabled={project.status !== 'under_review'}
-                                >
-                                    Request Revision
-                                </Button>
-                            </CardContent>
-                            <CardFooter className="bg-black/10 p-4 flex justify-between items-center text-xs font-bold uppercase tracking-widest border-t border-white/10">
-                                <span>Status Guarantee active</span>
-                                <ShieldCheck className="w-4 h-4" />
-                            </CardFooter>
-                        </Card>
-
-                        {/* Professional Contact */}
-                        <Card className="border-border/40">
-                            <CardContent className="pt-8">
-                                <div className="flex flex-col items-center text-center space-y-6">
-                                    <div className="relative">
-                                        <Avatar className="h-24 w-24 border-4 border-background ring-4 ring-primary/10">
-                                            <AvatarImage src={project.hiredDeveloper.avatar} />
-                                            <AvatarFallback>AC</AvatarFallback>
-                                        </Avatar>
-                                        <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-background" title="Developer is online"></div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h3 className="font-black text-xl">{project.hiredDeveloper.name}</h3>
-                                        <p className="text-muted-foreground font-medium">{project.hiredDeveloper.title}</p>
-                                    </div>
-                                    <Button className="w-full gap-2 rounded-xl h-12 font-bold" variant="secondary">
-                                        <MessageSquare className="w-5 h-5" /> Instant Message
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                            <span className="font-bold text-sm tracking-tight">
+                              {item.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                  </TabsContent>
+
+                  <TabsContent
+                    value="milestones"
+                    className="p-8 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  >
+                    {project.milestones.map((milestone) => (
+                      <div
+                        key={milestone.id}
+                        className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-muted/20 border border-border/50 group hover:border-primary/20 transition-all"
+                      >
+                        <div className="flex items-center gap-5">
+                          <div className="w-12 h-12 rounded-full bg-background border flex items-center justify-center font-black text-lg shadow-sm group-hover:scale-110 transition-transform">
+                            {milestone.id}
+                          </div>
+                          <div>
+                            <h5 className="font-black text-lg tracking-tight">
+                              {milestone.name}
+                            </h5>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5" />{" "}
+                                {milestone.date}
+                              </span>
+                              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                                <DollarSign className="w-3.5 h-3.5" />{" "}
+                                {milestone.amount}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "px-4 py-1.5 font-black tracking-widest text-[10px]",
+                            milestone.status === "completed"
+                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                              : milestone.status === "active"
+                                ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                                : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {milestone.status.toUpperCase()}
+                        </Badge>
+                      </div>
+                    ))}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* Proposals Preview Card */}
+            <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
+              <CardHeader className="p-8 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="text-xl font-black">
+                    Top Proposals
+                  </CardTitle>
+                  <Badge className="bg-primary/10 text-primary">
+                    {project.proposals}
+                  </Badge>
                 </div>
-            </div>
-        </DashboardLayout>
-    );
+                <Button
+                  variant="link"
+                  className="font-bold gap-2 text-primary"
+                  asChild
+                >
+                  <Link to={`/client/projects/${project.id}/proposals`}>
+                    View All Proposals <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </Button>
+              </CardHeader>
+              <CardContent className="p-8 pt-0 space-y-4">
+                {project.proposalsList.map((proposal, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/40 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={proposal.avatar} />
+                        <AvatarFallback>{proposal.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-bold text-sm">{proposal.name}</p>
+                        <div className="flex items-center gap-1.5 text-xs text-amber-500 font-black">
+                          <Star className="w-3 h-3 fill-amber-500" />{" "}
+                          {proposal.rating}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-black text-sm">{proposal.bid}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {proposal.time} delivery
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Activity Timeline Card */}
+            <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="p-8">
+                <CardTitle className="text-xl font-black">Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 pt-0">
+                <div className="space-y-8 relative">
+                  <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border/40" />
+                  {project.activity.map((item, i) => (
+                    <div key={i} className="flex gap-6 relative">
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-full bg-background border flex items-center justify-center shrink-0 z-10",
+                          item.color,
+                        )}
+                      >
+                        <item.icon className="w-4 h-4" />
+                      </div>
+                      <div className="pt-1">
+                        <p className="font-bold text-sm">{item.text}</p>
+                        <p className="text-xs text-muted-foreground mt-1 tracking-tight">
+                          {item.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar (35%) */}
+          <div className="lg:col-span-4 space-y-8 sticky top-24">
+            {/* Project Stats Card */}
+            <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl shadow-background/20 overflow-hidden">
+              <div className="h-2 bg-gradient-to-r from-primary to-blue-600" />
+              <CardContent className="p-8 space-y-8">
+                <div className="space-y-1">
+                  <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                    Pricing Model
+                  </p>
+                  <p className="text-3xl font-black tracking-tight">
+                    {project.budget}
+                  </p>
+                  <p className="text-sm text-primary font-bold">
+                    {project.budgetType}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-muted/30 border border-border/40">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
+                      Views
+                    </p>
+                    <p className="text-2xl font-black">{project.views}</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted/30 border border-border/40">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
+                      Bids
+                    </p>
+                    <p className="text-2xl font-black">{project.proposals}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center bg-card/40 p-3 rounded-xl border">
+                    <div className="flex items-center gap-3">
+                      <Bookmark className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm font-bold">Shortlisted</span>
+                    </div>
+                    <span className="font-black text-sm">
+                      {project.shortlisted}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center bg-card/40 p-3 rounded-xl border">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="w-4 h-4 text-emerald-500" />
+                      <span className="text-sm font-bold">In Discussion</span>
+                    </div>
+                    <span className="font-black text-sm">3</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Primary Actions Card */}
+            <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm shadow-2xl shadow-primary/10">
+              <CardContent className="p-8 space-y-4">
+                {project.status === "open" ? (
+                  <>
+                    <Button className="w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-lg shadow-primary/30 group">
+                      <Users className="w-5 h-5 transition-transform group-hover:scale-110" />
+                      View All Proposals
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full h-14 rounded-2xl font-black bg-background/50 border-border/60"
+                    >
+                      Edit Project Details
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full h-12 rounded-xl font-bold text-primary hover:bg-primary/10"
+                    >
+                      Boost with AI Search
+                    </Button>
+                    <div className="pt-2">
+                      <Button
+                        variant="ghost"
+                        className="w-full text-destructive hover:bg-destructive/10 font-bold gap-2"
+                      >
+                        <Trash2 className="w-4 h-4" /> Close Project
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Button className="w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-lg shadow-primary/30 group">
+                      <MessageSquare className="w-5 h-5 transition-transform group-hover:scale-110" />
+                      Message Specialist
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full h-14 rounded-2xl font-black bg-background/50 border-border/60"
+                    >
+                      View Legal Contract
+                    </Button>
+                    {project.status === "in_progress" && (
+                      <Button
+                        variant="ghost"
+                        className="w-full h-12 rounded-xl font-bold text-amber-500 hover:bg-amber-500/10"
+                      >
+                        Request Revision
+                      </Button>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Hired Freelancer Card */}
+            {(project.status === "in_progress" ||
+              project.status === "completed") &&
+              project.hiredDeveloper && (
+                <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden group">
+                  <div className="p-6 border-b bg-muted/30">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                      Active Specialist
+                    </p>
+                  </div>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <Avatar className="h-16 w-16 ring-4 ring-primary/10">
+                          <AvatarImage src={project.hiredDeveloper.avatar} />
+                          <AvatarFallback>
+                            {project.hiredDeveloper.name[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div
+                          className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-4 border-background rounded-full"
+                          title="Online"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h5 className="font-black text-lg tracking-tight truncate">
+                            {project.hiredDeveloper.name}
+                          </h5>
+                          <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
+                        </div>
+                        <p className="text-sm text-muted-foreground font-medium truncate">
+                          {project.hiredDeveloper.title}
+                        </p>
+                        <div className="flex items-center gap-1 mt-1 font-black text-xs text-amber-500">
+                          <Star className="w-3 h-3 fill-amber-500" />{" "}
+                          {project.hiredDeveloper.rating}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="secondary"
+                        className="font-black text-xs h-10 rounded-xl"
+                      >
+                        Chat
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="font-black text-xs h-10 rounded-xl"
+                      >
+                        Contract
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+            {/* Danger Zone Accordion */}
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="actions" className="border-none">
+                <AccordionTrigger className="flex flex-row items-center gap-2 p-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:no-underline rounded-2xl hover:bg-muted/50 transition-all">
+                  Project Actions
+                </AccordionTrigger>
+                <AccordionContent className="pt-4 px-2 space-y-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl"
+                  >
+                    <Pause className="w-4 h-4" /> Pause Project
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl"
+                  >
+                    <Archive className="w-4 h-4" /> Archive Project
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" /> Delete Permanently
+                  </Button>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
 };
 
 export default ClientProjectDetailsPage;

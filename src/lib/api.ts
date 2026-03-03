@@ -55,6 +55,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    if (originalRequest.url?.includes('/auth/refresh') || 
+        originalRequest.url?.includes('/auth/login') || 
+        originalRequest.url?.includes('/auth/signup')) {
+      return Promise.reject(error)
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         // Already refreshing — queue this request
@@ -84,7 +90,6 @@ api.interceptors.response.use(
         // Refresh failed — force logout
         processQueue(refreshError, null)
         clearAccessToken()
-        window.location.href = '/login'
         return Promise.reject(refreshError)
 
       } finally {

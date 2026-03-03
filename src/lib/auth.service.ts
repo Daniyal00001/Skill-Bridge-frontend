@@ -9,11 +9,16 @@ export interface SignupPayload {
   role: 'client' | 'freelancer'
 }
 
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
 export interface AuthUser {
   id: string
   name: string
   email: string
-  role: 'CLIENT' | 'FREELANCER' | 'ADMIN'
+  role: 'CLIENT' | 'FREELANCER' | 'ADMIN' | null
   profileImage: string | null
   isEmailVerified: boolean
 }
@@ -27,14 +32,39 @@ export interface AuthResponse {
   }
 }
 
-// ── Actions ───────────────────────────────────────────────────
 
-export const signupAPI = async (payload: SignupPayload): Promise<AuthResponse> => {
+// Api calls
+// ── Signup ────────────────────────────────────────────────────
+export const signupAPI = async (
+  payload: SignupPayload
+): Promise<AuthResponse> => {
   const response = await api.post<AuthResponse>('/auth/signup', payload)
   return response.data
 }
 
-export const loginAPI = async (email: string, password: string, role?: string): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', { email, password, role })
+// ── Login ─────────────────────────────────────────────────────
+export const loginAPI = async (
+  payload: LoginPayload
+): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/auth/login', payload)
   return response.data
+}
+
+// ── Logout ────────────────────────────────────────────────────
+export const logoutAPI = async (): Promise<void> => {
+  await api.post('/auth/logout')
+}
+
+
+// ── Forgot Password ───────────────────────────────────────────
+export const forgotPasswordAPI = async (email: string): Promise<void> => {
+  await api.post('/auth/forgot-password', { email })
+}
+
+// ── Reset Password ────────────────────────────────────────────
+export const resetPasswordAPI = async (
+  token: string,
+  password: string
+): Promise<void> => {
+  await api.post('/auth/reset-password', { token, password })
 }

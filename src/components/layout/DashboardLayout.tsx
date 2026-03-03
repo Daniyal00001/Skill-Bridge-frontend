@@ -1,9 +1,9 @@
-import { ReactNode, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { ReactNode, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Bell,
   ChevronLeft,
@@ -33,10 +33,10 @@ import {
   LogOut,
   User,
   Sparkles,
-} from 'lucide-react';
-import { mockNotifications } from '@/lib/mockData';
-import { cn } from '@/lib/utils';
-import logo from '@/assets/logo/logo.png';
+} from "lucide-react";
+import { mockNotifications } from "@/lib/mockData";
+import { cn } from "@/lib/utils";
+import logo from "@/assets/logo/logo.png";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -49,6 +49,11 @@ interface NavItem {
   badge?: number;
 }
 
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -56,48 +61,162 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
-  const getNavItems = (): NavItem[] => {
+  const getNavGroups = (): NavGroup[] => {
     switch (user?.role) {
-      case 'CLIENT':
+      case "CLIENT":
         return [
-          { icon: Home, label: 'Dashboard', href: '/client' },
-          { icon: PlusCircle, label: 'Post a New Project', href: '/client/post-project' },
-          { icon: FolderOpen, label: 'My Projects', href: '/client/projects' },
-          { icon: Sparkles, label: 'Help Me Find', href: '/client/help-me-find' },
-          { icon: MessageSquare, label: 'Messages', href: '/client/messages', badge: 2 },
-          { icon: Star, label: 'Reviews', href: '/client/reviews' },
-          { icon: Settings, label: 'Settings', href: '/settings' },
+          {
+            label: "Main",
+            items: [
+              { icon: Home, label: "Dashboard", href: "/client" },
+              {
+                icon: PlusCircle,
+                label: "Post Project",
+                href: "/client/post-project",
+              },
+              {
+                icon: FolderOpen,
+                label: "My Projects",
+                href: "/client/projects",
+              },
+              {
+                icon: FileText,
+                label: "Drafts",
+                href: "/client/drafts",
+              },
+            ],
+          },
+          {
+            label: "Talent",
+            items: [
+              {
+                icon: Search,
+                label: "Browse Freelancers",
+                href: "/client/browse",
+              },
+              {
+                icon: Sparkles,
+                label: "AI Assistant",
+                href: "/client/ai-assistant",
+              },
+            ],
+          },
+          {
+            label: "Manage",
+            items: [
+              { icon: FileText, label: "Proposals", href: "/client/proposals" },
+              {
+                icon: MessageSquare,
+                label: "Messages",
+                href: "/client/messages",
+                badge: 2,
+              },
+              { icon: Star, label: "Reviews", href: "/client/reviews" },
+            ],
+          },
+          {
+            label: "Account",
+            items: [
+              { icon: User, label: "Profile", href: "/client/profile" },
+              { icon: Settings, label: "Settings", href: "/settings" },
+            ],
+          },
         ];
-      case 'FREELANCER':
+      case "FREELANCER":
         return [
-          { icon: Home, label: 'Dashboard', href: '/freelancer' },
-          { icon: Search, label: 'Browse Projects', href: '/freelancer/browse' },
-          { icon: FileText, label: 'My Proposals', href: '/freelancer/proposals' },
-          { icon: Briefcase, label: 'Active Projects', href: '/freelancer/projects' },
-          { icon: MessageSquare, label: 'Messages', href: '/freelancer/messages', badge: 3 },
-          { icon: User, label: 'Profile', href: '/freelancer/profile' },
-          { icon: Settings, label: 'Settings', href: '/settings' },
+          {
+            label: "Main",
+            items: [
+              { icon: Home, label: "Dashboard", href: "/freelancer" },
+              {
+                icon: Search,
+                label: "Browse Projects",
+                href: "/freelancer/browse",
+              },
+            ],
+          },
+          {
+            label: "Work",
+            items: [
+              {
+                icon: FileText,
+                label: "My Proposals",
+                href: "/freelancer/proposals",
+              },
+              {
+                icon: Briefcase,
+                label: "Active Projects",
+                href: "/freelancer/projects",
+              },
+            ],
+          },
+          {
+            label: "Communication",
+            items: [
+              {
+                icon: MessageSquare,
+                label: "Messages",
+                href: "/freelancer/messages",
+                badge: 3,
+              },
+            ],
+          },
+          {
+            label: "Account",
+            items: [
+              { icon: User, label: "Profile", href: "/freelancer/profile" },
+              {
+                icon: Settings,
+                label: "Settings",
+                href: "/freelancer/settings",
+              },
+            ],
+          },
         ];
-      case 'ADMIN':
+      case "ADMIN":
         return [
-          { icon: Home, label: 'Dashboard', href: '/admin' },
-          { icon: Users, label: 'Users', href: '/admin/users' },
-          { icon: FolderOpen, label: 'Projects', href: '/admin/projects' },
-          { icon: AlertTriangle, label: 'Disputes', href: '/admin/disputes', badge: 3 },
-          { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-          { icon: Shield, label: 'Security', href: '/admin/security' },
-          { icon: Settings, label: 'Settings', href: '/settings' },
+          {
+            label: "Overview",
+            items: [
+              { icon: Home, label: "Dashboard", href: "/admin" },
+              { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
+            ],
+          },
+          {
+            label: "Users & Content",
+            items: [
+              { icon: Users, label: "Users", href: "/admin/users" },
+              { icon: FolderOpen, label: "Projects", href: "/admin/projects" },
+              {
+                icon: AlertTriangle,
+                label: "Disputes",
+                href: "/admin/disputes",
+                badge: 3,
+              },
+            ],
+          },
+          {
+            label: "System",
+            items: [
+              { icon: Shield, label: "Security", href: "/admin/security" },
+              { icon: Settings, label: "Settings", href: "/settings" },
+            ],
+          },
         ];
       default:
         return [];
     }
   };
 
-  const navItems = getNavItems();
+  const navGroups = getNavGroups();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch {
+      navigate("/login");
+    }
   };
 
   return (
@@ -105,51 +224,95 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300',
-          sidebarCollapsed ? 'w-16' : 'w-64'
+          "fixed left-0 top-0 z-40 h-screen bg-card/70 backdrop-blur-md border-r transition-all duration-300 ease-in-out flex flex-col",
+          sidebarCollapsed ? "w-16" : "w-60",
         )}
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b">
           <Link to="/" className="flex items-center">
             <div className=" h-11 flex items-center justify-center flex-shrink-0">
-              <img src={logo} alt="SkillBridge" className="w-full h-full object-contain" />
+              <img
+                src={logo}
+                alt="SkillBridge"
+                className="w-full h-full object-contain"
+              />
             </div>
             {!sidebarCollapsed && (
-              <span className="text-lg font-bold gradient-text">SkillBridge</span>
+              <span className="text-lg font-bold gradient-text">
+                SkillBridge
+              </span>
             )}
           </Link>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-3 space-y-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
-                  isActive
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+        {/* Main Navigation */}
+        <nav
+          className={cn(
+            "flex-1 space-y-6 overflow-y-auto scrollbar-none",
+            sidebarCollapsed ? "py-4 px-2" : "p-4",
+          )}
+        >
+          {navGroups
+            .filter((g) => g.label !== "Account" && g.label !== "System")
+            .map((group, idx) => (
+              <div key={idx} className="space-y-1">
+                {!sidebarCollapsed && group.label && (
+                  <h3 className="px-3 text-[10px] uppercase tracking-wider font-bold text-muted-foreground/60 mb-2">
+                    {group.label}
+                  </h3>
                 )}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {!sidebarCollapsed && (
-                  <>
-                    <span className="flex-1 font-medium">{item.label}</span>
-                    {item.badge && (
-                      <Badge variant="destructive" className="h-5 px-1.5">
-                        {item.badge}
-                      </Badge>
-                    )}
-                  </>
-                )}
-              </Link>
-            );
-          })}
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "group flex items-center rounded-lg transition-all duration-200 outline-none",
+                          sidebarCollapsed
+                            ? "justify-center w-10 h-10 mx-auto"
+                            : "gap-3 px-3 py-2 border-l-[3px]",
+                          isActive
+                            ? sidebarCollapsed
+                              ? "bg-primary/8 text-primary font-semibold"
+                              : "bg-primary/8 text-primary font-semibold border-primary"
+                            : sidebarCollapsed
+                              ? "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground"
+                              : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
+                        )}
+                      >
+                        <item.icon
+                          className={cn(
+                            "w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110",
+                            isActive
+                              ? "text-primary"
+                              : "text-muted-foreground/60 group-hover:text-foreground",
+                          )}
+                        />
+
+                        {!sidebarCollapsed && (
+                          <>
+                            <span className="flex-1 text-[13px] tracking-tight">
+                              {item.label}
+                            </span>
+                            {item.badge && (
+                              <Badge
+                                variant="destructive"
+                                className="h-4.5 min-w-[18px] px-1 text-[10px] flex items-center justify-center border-none shadow-sm"
+                              >
+                                {item.badge}
+                              </Badge>
+                            )}
+                          </>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
         </nav>
 
         {/* Collapse Button */}
@@ -164,38 +327,123 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           )}
         </button>
 
-        {/* User Info */}
-        {!sidebarCollapsed && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-card">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
+        {/* Persistent Bottom Section (Account & Profile) */}
+        <div
+          className={cn(
+            "border-t bg-card/50 backdrop-blur-md transition-all duration-300 flex flex-col items-center",
+            sidebarCollapsed ? "p-2 space-y-2" : "p-4 space-y-4",
+          )}
+        >
+          {/* Account Group */}
+          <div className="w-full">
+            {navGroups
+              .filter((g) => g.label === "Account" || g.label === "System")
+              .map((group, idx) => (
+                <div key={idx} className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "group flex items-center rounded-lg transition-all duration-200 outline-none w-full border-l-[3px]",
+                          sidebarCollapsed
+                            ? "justify-center h-10 w-10 mx-auto border-transparent"
+                            : "gap-3 px-3 py-2",
+                          isActive
+                            ? "bg-primary/8 text-primary font-semibold border-primary"
+                            : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
+                        )}
+                      >
+                        <item.icon
+                          className={cn(
+                            "w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110",
+                            isActive
+                              ? "text-primary"
+                              : "text-muted-foreground/60 group-hover:text-foreground",
+                          )}
+                        />
+                        {!sidebarCollapsed && (
+                          <span className="flex-1 text-[13px] tracking-tight">
+                            {item.label}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
           </div>
-        )}
+
+          {/* User Profile */}
+          <div
+            className={cn(
+              "flex items-center transition-all duration-300 w-full",
+              sidebarCollapsed ? "justify-center h-10 w-10" : "gap-3 px-1",
+            )}
+          >
+            <Avatar
+              className={cn(
+                "border-2 border-primary/10 shadow-sm transition-all",
+                sidebarCollapsed ? "h-8 w-8" : "h-9 w-9",
+              )}
+            >
+              <AvatarImage src={user?.profileImage} alt={user?.name} />
+              <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
+                {user?.name?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold truncate leading-none mb-1">
+                  {user?.name}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-bold">
+                  {user?.role}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "flex items-center font-semibold text-muted-foreground hover:text-destructive transition-all duration-200 rounded-lg hover:bg-destructive/8 group w-full",
+              sidebarCollapsed
+                ? "justify-center h-10 w-10 mx-auto"
+                : "gap-3 text-[13px] px-3 py-2",
+            )}
+          >
+            <LogOut
+              className={cn(
+                "transition-transform",
+                sidebarCollapsed
+                  ? "w-4 h-4"
+                  : "w-4 h-4 group-hover:-translate-x-0.5",
+              )}
+            />
+            {!sidebarCollapsed && <span>Logout</span>}
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
       <div
         className={cn(
-          'flex-1 transition-all duration-300',
-          sidebarCollapsed ? 'ml-16' : 'ml-64'
+          "flex-1 transition-all duration-300 ease-in-out",
+          sidebarCollapsed ? "ml-16" : "ml-60",
         )}
       >
         {/* Top Bar */}
         <header className="h-16 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold">
-              {navItems.find((item) => item.href === location.pathname)?.label || 'Dashboard'}
+            <h1 className="text-sm font-bold tracking-tight text-foreground/80">
+              {navGroups
+                .flatMap((g) => g.items)
+                .find((item) => item.href === location.pathname)?.label ||
+                "Dashboard"}
             </h1>
           </div>
 
@@ -231,7 +479,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/notifications" className="w-full text-center text-primary">
+                  <Link
+                    to="/notifications"
+                    className="w-full text-center text-primary"
+                  >
                     View all notifications
                   </Link>
                 </DropdownMenuItem>
@@ -243,7 +494,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarImage src={user?.profileImage} alt={user?.name} />
                     <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -259,10 +510,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/settings">Settings</Link>
+                  <Link
+                    to={
+                      user?.role === "FREELANCER"
+                        ? "/freelancer/settings"
+                        : "/settings"
+                    }
+                  >
+                    Settings
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive"
+                >
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>

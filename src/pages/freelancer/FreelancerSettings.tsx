@@ -3,8 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -13,65 +12,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   User,
   Lock,
-  Building,
   Mail,
-  Camera,
   Loader2,
-  Briefcase,
-  Globe,
-  Info,
-  CreditCard,
-  CheckCircle2,
-  MapPin,
-  Clock,
-  Calendar,
-  Award,
-  ShieldCheck,
   Activity,
-  Trophy,
-  Star,
+  CreditCard,
+  ShieldCheck,
+  Wallet,
+  Phone,
 } from "lucide-react";
 
-// Mock User Data
+// Mock Freelancer Data
 const MOCK_USER = {
-  name: "John Client",
-  email: "john@techcorp.com",
-  company: "TechCorp Inc.",
-  avatar: "https://github.com/shadcn.png",
-  bio: "Visionary entrepreneur focused on scaling AI-driven SaaS platforms. Looking for top-tier developers who value code quality and long-term collaboration.",
-  companyType: "Startup",
-  industry: "e-commerce",
-  hiringPreference: "Hourly",
-  budgetRange: "Medium",
-  experienceLevel: "Expert",
-  commMethod: "Slack/Messages",
-  timezone: "UTC+5",
-  availability: "Part-time (20hrs/week)",
-  totalProjects: 14,
-  completedProjects: 12,
-  avgRating: 4.8,
-  memberSince: "Jan 2024",
+  name: "Alex Chen",
+  email: "alex.chen@work.com",
+  phone: "+1 (555) 000-1111",
+  accountType: "Freelancer",
   emailVerified: true,
-  paymentVerified: true,
-  profileCompletion: 85,
+  phoneVerified: true,
+  balance: 1250.0,
 };
 
-const ClientSettingsPage = () => {
+const FreelancerSettings = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(MOCK_USER);
 
@@ -100,13 +67,13 @@ const ClientSettingsPage = () => {
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight">Settings</h1>
             <p className="text-muted-foreground mt-1 text-lg">
-              Manage your account security and preferences.
+              Manage your freelancer account and payment preferences.
             </p>
           </div>
           <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
             <ShieldCheck className="w-5 h-5 text-primary" />
             <span className="text-sm font-bold text-primary">
-              Account Status: Verified
+              Account Status: Top Rated
             </span>
           </div>
         </div>
@@ -119,11 +86,11 @@ const ClientSettingsPage = () => {
             <TabsTrigger value="security" className="gap-2">
               <Lock className="h-4 w-4" /> Security
             </TabsTrigger>
+            <TabsTrigger value="withdrawals" className="gap-2">
+              <Wallet className="h-4 w-4" /> Withdrawals
+            </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
               <Activity className="h-4 w-4" /> Notifications
-            </TabsTrigger>
-            <TabsTrigger value="billing" className="gap-2">
-              <CreditCard className="h-4 w-4" /> Billing
             </TabsTrigger>
           </TabsList>
 
@@ -135,9 +102,9 @@ const ClientSettingsPage = () => {
             <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
-                  <CardTitle>Account Details</CardTitle>
+                  <CardTitle>Account Information</CardTitle>
                   <CardDescription>
-                    Update your personal information and contact details.
+                    Primary account contact details.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -153,6 +120,20 @@ const ClientSettingsPage = () => {
                       />
                     </div>
                     <div className="space-y-2 text-left">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="phone"
+                          className="pl-10"
+                          defaultValue={user.phone}
+                          onChange={(e) =>
+                            setUser({ ...user, phone: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2 md:col-span-2 text-left">
                       <Label htmlFor="email">Email Address</Label>
                       <Input
                         id="email"
@@ -164,7 +145,7 @@ const ClientSettingsPage = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end border-t p-6">
-                  <Button onClick={handleSaveAccount}>Save Account</Button>
+                  <Button onClick={handleSaveAccount}>Save Changes</Button>
                 </CardFooter>
               </Card>
 
@@ -172,23 +153,27 @@ const ClientSettingsPage = () => {
                 <Card className="border-border/40 bg-card/80 shadow-md">
                   <CardHeader className="pb-3 text-left">
                     <CardTitle className="text-lg font-bold">
-                      Verification
+                      Account Verification
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4 text-left">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Email
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-primary" />
+                        <span className="text-sm">Email</span>
+                      </div>
                       <Badge className="bg-green-500/10 text-green-500 border-none">
                         Verified
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Identity
-                      </span>
-                      <Badge variant="outline">Pending</Badge>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-primary" />
+                        <span className="text-sm">Phone</span>
+                      </div>
+                      <Badge className="bg-green-500/10 text-green-500 border-none">
+                        Verified
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -203,9 +188,9 @@ const ClientSettingsPage = () => {
           >
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl max-w-2xl">
               <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
+                <CardTitle>Password & Security</CardTitle>
                 <CardDescription>
-                  Protect your account with a strong password.
+                  Update your credentials regularly to stay safe.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -219,9 +204,63 @@ const ClientSettingsPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end border-t p-6">
-                <Button onClick={handleChangePassword}>Update Security</Button>
+                <Button onClick={handleChangePassword}>Update Password</Button>
               </CardFooter>
             </Card>
+          </TabsContent>
+
+          {/* Withdrawals Tab */}
+          <TabsContent
+            value="withdrawals"
+            className="animate-in fade-in-50 duration-500"
+          >
+            <div className="grid md:grid-cols-[1fr_2fr] gap-6">
+              <Card className="border-none bg-primary text-primary-foreground shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-white/80 text-sm uppercase tracking-widest">
+                    Available Balance
+                  </CardTitle>
+                  <p className="text-4xl font-black">
+                    ${user.balance.toFixed(2)}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full bg-white text-primary hover:bg-white/90 font-bold">
+                    Withdraw Funds
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
+                <CardHeader>
+                  <CardTitle>Withdrawal Methods</CardTitle>
+                  <CardDescription>
+                    How you receive your earnings.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-primary/5">
+                    <div className="flex items-center gap-3">
+                      <Wallet className="h-6 w-6 text-primary" />
+                      <div>
+                        <p className="font-bold">Bank Account (...8829)</p>
+                        <p className="text-xs text-muted-foreground">
+                          Standard Withdrawal (2-3 days)
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline">Default</Badge>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full border-dashed group"
+                  >
+                    <CreditCard className="mr-2 h-4 w-4 group-hover:text-primary" />
+                    Add Method
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Notifications Tab */}
@@ -231,24 +270,24 @@ const ClientSettingsPage = () => {
           >
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl max-w-2xl">
               <CardHeader>
-                <CardTitle>Notifications</CardTitle>
+                <CardTitle>Freelancer Notifications</CardTitle>
                 <CardDescription>
-                  Choose how you want to be notified.
+                  Stay updated on new projects and invitations.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-left">
                 {[
                   {
-                    title: "Project Updates",
-                    desc: "Get notified when someone bids on your project.",
+                    title: "New Job Matches",
+                    desc: "Get notified when a job matches your skills.",
                   },
                   {
-                    title: "Messages",
-                    desc: "Get notified when you receive a message.",
+                    title: "Proposal Status",
+                    desc: "Get notified when your proposal is viewed or accepted.",
                   },
                   {
-                    title: "Account Alerts",
-                    desc: "Security and billing notifications.",
+                    title: "Direct Invitations",
+                    desc: "Get notified when a client invites you to a project.",
                   },
                 ].map((item, i) => (
                   <div
@@ -269,31 +308,10 @@ const ClientSettingsPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Billing Tab */}
-          <TabsContent
-            value="billing"
-            className="animate-in fade-in-50 duration-500"
-          >
-            <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl max-w-2xl">
-              <CardHeader>
-                <CardTitle>Billing & Payments</CardTitle>
-                <CardDescription>
-                  Manage your payment methods and billing history.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="p-6 border-2 border-dashed rounded-xl flex flex-col items-center gap-3 text-muted-foreground hover:border-primary/50 hover:text-primary transition-all cursor-pointer">
-                  <CreditCard className="h-8 w-8" />
-                  <p className="font-bold">Add Payment Method</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
   );
 };
 
-export default ClientSettingsPage;
+export default FreelancerSettings;
