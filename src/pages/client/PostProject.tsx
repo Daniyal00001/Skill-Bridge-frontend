@@ -103,6 +103,14 @@ const SKILL_SUGGESTIONS = [
   "Solidity",
 ];
 
+const VALIDATION = {
+  title: { min: 5, max: 80 },
+  shortDesc: { min: 10, max: 120 },
+  fullDesc: { min: 30, max: 2000 },
+  functionalReq: { min: 20, max: 2000 },
+  skill: { min: 2, max: 30 },
+};
+
 const PostProjectPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -140,11 +148,23 @@ const PostProjectPage = () => {
   const validateStep = (currentStep: number) => {
     switch (currentStep) {
       case 1:
-        return formData.title && formData.category && formData.subCategory;
+        return (
+          formData.title.length >= VALIDATION.title.min &&
+          formData.title.length <= VALIDATION.title.max &&
+          formData.shortDesc.length >= VALIDATION.shortDesc.min &&
+          formData.shortDesc.length <= VALIDATION.shortDesc.max &&
+          !!formData.category &&
+          !!formData.subCategory
+        );
       case 2:
-        return formData.fullDesc && formData.functionalReq;
+        return (
+          formData.fullDesc.length >= VALIDATION.fullDesc.min &&
+          formData.fullDesc.length <= VALIDATION.fullDesc.max &&
+          formData.functionalReq.length >= VALIDATION.functionalReq.min &&
+          formData.functionalReq.length <= VALIDATION.functionalReq.max
+        );
       case 3:
-        return formData.deadline && formData.budget > 0;
+        return !!formData.deadline && formData.budget > 0;
       case 4:
         return formData.skills.length > 0;
       case 5:
@@ -295,23 +315,38 @@ const PostProjectPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-sm font-semibold">
-                      Project Title
+                      Project Title *
                     </label>
                     <Input
                       placeholder="e.g., E-commerce App Redesign"
                       value={formData.title}
-                      onChange={(e) =>
-                        updateFormData({ title: e.target.value })
-                      }
+                      onChange={(e) => {
+                        if (e.target.value.length <= VALIDATION.title.max) {
+                          updateFormData({ title: e.target.value });
+                        }
+                      }}
                       className="h-12 text-lg focus-visible:ring-primary/30"
                     />
+                    <div className="flex justify-between items-center pt-1">
+                      {showErrors &&
+                      formData.title.length < VALIDATION.title.min ? (
+                        <p className="text-[11px] text-destructive font-medium">
+                          Must be at least {VALIDATION.title.min} characters
+                        </p>
+                      ) : (
+                        <span />
+                      )}
+                      <p className="text-[11px] text-muted-foreground">
+                        {formData.title.length} / {VALIDATION.title.max}
+                      </p>
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">
-                        Main Category
+                        Main Category *
                       </label>
                       <Select
                         value={formData.category}
@@ -333,7 +368,7 @@ const PostProjectPage = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">
-                        Sub Category
+                        Sub Category *
                       </label>
                       <Select
                         disabled={!formData.category}
@@ -357,18 +392,33 @@ const PostProjectPage = () => {
                       </Select>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-sm font-semibold">
-                      One-line Summary
+                      One-line Summary *
                     </label>
                     <Input
                       placeholder="Capture attention in one sentence"
                       value={formData.shortDesc}
-                      onChange={(e) =>
-                        updateFormData({ shortDesc: e.target.value })
-                      }
+                      onChange={(e) => {
+                        if (e.target.value.length <= VALIDATION.shortDesc.max) {
+                          updateFormData({ shortDesc: e.target.value });
+                        }
+                      }}
                       className="h-12"
                     />
+                    <div className="flex justify-between items-center pt-1">
+                      {showErrors &&
+                      formData.shortDesc.length < VALIDATION.shortDesc.min ? (
+                        <p className="text-[11px] text-destructive font-medium">
+                          Must be at least {VALIDATION.shortDesc.min} characters
+                        </p>
+                      ) : (
+                        <span />
+                      )}
+                      <p className="text-[11px] text-muted-foreground">
+                        {formData.shortDesc.length} / {VALIDATION.shortDesc.max}
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between w-full pt-6 border-t items-center">
@@ -409,31 +459,66 @@ const PostProjectPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-sm font-semibold">
-                      Describe your vision
+                      Describe your vision *
                     </label>
                     <Textarea
                       placeholder="What's the big picture? Why are you building this?"
                       className="min-h-[120px] p-4"
                       value={formData.fullDesc}
-                      onChange={(e) =>
-                        updateFormData({ fullDesc: e.target.value })
-                      }
+                      onChange={(e) => {
+                        if (e.target.value.length <= VALIDATION.fullDesc.max) {
+                          updateFormData({ fullDesc: e.target.value });
+                        }
+                      }}
                     />
+                    <div className="flex justify-between items-center pt-1">
+                      {showErrors &&
+                      formData.fullDesc.length < VALIDATION.fullDesc.min ? (
+                        <p className="text-[11px] text-destructive font-medium">
+                          Must be at least {VALIDATION.fullDesc.min} characters
+                        </p>
+                      ) : (
+                        <span />
+                      )}
+                      <p className="text-[11px] text-muted-foreground">
+                        {formData.fullDesc.length} / {VALIDATION.fullDesc.max}
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-sm font-semibold">
-                      Functional Requirements
+                      Functional Requirements *
                     </label>
                     <Textarea
                       placeholder="List specific features or modules you need..."
                       className="min-h-[120px] p-4"
                       value={formData.functionalReq}
-                      onChange={(e) =>
-                        updateFormData({ functionalReq: e.target.value })
-                      }
+                      onChange={(e) => {
+                        if (
+                          e.target.value.length <= VALIDATION.functionalReq.max
+                        ) {
+                          updateFormData({ functionalReq: e.target.value });
+                        }
+                      }}
                     />
+                    <div className="flex justify-between items-center pt-1">
+                      {showErrors &&
+                      formData.functionalReq.length <
+                        VALIDATION.functionalReq.min ? (
+                        <p className="text-[11px] text-destructive font-medium">
+                          Must be at least {VALIDATION.functionalReq.min}{" "}
+                          characters
+                        </p>
+                      ) : (
+                        <span />
+                      )}
+                      <p className="text-[11px] text-muted-foreground">
+                        {formData.functionalReq.length} /{" "}
+                        {VALIDATION.functionalReq.max}
+                      </p>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold flex items-center gap-2">
@@ -795,26 +880,41 @@ const PostProjectPage = () => {
                             + {skill}
                           </button>
                         ))}
-                      <Input
-                        placeholder="Type custom skill & press Enter..."
-                        value={customSkill}
-                        onChange={(e) => setCustomSkill(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && customSkill.trim()) {
-                            e.preventDefault();
-                            if (!formData.skills.includes(customSkill.trim())) {
-                              updateFormData({
-                                skills: [
-                                  ...formData.skills,
-                                  customSkill.trim(),
-                                ],
-                              });
+                      <div className="flex flex-col gap-1">
+                        <Input
+                          placeholder="Type custom skill & press Enter..."
+                          value={customSkill}
+                          onChange={(e) => {
+                            if (e.target.value.length <= VALIDATION.skill.max) {
+                              setCustomSkill(e.target.value);
                             }
-                            setCustomSkill("");
-                          }
-                        }}
-                        className="h-8 w-[240px] text-xs rounded-full border-dashed focus-visible:ring-primary/30"
-                      />
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && customSkill.trim()) {
+                              e.preventDefault();
+                              const trimmed = customSkill.trim();
+                              if (trimmed.length < VALIDATION.skill.min) {
+                                toast.error(
+                                  `Skill must be at least ${VALIDATION.skill.min} characters`,
+                                );
+                                return;
+                              }
+                              if (!formData.skills.includes(trimmed)) {
+                                updateFormData({
+                                  skills: [...formData.skills, trimmed],
+                                });
+                              }
+                              setCustomSkill("");
+                            }
+                          }}
+                          className="h-8 w-[240px] text-xs rounded-full border-dashed focus-visible:ring-primary/30"
+                        />
+                        <div className="flex justify-end w-[240px] pr-2">
+                          <p className="text-[10px] text-muted-foreground">
+                            {customSkill.length} / {VALIDATION.skill.max}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1245,35 +1345,54 @@ const PostProjectPage = () => {
 
                         setIsLoading(true);
                         try {
-                          const payload = {
-                            title: formData.title,
-                            category: formData.category,
-                            subCategory: formData.subCategory,
-                            shortDesc: formData.shortDesc,
-                            description: formData.fullDesc,
-                            requirements: formData.functionalReq,
-                            referenceLinks: formData.referenceLinks,
-                            budget: formData.budget,
-                            budgetType: formData.budgetType, // "fixed" | "hourly"
-                            projectSize: formData.projectSize,
-                            deadline: formData.deadline,
-                            skills: formData.skills,
-                            experienceLevel: formData.experienceLevel,
-                            hiringMethod: formData.hiringMethod,
-                            language: formData.language,
-                            locationPref: formData.locationPref,
-                          };
+                          const fd = new FormData();
+                          fd.append("title", formData.title);
+                          fd.append("category", formData.category);
+                          fd.append("subCategory", formData.subCategory);
+                          fd.append("shortDesc", formData.shortDesc);
+                          fd.append("description", formData.fullDesc);
+                          fd.append("requirements", formData.functionalReq);
+                          fd.append("referenceLinks", formData.referenceLinks);
+                          fd.append("budget", String(formData.budget));
+                          fd.append("budgetType", formData.budgetType);
+                          fd.append("projectSize", formData.projectSize);
+                          fd.append(
+                            "deadline",
+                            formData.deadline
+                              ? formData.deadline.toISOString()
+                              : "",
+                          );
+                          fd.append(
+                            "experienceLevel",
+                            formData.experienceLevel,
+                          );
+                          fd.append("hiringMethod", formData.hiringMethod);
+                          fd.append("language", formData.language);
+                          fd.append("locationPref", formData.locationPref);
+                          fd.append("status", "OPEN");
+
+                          // Append skills one by one (FormData arrays)
+                          formData.skills.forEach((skill) =>
+                            fd.append("skills", skill),
+                          );
+
+                          // Append files
+                          formData.files.forEach((file) =>
+                            fd.append("files", file),
+                          );
 
                           let res;
                           if (draftId) {
-                            res = await api.patch(`/projects/${draftId}`, {
-                              ...payload,
-                              status: "OPEN",
+                            res = await api.patch(`/projects/${draftId}`, fd, {
+                              headers: {
+                                "Content-Type": "multipart/form-data",
+                              },
                             });
                           } else {
-                            res = await api.post("/projects", {
-                              ...payload,
-                              status: "OPEN",
+                            res = await api.post("/projects", fd, {
+                              headers: {
+                                "Content-Type": "multipart/form-data",
+                              },
                             });
                           }
 
