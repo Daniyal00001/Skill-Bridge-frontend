@@ -21,6 +21,9 @@ import {
   FileText,
   MousePointer2,
   Zap,
+  UploadCloud,
+  Globe2,
+  Languages,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -50,15 +53,41 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 const CATEGORIES = [
-  { id: "web", name: "Web Development", icon: Layout },
-  { id: "mobile", name: "Mobile Development", icon: Target },
-  { id: "ai", name: "AI & Data Science", icon: Sparkles },
-  { id: "design", name: "UI/UX Design", icon: Gem },
-  { id: "other", name: "Other Tech", icon: Code2 },
+  {
+    id: "web",
+    name: "Web Development",
+    icon: Layout,
+    subCategories: ["Frontend", "Backend", "Full Stack", "E-commerce"],
+  },
+  {
+    id: "mobile",
+    name: "Mobile Development",
+    icon: Target,
+    subCategories: ["iOS", "Android", "Cross-platform"],
+  },
+  {
+    id: "ai",
+    name: "AI & Data Science",
+    icon: Sparkles,
+    subCategories: ["Machine Learning", "Data Analysis", "NLP"],
+  },
+  {
+    id: "design",
+    name: "UI/UX Design",
+    icon: Gem,
+    subCategories: ["Web Design", "App Design", "Prototyping"],
+  },
+  {
+    id: "other",
+    name: "Other Tech",
+    icon: Code2,
+    subCategories: ["DevOps", "Blockchain", "Cybersecurity"],
+  },
 ];
 
 const SKILL_SUGGESTIONS = [
@@ -81,32 +110,117 @@ const PostProjectPage = () => {
   const [formData, setFormData] = useState({
     title: "",
     category: "",
+    subCategory: "",
     shortDesc: "",
     fullDesc: "",
     functionalReq: "",
     referenceLinks: "",
-    budget: [5000],
+    files: [] as File[],
+    budget: 5000,
     budgetType: "fixed", // fixed, hourly
     projectSize: "medium", // small, medium, large
     skills: [] as string[],
     experienceLevel: "intermediate", // entry, intermediate, expert
     hiringMethod: "bidding", // bidding, direct
     deadline: undefined as Date | undefined,
+    language: "English",
+    locationPref: "Any location",
+    termsAccepted: false,
   });
+
+  const [customSkill, setCustomSkill] = useState("");
+  const [showErrors, setShowErrors] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
   };
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, 5));
-  const prevStep = () => setStep((s) => Math.max(s - 1, 1));
-  const goToStep = (s: number) => setStep(s);
+  const validateStep = (currentStep: number) => {
+    switch (currentStep) {
+      case 1:
+        return formData.title && formData.category && formData.subCategory;
+      case 2:
+        return formData.fullDesc && formData.functionalReq;
+      case 3:
+        return formData.deadline && formData.budget > 0;
+      case 4:
+        return formData.skills.length > 0;
+      case 5:
+        return formData.termsAccepted;
+      default:
+        return true;
+    }
+  };
 
-  const handleSaveDraft = () => {
-    toast.info("Project saved as draft", {
-      description: "You can continue editing this project from your drafts.",
-    });
-    navigate("/client/drafts");
+  const nextStep = () => {
+    if (!validateStep(step)) {
+      setShowErrors(true);
+      return;
+    }
+    setShowErrors(false);
+    setStep((s) => Math.min(s + 1, 5));
+  };
+
+  const prevStep = () => {
+    setShowErrors(false);
+    setStep((s) => Math.max(s - 1, 1));
+  };
+  const goToStep = (s: number) => {
+    setShowErrors(false);
+    setStep(s);
+  };
+
+  const handleSaveDraft = async () => {
+    if (!formData.title) {
+      toast.error("Please add a project title before saving draft.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        title: formData.title,
+        category: formData.category || "other",
+        subCategory: formData.subCategory || "",
+        shortDesc: formData.shortDesc,
+        description: formData.fullDesc || "Draft - description pending",
+        requirements: formData.functionalReq || "",
+        budget: formData.budget || 0,
+        budgetType: formData.budgetType,
+        projectSize: formData.projectSize,
+        deadline:
+          formData.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // default 30 days
+        skills: formData.skills,
+        experienceLevel: formData.experienceLevel,
+        hiringMethod: formData.hiringMethod,
+        language: formData.language,
+        locationPref: formData.locationPref,
+        status: "DRAFT", // yeh key hai
+      };
+
+      let res;
+
+      if (draftId) {
+        // Already saved draft hai → update karo
+        res = await api.patch(`/projects/${draftId}`, payload);
+        toast.info("Draft updated ✓");
+      } else {
+        // Pehli baar save kar raha hai
+        res = await api.post("/projects", payload);
+        setDraftId(res.data.project.id); // ID save karo future updates ke liye
+        toast.success("Draft saved!", {
+          description: "Continue anytime from your Drafts.",
+        });
+      }
+
+      navigate("/client/drafts");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to save draft");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const steps = [
@@ -194,43 +308,53 @@ const PostProjectPage = () => {
                       className="h-12 text-lg focus-visible:ring-primary/30"
                     />
                   </div>
-                  <div className="space-y-4">
-                    <label className="text-sm font-semibold">Category</label>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                      {CATEGORIES.map((cat) => {
-                        const Icon = cat.icon;
-                        return (
-                          <button
-                            key={cat.id}
-                            onClick={() => updateFormData({ category: cat.id })}
-                            className={cn(
-                              "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all gap-2 group",
-                              formData.category === cat.id
-                                ? "bg-primary/10 border-primary shadow-sm"
-                                : "bg-background border-transparent hover:border-muted hover:bg-muted/30",
-                            )}
-                          >
-                            <Icon
-                              className={cn(
-                                "w-6 h-6 transition-colors",
-                                formData.category === cat.id
-                                  ? "text-primary"
-                                  : "text-muted-foreground group-hover:text-foreground",
-                              )}
-                            />
-                            <span
-                              className={cn(
-                                "text-xs font-medium text-center",
-                                formData.category === cat.id
-                                  ? "text-primary font-bold"
-                                  : "text-muted-foreground",
-                              )}
-                            >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">
+                        Main Category
+                      </label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(val) =>
+                          updateFormData({ category: val, subCategory: "" })
+                        }
+                      >
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
                               {cat.name}
-                            </span>
-                          </button>
-                        );
-                      })}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold">
+                        Sub Category
+                      </label>
+                      <Select
+                        disabled={!formData.category}
+                        value={formData.subCategory}
+                        onValueChange={(val) =>
+                          updateFormData({ subCategory: val })
+                        }
+                      >
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select Sub Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.find(
+                            (c) => c.id === formData.category,
+                          )?.subCategories?.map((sub) => (
+                            <SelectItem key={sub} value={sub}>
+                              {sub}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -247,7 +371,7 @@ const PostProjectPage = () => {
                     />
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between pt-6 border-t items-center">
+                <CardFooter className="flex justify-between w-full pt-6 border-t items-center">
                   <Button
                     variant="ghost"
                     onClick={handleSaveDraft}
@@ -255,13 +379,20 @@ const PostProjectPage = () => {
                   >
                     <FileText className="w-4 h-4" /> Save as Draft
                   </Button>
-                  <Button
-                    onClick={nextStep}
-                    disabled={!formData.title || !formData.category}
-                    className="gap-2 px-8 h-12"
-                  >
-                    Next: Description <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    {showErrors &&
+                      (!formData.title ||
+                        !formData.category ||
+                        !formData.subCategory) && (
+                        <span className="text-sm font-medium text-destructive flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" /> Required fields
+                          missing
+                        </span>
+                      )}
+                    <Button onClick={nextStep} className="gap-2 px-8 h-12">
+                      Next: Description <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             )}
@@ -323,24 +454,93 @@ const PostProjectPage = () => {
                       />
                     </div>
                   </div>
+                  <div className="space-y-4">
+                    <label className="text-sm font-semibold flex items-center gap-2">
+                      Attachments
+                      <span className="text-xs font-normal text-muted-foreground">
+                        (Upload files, optional)
+                      </span>
+                    </label>
+                    <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:bg-muted/50 transition-colors">
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        id="file-upload"
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            updateFormData({
+                              files: [
+                                ...formData.files,
+                                ...Array.from(e.target.files),
+                              ],
+                            });
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="file-upload"
+                        className="cursor-pointer flex flex-col items-center"
+                      >
+                        <UploadCloud className="w-8 h-8 text-muted-foreground mb-3" />
+                        <span className="text-sm font-medium">
+                          Click to upload files
+                        </span>
+                        <span className="text-xs text-muted-foreground mt-1">
+                          PNG, JPG, PDF up to 10MB
+                        </span>
+                      </label>
+                      {formData.files.length > 0 && (
+                        <div className="mt-4 pt-4 border-t flex flex-wrap gap-2 justify-center">
+                          {formData.files.map((file, i) => (
+                            <Badge
+                              key={i}
+                              variant="secondary"
+                              className="gap-2 bg-background"
+                            >
+                              <FileText className="w-3 h-3" />
+                              <span className="truncate max-w-[120px]">
+                                {file.name}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  updateFormData({
+                                    files: formData.files.filter(
+                                      (_, idx) => idx !== i,
+                                    ),
+                                  });
+                                }}
+                              >
+                                <X className="w-3 h-3 hover:text-destructive" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
-                <CardFooter className="flex justify-between pt-6 border-t">
+                <CardFooter className="flex justify-between w-full pt-6 border-t items-center">
                   <Button variant="ghost" onClick={prevStep} className="gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
                   </Button>
-                  <div className="flex gap-3">
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
-                      className="gap-2 border-border/40"
+                      className="gap-2 border-border/40 hidden md:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
                     </Button>
-                    <Button
-                      onClick={nextStep}
-                      disabled={!formData.fullDesc || !formData.functionalReq}
-                      className="gap-2 px-8"
-                    >
+                    {showErrors &&
+                      (!formData.fullDesc || !formData.functionalReq) && (
+                        <span className="text-sm font-medium text-destructive flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" /> Required fields
+                          missing
+                        </span>
+                      )}
+                    <Button onClick={nextStep} className="gap-2 px-8">
                       Next: Budget <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -389,27 +589,24 @@ const PostProjectPage = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <label className="text-sm font-semibold">
-                        Budget Amount (US$)
-                      </label>
+                  <div className="space-y-4">
+                    <label className="text-sm font-semibold block">
+                      Budget Amount (US$)
+                    </label>
+                    <div className="relative max-w-xs">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                        $
+                      </span>
                       <Input
                         type="number"
-                        value={formData.budget[0]}
+                        min="1"
+                        value={formData.budget}
                         onChange={(e) =>
-                          updateFormData({ budget: [Number(e.target.value)] })
+                          updateFormData({ budget: Number(e.target.value) })
                         }
-                        className="w-32 h-10 font-mono text-right"
+                        className="w-full h-12 pl-8 text-lg font-mono focus-visible:ring-primary/30"
                       />
                     </div>
-                    <Slider
-                      value={formData.budget}
-                      onValueChange={(val) => updateFormData({ budget: val })}
-                      max={20000}
-                      step={100}
-                      className="py-4"
-                    />
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-8">
@@ -509,23 +706,26 @@ const PostProjectPage = () => {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between pt-6 border-t">
+                <CardFooter className="flex justify-between w-full pt-6 border-t items-center">
                   <Button variant="ghost" onClick={prevStep} className="gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
                   </Button>
-                  <div className="flex gap-3">
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
-                      className="gap-2 border-border/40"
+                      className="gap-2 border-border/40 hidden md:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
                     </Button>
-                    <Button
-                      onClick={nextStep}
-                      disabled={!formData.deadline}
-                      className="gap-2 px-8"
-                    >
+                    {showErrors &&
+                      (!formData.deadline || formData.budget <= 0) && (
+                        <span className="text-sm font-medium text-destructive flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" /> Required fields
+                          missing
+                        </span>
+                      )}
+                    <Button onClick={nextStep} className="gap-2 px-8">
                       Next: Skills <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -572,27 +772,113 @@ const PostProjectPage = () => {
                         </Badge>
                       ))}
                       {formData.skills.length === 0 && (
-                        <span className="text-xs text-muted-foreground italic">
+                        <span className="text-xs text-muted-foreground italic mt-1">
                           Add skills below...
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-wrap gap-1.5 pt-2">
+                    <div className="flex flex-wrap items-center gap-2 pt-2">
                       {SKILL_SUGGESTIONS.filter(
                         (s) => !formData.skills.includes(s),
-                      ).map((skill) => (
-                        <button
-                          key={skill}
-                          onClick={() =>
-                            updateFormData({
-                              skills: [...formData.skills, skill],
-                            })
+                      )
+                        .slice(0, 5)
+                        .map((skill) => (
+                          <button
+                            key={skill}
+                            onClick={() =>
+                              updateFormData({
+                                skills: [...formData.skills, skill],
+                              })
+                            }
+                            className="text-[11px] bg-background hover:bg-muted py-1.5 px-3 rounded-full transition-colors border border-border/40 shrink-0"
+                          >
+                            + {skill}
+                          </button>
+                        ))}
+                      <Input
+                        placeholder="Type custom skill & press Enter..."
+                        value={customSkill}
+                        onChange={(e) => setCustomSkill(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && customSkill.trim()) {
+                            e.preventDefault();
+                            if (!formData.skills.includes(customSkill.trim())) {
+                              updateFormData({
+                                skills: [
+                                  ...formData.skills,
+                                  customSkill.trim(),
+                                ],
+                              });
+                            }
+                            setCustomSkill("");
                           }
-                          className="text-[11px] bg-background hover:bg-muted py-1.5 px-3 rounded-full transition-colors border border-border/40"
-                        >
-                          + {skill}
-                        </button>
-                      ))}
+                        }}
+                        className="h-8 w-[240px] text-xs rounded-full border-dashed focus-visible:ring-primary/30"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <label className="text-sm font-semibold flex items-center gap-2">
+                        <Languages className="w-4 h-4 text-muted-foreground" />{" "}
+                        Communication Language
+                      </label>
+                      <Select
+                        value={formData.language}
+                        onValueChange={(val) =>
+                          updateFormData({ language: val })
+                        }
+                      >
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select Language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[
+                            "English",
+                            "Spanish",
+                            "French",
+                            "German",
+                            "Mandarin",
+                            "Hindi",
+                            "Arabic",
+                          ].map((lang) => (
+                            <SelectItem key={lang} value={lang}>
+                              {lang}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-sm font-semibold flex items-center gap-2">
+                        <Globe2 className="w-4 h-4 text-muted-foreground" />{" "}
+                        Freelancer Location
+                      </label>
+                      <Select
+                        value={formData.locationPref}
+                        onValueChange={(val) =>
+                          updateFormData({ locationPref: val })
+                        }
+                      >
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select Location Preference" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[
+                            "Any location",
+                            "North America",
+                            "Europe",
+                            "Asia",
+                            "Latin America",
+                            "Remote only",
+                          ].map((loc) => (
+                            <SelectItem key={loc} value={loc}>
+                              {loc}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -727,23 +1013,25 @@ const PostProjectPage = () => {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between pt-6 border-t font-semibold">
+                <CardFooter className="flex justify-between w-full pt-6 border-t font-semibold items-center">
                   <Button variant="ghost" onClick={prevStep} className="gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
                   </Button>
-                  <div className="flex gap-3">
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
-                      className="gap-2 border-border/40"
+                      className="gap-2 border-border/40 hidden md:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
                     </Button>
-                    <Button
-                      onClick={nextStep}
-                      disabled={formData.skills.length === 0}
-                      className="gap-2 px-8"
-                    >
+                    {showErrors && formData.skills.length === 0 && (
+                      <span className="text-sm font-medium text-destructive flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" /> Add at least one
+                        skill
+                      </span>
+                    )}
+                    <Button onClick={nextStep} className="gap-2 px-8">
                       Final Review <ArrowRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -811,7 +1099,7 @@ const PostProjectPage = () => {
                             ESTIMATED BUDGET
                           </span>
                           <span className="text-sm font-bold">
-                            ${formData.budget[0].toLocaleString()}
+                            ${(formData.budget || 0).toLocaleString()}
                           </span>
                           <span className="text-[9px] block uppercase font-bold text-primary">
                             {formData.budgetType}
@@ -894,31 +1182,117 @@ const PostProjectPage = () => {
                   </div>
                 </CardContent>
 
-                <CardFooter className="flex flex-col md:flex-row gap-3 pt-6 border-t bg-muted/20 p-8">
-                  <div className="flex-1 flex items-center gap-2 text-xs text-muted-foreground pr-4">
-                    <AlertCircle className="w-4 h-4 text-primary shrink-0" />
-                    <span>
-                      Launching this project will notify matching developers
-                      immediately.
-                    </span>
+                <CardFooter className="flex flex-col md:flex-row gap-6 pt-6 border-t bg-muted/20 p-8">
+                  <div className="flex-1 flex flex-col gap-3 pr-4">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <AlertCircle className="w-4 h-4 text-primary shrink-0" />
+                      <span>
+                        Launching this project will notify matching developers
+                        immediately.
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-2 mt-2">
+                      <Checkbox
+                        id="terms"
+                        checked={formData.termsAccepted}
+                        onCheckedChange={(checked) =>
+                          updateFormData({ termsAccepted: checked === true })
+                        }
+                        className="mt-1"
+                      />
+                      <label
+                        htmlFor="terms"
+                        className="text-sm cursor-pointer leading-tight text-foreground/80"
+                      >
+                        I agree to the{" "}
+                        <Link
+                          to="/terms"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Terms & Conditions
+                        </Link>{" "}
+                        and understand the{" "}
+                        <Link
+                          to="/privacy"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Privacy Policy
+                        </Link>
+                      </label>
+                    </div>
+                    {showErrors && !formData.termsAccepted && (
+                      <span className="text-sm font-medium text-destructive flex items-center gap-1 mt-1">
+                        <AlertCircle className="w-4 h-4" /> Please accept the
+                        terms to post your project
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
-                      className="h-12 px-6 gap-2 border-border/40 flex-1 md:flex-none"
+                      className="h-12 px-6 gap-2 border-border/40 flex-1 md:flex-none hidden lg:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
                     </Button>
                     <Button
                       className="w-full md:w-auto min-w-[200px] h-12 text-lg font-black gap-3 shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] transition-all hover:scale-[1.02] active:scale-[0.98] flex-1 md:flex-none"
-                      onClick={() => {
-                        toast.success(
-                          "Success! Project is now live on SkillBridge.",
-                        );
+                      onClick={async () => {
+                        if (!formData.termsAccepted) {
+                          setShowErrors(true);
+                          return;
+                        }
+
+                        setIsLoading(true);
+                        try {
+                          const payload = {
+                            title: formData.title,
+                            category: formData.category,
+                            subCategory: formData.subCategory,
+                            shortDesc: formData.shortDesc,
+                            description: formData.fullDesc,
+                            requirements: formData.functionalReq,
+                            referenceLinks: formData.referenceLinks,
+                            budget: formData.budget,
+                            budgetType: formData.budgetType, // "fixed" | "hourly"
+                            projectSize: formData.projectSize,
+                            deadline: formData.deadline,
+                            skills: formData.skills,
+                            experienceLevel: formData.experienceLevel,
+                            hiringMethod: formData.hiringMethod,
+                            language: formData.language,
+                            locationPref: formData.locationPref,
+                          };
+
+                          let res;
+                          if (draftId) {
+                            res = await api.patch(`/projects/${draftId}`, {
+                              ...payload,
+                              status: "OPEN",
+                            });
+                          } else {
+                            res = await api.post("/projects", {
+                              ...payload,
+                              status: "OPEN",
+                            });
+                          }
+
+                          toast.success(
+                            "Project is now live on SkillBridge! 🎉",
+                          );
+                          navigate(`/client/projects`);
+                        } catch (err: any) {
+                          toast.error(
+                            err?.response?.data?.message ||
+                              "Failed to post project",
+                          );
+                        } finally {
+                          setIsLoading(false);
+                        }
                       }}
                     >
-                      Post Project <MousePointer2 className="w-5 h-5" />
+                      {isLoading ? "Posting..." : "Post Project"}
+                      {!isLoading && <MousePointer2 className="w-5 h-5" />}
                     </Button>
                   </div>
                 </CardFooter>

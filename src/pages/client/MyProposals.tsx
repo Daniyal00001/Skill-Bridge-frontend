@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -30,115 +30,82 @@ import {
 import {
   Search,
   Filter,
-  Eye,
   ArrowUpRight,
   DollarSign,
   Clock,
+  Loader2,
 } from "lucide-react";
-
-// Mock Data for Received Proposals
-const MOCK_ALL_PROPOSALS = [
-  {
-    id: "prop-1",
-    projectId: "1",
-    projectTitle: "Myyyyyy proposalllll Mobile App Redesign",
-    freelancer: {
-      id: "dev-1",
-      name: "Alex Chen",
-      avatar: "https://i.pravatar.cc/150?u=alex",
-      title: "Senior Full Stack Dev",
-    },
-    budget: 7500,
-    deliveryTime: "4 weeks",
-    status: "pending",
-    date: "2024-02-15",
-  },
-  {
-    id: "prop-2",
-    projectId: "1",
-    projectTitle: "E-Commerce Mobile App Redesign",
-    freelancer: {
-      id: "dev-2",
-      name: "Sarah Jones",
-      avatar: "https://i.pravatar.cc/150?u=sarah",
-      title: "Mobile Specialist",
-    },
-    budget: 8200,
-    deliveryTime: "3 weeks",
-    status: "rejected",
-    date: "2024-02-14",
-  },
-  {
-    id: "prop-3",
-    projectId: "2",
-    projectTitle: "AI-Powered Customer Support Chatbot",
-    freelancer: {
-      id: "dev-3",
-      name: "Michael Brown",
-      avatar: "https://i.pravatar.cc/150?u=mike",
-      title: "AI Engineer",
-    },
-    budget: 4500,
-    deliveryTime: "2 weeks",
-    status: "accepted",
-    date: "2024-02-12",
-  },
-  {
-    id: "prop-4",
-    projectId: "3",
-    projectTitle: "Corporate Website Migration",
-    freelancer: {
-      id: "dev-4",
-      name: "Emily Davis",
-      avatar: "https://i.pravatar.cc/150?u=emily",
-      title: "Frontend Developer",
-    },
-    budget: 3000,
-    deliveryTime: "1 week",
-    status: "pending",
-    date: "2024-02-10",
-  },
-  {
-    id: "prop-5",
-    projectId: "1",
-    projectTitle: "E-Commerce Mobile App Redesign",
-    freelancer: {
-      id: "dev-5",
-      name: "David Wilson",
-      avatar: "https://i.pravatar.cc/150?u=david",
-      title: "React Native Expert",
-    },
-    budget: 6800,
-    deliveryTime: "5 weeks",
-    status: "pending",
-    date: "2024-02-16",
-  },
-];
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 const MyProposalsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [proposals, setProposals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProposals = MOCK_ALL_PROPOSALS.filter((proposal) => {
-    const matchesSearch =
-      proposal.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposal.freelancer.name.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    const fetchProposals = async () => {
+      setLoading(true);
+      try {
+        // Client apne saare projects ke proposals dekhta hai
+        // GET /api/projects/client/my se projects lo, phir har project ke proposals
+        // Ya agar backend mein client proposals route hai toh woh use karo
+        const projectsRes = await api.get("/projects/client/my");
+        const allProjects = projectsRes.data.projects;
 
-    const matchesStatus =
-      statusFilter === "all" || proposal.status === statusFilter;
+        // Har project ke proposals fetch karo
+        const proposalPromises = allProjects
+          .filter((p: any) => p.status !== "DRAFT")
+          .map((p: any) =>
+            api
+              .get(`/proposals/project/${p.id}`)
+              .then((res) =>
+                res.data.proposals.map((prop: any) => ({
+                  ...prop,
+                  projectTitle: p.title,
+                  projectId: p.id,
+                })),
+              )
+              .catch(() => []),
+          );
 
-    return matchesSearch && matchesStatus;
-  });
+        const results = await Promise.all(proposalPromises);
+        setProposals(results.flat());
+      } catch (err) {
+        toast.error("Failed to load proposals");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProposals();
+  }, []);
+
+  const filteredProposals = useMemo(() => {
+    return proposals.filter((proposal) => {
+      const matchesSearch =
+        proposal.projectTitle
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        proposal.freelancer?.name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === "all" ||
+        proposal.status?.toLowerCase() === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [proposals, searchTerm, statusFilter]);
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "accepted":
+    switch (status?.toUpperCase()) {
+      case "ACCEPTED":
         return (
           <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/25 border-green-200">
             Accepted
           </Badge>
         );
-      case "rejected":
+      case "REJECTED":
         return (
           <Badge
             variant="destructive"
@@ -159,6 +126,17 @@ const MyProposalsPage = () => {
     }
   };
 
+  // Stats
+  const stats = {
+    total: proposals.length,
+    pending: proposals.filter((p) => p.status?.toUpperCase() === "PENDING")
+      .length,
+    accepted: proposals.filter((p) => p.status?.toUpperCase() === "ACCEPTED")
+      .length,
+    rejected: proposals.filter((p) => p.status?.toUpperCase() === "REJECTED")
+      .length,
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in">
@@ -169,6 +147,18 @@ const MyProposalsPage = () => {
             <p className="text-muted-foreground mt-1">
               Track and manage all proposals received for your projects.
             </p>
+          </div>
+          {/* Quick stats */}
+          <div className="flex items-center gap-3 text-sm">
+            <span className="px-3 py-1 bg-muted rounded-full font-bold">
+              {stats.total} Total
+            </span>
+            <span className="px-3 py-1 bg-yellow-500/10 text-yellow-700 rounded-full font-bold">
+              {stats.pending} Pending
+            </span>
+            <span className="px-3 py-1 bg-green-500/10 text-green-700 rounded-full font-bold">
+              {stats.accepted} Accepted
+            </span>
           </div>
         </div>
 
@@ -199,97 +189,118 @@ const MyProposalsPage = () => {
           </div>
         </div>
 
-        {/* Proposals Table */}
-        <Card>
-          <CardHeader className="px-6 py-4 border-b">
-            <CardTitle>Received Proposals</CardTitle>
-            <CardDescription>
-              Review the details and status of each proposal.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">Freelancer</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Budget & Time</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right pr-6">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProposals.map((proposal) => (
-                  <TableRow key={proposal.id} className="group">
-                    <TableCell className="pl-6 font-medium">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 border">
-                          <AvatarImage src={proposal.freelancer.avatar} />
-                          <AvatarFallback>
-                            {proposal.freelancer.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-sm">
-                            {proposal.freelancer.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {proposal.freelancer.title}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className="font-medium text-sm line-clamp-1 max-w-[200px]"
-                        title={proposal.projectTitle}
-                      >
-                        {proposal.projectTitle}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1 text-sm">
-                          <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span>${proposal.budget.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>{proposal.deliveryTime}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {proposal.date}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(proposal.status)}</TableCell>
-                    <TableCell className="text-right pr-6">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="hover:bg-primary/10 hover:text-primary"
-                      >
-                        <Link
-                          to={`/client/projects/${proposal.projectId}/proposals`}
-                        >
-                          View Project <ArrowUpRight className="ml-1 h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </TableCell>
+        {/* Table */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20 gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading proposals...</p>
+          </div>
+        ) : (
+          <Card>
+            <CardHeader className="px-6 py-4 border-b">
+              <CardTitle>Received Proposals</CardTitle>
+              <CardDescription>
+                Review the details and status of each proposal.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="pl-6">Freelancer</TableHead>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Budget & Time</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right pr-6">Action</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredProposals.map((proposal) => (
+                    <TableRow key={proposal.id} className="group">
+                      <TableCell className="pl-6 font-medium">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9 border">
+                            <AvatarImage
+                              src={proposal.freelancer?.profileImage}
+                            />
+                            <AvatarFallback>
+                              {proposal.freelancer?.name?.charAt(0) || "F"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {proposal.freelancer?.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {proposal.freelancer?.title || "Freelancer"}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className="font-medium text-sm line-clamp-1 max-w-[200px]"
+                          title={proposal.projectTitle}
+                        >
+                          {proposal.projectTitle}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1 text-sm">
+                            <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span>${proposal.bidAmount?.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{proposal.deliveryDays} days</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {proposal.createdAt
+                          ? new Date(proposal.createdAt).toLocaleDateString()
+                          : "—"}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(proposal.status)}</TableCell>
+                      <TableCell className="text-right pr-6">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="hover:bg-primary/10 hover:text-primary"
+                        >
+                          <Link
+                            to={`/client/projects/${proposal.projectId}/proposals`}
+                          >
+                            View Project{" "}
+                            <ArrowUpRight className="ml-1 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
-            {filteredProposals.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No proposals found.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {filteredProposals.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">
+                    {proposals.length === 0
+                      ? "No proposals received yet. Post a project to start receiving bids."
+                      : "No proposals match your search."}
+                  </p>
+                  {proposals.length === 0 && (
+                    <Button className="mt-4" asChild>
+                      <Link to="/client/post-project">Post a Project</Link>
+                    </Button>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

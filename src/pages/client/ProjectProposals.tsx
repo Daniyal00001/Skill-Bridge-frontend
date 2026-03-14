@@ -1,135 +1,129 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ProposalCard } from "@/components/client/ProposalCard";
-import { ArrowLeft, Calendar, DollarSign, Clock } from "lucide-react";
-import { Freelancer, Proposal } from "@/lib/mockData";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  ArrowLeft,
+  Calendar,
+  DollarSign,
+  Clock,
+  Star,
+  CheckCircle2,
+  XCircle,
+  MessageSquare,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Users,
+  Briefcase,
+  Award,
+  TrendingUp,
+} from "lucide-react";
 import { toast } from "sonner";
-
-// Mock Data
-const MOCK_PROJECT = {
-  id: "1",
-  title: "projecttttt proposal Mobile App Redesign",
-  budget: { min: 5000, max: 8000 },
-  deadline: "2024-04-15",
-  description: "Complete overhaul of our existing React Native app...",
-  status: "open",
-  proposalCount: 12,
-};
-
-const MOCK_FREELANCERS: Record<string, Freelancer> = {
-  "dev-1": {
-    id: "dev-1",
-    name: "Alex Chen",
-    avatar: "https://i.pravatar.cc/150?u=alex",
-    bio: "Senior Full Stack Dev",
-    skills: ["React", "Node.js", "AWS"],
-    rating: 4.9,
-    reviewCount: 47,
-    completedProjects: 52,
-    hourlyRate: 85,
-    title: "Senior Full Stack Dev",
-    portfolio: [],
-    availability: "available",
-    location: "Dallas, TX",
-  },
-  "dev-2": {
-    id: "dev-2",
-    name: "Sarah Jones",
-    avatar: "https://i.pravatar.cc/150?u=sarah",
-    bio: "UI/UX Specialist",
-    skills: ["Figma", "React", "Tailwind"],
-    rating: 4.7,
-    reviewCount: 23,
-    completedProjects: 18,
-    hourlyRate: 65,
-    title: "UI/UX Specialist",
-    portfolio: [],
-    availability: "available",
-    location: "Remote",
-  },
-  "dev-3": {
-    id: "dev-3",
-    name: "Michael Brown",
-    avatar: "https://i.pravatar.cc/150?u=mike",
-    bio: "Backend Architect",
-    skills: ["Python", "Django", "PostgreSQL"],
-    rating: 5.0,
-    reviewCount: 12,
-    completedProjects: 10,
-    hourlyRate: 95,
-    title: "Backend Architect",
-    portfolio: [],
-    availability: "busy",
-    location: "Remote",
-  },
-};
-
-const MOCK_PROPOSALS: Proposal[] = [
-  {
-    id: "prop-1",
-    projectId: "1",
-    freelancerId: "dev-1",
-    freelancer: MOCK_FREELANCERS["dev-1"],
-    proposedBudget: 7500,
-    estimatedDuration: "45 days",
-    coverLetter:
-      "I have built 3 similar e-commerce apps in the last year. I can ensure high performance and smooth animations. Check my portfolio for examples.",
-    status: "pending",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "prop-2",
-    projectId: "1",
-    freelancerId: "dev-2",
-    freelancer: MOCK_FREELANCERS["dev-2"],
-    proposedBudget: 6000,
-    estimatedDuration: "30 days",
-    coverLetter:
-      "I focus heavily on UX/UI. I can make your app look stunning and user-friendly. I'm available to start immediately.",
-    status: "pending",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "prop-3",
-    projectId: "1",
-    freelancerId: "dev-3",
-    freelancer: MOCK_FREELANCERS["dev-3"],
-    proposedBudget: 8000,
-    estimatedDuration: "40 days",
-    coverLetter:
-      "My robust backend background ensures your app will be secure and scalable. I use best practices for API development.",
-    status: "rejected",
-    createdAt: new Date().toISOString(),
-  },
-];
+import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
 
 const ProjectProposalsPage = () => {
   const { projectId } = useParams();
-  const [proposals, setProposals] = useState(MOCK_PROPOSALS);
+  const navigate = useNavigate();
 
-  // In a real app, fetch project and proposals based on projectId
-  const project = MOCK_PROJECT;
+  const [project, setProject] = useState<any>(null);
+  const [proposals, setProposals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
-  const handleAccept = (proposalId: string) => {
-    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
-      loading: "Drafting contract and securing funds...",
-      success: "Hired successfully! Project moved to Working phase.",
-      error: "Failed to process deal.",
-    });
-    // In a real app, this would navigate or refresh with new status
+  const toggleExpand = (id: string) =>
+    setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  // Fetch project + proposals
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [projectRes, proposalsRes] = await Promise.all([
+          api.get(`/projects/${projectId}`),
+          api.get(`/proposals/project/${projectId}`),
+        ]);
+        setProject(projectRes.data.project);
+        setProposals(proposalsRes.data.proposals);
+      } catch (err) {
+        toast.error("Failed to load proposals");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [projectId]);
+
+  // Accept a proposal → auto creates contract, rejects others
+  const handleAccept = async (proposalId: string) => {
+    setProcessingId(proposalId);
+    try {
+      await toast.promise(
+        api.patch(`/proposals/${proposalId}/status`, { status: "ACCEPTED" }),
+        {
+          loading: "Drafting contract and securing funds...",
+          success: "Hired! Project moved to In Progress. Contract created. 🎉",
+          error: "Failed to process. Try again.",
+        },
+      );
+      // Refresh proposals — others will now show REJECTED
+      const res = await api.get(`/proposals/project/${projectId}`);
+      setProposals(res.data.proposals);
+      // Navigate to project details after short delay
+      setTimeout(() => navigate(`/client/projects/${projectId}`), 1500);
+    } catch (err) {
+      // toast.promise handles error
+    } finally {
+      setProcessingId(null);
+    }
   };
 
-  const handleReject = (proposalId: string) => {
-    toast.error("Proposal rejected.");
+  // Reject a proposal
+  const handleReject = async (proposalId: string) => {
+    setProcessingId(proposalId);
+    try {
+      await api.patch(`/proposals/${proposalId}/status`, {
+        status: "REJECTED",
+      });
+      setProposals((prev) =>
+        prev.map((p) =>
+          p.id === proposalId ? { ...p, status: "REJECTED" } : p,
+        ),
+      );
+      toast.success("Proposal rejected.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to reject proposal");
+    } finally {
+      setProcessingId(null);
+    }
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh] gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground font-medium">
+            Loading proposals...
+          </p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const pendingCount = proposals.filter((p) => p.status === "PENDING").length;
+  const acceptedCount = proposals.filter((p) => p.status === "ACCEPTED").length;
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in">
-        {/* Back Link */}
+      <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in max-w-5xl">
+        {/* Back */}
         <Button
           variant="ghost"
           className="pl-0 gap-2 text-muted-foreground hover:text-foreground"
@@ -141,67 +135,392 @@ const ProjectProposalsPage = () => {
         </Button>
 
         {/* Project Header */}
-        <div className="bg-card border rounded-xl p-6 shadow-sm">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-2xl font-bold tracking-tight">
-                  {project.title}
-                </h1>
-                <Badge
-                  variant={project.status === "open" ? "default" : "secondary"}
-                >
-                  {project.status.toUpperCase()}
-                </Badge>
+        {project && (
+          <div className="bg-card border border-border/40 rounded-2xl p-8 shadow-sm space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl font-black tracking-tight">
+                    {project.title}
+                  </h1>
+                  <Badge
+                    className={cn(
+                      "font-bold uppercase tracking-widest text-[10px]",
+                      project.status === "OPEN"
+                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        : "bg-blue-500/10 text-blue-600 border-blue-500/20",
+                    )}
+                  >
+                    {project.status}
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <DollarSign className="h-4 w-4 text-emerald-500" />
+                    <span className="font-bold text-foreground">
+                      ${project.budget?.toLocaleString()}
+                    </span>
+                    <span className="text-xs">{project.budgetType}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    <span>
+                      Deadline:{" "}
+                      {project.deadline
+                        ? new Date(project.deadline).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      Posted {new Date(project.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <DollarSign className="h-4 w-4" />
-                  <span>
-                    ${project.budget.min} - ${project.budget.max}
-                  </span>
+
+              {/* Proposals count summary */}
+              <div className="flex items-center gap-4 shrink-0">
+                <div className="text-center p-4 rounded-2xl bg-muted/30 border border-border/40 min-w-[80px]">
+                  <p className="text-2xl font-black text-primary">
+                    {proposals.length}
+                  </p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Total
+                  </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    Deadline: {new Date(project.deadline).toLocaleDateString()}
-                  </span>
+                <div className="text-center p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 min-w-[80px]">
+                  <p className="text-2xl font-black text-amber-600">
+                    {pendingCount}
+                  </p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Pending
+                  </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>Posted 2 days ago</span>
-                </div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">{proposals.length}</div>
-              <div className="text-sm text-muted-foreground">
-                Total Proposals
+                {acceptedCount > 0 && (
+                  <div className="text-center p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 min-w-[80px]">
+                    <p className="text-2xl font-black text-emerald-600">
+                      {acceptedCount}
+                    </p>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                      Hired
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Already hired banner */}
+        {acceptedCount > 0 && (
+          <div className="flex items-center gap-4 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
+            <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
+            <div>
+              <p className="font-black text-emerald-700 dark:text-emerald-400">
+                Freelancer hired!
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Contract has been created. Other proposals are now closed.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+              asChild
+            >
+              <Link to={`/client/projects/${projectId}`}>View Project</Link>
+            </Button>
+          </div>
+        )}
 
         {/* Proposals List */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold">Received Proposals</h2>
-          <div className="grid gap-6">
-            {proposals.map((proposal) => (
-              <ProposalCard
-                key={proposal.id}
-                proposal={proposal}
-                freelancer={MOCK_FREELANCERS[proposal.freelancerId]}
-                onAccept={handleAccept}
-                onReject={handleReject}
-                onViewProfile={(id) => console.log("View profile:", id)}
-                onMessage={(id) => console.log("Message:", id)}
-                isProcessing={false}
-              />
-            ))}
-          </div>
+        <div className="space-y-4">
+          <h2 className="text-xl font-black">
+            Received Proposals
+            <span className="text-muted-foreground font-medium text-base ml-2">
+              ({proposals.length})
+            </span>
+          </h2>
+
+          {proposals.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-card/20 rounded-3xl border-2 border-dashed border-border/40 gap-4">
+              <Users className="w-12 h-12 text-muted-foreground/30" />
+              <h3 className="text-xl font-black text-foreground/70">
+                No proposals yet
+              </h3>
+              <p className="text-muted-foreground text-center max-w-xs">
+                Your project is live. Freelancers will start sending proposals
+                soon.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {proposals.map((proposal) => (
+                <ProposalCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  isExpanded={!!expandedIds[proposal.id]}
+                  onToggleExpand={() => toggleExpand(proposal.id)}
+                  onAccept={handleAccept}
+                  onReject={handleReject}
+                  isProcessing={processingId === proposal.id}
+                  projectBudget={project?.budget}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
+  );
+};
+
+// ─── Proposal Card ─────────────────────────────────────────────────────────────
+const ProposalCard = ({
+  proposal,
+  isExpanded,
+  onToggleExpand,
+  onAccept,
+  onReject,
+  isProcessing,
+  projectBudget,
+}: {
+  proposal: any;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onAccept: (id: string) => void;
+  onReject: (id: string) => void;
+  isProcessing: boolean;
+  projectBudget?: number;
+}) => {
+  const freelancer = proposal.freelancer;
+  const status = proposal.status?.toUpperCase();
+
+  const statusConfig: Record<string, { label: string; className: string }> = {
+    PENDING: {
+      label: "Pending",
+      className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    },
+    ACCEPTED: {
+      label: "Hired ✓",
+      className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    },
+    REJECTED: {
+      label: "Rejected",
+      className: "bg-red-500/10 text-red-600 border-red-500/20",
+    },
+  };
+
+  const cfg = statusConfig[status] || statusConfig["PENDING"];
+
+  // Budget comparison
+  const budgetDiff =
+    projectBudget && proposal.bidAmount
+      ? Math.round(((proposal.bidAmount - projectBudget) / projectBudget) * 100)
+      : null;
+
+  return (
+    <Card
+      className={cn(
+        "border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 overflow-hidden",
+        status === "ACCEPTED" && "border-emerald-500/30 bg-emerald-500/5",
+        status === "REJECTED" && "opacity-60",
+        status === "PENDING" && "hover:border-primary/30 hover:shadow-lg",
+      )}
+    >
+      <CardContent className="p-6 space-y-6">
+        {/* Top Row — Freelancer info + status */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Avatar className="h-14 w-14 ring-4 ring-border/40">
+                <AvatarImage src={freelancer?.profileImage} />
+                <AvatarFallback className="text-lg font-black">
+                  {freelancer?.name?.[0] || "F"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-black">
+                  {freelancer?.name || "Freelancer"}
+                </h3>
+                {status === "ACCEPTED" && (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {freelancer?.title || "Developer"}
+              </p>
+              <div className="flex items-center gap-3 mt-1">
+                {freelancer?.rating && (
+                  <div className="flex items-center gap-1 text-xs font-black text-amber-500">
+                    <Star className="w-3 h-3 fill-amber-500" />{" "}
+                    {freelancer.rating.toFixed(1)}
+                  </div>
+                )}
+                {freelancer?.completedProjects > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Briefcase className="w-3 h-3" />{" "}
+                    {freelancer.completedProjects} projects
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <Badge
+            variant="outline"
+            className={cn("font-bold text-xs shrink-0", cfg.className)}
+          >
+            {cfg.label}
+          </Badge>
+        </div>
+
+        {/* Bid Details */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5 rounded-2xl bg-muted/30 border border-border/40">
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+              Bid Amount
+            </p>
+            <p className="text-xl font-black text-foreground">
+              ${proposal.bidAmount?.toLocaleString()}
+            </p>
+            {budgetDiff !== null && (
+              <p
+                className={cn(
+                  "text-[10px] font-bold",
+                  budgetDiff > 0 ? "text-red-500" : "text-emerald-500",
+                )}
+              >
+                {budgetDiff > 0 ? `+${budgetDiff}%` : `${budgetDiff}%`} vs your
+                budget
+              </p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+              Delivery
+            </p>
+            <p className="text-lg font-black">{proposal.deliveryDays} days</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+              Submitted
+            </p>
+            <p className="text-sm font-bold">
+              {new Date(proposal.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
+
+        {/* Cover Letter */}
+        {proposal.coverLetter && (
+          <div className="space-y-2">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+              Cover Letter
+            </p>
+            <p
+              className={cn(
+                "text-sm text-muted-foreground leading-relaxed transition-all duration-300",
+                !isExpanded && "line-clamp-3",
+              )}
+            >
+              {proposal.coverLetter}
+            </p>
+            <button
+              onClick={onToggleExpand}
+              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+            >
+              {isExpanded ? (
+                <>
+                  Show Less <ChevronUp className="w-3 h-3" />
+                </>
+              ) : (
+                <>
+                  Read Full Letter <ChevronDown className="w-3 h-3" />
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Action Buttons — only for PENDING proposals */}
+        {status === "PENDING" && (
+          <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border/40">
+            <Button
+              className="flex-1 h-12 rounded-xl font-black text-base gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+              onClick={() => onAccept(proposal.id)}
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5" />
+              )}
+              {isProcessing
+                ? "Processing..."
+                : `Hire for $${proposal.bidAmount?.toLocaleString()}`}
+            </Button>
+            <Button
+              variant="outline"
+              className="sm:w-auto h-12 rounded-xl font-black border-2 border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/50 gap-2"
+              onClick={() => onReject(proposal.id)}
+              disabled={isProcessing}
+            >
+              <XCircle className="w-4 h-4" /> Reject
+            </Button>
+            <Button
+              variant="ghost"
+              className="sm:w-auto h-12 rounded-xl font-bold gap-2 text-primary hover:bg-primary/10"
+              asChild
+            >
+              <Link to="/client/messages">
+                <MessageSquare className="w-4 h-4" /> Message
+              </Link>
+            </Button>
+            {freelancer?.id && (
+              <Button
+                variant="ghost"
+                className="sm:w-auto h-12 rounded-xl font-bold gap-2"
+                asChild
+              >
+                <Link to={`/freelancer/profile/${freelancer.id}`}>
+                  <ExternalLink className="w-4 h-4" /> Profile
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Accepted state CTA */}
+        {status === "ACCEPTED" && proposal.contractId && (
+          <div className="flex gap-3 pt-2 border-t border-emerald-500/20">
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black gap-2"
+              asChild
+            >
+              <Link to={`/client/contracts/${proposal.contractId}`}>
+                View Contract <ExternalLink className="w-4 h-4" />
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-xl font-bold gap-2 border-emerald-500/30"
+              asChild
+            >
+              <Link to="/client/messages">
+                <MessageSquare className="w-4 h-4" /> Message
+              </Link>
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

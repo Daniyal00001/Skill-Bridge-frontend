@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   ChevronLeft,
   Edit,
@@ -23,10 +23,8 @@ import {
   Eye,
   Bookmark,
   MessageSquare,
-  FileText,
   CheckCircle2,
   AlertCircle,
-  MoreVertical,
   Briefcase,
   ExternalLink,
   PlusCircle,
@@ -34,249 +32,168 @@ import {
   Trash2,
   Archive,
   Pause,
-  ChevronDown,
   Layout,
   ChevronRight,
   Star,
+  Loader2,
 } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-
-// Mock Data for the project
-const MOCK_PROJECTS = {
-  "1": {
-    id: "1",
-    title: "E-Commercee Mobile App Redesign",
-    description:
-      "We need a complete overhaul of our existing React Native app to improve user experience and sales conversion. The project focuses on streamlining the checkout process, integrating new payment gateways, and implementing a more social-driven shopping experience. We are looking for a developer who understands both technical implementation and UX best practices.",
-    category: "Mobile Development",
-    experienceLevel: "Expert",
-    status: "in_progress",
-    budget: "$7,500",
-    budgetType: "Fixed Price",
-    postedDate: "March 20, 2024",
-    deadline: "April 15, 2024",
-    daysRemaining: 12,
-    progress: 65,
-    functionalRequirements: [
-      "Seamless integration with Stripe and PayPal",
-      "Dynamic social feed for product discovery",
-      "Push notification system for order updates",
-      "Optimized image loading for slower connections",
-    ],
-    skills: ["React Native", "UI/UX", "Stripe API", "Node.js", "Firebase"],
-    projectSize: "Large",
-    hiringMethod: "Direct Hire",
-    devsNeeded: 1,
-    views: 47,
-    proposals: 8,
-    shortlisted: 2,
-    hiredDeveloper: {
-      name: "Alex Chen",
-      avatar: "https://i.pravatar.cc/150?u=alex",
-      title: "Senior Full Stack Dev",
-      rating: 4.9,
-    },
-    milestones: [
-      {
-        id: 1,
-        name: "Discovery & Wireframing",
-        date: "Mar 25",
-        amount: "$1,500",
-        status: "completed",
-      },
-      {
-        id: 2,
-        name: "Core Feature Development",
-        date: "Apr 05",
-        amount: "$4,000",
-        status: "active",
-      },
-      {
-        id: 3,
-        name: "Testing & Launch",
-        date: "Apr 15",
-        amount: "$2,000",
-        status: "pending",
-      },
-    ],
-    proposalsList: [
-      {
-        name: "Sarah Jones",
-        avatar: "https://i.pravatar.cc/150?u=sarah",
-        bid: "$6,800",
-        time: "25 days",
-        rating: 4.8,
-      },
-      {
-        name: "Michael Brown",
-        avatar: "https://i.pravatar.cc/150?u=mike",
-        bid: "$7,200",
-        time: "30 days",
-        rating: 5.0,
-      },
-      {
-        name: "David Lee",
-        avatar: "https://i.pravatar.cc/150?u=david",
-        bid: "$8,000",
-        time: "20 days",
-        rating: 4.7,
-      },
-    ],
-    activity: [
-      {
-        type: "posted",
-        text: "Project posted",
-        time: "5 days ago",
-        icon: PlusCircle,
-        color: "text-emerald-500",
-      },
-      {
-        type: "proposal",
-        text: "Alex Chen submitted proposal",
-        time: "3 days ago",
-        icon: Users,
-        color: "text-blue-500",
-      },
-      {
-        type: "proposal",
-        text: "Sarah Jones submitted proposal",
-        time: "2 days ago",
-        icon: Users,
-        color: "text-blue-500",
-      },
-      {
-        type: "view",
-        text: "12 freelancers viewed your project",
-        time: "Today",
-        icon: Eye,
-        color: "text-amber-500",
-      },
-    ],
-  },
-  "4": {
-    id: "4",
-    title: "Real-time Data Visualization Dashboard",
-    description:
-      "Build a dashboard for visualizing IoT sensor data in real-time. The project requires expertise in D3.js and WebSocket communication.",
-    category: "Data Visualization",
-    experienceLevel: "Expert",
-    status: "open",
-    budget: "$5,000 - $8,000",
-    budgetType: "Fixed Price",
-    postedDate: "March 28, 2024",
-    deadline: "May 01, 2024",
-    daysRemaining: 28,
-    progress: 0,
-    functionalRequirements: [
-      "Real-time data streaming",
-      "Interactive D3 charts",
-      "Alerting system",
-    ],
-    skills: ["React", "D3.js", "WebSockets"],
-    projectSize: "Medium",
-    hiringMethod: "Competitive Bidding",
-    devsNeeded: 2,
-    views: 112,
-    proposals: 15,
-    shortlisted: 4,
-    activity: [
-      {
-        type: "posted",
-        text: "Project posted",
-        time: "2 days ago",
-        icon: PlusCircle,
-        color: "text-emerald-500",
-      },
-      {
-        type: "view",
-        text: "45 freelancers viewed your project",
-        time: "Yesterday",
-        icon: Eye,
-        color: "text-amber-500",
-      },
-    ],
-    milestones: [
-      {
-        id: 1,
-        name: "Initial Prototype",
-        date: "Apr 10",
-        amount: "$2,000",
-        status: "pending",
-      },
-      {
-        id: 2,
-        name: "Final Delivery",
-        date: "May 01",
-        amount: "$4,000",
-        status: "pending",
-      },
-    ],
-    proposalsList: [
-      {
-        name: "John Doe",
-        avatar: "https://i.pravatar.cc/150?u=john",
-        bid: "$5,500",
-        time: "15 days",
-        rating: 4.9,
-      },
-    ],
-  },
-};
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 const ClientProjectDetailsPage = () => {
   const { projectId } = useParams();
-  const project =
-    MOCK_PROJECTS[projectId as keyof typeof MOCK_PROJECTS] ||
-    MOCK_PROJECTS["1"];
+  const navigate = useNavigate();
+
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`/projects/${projectId}`);
+        setProject(res.data.project);
+      } catch (err) {
+        toast.error("Failed to load project details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProject();
+  }, [projectId]);
+
+  // Approve milestone
+  const handleApproveMilestone = async (milestoneId: string) => {
+    const contractId = project?.contract?.id;
+    if (!contractId) return;
+    try {
+      await toast.promise(
+        api.patch(`/contracts/${contractId}/milestones/${milestoneId}/approve`),
+        {
+          loading: "Releasing funds...",
+          success: "Milestone approved & payment released! ✅",
+          error: "Failed to approve milestone.",
+        },
+      );
+      const res = await api.get(`/projects/${projectId}`);
+      setProject(res.data.project);
+    } catch {}
+  };
+
+  // Request revision
+  const handleRevision = async (milestoneId: string) => {
+    const contractId = project?.contract?.id;
+    if (!contractId) return;
+    try {
+      await api.patch(
+        `/contracts/${contractId}/milestones/${milestoneId}/revision`,
+        {
+          feedback: "Please review and make the requested changes.",
+        },
+      );
+      toast.info("Revision request sent.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to send revision");
+    }
+  };
+
+  // Delete project (only OPEN/DRAFT)
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this project?")) return;
+    try {
+      await api.delete(`/projects/${projectId}`);
+      toast.success("Project deleted.");
+      navigate("/client/projects");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ||
+          "Cannot delete project with active proposals",
+      );
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh] gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground font-medium">
+            Loading project...
+          </p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!project) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <AlertCircle className="w-12 h-12 text-muted-foreground/40" />
+          <h2 className="text-xl font-black">Project not found</h2>
+          <Button asChild>
+            <Link to="/client/projects">Back to Projects</Link>
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Derived data from API
+  const contract = project.contract;
+  const hiredDeveloper = contract?.freelancer;
+  const milestones = contract?.milestones || [];
+  const completedMilestones = milestones.filter(
+    (m: any) => m.status === "APPROVED",
+  ).length;
+  const progress =
+    milestones.length > 0
+      ? Math.round((completedMilestones / milestones.length) * 100)
+      : 0;
+  const pendingReview = milestones.find((m: any) => m.status === "SUBMITTED");
+  const proposalsPreview = project.proposals?.slice(0, 3) || [];
+  const daysRemaining = project.deadline
+    ? Math.ceil(
+        (new Date(project.deadline).getTime() - Date.now()) / (1000 * 86400),
+      )
+    : null;
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "open":
-        return (
-          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-            OPEN
-          </Badge>
-        );
-      case "in_progress":
-        return (
-          <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-            IN PROGRESS
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge className="bg-violet-500/10 text-violet-500 border-violet-500/20">
-            COMPLETED
-          </Badge>
-        );
-      default:
-        return <Badge variant="secondary">{status.toUpperCase()}</Badge>;
-    }
+    const map: Record<string, string> = {
+      OPEN: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      IN_PROGRESS: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      COMPLETED: "bg-violet-500/10 text-violet-500 border-violet-500/20",
+      DRAFT: "bg-muted text-muted-foreground",
+    };
+    return (
+      <Badge
+        className={cn(
+          "font-bold uppercase tracking-widest text-[10px]",
+          map[status] || "bg-muted text-muted-foreground",
+        )}
+      >
+        {status}
+      </Badge>
+    );
   };
 
   return (
     <DashboardLayout>
       <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in max-w-7xl">
-        {/* Back Button */}
+        {/* Back */}
         <Button
           variant="ghost"
           asChild
-          className="gap-2 -ml-4 hover:bg-transparent text-muted-foreground hover:text-foreground transition-colors"
+          className="gap-2 -ml-4 text-muted-foreground hover:text-foreground"
         >
           <Link to="/client/projects">
-            <ChevronLeft className="w-4 h-4" />
-            Back to My Projects
+            <ChevronLeft className="w-4 h-4" /> Back to My Projects
           </Link>
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Main Content (65%) */}
+          {/* ── Main Content ── */}
           <div className="lg:col-span-8 space-y-8">
             {/* Project Header Card */}
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
@@ -287,13 +204,16 @@ const ClientProjectDetailsPage = () => {
                     variant="outline"
                     size="sm"
                     className="gap-2 font-bold h-9"
+                    asChild
                   >
-                    <Edit className="w-4 h-4" /> Edit Project
+                    <Link to={`/client/post-project?editId=${project.id}`}>
+                      <Edit className="w-4 h-4" /> Edit Project
+                    </Link>
                   </Button>
                 </div>
-                <CardTitle className="text-3xl font-black tracking-tight leading-tight">
+                <h1 className="text-3xl font-black tracking-tight leading-tight">
                   {project.title}
-                </CardTitle>
+                </h1>
                 <div className="flex flex-wrap items-center gap-4 mt-6">
                   <Badge
                     variant="outline"
@@ -301,39 +221,42 @@ const ClientProjectDetailsPage = () => {
                   >
                     {project.category}
                   </Badge>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Zap className="w-4 h-4 text-amber-500" />
-                    <span className="font-medium">
-                      {project.experienceLevel} Level
-                    </span>
-                  </div>
+                  {project.experienceLevel && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Zap className="w-4 h-4 text-amber-500" />
+                      <span className="font-medium">
+                        {project.experienceLevel} Level
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4" />
-                    <span>Posted {project.postedDate}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    <span
-                      className={cn(
-                        project.daysRemaining < 7
-                          ? "text-destructive font-bold"
-                          : "",
-                      )}
-                    >
-                      {project.deadline} ({project.daysRemaining} days left)
+                    <span>
+                      Posted {new Date(project.createdAt).toLocaleDateString()}
                     </span>
                   </div>
+                  {daysRemaining !== null && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      <span
+                        className={cn(
+                          daysRemaining < 7 ? "text-destructive font-bold" : "",
+                        )}
+                      >
+                        Deadline:{" "}
+                        {new Date(project.deadline).toLocaleDateString()} (
+                        {daysRemaining} days left)
+                      </span>
+                    </div>
+                  )}
                 </div>
-                {project.status === "in_progress" && (
+                {project.status === "IN_PROGRESS" && (
                   <div className="mt-8 space-y-3">
                     <div className="flex justify-between items-center text-xs font-black uppercase tracking-wider text-muted-foreground">
                       <span>Execution Progress</span>
-                      <span className="text-primary">{project.progress}%</span>
+                      <span className="text-primary">{progress}%</span>
                     </div>
-                    <Progress
-                      value={project.progress}
-                      className="h-2.5 bg-muted/60"
-                    />
+                    <Progress value={progress} className="h-2.5 bg-muted/60" />
                   </div>
                 )}
               </CardHeader>
@@ -341,29 +264,21 @@ const ClientProjectDetailsPage = () => {
               <CardContent className="p-0">
                 <Tabs defaultValue="overview" className="w-full">
                   <TabsList className="w-full justify-start rounded-none border-b bg-transparent h-14 px-8 gap-8">
-                    <TabsTrigger
-                      value="overview"
-                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 gap-2"
-                    >
-                      Overview
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="requirements"
-                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 gap-2"
-                    >
-                      Requirements
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="milestones"
-                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 gap-2"
-                    >
-                      Milestones
-                    </TabsTrigger>
+                    {["overview", "requirements", "milestones"].map((tab) => (
+                      <TabsTrigger
+                        key={tab}
+                        value={tab}
+                        className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 capitalize"
+                      >
+                        {tab}
+                      </TabsTrigger>
+                    ))}
                   </TabsList>
 
+                  {/* Overview Tab */}
                   <TabsContent
                     value="overview"
-                    className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                    className="p-8 space-y-8 animate-in fade-in duration-300"
                   >
                     <div className="space-y-4">
                       <h4 className="text-lg font-bold">Project Description</h4>
@@ -371,54 +286,40 @@ const ClientProjectDetailsPage = () => {
                         {project.description}
                       </p>
                     </div>
-
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-bold">
-                        Functional Requirements
-                      </h4>
-                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {project.functionalRequirements.map((req, i) => (
-                          <li
-                            key={i}
-                            className="flex gap-3 items-start p-3 rounded-xl bg-muted/30 border border-border/50"
-                          >
-                            <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
-                            <span className="text-sm font-medium">{req}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-bold">Reference Links</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          "Figma Design",
-                          "Product Specs",
-                          "Competitor Reference",
-                        ].map((link, i) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                            className="gap-2 py-2 px-4 cursor-pointer hover:bg-muted transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            {link}
-                          </Badge>
-                        ))}
+                    {project.requirements && (
+                      <div className="space-y-4">
+                        <h4 className="text-lg font-bold">
+                          Functional Requirements
+                        </h4>
+                        <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                          {project.requirements}
+                        </p>
                       </div>
-                    </div>
+                    )}
+                    {project.referenceLinks && (
+                      <div className="space-y-3">
+                        <h4 className="text-lg font-bold">Reference Links</h4>
+                        <Badge
+                          variant="secondary"
+                          className="gap-2 py-2 px-4 cursor-pointer"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          {project.referenceLinks}
+                        </Badge>
+                      </div>
+                    )}
                   </TabsContent>
 
+                  {/* Requirements Tab */}
                   <TabsContent
                     value="requirements"
-                    className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                    className="p-8 space-y-8 animate-in fade-in duration-300"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
                         <h4 className="text-lg font-bold">Required Skills</h4>
                         <div className="flex flex-wrap gap-2">
-                          {project.skills.map((skill, i) => (
+                          {project.skills?.map((skill: string, i: number) => (
                             <Badge
                               key={i}
                               variant="outline"
@@ -429,10 +330,10 @@ const ClientProjectDetailsPage = () => {
                           ))}
                         </div>
                       </div>
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         {[
                           {
-                            label: "Experience",
+                            label: "Experience Level",
                             value: project.experienceLevel,
                             icon: Zap,
                             color: "text-amber-500",
@@ -450,10 +351,10 @@ const ClientProjectDetailsPage = () => {
                             color: "text-emerald-500",
                           },
                           {
-                            label: "Developers",
-                            value: project.devsNeeded,
-                            icon: Users,
-                            color: "text-violet-500",
+                            label: "Budget",
+                            value: `$${project.budget?.toLocaleString()}`,
+                            icon: DollarSign,
+                            color: "text-primary",
                           },
                         ].map((item, i) => (
                           <div
@@ -473,8 +374,8 @@ const ClientProjectDetailsPage = () => {
                                 {item.label}
                               </span>
                             </div>
-                            <span className="font-bold text-sm tracking-tight">
-                              {item.value}
+                            <span className="font-bold text-sm">
+                              {item.value || "—"}
                             </span>
                           </div>
                         ))}
@@ -482,308 +383,380 @@ const ClientProjectDetailsPage = () => {
                     </div>
                   </TabsContent>
 
+                  {/* Milestones Tab */}
                   <TabsContent
                     value="milestones"
-                    className="p-8 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                    className="p-8 space-y-6 animate-in fade-in duration-300"
                   >
-                    {project.milestones.map((milestone) => (
-                      <div
-                        key={milestone.id}
-                        className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-muted/20 border border-border/50 group hover:border-primary/20 transition-all"
-                      >
-                        <div className="flex items-center gap-5">
-                          <div className="w-12 h-12 rounded-full bg-background border flex items-center justify-center font-black text-lg shadow-sm group-hover:scale-110 transition-transform">
-                            {milestone.id}
-                          </div>
-                          <div>
-                            <h5 className="font-black text-lg tracking-tight">
-                              {milestone.name}
-                            </h5>
-                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                              <span className="flex items-center gap-1.5">
-                                <Calendar className="w-3.5 h-3.5" />{" "}
-                                {milestone.date}
-                              </span>
-                              <span className="flex items-center gap-1.5 font-bold text-foreground">
-                                <DollarSign className="w-3.5 h-3.5" />{" "}
-                                {milestone.amount}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <Badge
-                          variant="outline"
+                    {milestones.length === 0 ? (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                        <p className="font-medium">No milestones added yet.</p>
+                        {contract && (
+                          <p className="text-sm mt-1">
+                            Add milestones from the contract page.
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      milestones.map((milestone: any, idx: number) => (
+                        <div
+                          key={milestone.id}
                           className={cn(
-                            "px-4 py-1.5 font-black tracking-widest text-[10px]",
-                            milestone.status === "completed"
-                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                              : milestone.status === "active"
-                                ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                                : "bg-muted text-muted-foreground",
+                            "flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border group hover:border-primary/20 transition-all",
+                            milestone.status === "APPROVED"
+                              ? "bg-emerald-500/5 border-emerald-500/20"
+                              : milestone.status === "SUBMITTED"
+                                ? "bg-amber-500/10 border-amber-500/30"
+                                : "bg-muted/20 border-border/50",
                           )}
                         >
-                          {milestone.status.toUpperCase()}
-                        </Badge>
-                      </div>
-                    ))}
+                          <div className="flex items-center gap-5">
+                            <div
+                              className={cn(
+                                "w-12 h-12 rounded-full flex items-center justify-center font-black text-lg border",
+                                milestone.status === "APPROVED"
+                                  ? "bg-emerald-500 text-white border-0"
+                                  : milestone.status === "SUBMITTED"
+                                    ? "bg-amber-500 text-white border-0"
+                                    : "bg-background",
+                              )}
+                            >
+                              {milestone.status === "APPROVED" ? (
+                                <CheckCircle2 className="w-6 h-6" />
+                              ) : (
+                                idx + 1
+                              )}
+                            </div>
+                            <div>
+                              <h5 className="font-black text-lg">
+                                {milestone.title}
+                              </h5>
+                              <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1.5 font-bold text-foreground">
+                                  <DollarSign className="w-3.5 h-3.5" /> $
+                                  {milestone.amount?.toLocaleString()}
+                                </span>
+                                {milestone.dueDate && (
+                                  <span className="flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    {new Date(
+                                      milestone.dueDate,
+                                    ).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "px-4 py-1.5 font-black tracking-widest text-[10px]",
+                                milestone.status === "APPROVED"
+                                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                  : milestone.status === "SUBMITTED"
+                                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                    : "bg-muted text-muted-foreground",
+                              )}
+                            >
+                              {milestone.status}
+                            </Badge>
+                            {milestone.status === "SUBMITTED" && (
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold gap-1"
+                                  onClick={() =>
+                                    handleApproveMilestone(milestone.id)
+                                  }
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" />{" "}
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="rounded-xl font-bold border-amber-500/30 text-amber-600"
+                                  onClick={() => handleRevision(milestone.id)}
+                                >
+                                  Revise
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </TabsContent>
                 </Tabs>
               </CardContent>
             </Card>
 
-            {/* Proposals Preview Card */}
-            <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="p-8 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-xl font-black">
-                    Top Proposals
-                  </CardTitle>
-                  <Badge className="bg-primary/10 text-primary">
-                    {project.proposals}
-                  </Badge>
+            {/* Pending Review Alert */}
+            {pendingReview && (
+              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-2 border-amber-500/30 space-y-6">
+                <div className="flex items-center gap-2 text-amber-600 font-black text-xs uppercase tracking-widest">
+                  <Clock className="w-3.5 h-3.5" /> Work Submitted — Pending
+                  Your Review
                 </div>
-                <Button
-                  variant="link"
-                  className="font-bold gap-2 text-primary"
-                  asChild
-                >
-                  <Link to={`/client/projects/${project.id}/proposals`}>
-                    View All Proposals <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </Button>
-              </CardHeader>
-              <CardContent className="p-8 pt-0 space-y-4">
-                {project.proposalsList.map((proposal, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/40 transition-colors"
+                <h4 className="text-xl font-black">
+                  {hiredDeveloper?.name} submitted "{pendingReview.title}"
+                </h4>
+                {pendingReview.submissionNote && (
+                  <div className="bg-background/40 p-5 rounded-2xl border border-amber-500/20">
+                    <p className="text-xs font-black text-muted-foreground uppercase mb-2">
+                      Developer Notes:
+                    </p>
+                    <p className="text-sm italic">
+                      "{pendingReview.submissionNote}"
+                    </p>
+                  </div>
+                )}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-black h-14 rounded-2xl flex-1 text-lg gap-3"
+                    onClick={() => handleApproveMilestone(pendingReview.id)}
                   >
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={proposal.avatar} />
-                        <AvatarFallback>{proposal.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-bold text-sm">{proposal.name}</p>
-                        <div className="flex items-center gap-1.5 text-xs text-amber-500 font-black">
-                          <Star className="w-3 h-3 fill-amber-500" />{" "}
-                          {proposal.rating}
+                    <CheckCircle2 className="w-6 h-6" /> Approve & Release $
+                    {pendingReview.amount?.toLocaleString()}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-2 border-amber-500/50 text-amber-600 font-black h-14 rounded-2xl px-10 text-lg"
+                    onClick={() => handleRevision(pendingReview.id)}
+                  >
+                    Request Changes
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Proposals Preview (only for OPEN projects) */}
+            {project.status === "OPEN" && proposalsPreview.length > 0 && (
+              <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
+                <CardHeader className="p-8 flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CardTitle className="text-xl font-black">
+                      Top Proposals
+                    </CardTitle>
+                    <Badge className="bg-primary/10 text-primary">
+                      {project._count?.proposals || proposalsPreview.length}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="link"
+                    className="font-bold gap-2 text-primary"
+                    asChild
+                  >
+                    <Link to={`/client/projects/${project.id}/proposals`}>
+                      View All <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-8 pt-0 space-y-4">
+                  {proposalsPreview.map((proposal: any, i: number) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/40 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={proposal.freelancer?.profileImage}
+                          />
+                          <AvatarFallback>
+                            {proposal.freelancer?.name?.[0] || "F"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-bold text-sm">
+                            {proposal.freelancer?.name}
+                          </p>
+                          {proposal.freelancer?.rating && (
+                            <div className="flex items-center gap-1 text-xs text-amber-500 font-black">
+                              <Star className="w-3 h-3 fill-amber-500" />{" "}
+                              {proposal.freelancer.rating.toFixed(1)}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-black text-sm">{proposal.bid}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {proposal.time} delivery
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Activity Timeline Card */}
-            <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="p-8">
-                <CardTitle className="text-xl font-black">Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <div className="space-y-8 relative">
-                  <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border/40" />
-                  {project.activity.map((item, i) => (
-                    <div key={i} className="flex gap-6 relative">
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full bg-background border flex items-center justify-center shrink-0 z-10",
-                          item.color,
-                        )}
-                      >
-                        <item.icon className="w-4 h-4" />
-                      </div>
-                      <div className="pt-1">
-                        <p className="font-bold text-sm">{item.text}</p>
-                        <p className="text-xs text-muted-foreground mt-1 tracking-tight">
-                          {item.time}
+                      <div className="text-right">
+                        <p className="font-black text-sm">
+                          ${proposal.bidAmount?.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {proposal.deliveryDays} days
                         </p>
                       </div>
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
-          {/* Sidebar (35%) */}
-          <div className="lg:col-span-4 space-y-8 sticky top-24">
-            {/* Project Stats Card */}
-            <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl shadow-background/20 overflow-hidden">
+          {/* ── Sidebar ── */}
+          <div className="lg:col-span-4 space-y-6 sticky top-24">
+            {/* Stats Card */}
+            <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl overflow-hidden">
               <div className="h-2 bg-gradient-to-r from-primary to-blue-600" />
               <CardContent className="p-8 space-y-8">
                 <div className="space-y-1">
                   <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-                    Pricing Model
+                    Budget
                   </p>
-                  <p className="text-3xl font-black tracking-tight">
-                    {project.budget}
+                  <p className="text-3xl font-black">
+                    ${project.budget?.toLocaleString()}
                   </p>
-                  <p className="text-sm text-primary font-bold">
-                    {project.budgetType}
+                  <p className="text-sm text-primary font-bold capitalize">
+                    {project.budgetType || "Fixed Price"}
                   </p>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-muted/30 border border-border/40">
                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
                       Views
                     </p>
-                    <p className="text-2xl font-black">{project.views}</p>
+                    <p className="text-2xl font-black">
+                      {project.viewCount || 0}
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-muted/30 border border-border/40">
                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
                       Bids
                     </p>
-                    <p className="text-2xl font-black">{project.proposals}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center bg-card/40 p-3 rounded-xl border">
-                    <div className="flex items-center gap-3">
-                      <Bookmark className="w-4 h-4 text-blue-500" />
-                      <span className="text-sm font-bold">Shortlisted</span>
-                    </div>
-                    <span className="font-black text-sm">
-                      {project.shortlisted}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center bg-card/40 p-3 rounded-xl border">
-                    <div className="flex items-center gap-3">
-                      <MessageSquare className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm font-bold">In Discussion</span>
-                    </div>
-                    <span className="font-black text-sm">3</span>
+                    <p className="text-2xl font-black">
+                      {project._count?.proposals || 0}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Primary Actions Card */}
+            {/* Actions Card */}
             <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm shadow-2xl shadow-primary/10">
               <CardContent className="p-8 space-y-4">
-                {project.status === "open" ? (
+                {project.status === "OPEN" ? (
                   <>
-                    <Button className="w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-lg shadow-primary/30 group">
-                      <Users className="w-5 h-5 transition-transform group-hover:scale-110" />
-                      View All Proposals
+                    <Button
+                      className="w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-lg shadow-primary/30"
+                      asChild
+                    >
+                      <Link to={`/client/projects/${project.id}/proposals`}>
+                        <Users className="w-5 h-5" /> View All Proposals
+                      </Link>
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full h-14 rounded-2xl font-black bg-background/50 border-border/60"
+                      className="w-full h-14 rounded-2xl font-black bg-background/50"
+                      asChild
                     >
-                      Edit Project Details
+                      <Link to={`/client/post-project?editId=${project.id}`}>
+                        Edit Project Details
+                      </Link>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full h-12 rounded-xl font-bold text-primary hover:bg-primary/10"
-                    >
-                      Boost with AI Search
-                    </Button>
-                    <div className="pt-2">
-                      <Button
-                        variant="ghost"
-                        className="w-full text-destructive hover:bg-destructive/10 font-bold gap-2"
-                      >
-                        <Trash2 className="w-4 h-4" /> Close Project
-                      </Button>
-                    </div>
                   </>
-                ) : (
+                ) : project.status === "IN_PROGRESS" ? (
                   <>
-                    <Button className="w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-lg shadow-primary/30 group">
-                      <MessageSquare className="w-5 h-5 transition-transform group-hover:scale-110" />
-                      Message Specialist
-                    </Button>
                     <Button
-                      variant="outline"
-                      className="w-full h-14 rounded-2xl font-black bg-background/50 border-border/60"
+                      className="w-full h-14 rounded-2xl font-black text-lg gap-3"
+                      asChild
                     >
-                      View Legal Contract
+                      <Link to="/client/messages">
+                        <MessageSquare className="w-5 h-5" /> Message Developer
+                      </Link>
                     </Button>
-                    {project.status === "in_progress" && (
+                    {contract && (
                       <Button
-                        variant="ghost"
-                        className="w-full h-12 rounded-xl font-bold text-amber-500 hover:bg-amber-500/10"
+                        variant="outline"
+                        className="w-full h-14 rounded-2xl font-black bg-background/50"
+                        asChild
                       >
-                        Request Revision
+                        <Link to={`/client/contracts/${contract.id}`}>
+                          View Contract
+                        </Link>
                       </Button>
                     )}
                   </>
-                )}
+                ) : project.status === "COMPLETED" ? (
+                  <Button
+                    className="w-full h-14 rounded-2xl font-black"
+                    asChild
+                  >
+                    <Link to={`/client/contracts/${contract?.id}`}>
+                      View Final Contract
+                    </Link>
+                  </Button>
+                ) : null}
               </CardContent>
             </Card>
 
-            {/* Hired Freelancer Card */}
-            {(project.status === "in_progress" ||
-              project.status === "completed") &&
-              project.hiredDeveloper && (
-                <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden group">
-                  <div className="p-6 border-b bg-muted/30">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                      Active Specialist
-                    </p>
-                  </div>
-                  <CardContent className="p-6 space-y-6">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <Avatar className="h-16 w-16 ring-4 ring-primary/10">
-                          <AvatarImage src={project.hiredDeveloper.avatar} />
-                          <AvatarFallback>
-                            {project.hiredDeveloper.name[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div
-                          className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-4 border-background rounded-full"
-                          title="Online"
-                        />
+            {/* Hired Developer Card */}
+            {hiredDeveloper && (
+              <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
+                <div className="p-6 border-b bg-muted/30">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Active Specialist
+                  </p>
+                </div>
+                <CardContent className="p-6 space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <Avatar className="h-16 w-16 ring-4 ring-primary/10">
+                        <AvatarImage src={hiredDeveloper.profileImage} />
+                        <AvatarFallback>
+                          {hiredDeveloper.name?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-4 border-background rounded-full" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h5 className="font-black text-lg truncate">
+                          {hiredDeveloper.name}
+                        </h5>
+                        <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h5 className="font-black text-lg tracking-tight truncate">
-                            {project.hiredDeveloper.name}
-                          </h5>
-                          <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
-                        </div>
-                        <p className="text-sm text-muted-foreground font-medium truncate">
-                          {project.hiredDeveloper.title}
-                        </p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {hiredDeveloper.title || "Freelancer"}
+                      </p>
+                      {hiredDeveloper.rating && (
                         <div className="flex items-center gap-1 mt-1 font-black text-xs text-amber-500">
                           <Star className="w-3 h-3 fill-amber-500" />{" "}
-                          {project.hiredDeveloper.rating}
+                          {hiredDeveloper.rating.toFixed(1)}
                         </div>
-                      </div>
+                      )}
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        variant="secondary"
-                        className="font-black text-xs h-10 rounded-xl"
-                      >
-                        Chat
-                      </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="secondary"
+                      className="font-black text-xs h-10 rounded-xl"
+                      asChild
+                    >
+                      <Link to="/client/messages">Chat</Link>
+                    </Button>
+                    {contract && (
                       <Button
                         variant="outline"
                         className="font-black text-xs h-10 rounded-xl"
+                        asChild
                       >
-                        Contract
+                        <Link to={`/client/contracts/${contract.id}`}>
+                          Contract
+                        </Link>
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Danger Zone Accordion */}
+            {/* Danger Zone */}
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="actions" className="border-none">
-                <AccordionTrigger className="flex flex-row items-center gap-2 p-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:no-underline rounded-2xl hover:bg-muted/50 transition-all">
+                <AccordionTrigger className="flex items-center gap-2 p-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:no-underline rounded-2xl hover:bg-muted/50">
                   Project Actions
                 </AccordionTrigger>
                 <AccordionContent className="pt-4 px-2 space-y-2">
@@ -799,12 +772,15 @@ const ClientProjectDetailsPage = () => {
                   >
                     <Archive className="w-4 h-4" /> Archive Project
                   </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="w-4 h-4" /> Delete Permanently
-                  </Button>
+                  {["OPEN", "DRAFT"].includes(project.status) && (
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl text-destructive hover:bg-destructive/10"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="w-4 h-4" /> Delete Permanently
+                    </Button>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
