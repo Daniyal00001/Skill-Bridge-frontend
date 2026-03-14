@@ -4,20 +4,13 @@ import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
   Check,
-  Plus,
   X,
-  Sparkles,
   ArrowRight,
   ArrowLeft,
-  Layout,
-  Target,
   Clock,
   Code2,
   AlertCircle,
-  Gem,
-  Briefcase,
   Link as LinkIcon,
-  MessageSquare,
   FileText,
   MousePointer2,
   Zap,
@@ -56,39 +49,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-
-const CATEGORIES = [
-  {
-    id: "web",
-    name: "Web Development",
-    icon: Layout,
-    subCategories: ["Frontend", "Backend", "Full Stack", "E-commerce"],
-  },
-  {
-    id: "mobile",
-    name: "Mobile Development",
-    icon: Target,
-    subCategories: ["iOS", "Android", "Cross-platform"],
-  },
-  {
-    id: "ai",
-    name: "AI & Data Science",
-    icon: Sparkles,
-    subCategories: ["Machine Learning", "Data Analysis", "NLP"],
-  },
-  {
-    id: "design",
-    name: "UI/UX Design",
-    icon: Gem,
-    subCategories: ["Web Design", "App Design", "Prototyping"],
-  },
-  {
-    id: "other",
-    name: "Other Tech",
-    icon: Code2,
-    subCategories: ["DevOps", "Blockchain", "Cybersecurity"],
-  },
-];
+import { useCategories } from "@/hooks/useCategories";
 
 const SKILL_SUGGESTIONS = [
   "React",
@@ -115,21 +76,24 @@ const PostProjectPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
+  // ✅ Load categories from DB
+  const { categories, loading: catsLoading } = useCategories();
+
   const [formData, setFormData] = useState({
     title: "",
-    category: "",
-    subCategory: "",
+    categoryId: "", // ✅ now stores DB id
+    subCategoryId: "", // ✅ now stores DB id
     shortDesc: "",
     fullDesc: "",
     functionalReq: "",
     referenceLinks: "",
     files: [] as File[],
     budget: 5000,
-    budgetType: "fixed", // fixed, hourly
-    projectSize: "medium", // small, medium, large
+    budgetType: "fixed",
+    projectSize: "medium",
     skills: [] as string[],
-    experienceLevel: "intermediate", // entry, intermediate, expert
-    hiringMethod: "bidding", // bidding, direct
+    experienceLevel: "intermediate",
+    hiringMethod: "bidding",
     deadline: undefined as Date | undefined,
     language: "English",
     locationPref: "Any location",
@@ -140,6 +104,14 @@ const PostProjectPage = () => {
   const [showErrors, setShowErrors] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(null);
+
+  // ✅ Helper to get selected category object
+  const selectedCategory = categories.find((c) => c.id === formData.categoryId);
+
+  // ✅ Helper to get selected subcategory object
+  const selectedSubCategory = selectedCategory?.subCategories.find(
+    (s) => s.id === formData.subCategoryId,
+  );
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
@@ -153,8 +125,8 @@ const PostProjectPage = () => {
           formData.title.length <= VALIDATION.title.max &&
           formData.shortDesc.length >= VALIDATION.shortDesc.min &&
           formData.shortDesc.length <= VALIDATION.shortDesc.max &&
-          !!formData.category &&
-          !!formData.subCategory
+          !!formData.categoryId &&
+          !!formData.subCategoryId
         );
       case 2:
         return (
@@ -187,6 +159,7 @@ const PostProjectPage = () => {
     setShowErrors(false);
     setStep((s) => Math.max(s - 1, 1));
   };
+
   const goToStep = (s: number) => {
     setShowErrors(false);
     setStep(s);
@@ -202,8 +175,8 @@ const PostProjectPage = () => {
     try {
       const payload = {
         title: formData.title,
-        category: formData.category || "other",
-        subCategory: formData.subCategory || "",
+        categoryId: formData.categoryId || null,
+        subCategoryId: formData.subCategoryId || null,
         shortDesc: formData.shortDesc,
         description: formData.fullDesc || "Draft - description pending",
         requirements: formData.functionalReq || "",
@@ -211,25 +184,22 @@ const PostProjectPage = () => {
         budgetType: formData.budgetType,
         projectSize: formData.projectSize,
         deadline:
-          formData.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // default 30 days
+          formData.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         skills: formData.skills,
         experienceLevel: formData.experienceLevel,
         hiringMethod: formData.hiringMethod,
         language: formData.language,
         locationPref: formData.locationPref,
-        status: "DRAFT", // yeh key hai
+        status: "DRAFT",
       };
 
       let res;
-
       if (draftId) {
-        // Already saved draft hai → update karo
         res = await api.patch(`/projects/${draftId}`, payload);
         toast.info("Draft updated ✓");
       } else {
-        // Pehli baar save kar raha hai
         res = await api.post("/projects", payload);
-        setDraftId(res.data.project.id); // ID save karo future updates ke liye
+        setDraftId(res.data.project.id);
         toast.success("Draft saved!", {
           description: "Continue anytime from your Drafts.",
         });
@@ -304,8 +274,10 @@ const PostProjectPage = () => {
             />
           </div>
 
-          {/* Step 1: Basics */}
           <div className="animate-fade-up">
+            {/* ─────────────────────────────────────────
+                Step 1: Basics
+            ───────────────────────────────────────── */}
             {step === 1 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
@@ -315,6 +287,7 @@ const PostProjectPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Title */}
                   <div className="space-y-1">
                     <label className="text-sm font-semibold">
                       Project Title *
@@ -323,9 +296,8 @@ const PostProjectPage = () => {
                       placeholder="e.g., E-commerce App Redesign"
                       value={formData.title}
                       onChange={(e) => {
-                        if (e.target.value.length <= VALIDATION.title.max) {
+                        if (e.target.value.length <= VALIDATION.title.max)
                           updateFormData({ title: e.target.value });
-                        }
                       }}
                       className="h-12 text-lg focus-visible:ring-primary/30"
                     />
@@ -343,55 +315,75 @@ const PostProjectPage = () => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Category + SubCategory */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* ✅ Main Category — loaded from DB */}
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">
                         Main Category *
                       </label>
                       <Select
-                        value={formData.category}
+                        value={formData.categoryId}
                         onValueChange={(val) =>
-                          updateFormData({ category: val, subCategory: "" })
+                          updateFormData({ categoryId: val, subCategoryId: "" })
                         }
+                        disabled={catsLoading}
                       >
                         <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select Category" />
+                          <SelectValue
+                            placeholder={
+                              catsLoading ? "Loading..." : "Select Category"
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          {CATEGORIES.map((cat) => (
+                          {categories.map((cat) => (
                             <SelectItem key={cat.id} value={cat.id}>
                               {cat.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {showErrors && !formData.categoryId && (
+                        <p className="text-[11px] text-destructive font-medium">
+                          Please select a category
+                        </p>
+                      )}
                     </div>
+
+                    {/* ✅ Sub Category — filtered from selected category */}
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">
                         Sub Category *
                       </label>
                       <Select
-                        disabled={!formData.category}
-                        value={formData.subCategory}
+                        disabled={!formData.categoryId || catsLoading}
+                        value={formData.subCategoryId}
                         onValueChange={(val) =>
-                          updateFormData({ subCategory: val })
+                          updateFormData({ subCategoryId: val })
                         }
                       >
                         <SelectTrigger className="h-12">
                           <SelectValue placeholder="Select Sub Category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {CATEGORIES.find(
-                            (c) => c.id === formData.category,
-                          )?.subCategories?.map((sub) => (
-                            <SelectItem key={sub} value={sub}>
-                              {sub}
+                          {selectedCategory?.subCategories.map((sub) => (
+                            <SelectItem key={sub.id} value={sub.id}>
+                              {sub.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {showErrors && !formData.subCategoryId && (
+                        <p className="text-[11px] text-destructive font-medium">
+                          Please select a sub category
+                        </p>
+                      )}
                     </div>
                   </div>
+
+                  {/* Short Description */}
                   <div className="space-y-1">
                     <label className="text-sm font-semibold">
                       One-line Summary *
@@ -400,9 +392,8 @@ const PostProjectPage = () => {
                       placeholder="Capture attention in one sentence"
                       value={formData.shortDesc}
                       onChange={(e) => {
-                        if (e.target.value.length <= VALIDATION.shortDesc.max) {
+                        if (e.target.value.length <= VALIDATION.shortDesc.max)
                           updateFormData({ shortDesc: e.target.value });
-                        }
                       }}
                       className="h-12"
                     />
@@ -425,6 +416,7 @@ const PostProjectPage = () => {
                   <Button
                     variant="ghost"
                     onClick={handleSaveDraft}
+                    disabled={isLoading}
                     className="gap-2 text-muted-foreground hover:text-foreground"
                   >
                     <FileText className="w-4 h-4" /> Save as Draft
@@ -432,8 +424,8 @@ const PostProjectPage = () => {
                   <div className="flex items-center gap-3">
                     {showErrors &&
                       (!formData.title ||
-                        !formData.category ||
-                        !formData.subCategory) && (
+                        !formData.categoryId ||
+                        !formData.subCategoryId) && (
                         <span className="text-sm font-medium text-destructive flex items-center gap-1">
                           <AlertCircle className="w-4 h-4" /> Required fields
                           missing
@@ -447,7 +439,9 @@ const PostProjectPage = () => {
               </Card>
             )}
 
-            {/* Step 2: Description */}
+            {/* ─────────────────────────────────────────
+                Step 2: Description
+            ───────────────────────────────────────── */}
             {step === 2 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
@@ -468,9 +462,8 @@ const PostProjectPage = () => {
                       className="min-h-[120px] p-4"
                       value={formData.fullDesc}
                       onChange={(e) => {
-                        if (e.target.value.length <= VALIDATION.fullDesc.max) {
+                        if (e.target.value.length <= VALIDATION.fullDesc.max)
                           updateFormData({ fullDesc: e.target.value });
-                        }
                       }}
                     />
                     <div className="flex justify-between items-center pt-1">
@@ -487,6 +480,7 @@ const PostProjectPage = () => {
                       </p>
                     </div>
                   </div>
+
                   <div className="space-y-1">
                     <label className="text-sm font-semibold">
                       Functional Requirements *
@@ -498,9 +492,8 @@ const PostProjectPage = () => {
                       onChange={(e) => {
                         if (
                           e.target.value.length <= VALIDATION.functionalReq.max
-                        ) {
+                        )
                           updateFormData({ functionalReq: e.target.value });
-                        }
                       }}
                     />
                     <div className="flex justify-between items-center pt-1">
@@ -520,6 +513,7 @@ const PostProjectPage = () => {
                       </p>
                     </div>
                   </div>
+
                   <div className="space-y-2">
                     <label className="text-sm font-semibold flex items-center gap-2">
                       Reference Links{" "}
@@ -539,6 +533,7 @@ const PostProjectPage = () => {
                       />
                     </div>
                   </div>
+
                   <div className="space-y-4">
                     <label className="text-sm font-semibold flex items-center gap-2">
                       Attachments
@@ -550,17 +545,33 @@ const PostProjectPage = () => {
                       <input
                         type="file"
                         multiple
+                        accept=".jpg,.jpeg,.png,.pdf"
                         className="hidden"
                         id="file-upload"
                         onChange={(e) => {
-                          if (e.target.files) {
+                          if (!e.target.files) return;
+                          const ALLOWED = [
+                            "image/jpeg",
+                            "image/png",
+                            "application/pdf",
+                          ];
+                          const selected = Array.from(e.target.files);
+                          const valid = selected.filter((f) =>
+                            ALLOWED.includes(f.type),
+                          );
+                          const invalid = selected.filter(
+                            (f) => !ALLOWED.includes(f.type),
+                          );
+                          if (invalid.length > 0)
+                            toast.error(
+                              `${invalid.length} file(s) skipped — only JPG, PNG and PDF are allowed.`,
+                            );
+                          if (valid.length > 0)
                             updateFormData({
-                              files: [
-                                ...formData.files,
-                                ...Array.from(e.target.files),
-                              ],
+                              files: [...formData.files, ...valid],
                             });
-                          }
+                          // reset so same file can be re-selected after removal
+                          e.target.value = "";
                         }}
                       />
                       <label
@@ -614,6 +625,7 @@ const PostProjectPage = () => {
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
+                      disabled={isLoading}
                       className="gap-2 border-border/40 hidden md:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
@@ -633,7 +645,9 @@ const PostProjectPage = () => {
               </Card>
             )}
 
-            {/* Step 3: Budget & Timeline */}
+            {/* ─────────────────────────────────────────
+                Step 3: Budget & Timeline
+            ───────────────────────────────────────── */}
             {step === 3 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
@@ -643,34 +657,25 @@ const PostProjectPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-10">
-                  {/* Budget Type Toggle */}
                   <div className="space-y-4">
                     <label className="text-sm font-semibold block text-center">
                       How do you want to pay?
                     </label>
                     <div className="flex justify-center p-1 bg-muted rounded-xl max-w-xs mx-auto">
-                      <button
-                        className={cn(
-                          "flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all",
-                          formData.budgetType === "fixed"
-                            ? "bg-background shadow-sm text-primary"
-                            : "text-muted-foreground",
-                        )}
-                        onClick={() => updateFormData({ budgetType: "fixed" })}
-                      >
-                        Fixed Price
-                      </button>
-                      <button
-                        className={cn(
-                          "flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all",
-                          formData.budgetType === "hourly"
-                            ? "bg-background shadow-sm text-primary"
-                            : "text-muted-foreground",
-                        )}
-                        onClick={() => updateFormData({ budgetType: "hourly" })}
-                      >
-                        Hourly Rate
-                      </button>
+                      {["fixed", "hourly"].map((type) => (
+                        <button
+                          key={type}
+                          className={cn(
+                            "flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all capitalize",
+                            formData.budgetType === type
+                              ? "bg-background shadow-sm text-primary"
+                              : "text-muted-foreground",
+                          )}
+                          onClick={() => updateFormData({ budgetType: type })}
+                        >
+                          {type === "fixed" ? "Fixed Price" : "Hourly Rate"}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
@@ -799,6 +804,7 @@ const PostProjectPage = () => {
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
+                      disabled={isLoading}
                       className="gap-2 border-border/40 hidden md:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
@@ -818,7 +824,9 @@ const PostProjectPage = () => {
               </Card>
             )}
 
-            {/* Step 4: Skills & Preferences */}
+            {/* ─────────────────────────────────────────
+                Step 4: Skills & Preferences
+            ───────────────────────────────────────── */}
             {step === 4 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
@@ -885,9 +893,8 @@ const PostProjectPage = () => {
                           placeholder="Type custom skill & press Enter..."
                           value={customSkill}
                           onChange={(e) => {
-                            if (e.target.value.length <= VALIDATION.skill.max) {
+                            if (e.target.value.length <= VALIDATION.skill.max)
                               setCustomSkill(e.target.value);
-                            }
                           }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter" && customSkill.trim()) {
@@ -899,11 +906,10 @@ const PostProjectPage = () => {
                                 );
                                 return;
                               }
-                              if (!formData.skills.includes(trimmed)) {
+                              if (!formData.skills.includes(trimmed))
                                 updateFormData({
                                   skills: [...formData.skills, trimmed],
                                 });
-                              }
                               setCustomSkill("");
                             }
                           }}
@@ -1047,73 +1053,60 @@ const PostProjectPage = () => {
                         Hiring Method
                       </label>
                       <Card className="bg-muted/20 border-border/40 overflow-hidden">
-                        <button
-                          className={cn(
-                            "w-full flex items-center gap-4 p-4 text-left transition-all border-b border-border/40",
-                            formData.hiringMethod === "bidding"
-                              ? "bg-background"
-                              : "opacity-60",
-                          )}
-                          onClick={() =>
-                            updateFormData({ hiringMethod: "bidding" })
-                          }
-                        >
-                          <MousePointer2
+                        {[
+                          {
+                            id: "bidding",
+                            icon: <MousePointer2 className="w-5 h-5" />,
+                            label: "Open Bidding",
+                            desc: "Receive proposals from anyone",
+                          },
+                          {
+                            id: "direct",
+                            icon: <Zap className="w-5 h-5" />,
+                            label: "Direct Invite",
+                            desc: "Invite specific developers only",
+                          },
+                        ].map((method, idx) => (
+                          <button
+                            key={method.id}
                             className={cn(
-                              "w-5 h-5",
-                              formData.hiringMethod === "bidding"
-                                ? "text-primary"
-                                : "text-muted-foreground",
+                              "w-full flex items-center gap-4 p-4 text-left transition-all",
+                              idx === 0 && "border-b border-border/40",
+                              formData.hiringMethod === method.id
+                                ? "bg-background"
+                                : "opacity-60",
                             )}
-                          />
-                          <div>
-                            <span className="text-xs font-bold block">
-                              Open Bidding
+                            onClick={() =>
+                              updateFormData({ hiringMethod: method.id })
+                            }
+                          >
+                            <span
+                              className={cn(
+                                formData.hiringMethod === method.id
+                                  ? "text-primary"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              {method.icon}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">
-                              Receive proposals from anyone
-                            </span>
-                          </div>
-                          {formData.hiringMethod === "bidding" && (
-                            <Check className="ml-auto w-4 h-4 text-primary" />
-                          )}
-                        </button>
-                        <button
-                          className={cn(
-                            "w-full flex items-center gap-4 p-4 text-left transition-all",
-                            formData.hiringMethod === "direct"
-                              ? "bg-background"
-                              : "opacity-60",
-                          )}
-                          onClick={() =>
-                            updateFormData({ hiringMethod: "direct" })
-                          }
-                        >
-                          <Zap
-                            className={cn(
-                              "w-5 h-5",
-                              formData.hiringMethod === "direct"
-                                ? "text-primary"
-                                : "text-muted-foreground",
+                            <div>
+                              <span className="text-xs font-bold block">
+                                {method.label}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground">
+                                {method.desc}
+                              </span>
+                            </div>
+                            {formData.hiringMethod === method.id && (
+                              <Check className="ml-auto w-4 h-4 text-primary" />
                             )}
-                          />
-                          <div>
-                            <span className="text-xs font-bold block">
-                              Direct Invite
-                            </span>
-                            <span className="text-[10px] text-muted-foreground">
-                              Invite specific developers only
-                            </span>
-                          </div>
-                          {formData.hiringMethod === "direct" && (
-                            <Check className="ml-auto w-4 h-4 text-primary" />
-                          )}
-                        </button>
+                          </button>
+                        ))}
                       </Card>
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between w-full pt-6 border-t font-semibold items-center">
+                <CardFooter className="flex justify-between w-full pt-6 border-t items-center">
                   <Button variant="ghost" onClick={prevStep} className="gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
                   </Button>
@@ -1121,6 +1114,7 @@ const PostProjectPage = () => {
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
+                      disabled={isLoading}
                       className="gap-2 border-border/40 hidden md:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
@@ -1139,7 +1133,9 @@ const PostProjectPage = () => {
               </Card>
             )}
 
-            {/* Step 5: Review & Post */}
+            {/* ─────────────────────────────────────────
+                Step 5: Review & Post
+            ───────────────────────────────────────── */}
             {step === 5 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl relative overflow-hidden">
                 <CardHeader className="text-center pb-2">
@@ -1155,9 +1151,8 @@ const PostProjectPage = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-6">
-                  {/* Summary Grid */}
                   <div className="grid md:grid-cols-2 gap-4">
-                    {/* Basics Section */}
+                    {/* Basics */}
                     <div className="p-5 rounded-xl bg-muted/30 border border-border/40 relative group">
                       <button
                         onClick={() => goToStep(1)}
@@ -1171,18 +1166,21 @@ const PostProjectPage = () => {
                       <h2 className="text-xl font-bold mb-1">
                         {formData.title}
                       </h2>
-                      <Badge variant="outline" className="mb-3">
-                        {
-                          CATEGORIES.find((c) => c.id === formData.category)
-                            ?.name
-                        }
+                      {/* ✅ Show category name from DB object */}
+                      <Badge variant="outline" className="mb-1">
+                        {selectedCategory?.name ?? "—"}
                       </Badge>
-                      <p className="text-xs text-muted-foreground italic">
+                      {selectedSubCategory && (
+                        <Badge variant="secondary" className="mb-3 ml-1">
+                          {selectedSubCategory.name}
+                        </Badge>
+                      )}
+                      <p className="text-xs text-muted-foreground italic mt-2">
                         "{formData.shortDesc}"
                       </p>
                     </div>
 
-                    {/* Budget/Time Section */}
+                    {/* Budget / Timeline */}
                     <div className="p-5 rounded-xl bg-primary/5 border border-primary/20 relative group">
                       <button
                         onClick={() => goToStep(3)}
@@ -1218,7 +1216,7 @@ const PostProjectPage = () => {
                       </div>
                     </div>
 
-                    {/* Requirements Section */}
+                    {/* Description & Requirements */}
                     <div className="p-5 rounded-xl bg-muted/30 border border-border/40 md:col-span-2 relative group">
                       <button
                         onClick={() => goToStep(2)}
@@ -1250,7 +1248,7 @@ const PostProjectPage = () => {
                       </div>
                     </div>
 
-                    {/* Skills Section */}
+                    {/* Skills */}
                     <div className="p-5 rounded-xl bg-muted/30 border border-border/40 md:col-span-2 relative group">
                       <button
                         onClick={() => goToStep(4)}
@@ -1327,15 +1325,18 @@ const PostProjectPage = () => {
                       </span>
                     )}
                   </div>
+
                   <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
                     <Button
                       variant="outline"
                       onClick={handleSaveDraft}
+                      disabled={isLoading}
                       className="h-12 px-6 gap-2 border-border/40 flex-1 md:flex-none hidden lg:flex"
                     >
                       <FileText className="w-4 h-4" /> Save as Draft
                     </Button>
                     <Button
+                      disabled={isLoading}
                       className="w-full md:w-auto min-w-[200px] h-12 text-lg font-black gap-3 shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] transition-all hover:scale-[1.02] active:scale-[0.98] flex-1 md:flex-none"
                       onClick={async () => {
                         if (!formData.termsAccepted) {
@@ -1347,8 +1348,9 @@ const PostProjectPage = () => {
                         try {
                           const fd = new FormData();
                           fd.append("title", formData.title);
-                          fd.append("category", formData.category);
-                          fd.append("subCategory", formData.subCategory);
+                          // ✅ send IDs to backend
+                          fd.append("categoryId", formData.categoryId);
+                          fd.append("subCategoryId", formData.subCategoryId);
                           fd.append("shortDesc", formData.shortDesc);
                           fd.append("description", formData.fullDesc);
                           fd.append("requirements", formData.functionalReq);
@@ -1371,12 +1373,9 @@ const PostProjectPage = () => {
                           fd.append("locationPref", formData.locationPref);
                           fd.append("status", "OPEN");
 
-                          // Append skills one by one (FormData arrays)
                           formData.skills.forEach((skill) =>
                             fd.append("skills", skill),
                           );
-
-                          // Append files
                           formData.files.forEach((file) =>
                             fd.append("files", file),
                           );
@@ -1399,7 +1398,7 @@ const PostProjectPage = () => {
                           toast.success(
                             "Project is now live on SkillBridge! 🎉",
                           );
-                          navigate(`/client/projects`);
+                          navigate("/client/projects");
                         } catch (err: any) {
                           toast.error(
                             err?.response?.data?.message ||
