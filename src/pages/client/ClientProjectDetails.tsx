@@ -292,7 +292,7 @@ const ClientProjectDetailsPage = () => {
                   {/* Overview Tab */}
                   <TabsContent
                     value="overview"
-                    className="p-8 space-y-8 animate-in fade-in duration-300"
+                    className="p-8 space-y-8 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
                   >
                     <div className="space-y-4">
                       <h4 className="text-lg font-bold">Project Description</h4>
@@ -378,7 +378,7 @@ const ClientProjectDetailsPage = () => {
                   {/* Requirements Tab */}
                   <TabsContent
                     value="requirements"
-                    className="p-8 space-y-8 animate-in fade-in duration-300"
+                    className="p-8 space-y-8 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
@@ -460,7 +460,7 @@ const ClientProjectDetailsPage = () => {
                   {/* Milestones Tab */}
                   <TabsContent
                     value="milestones"
-                    className="p-8 space-y-6 animate-in fade-in duration-300"
+                    className="p-8 space-y-6 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
                   >
                     {milestones.length === 0 ? (
                       <div className="text-center py-12 text-muted-foreground">

@@ -32,188 +32,207 @@ export default function ClientDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Welcome back! 👋</h1>
-            <p className="text-muted-foreground mt-1">
-              Here's what's happening with your projects
-            </p>
-          </div>
-        </div>
+      <div className="relative overflow-hidden -m-6 p-6 min-h-full">
+        {/* Premium Background Decoration */}
+        <div
+          className="absolute top-0 left-0 w-[800px] h-[800px] pointer-events-none -z-10"
+          style={{
+            background:
+              "radial-gradient(circle at 0% 0%, hsl(var(--accent) / 0.15) 0%, transparent 70%)",
+            clipPath: "polygon(0 0, 100% 0, 0 100%)",
+          }}
+        />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-accent/[0.08] via-transparent to-transparent pointer-events-none -z-10" />
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard
-            title="Active Projects"
-            value={clientDashboardStats.activeProjects}
-            change="+2 this month"
-            changeType="positive"
-            icon={FolderOpen}
-          />
-          <StatsCard
-            title="Total Spent"
-            value={`$${clientDashboardStats.totalSpent.toLocaleString()}`}
-            change="On budget"
-            changeType="neutral"
-            icon={DollarSign}
-          />
-          <StatsCard
-            title="Pending Proposals"
-            value={clientDashboardStats.pendingProposals}
-            change="5 new today"
-            changeType="positive"
-            icon={FileText}
-          />
-          <StatsCard
-            title="Completed Projects"
-            value={clientDashboardStats.completedProjects}
-            change="98% success rate"
-            changeType="positive"
-            icon={CheckCircle}
-          />
-        </div>
-
-        {/* Find Talent Section */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="group overflow-hidden border-primary/20 bg-gradient-to-br from-card to-primary/5 hover:to-primary/10 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Search className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Browse Freelancers</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Search and filter from our curated talent pool
-                    </p>
-                  </div>
-                  <Button variant="default" asChild>
-                    <Link to="/client/browse">Browse Talent</Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="group overflow-hidden border-primary/30 bg-gradient-to-br from-card to-purple-500/5 hover:to-purple-500/10 transition-all duration-300 relative">
-            <div className="absolute top-2 right-2">
-              <Badge className="bg-gradient-to-r from-primary to-purple-600 border-none">
-                Recommended
-              </Badge>
-            </div>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <div className="h-12 w-12 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Sparkles className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">AI Talent Finder</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Let AI find the perfect match for your requirements
-                    </p>
-                  </div>
-                  <Button
-                    className="bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 border-none"
-                    asChild
-                  >
-                    <Link to="/client/ai-assistant">Chat with AI</Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Recent Projects */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Open Projects</h2>
-              <Button variant="ghost" asChild>
-                <Link to="/client/projects">
-                  View all <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              {recentProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  viewAs="client"
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Quick Actions</h2>
-            <Card>
-              <CardContent className="p-4 space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  asChild
-                >
-                  <Link to="/client/projects">
-                    <FolderOpen className="mr-3 h-4 w-4" />
-                    Manage Projects
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  asChild
-                >
-                  <Link to="/client/messages">
-                    <FileText className="mr-3 h-4 w-4" />
-                    View Messages
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* AI Tip */}
-            <Card variant="gradient">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-white mt-0.5" />
-                  <div>
-                    <h3 className="font-medium text-white">Pro Tip</h3>
-                    <p className="text-sm text-white/80 mt-1">
-                      Use our AI Scoping Assistant to get accurate budget
-                      estimates for your next project.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* AI Recommended Freelancers */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-8 relative z-10">
+          {/* Welcome Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold">
-                Freelancers I’ve Worked With
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Based on your project history and requirements
+              <h1 className="text-3xl font-bold tracking-tight">
+                Welcome back! 👋
+              </h1>
+              <p className="text-muted-foreground mt-1 text-lg">
+                Here's what's happening with your projects
               </p>
             </div>
-            <Button variant="outline">Browse All</Button>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommendedFreelancers.map((freelancer) => (
-              <FreelancerCard key={freelancer.id} freelancer={freelancer} />
-            ))}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatsCard
+              title="Active Projects"
+              value={clientDashboardStats.activeProjects}
+              change="+2 this month"
+              changeType="positive"
+              icon={FolderOpen}
+            />
+            <StatsCard
+              title="Total Spent"
+              value={`$${clientDashboardStats.totalSpent.toLocaleString()}`}
+              change="On budget"
+              changeType="neutral"
+              icon={DollarSign}
+            />
+            <StatsCard
+              title="Pending Proposals"
+              value={clientDashboardStats.pendingProposals}
+              change="5 new today"
+              changeType="positive"
+              icon={FileText}
+            />
+            <StatsCard
+              title="Completed Projects"
+              value={clientDashboardStats.completedProjects}
+              change="98% success rate"
+              changeType="positive"
+              icon={CheckCircle}
+            />
+          </div>
+
+          {/* Find Talent Section */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="group overflow-hidden border-primary/20 bg-gradient-to-br from-card to-primary/5 hover:to-primary/10 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-4">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Search className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Browse Freelancers</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Search and filter from our curated talent pool
+                      </p>
+                    </div>
+                    <Button variant="default" asChild>
+                      <Link to="/client/browse">Browse Talent</Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group overflow-hidden border-primary/30 bg-gradient-to-br from-card to-purple-500/5 hover:to-purple-500/10 transition-all duration-300 relative border-l-4 border-l-purple-500">
+              <div className="absolute top-2 right-2">
+                <Badge className="bg-gradient-to-r from-primary to-purple-600 border-none shadow-sm">
+                  Recommended
+                </Badge>
+              </div>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-4">
+                    <div className="h-12 w-12 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Sparkles className="h-6 w-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">AI Talent Finder</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Let AI find the perfect match for your requirements
+                      </p>
+                    </div>
+                    <Button
+                      className="bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 border-none shadow-md"
+                      asChild
+                    >
+                      <Link to="/client/ai-assistant">Chat with AI</Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Two Column Layout */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Recent Projects */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Open Projects</h2>
+                <Button variant="ghost" asChild>
+                  <Link to="/client/projects">
+                    View all <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {recentProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    viewAs="client"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Quick Actions</h2>
+              <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-4 space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start hover:bg-primary/5 hover:text-primary transition-colors"
+                    asChild
+                  >
+                    <Link to="/client/projects">
+                      <FolderOpen className="mr-3 h-4 w-4" />
+                      Manage Projects
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start hover:bg-primary/5 hover:text-primary transition-colors"
+                    asChild
+                  >
+                    <Link to="/client/messages">
+                      <FileText className="mr-3 h-4 w-4" />
+                      View Messages
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* AI Tip */}
+              <Card variant="gradient" className="shadow-lg border-none">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-xl bg-white/20 backdrop-blur-md">
+                      <Bot className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white">Pro Tip</h3>
+                      <p className="text-sm text-white/90 mt-1 leading-relaxed">
+                        Use our AI Scoping Assistant to get accurate budget
+                        estimates for your next project.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* AI Recommended Freelancers */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight">
+                  Freelancers I’ve Worked With
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Based on your project history and requirements
+                </p>
+              </div>
+              <Button variant="outline" className="rounded-full px-6">
+                Browse All
+              </Button>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recommendedFreelancers.map((freelancer) => (
+                <FreelancerCard key={freelancer.id} freelancer={freelancer} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
