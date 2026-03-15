@@ -1023,7 +1023,7 @@ const PostProjectPage = () => {
                             "Europe",
                             "Asia",
                             "Latin America",
-                            "Remote only",
+                            // "Remote only",
                           ].map((loc) => (
                             <SelectItem key={loc} value={loc}>
                               {loc}

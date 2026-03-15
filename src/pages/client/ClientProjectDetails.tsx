@@ -319,13 +319,13 @@ const ClientProjectDetailsPage = () => {
                       <div className="space-y-4">
                         <h4 className="text-lg font-bold">Required Skills</h4>
                         <div className="flex flex-wrap gap-2">
-                          {project.skills?.map((skill: string, i: number) => (
+                          {project.skills?.map((skill: any, i: number) => (
                             <Badge
-                              key={i}
+                              key={skill.id || i}
                               variant="outline"
                               className="font-bold py-1.5 px-3"
                             >
-                              {skill}
+                              {skill.skill?.name || skill.name}
                             </Badge>
                           ))}
                         </div>
@@ -752,38 +752,6 @@ const ClientProjectDetailsPage = () => {
                 </CardContent>
               </Card>
             )}
-
-            {/* Danger Zone */}
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="actions" className="border-none">
-                <AccordionTrigger className="flex items-center gap-2 p-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:no-underline rounded-2xl hover:bg-muted/50">
-                  Project Actions
-                </AccordionTrigger>
-                <AccordionContent className="pt-4 px-2 space-y-2">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl"
-                  >
-                    <Pause className="w-4 h-4" /> Pause Project
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl"
-                  >
-                    <Archive className="w-4 h-4" /> Archive Project
-                  </Button>
-                  {["OPEN", "DRAFT"].includes(project.status) && (
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-3 font-bold text-sm h-11 rounded-xl text-destructive hover:bg-destructive/10"
-                      onClick={handleDelete}
-                    >
-                      <Trash2 className="w-4 h-4" /> Delete Permanently
-                    </Button>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
           </div>
         </div>
       </div>

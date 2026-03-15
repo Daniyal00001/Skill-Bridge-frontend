@@ -51,9 +51,12 @@ import { api } from "@/lib/api";
 // Freelancer's skills — in future, pull from profile API
 const FREELANCER_SKILLS = ["React", "TypeScript", "Node.js", "MongoDB", "AWS"];
 
-const calculateMatchScore = (projectSkills: string[]): number => {
+const calculateMatchScore = (projectSkills: any[]): number => {
   if (!projectSkills?.length) return 0;
-  const overlap = projectSkills.filter((s) => FREELANCER_SKILLS.includes(s));
+  const overlap = projectSkills.filter((s) => {
+    const name = s.skill?.name || s.name || s;
+    return typeof name === "string" && FREELANCER_SKILLS.includes(name);
+  });
   return Math.round((overlap.length / projectSkills.length) * 100);
 };
 
@@ -367,46 +370,60 @@ export default function FreelancerProjectDetails() {
                 </div>
               </div>
               <div className="space-y-8">
-                {project.skills?.filter((s: string) =>
-                  FREELANCER_SKILLS.includes(s),
-                ).length > 0 && (
+                {project.skills?.filter((s: any) => {
+                  const name = s.skill?.name || s.name;
+                  return FREELANCER_SKILLS.includes(name);
+                }).length > 0 && (
                   <div className="space-y-4">
                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-70">
                       Your Matching Skills
                     </Label>
                     <div className="flex flex-wrap gap-3">
                       {project.skills
-                        .filter((s: string) => FREELANCER_SKILLS.includes(s))
-                        .map((skill: string) => (
-                          <Badge
-                            key={skill}
-                            className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-2 px-5 rounded-xl font-bold text-sm"
-                          >
-                            {skill}
-                          </Badge>
-                        ))}
+                        .filter((s: any) => {
+                          const name = s.skill?.name || s.name;
+                          return FREELANCER_SKILLS.includes(name);
+                        })
+                        .map((skill: any) => {
+                          const name = skill.skill?.name || skill.name;
+                          return (
+                            <Badge
+                              key={skill.id || name}
+                              className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-2 px-5 rounded-xl font-bold text-sm"
+                            >
+                              {name}
+                            </Badge>
+                          );
+                        })}
                     </div>
                   </div>
                 )}
-                {project.skills?.filter(
-                  (s: string) => !FREELANCER_SKILLS.includes(s),
-                ).length > 0 && (
+                {project.skills?.filter((s: any) => {
+                  const name = s.skill?.name || s.name;
+                  return !FREELANCER_SKILLS.includes(name);
+                }).length > 0 && (
                   <div className="space-y-4">
                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-70">
                       Other Requirements
                     </Label>
                     <div className="flex flex-wrap gap-3">
                       {project.skills
-                        .filter((s: string) => !FREELANCER_SKILLS.includes(s))
-                        .map((skill: string) => (
-                          <Badge
-                            key={skill}
-                            variant="outline"
-                            className="bg-background/40 border-border/60 py-2 px-5 rounded-xl font-bold text-sm text-muted-foreground"
-                          >
-                            {skill}
-                          </Badge>
-                        ))}
+                        .filter((s: any) => {
+                          const name = s.skill?.name || s.name;
+                          return !FREELANCER_SKILLS.includes(name);
+                        })
+                        .map((skill: any) => {
+                          const name = skill.skill?.name || skill.name;
+                          return (
+                            <Badge
+                              key={skill.id || name}
+                              variant="outline"
+                              className="bg-background/40 border-border/60 py-2 px-5 rounded-xl font-bold text-sm text-muted-foreground"
+                            >
+                              {name}
+                            </Badge>
+                          );
+                        })}
                     </div>
                   </div>
                 )}

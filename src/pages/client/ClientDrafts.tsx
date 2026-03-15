@@ -253,13 +253,13 @@ const ClientDraftsPage = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {draft.skills?.slice(0, 3).map((skill: string) => (
+                      {draft.skills?.slice(0, 3).map((skill: any) => (
                         <Badge
-                          key={skill}
+                          key={skill.id || skill.skill?.name || skill.name}
                           variant="secondary"
                           className="bg-primary/5 text-primary border-primary/10 font-bold text-[10px] px-2.5"
                         >
-                          {skill}
+                          {skill.skill?.name || skill.name}
                         </Badge>
                       ))}
                       {draft.skills?.length > 3 && (
