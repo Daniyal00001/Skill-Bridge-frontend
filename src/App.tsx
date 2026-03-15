@@ -42,6 +42,7 @@ import ClientDraftsPage from "./pages/client/ClientDrafts";
 import MyProposalsPage from "./pages/client/MyProposals";
 import ClientProfilePage from "./pages/client/ClientProfile";
 import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
+import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
 
 // Freelancer Pages
 import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
@@ -132,6 +133,10 @@ const App = () => (
                 <Route
                   path="/client/browse"
                   element={<BrowseFreelancersPage />}
+                />
+                <Route
+                  path="/freelancer/:id"
+                  element={<FreelancerProfileDetail />}
                 />
                 <Route path="/client/proposals" element={<MyProposalsPage />} />
                 <Route path="/client/profile" element={<ClientProfilePage />} />
