@@ -39,6 +39,8 @@ export default function SignupPage() {
   const [role, setRole] = useState<"client" | "freelancer">(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
   // ── Password Requirements Check ──────────────────────────────
   const passwordRequirements = useMemo(
@@ -60,9 +62,34 @@ export default function SignupPage() {
     [passwordRequirements],
   );
 
-  const { signup } = useAuth();
+  const { signup, verifyOtp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) value = value.slice(-1);
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,18 +109,17 @@ export default function SignupPage() {
       await signup({ name, email, password, role });
 
       toast({
-        title: "Account created!",
-        description: `Welcome to SkillBridge, ${name}! Your account has been successfully set up.`,
+        title: "Code Sent!",
+        description: `We've sent a 6-digit verification code to ${email}.`,
       });
 
-      navigate(role === "freelancer" ? "/freelancer" : "/client");
+      setShowOTP(true);
     } catch (error) {
       let message = "Failed to create account. Please try again.";
       let title = "Signup failed";
 
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.message || message;
-        // If it's a validation error, we can be more specific
         if (error.response?.status === 400) {
           title = "Validation Error";
         }
@@ -101,6 +127,43 @@ export default function SignupPage() {
 
       toast({
         title: title,
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const otpString = otp.join("");
+    if (otpString.length !== 6) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter the full 6-digit code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await verifyOtp(email, otpString);
+
+      toast({
+        title: "Email Verified!",
+        description: `Welcome to SkillBridge, ${name}! Your account is now active.`,
+      });
+
+      navigate(role === "freelancer" ? "/freelancer" : "/client");
+    } catch (error) {
+      let message = "Invalid or expired code. Please try again.";
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || message;
+      }
+      toast({
+        title: "Verification Failed",
         description: message,
         variant: "destructive",
       });
@@ -215,251 +278,305 @@ export default function SignupPage() {
 
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2 tracking-tight">
-              Create account
+              {showOTP ? "Verify Email" : "Create account"}
             </h1>
             <p className="text-muted-foreground">
-              Join the next-gen freelance ecosystem today.
+              {showOTP
+                ? `Enter the 6-digit code sent to ${email}`
+                : "Join the next-gen freelance ecosystem today."}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Role Selection */}
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setRole("client")}
-                className={cn(
-                  "flex flex-col items-start gap-1 p-4 rounded-2xl border-2 transition-all text-left relative overflow-hidden group",
-                  role === "client"
-                    ? "border-primary bg-primary/5 shadow-inner"
-                    : "border-border/50 hover:border-primary/30 hover:bg-muted/30",
-                )}
-              >
-                <div
-                  className={cn(
-                    "p-2 rounded-xl mb-2 transition-colors",
-                    role === "client"
-                      ? "bg-primary text-white"
-                      : "bg-muted text-muted-foreground group-hover:bg-primary/20",
-                  )}
-                >
-                  <Briefcase className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-bold">I'm hiring</span>
-                <span className="text-[10px] text-muted-foreground leading-tight">
-                  Post jobs & find talent
-                </span>
-                {role === "client" && (
-                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("freelancer")}
-                className={cn(
-                  "flex flex-col items-start gap-1 p-4 rounded-2xl border-2 transition-all text-left relative overflow-hidden group",
-                  role === "freelancer"
-                    ? "border-primary bg-primary/5 shadow-inner"
-                    : "border-border/50 hover:border-primary/30 hover:bg-muted/30",
-                )}
-              >
-                <div
-                  className={cn(
-                    "p-2 rounded-xl mb-2 transition-colors",
-                    role === "freelancer"
-                      ? "bg-primary text-white"
-                      : "bg-muted text-muted-foreground group-hover:bg-primary/20",
-                  )}
-                >
-                  <Code className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-bold">I'm expert</span>
-                <span className="text-[10px] text-muted-foreground leading-tight">
-                  Find work & build career
-                </span>
-                {role === "freelancer" && (
-                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
-                )}
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="name"
-                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
-                >
-                  Full Name
-                </Label>
-                <div className="relative group">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id="name"
-                    placeholder="Enter your name"
-                    className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="email"
-                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
-                >
-                  Email Address
-                </Label>
-                <div className="relative group">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="password"
-                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
-                >
-                  Password
-                </Label>
-                <div className="relative group">
-                  <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl focus:ring-1 focus:ring-primary/20"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
+          {!showOTP ? (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Role Selection */}
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
+                    onClick={() => setRole("client")}
+                    className={cn(
+                      "flex flex-col items-start gap-1 p-4 rounded-2xl border-2 transition-all text-left relative overflow-hidden group",
+                      role === "client"
+                        ? "border-primary bg-primary/5 shadow-inner"
+                        : "border-border/50 hover:border-primary/30 hover:bg-muted/30",
+                    )}
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
+                    <div
+                      className={cn(
+                        "p-2 rounded-xl mb-2 transition-colors",
+                        role === "client"
+                          ? "bg-primary text-white"
+                          : "bg-muted text-muted-foreground group-hover:bg-primary/20",
+                      )}
+                    >
+                      <Briefcase className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-bold">I'm hiring</span>
+                    <span className="text-[10px] text-muted-foreground leading-tight">
+                      Post jobs & find talent
+                    </span>
+                    {role === "client" && (
+                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRole("freelancer")}
+                    className={cn(
+                      "flex flex-col items-start gap-1 p-4 rounded-2xl border-2 transition-all text-left relative overflow-hidden group",
+                      role === "freelancer"
+                        ? "border-primary bg-primary/5 shadow-inner"
+                        : "border-border/50 hover:border-primary/30 hover:bg-muted/30",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "p-2 rounded-xl mb-2 transition-colors",
+                        role === "freelancer"
+                          ? "bg-primary text-white"
+                          : "bg-muted text-muted-foreground group-hover:bg-primary/20",
+                      )}
+                    >
+                      <Code className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-bold">I'm expert</span>
+                    <span className="text-[10px] text-muted-foreground leading-tight">
+                      Find work & build career
+                    </span>
+                    {role === "freelancer" && (
+                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
                     )}
                   </button>
                 </div>
 
-                {/* Password Requirements Checklist */}
-                {password.length > 0 && (
-                  <div className="mt-3 p-3 bg-muted/30 rounded-xl border border-border/50 space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                      Security Score
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
-                      {passwordRequirements.map((req, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <div
-                            className={cn(
-                              "w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-300",
-                              req.met
-                                ? "bg-primary text-white scale-110"
-                                : "bg-muted-foreground/20",
-                            )}
-                          >
-                            {req.met && (
-                              <CheckCircle2 className="w-2.5 h-2.5" />
-                            )}
-                          </div>
-                          <span
-                            className={cn(
-                              "text-[10px] transition-colors duration-300",
-                              req.met
-                                ? "text-foreground font-medium"
-                                : "text-muted-foreground",
-                            )}
-                          >
-                            {req.label}
-                          </span>
-                        </div>
-                      ))}
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="name"
+                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                    >
+                      Full Name
+                    </Label>
+                    <div className="relative group">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <Input
+                        id="name"
+                        placeholder="Enter your name"
+                        className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
-                )}
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="email"
+                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                    >
+                      Email Address
+                    </Label>
+                    <div className="relative group">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="password"
+                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                    >
+                      Password
+                    </Label>
+                    <div className="relative group">
+                      <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        className="pl-10 h-11 bg-background/50 border-border/50 rounded-xl focus:ring-1 focus:ring-primary/20"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Password Requirements Checklist */}
+                    {password.length > 0 && (
+                      <div className="mt-3 p-3 bg-muted/30 rounded-xl border border-border/50 space-y-2">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                          Security Score
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                          {passwordRequirements.map((req, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <div
+                                className={cn(
+                                  "w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-300",
+                                  req.met
+                                    ? "bg-primary text-white scale-110"
+                                    : "bg-muted-foreground/20",
+                                )}
+                              >
+                                {req.met && (
+                                  <CheckCircle2 className="w-2.5 h-2.5" />
+                                )}
+                              </div>
+                              <span
+                                className={cn(
+                                  "text-[10px] transition-colors duration-300",
+                                  req.met
+                                    ? "text-foreground font-medium"
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                {req.label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className={cn(
+                    "w-full h-12 text-base font-bold rounded-xl shadow-lg mt-2",
+                    isPasswordValid
+                      ? "gradient-hero hover:shadow-primary/20"
+                      : "bg-muted text-muted-foreground cursor-not-allowed opacity-70",
+                  )}
+                  disabled={
+                    isLoading || (password.length > 0 && !isPasswordValid)
+                  }
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Sending
+                      Code...
+                    </>
+                  ) : (
+                    "Continue"
+                  )}
+                </Button>
+              </form>
+
+              {/* login with google*/}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <Button
-              type="submit"
-              className={cn(
-                "w-full h-12 text-base font-bold rounded-xl shadow-lg mt-2",
-                isPasswordValid
-                  ? "gradient-hero hover:shadow-primary/20"
-                  : "bg-muted text-muted-foreground cursor-not-allowed opacity-70",
-              )}
-              disabled={isLoading || (password.length > 0 && !isPasswordValid)}
+              <button
+                type="button"
+                onClick={() =>
+                  (window.location.href =
+                    "http://localhost:5000/api/auth/google")
+                }
+                className="w-full flex items-center justify-center gap-3 h-12 px-4 border border-border rounded-xl hover:bg-muted transition-colors"
+              >
+                {/* Google SVG Icon */}
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+                Continue with Google
+              </button>
+            </>
+          ) : (
+            <form
+              onSubmit={handleVerifyOtp}
+              className="space-y-8 animate-fade-up"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Setting
-                  up...
-                </>
-              ) : (
-                "Create Account"
-              )}
-            </Button>
-          </form>
+              <div className="flex justify-center gap-3">
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    id={`otp-${i}`}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(i, e)}
+                    className="w-12 h-14 text-center text-2xl font-bold bg-background border-2 border-border/50 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  />
+                ))}
+              </div>
 
-          {/* login with google*/}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
+              <div className="space-y-4">
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-bold rounded-xl shadow-lg gradient-hero"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />{" "}
+                      Verifying...
+                    </>
+                  ) : (
+                    "Verify & Create Account"
+                  )}
+                </Button>
 
-          <button
-            type="button"
-            onClick={() =>
-              (window.location.href = "http://localhost:5000/api/auth/google")
-            }
-            className="w-full flex items-center justify-center gap-3 h-12 px-4 border border-border rounded-xl hover:bg-muted transition-colors"
-          >
-            {/* Google SVG Icon */}
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Continue with Google
-          </button>
+                <button
+                  type="button"
+                  onClick={() => setShowOTP(false)}
+                  className="w-full text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+                >
+                  Change Email or Use a Different Account
+                </button>
+              </div>
+            </form>
+          )}
 
           <p className="text-center text-[11px] text-muted-foreground mt-6 leading-relaxed">
             By signing up, you agree to our{" "}

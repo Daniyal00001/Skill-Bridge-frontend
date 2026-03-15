@@ -8,6 +8,7 @@ import React, {
 import { api, setAccessToken, clearAccessToken } from "@/lib/api";
 import {
   signupAPI,
+  verifyOtpAPI,
   loginAPI,
   logoutAPI,
   AuthUser,
@@ -21,6 +22,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   signup: (payload: SignupPayload) => Promise<void>;
+  verifyOtp: (email: string, otp: string) => Promise<void>;
   login: (payload: LoginPayload) => Promise<AuthUser>; // ← returns AuthUser now
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -53,7 +55,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Signup ────────────────────────────────────────────────
   const signup = async (payload: SignupPayload) => {
-    const response = await signupAPI(payload);
+    await signupAPI(payload);
+  };
+
+  // ── Verify OTP ─────────────────────────────────────────────
+  const verifyOtp = async (email: string, otp: string) => {
+    const response = await verifyOtpAPI(email, otp);
     setAccessToken(response.data.accessToken);
     setUser(response.data.user);
   };
@@ -105,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         signup,
+        verifyOtp,
         login,
         logout,
         refreshUser,

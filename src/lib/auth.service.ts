@@ -37,8 +37,23 @@ export interface AuthResponse {
 // ── Signup ────────────────────────────────────────────────────
 export const signupAPI = async (
   payload: SignupPayload
+): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post<{ success: boolean; message: string }>(
+    '/auth/signup',
+    payload
+  )
+  return response.data
+}
+
+// ── Verify OTP ────────────────────────────────────────────────
+export const verifyOtpAPI = async (
+  email: string,
+  otp: string
 ): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/signup', payload)
+  const response = await api.post<AuthResponse>('/auth/verify-otp', {
+    email,
+    otp,
+  })
   return response.data
 }
 
