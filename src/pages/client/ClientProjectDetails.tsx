@@ -36,6 +36,10 @@ import {
   ChevronRight,
   Star,
   Loader2,
+  MapPin,
+  Languages,
+  Globe2,
+  File as FileIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -215,12 +219,22 @@ const ClientProjectDetailsPage = () => {
                   {project.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 mt-6">
-                  <Badge
-                    variant="outline"
-                    className="bg-primary/5 text-primary border-primary/20"
-                  >
-                    {project.category}
-                  </Badge>
+                  {project.category && (
+                    <Badge
+                      variant="outline"
+                      className="bg-primary/5 text-primary border-primary/20"
+                    >
+                      {project.category.name}
+                    </Badge>
+                  )}
+                  {project.subCategory && (
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-500/5 text-blue-500 border-blue-500/20"
+                    >
+                      {project.subCategory.name}
+                    </Badge>
+                  )}
                   {project.experienceLevel && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Zap className="w-4 h-4 text-amber-500" />
@@ -299,13 +313,64 @@ const ClientProjectDetailsPage = () => {
                     {project.referenceLinks && (
                       <div className="space-y-3">
                         <h4 className="text-lg font-bold">Reference Links</h4>
-                        <Badge
-                          variant="secondary"
-                          className="gap-2 py-2 px-4 cursor-pointer"
+                        <a
+                          href={
+                            project.referenceLinks.startsWith("http")
+                              ? project.referenceLinks
+                              : `https://${project.referenceLinks}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          {project.referenceLinks}
-                        </Badge>
+                          <Badge
+                            variant="secondary"
+                            className="gap-2 py-2 px-4 cursor-pointer hover:bg-muted transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            {project.referenceLinks}
+                          </Badge>
+                        </a>
+                      </div>
+                    )}
+
+                    {project.attachments && project.attachments.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <h4 className="text-lg font-bold">Project Assets</h4>
+                          <div className="h-px flex-1 bg-gradient-to-r from-border/60 to-transparent" />
+                        </div>
+                        <div className="p-6 rounded-[2rem] border border-primary/10 bg-primary/5 backdrop-blur-sm shadow-sm transition-all hover:border-primary/20">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {project.attachments.map(
+                              (url: string, i: number) => {
+                                const fileName =
+                                  url.split("/").pop() || `Attachment ${i + 1}`;
+                                return (
+                                  <a
+                                    key={i}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-4 p-4 rounded-2xl border border-white/40 bg-white/40 hover:bg-white/80 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10 transition-all group lg:hover:-translate-y-1 hover:shadow-lg"
+                                  >
+                                    <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/10 shadow-inner text-primary group-hover:scale-110 transition-transform">
+                                      <FileIcon className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-black truncate text-foreground/80">
+                                        {fileName}
+                                      </p>
+                                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5 opacity-60">
+                                        Click to view
+                                      </p>
+                                    </div>
+                                    <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                                  </a>
+                                );
+                              },
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </TabsContent>
@@ -331,54 +396,63 @@ const ClientProjectDetailsPage = () => {
                         </div>
                       </div>
                       <div className="space-y-4">
-                        {[
-                          {
-                            label: "Experience Level",
-                            value: project.experienceLevel,
-                            icon: Zap,
-                            color: "text-amber-500",
-                          },
-                          {
-                            label: "Project Size",
-                            value: project.projectSize,
-                            icon: Layout,
-                            color: "text-blue-500",
-                          },
-                          {
-                            label: "Budget Type",
-                            value: project.budgetType,
-                            icon: DollarSign,
-                            color: "text-emerald-500",
-                          },
-                          {
-                            label: "Budget",
-                            value: `$${project.budget?.toLocaleString()}`,
-                            icon: DollarSign,
-                            color: "text-primary",
-                          },
-                        ].map((item, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
-                          >
-                            <div className="flex items-center gap-3">
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-2 gap-4">
+                            {[
+                              {
+                                label: "Hiring Method",
+                                value: project.hiringMethod,
+                                icon: Zap,
+                                color: "text-amber-500",
+                                bgColor: "bg-amber-500/10",
+                              },
+                              {
+                                label: "Location",
+                                value: project.locationPref,
+                                icon: MapPin,
+                                color: "text-rose-500",
+                                bgColor: "bg-rose-500/10",
+                              },
+                              {
+                                label: "Language",
+                                value: project.language,
+                                icon: Languages,
+                                color: "text-indigo-500",
+                                bgColor: "bg-indigo-500/10",
+                              },
+                              {
+                                label: "Level",
+                                value: project.experienceLevel,
+                                icon: Star,
+                                color: "text-amber-500",
+                                bgColor: "bg-amber-500/10",
+                              },
+                            ].map((item, i) => (
                               <div
-                                className={cn(
-                                  "p-2 rounded-lg bg-card border shadow-sm",
-                                  item.color,
-                                )}
+                                key={i}
+                                className="flex flex-col items-center justify-center p-6 rounded-[2rem] border border-border/40 bg-card/60 backdrop-blur-sm text-center space-y-3 hover:border-primary/20 transition-all group"
                               >
-                                <item.icon className="w-4 h-4" />
+                                <div
+                                  className={cn(
+                                    "p-3.5 rounded-2xl transition-transform group-hover:scale-110",
+                                    item.bgColor,
+                                    item.color,
+                                  )}
+                                >
+                                  <item.icon className="w-6 h-6" />
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                    {item.label}
+                                  </p>
+                                  <p className="text-sm font-black capitalize">
+                                    {item.value || "Any"}
+                                  </p>
+                                </div>
                               </div>
-                              <span className="text-sm font-medium text-muted-foreground">
-                                {item.label}
-                              </span>
-                            </div>
-                            <span className="font-bold text-sm">
-                              {item.value || "—"}
-                            </span>
+                            ))}
                           </div>
-                        ))}
+                        </div>
                       </div>
                     </div>
                   </TabsContent>

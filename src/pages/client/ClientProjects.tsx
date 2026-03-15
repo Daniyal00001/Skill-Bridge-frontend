@@ -44,6 +44,7 @@ import {
   Briefcase,
   ChevronRight,
   Loader2,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -252,6 +253,14 @@ const ClientProjectsPage = () => {
                 >
                   {config.label}
                 </Badge>
+                {project.hiringMethod && (
+                  <Badge
+                    variant="outline"
+                    className="font-black uppercase tracking-widest text-[10px] py-1 px-3 bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1"
+                  >
+                    <Zap className="w-3 h-3" /> {project.hiringMethod}
+                  </Badge>
+                )}
               </div>
             </div>
             <DropdownMenu>
@@ -484,13 +493,24 @@ const ClientProjectsPage = () => {
       <Card className="group overflow-hidden border-border/40 bg-card/50 hover:shadow-2xl hover:border-primary/20 transition-all duration-500 flex flex-col">
         <CardHeader className="p-5 pb-0">
           <div className="flex justify-between items-start">
-            <Badge
-              variant="outline"
-              className={cn("gap-1.5 font-bold py-1", config.color)}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {config.label.toUpperCase()}
-            </Badge>
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                variant="outline"
+                className={cn("gap-1.5 font-bold py-1", config.color)}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {config.label.toUpperCase()}
+              </Badge>
+              {project.hiringMethod && (
+                <Badge
+                  variant="outline"
+                  className="font-bold py-1 bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1 text-[10px]"
+                >
+                  <Zap className="w-3 h-3" />{" "}
+                  {project.hiringMethod.toUpperCase()}
+                </Badge>
+              )}
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
