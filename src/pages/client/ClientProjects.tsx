@@ -30,7 +30,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MoreVertical,
   Search,
-  Filter,
   Plus,
   Calendar,
   Users,
@@ -52,7 +51,7 @@ import { api } from "@/lib/api";
 
 const ClientProjectsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("active");
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +71,24 @@ const ClientProjectsPage = () => {
     };
     fetchProjects();
   }, []);
+
+  // Delete project
+  const handleDelete = async (projectId: string) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this project? This cannot be undone.",
+      )
+    )
+      return;
+    try {
+      await api.delete(`/projects/${projectId}`);
+      toast.success("Project deleted.");
+      const res = await api.get("/projects/client/my");
+      setProjects(res.data.projects);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to delete project");
+    }
+  };
 
   // Approve milestone
   const handleApprove = async (
@@ -154,19 +171,36 @@ const ClientProjectsPage = () => {
   };
 
   const filteredProjects = useMemo(() => {
+    const now = new Date();
+    const cutoff: Date | null = (() => {
+      switch (dateFilter) {
+        case "7d":
+          return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        case "30d":
+          return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        case "3m":
+          return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        case "1y":
+          return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        default:
+          return null;
+      }
+    })();
+
     return projects.filter((p) => {
       const matchesSearch = p.title
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "all" || p.status === statusFilter;
-      if (!matchesSearch || !matchesStatus) return false;
+      const matchesDate = !cutoff || new Date(p.createdAt) >= cutoff;
+      if (!matchesSearch || !matchesDate) return false;
       if (activeTab === "active")
         return ["IN_PROGRESS", "UNDER_REVIEW"].includes(p.status);
       if (activeTab === "hiring") return p.status === "OPEN";
       if (activeTab === "completed") return p.status === "COMPLETED";
+      if (activeTab === "drafts") return p.status === "DRAFT";
       return true;
     });
-  }, [projects, searchTerm, statusFilter, activeTab]);
+  }, [projects, searchTerm, dateFilter, activeTab]);
 
   // Stats from real data
   const stats = {
@@ -231,21 +265,27 @@ const ClientProjectsPage = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link to={`/client/projects/${project.id}`}>
-                    View Full Details
-                  </Link>
+                <DropdownMenuItem
+                  disabled={!["OPEN", "DRAFT"].includes(project.status)}
+                  className={cn(
+                    "cursor-pointer",
+                    ["OPEN", "DRAFT"].includes(project.status)
+                      ? "text-destructive focus:text-destructive"
+                      : "text-muted-foreground opacity-50 cursor-not-allowed",
+                  )}
+                  onClick={() =>
+                    ["OPEN", "DRAFT"].includes(project.status)
+                      ? setConfirmDeleteId(project.id)
+                      : undefined
+                  }
+                >
+                  <span>Delete Project</span>
+                  {!["OPEN", "DRAFT"].includes(project.status) && (
+                    <span className="block text-[10px] font-normal mt-0.5 text-muted-foreground">
+                      Only Hiring or Draft projects
+                    </span>
+                  )}
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/client/messages">Message Developer</Link>
-                </DropdownMenuItem>
-                {contract && (
-                  <DropdownMenuItem asChild>
-                    <Link to={`/client/contracts/${contract.id}`}>
-                      View Contract
-                    </Link>
-                  </DropdownMenuItem>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </CardHeader>
@@ -462,18 +502,27 @@ const ClientProjectsPage = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link to={`/client/projects/${project.id}`}>
-                    View Details
-                  </Link>
+                <DropdownMenuItem
+                  disabled={!["OPEN", "DRAFT"].includes(project.status)}
+                  className={cn(
+                    "cursor-pointer",
+                    ["OPEN", "DRAFT"].includes(project.status)
+                      ? "text-destructive focus:text-destructive"
+                      : "text-muted-foreground opacity-50 cursor-not-allowed",
+                  )}
+                  onClick={() =>
+                    ["OPEN", "DRAFT"].includes(project.status)
+                      ? setConfirmDeleteId(project.id)
+                      : undefined
+                  }
+                >
+                  <span>Delete Project</span>
+                  {!["OPEN", "DRAFT"].includes(project.status) && (
+                    <span className="block text-[10px] font-normal mt-0.5 text-muted-foreground">
+                      Only Hiring or Draft projects
+                    </span>
+                  )}
                 </DropdownMenuItem>
-                {project.status === "OPEN" && (
-                  <DropdownMenuItem asChild>
-                    <Link to={`/client/projects/${project.id}/proposals`}>
-                      View Proposals
-                    </Link>
-                  </DropdownMenuItem>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -685,6 +734,7 @@ const ClientProjectsPage = () => {
                 { id: "active", label: "Active", icon: PlayCircle },
                 { id: "hiring", label: "Hiring", icon: Users },
                 { id: "completed", label: "Completed", icon: CheckCircle2 },
+                { id: "drafts", label: "Drafts", icon: AlertTriangle },
                 { id: "all", label: "View All", icon: Layout },
               ].map((tab) => (
                 <TabsTrigger
@@ -708,20 +758,19 @@ const ClientProjectsPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={dateFilter} onValueChange={setDateFilter}>
               <SelectTrigger className="w-[200px] h-14 bg-card/60 rounded-2xl border-border/40 font-bold">
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-muted-foreground" />
-                  <SelectValue placeholder="Status Filter" />
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <SelectValue placeholder="Date Range" />
                 </div>
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                <SelectItem value="all">All Projects</SelectItem>
-                <SelectItem value="OPEN">Open / Hiring</SelectItem>
-                <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
-                <SelectItem value="COMPLETED">Completed</SelectItem>
-                <SelectItem value="DRAFT">Drafts</SelectItem>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="7d">Last 7 Days</SelectItem>
+                <SelectItem value="30d">Last 30 Days</SelectItem>
+                <SelectItem value="3m">Last 3 Months</SelectItem>
+                <SelectItem value="1y">Last Year</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -757,7 +806,7 @@ const ClientProjectsPage = () => {
               className="mt-8 rounded-xl font-bold px-8 h-12"
               onClick={() => {
                 setSearchTerm("");
-                setStatusFilter("all");
+                setDateFilter("all");
                 setActiveTab("all");
               }}
             >

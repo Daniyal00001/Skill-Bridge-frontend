@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -104,6 +104,52 @@ const PostProjectPage = () => {
   const [showErrors, setShowErrors] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(null);
+
+  // ── Pre-fill form when navigating from Drafts page ──
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const urlDraftId = searchParams.get("draftId");
+    if (!urlDraftId) return;
+
+    setDraftId(urlDraftId);
+    api
+      .get(`/projects/${urlDraftId}`)
+      .then((res) => {
+        const d = res.data.project;
+        const sizeMap: Record<string, string> = {
+          SMALL: "small",
+          MEDIUM: "medium",
+          LARGE: "large",
+        };
+        // Skills come back as projectSkill[] with nested skill.name
+        const skillNames: string[] =
+          d.skills
+            ?.map((ps: any) => ps.skill?.name ?? ps.name ?? "")
+            .filter(Boolean) ?? [];
+
+        setFormData((prev) => ({
+          ...prev,
+          title: d.title ?? prev.title,
+          categoryId: d.categoryId ?? prev.categoryId,
+          subCategoryId: d.subCategoryId ?? prev.subCategoryId,
+          shortDesc: d.shortDesc ?? prev.shortDesc,
+          fullDesc: d.description ?? prev.fullDesc,
+          functionalReq: d.requirements ?? prev.functionalReq,
+          referenceLinks: d.referenceLinks ?? prev.referenceLinks,
+          budget: d.budget ?? prev.budget,
+          budgetType: d.budgetType ?? prev.budgetType,
+          projectSize: sizeMap[d.size] ?? prev.projectSize,
+          deadline: d.deadline ? new Date(d.deadline) : prev.deadline,
+          skills: skillNames.length ? skillNames : prev.skills,
+          experienceLevel: d.experienceLevel ?? prev.experienceLevel,
+          hiringMethod: d.hiringMethod ?? prev.hiringMethod,
+          language: d.language ?? prev.language,
+          locationPref: d.locationPref ?? prev.locationPref,
+        }));
+      })
+      .catch(() => toast.error("Failed to load draft data"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ✅ Helper to get selected category object
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
