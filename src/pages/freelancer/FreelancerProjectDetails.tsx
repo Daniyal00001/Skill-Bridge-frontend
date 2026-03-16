@@ -42,6 +42,7 @@ import {
   ChevronDown,
   Info,
   Loader2,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -336,10 +337,16 @@ export default function FreelancerProjectDetails() {
                   subValue="Actively reviewing"
                 />
                 <DetailGridItem
-                  icon={Users}
+                  icon={Globe}
                   label="Language"
-                  value={project.language || "English"}
+                  value={project.languageObj?.name || project.language || "English"}
                   subValue="Preferred"
+                />
+                <DetailGridItem
+                  icon={MapPin}
+                  label="Location"
+                  value={project.locationObj?.name || project.locationPref || "Any location"}
+                  subValue="Preference"
                 />
               </div>
             </Card>

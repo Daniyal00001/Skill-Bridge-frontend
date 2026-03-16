@@ -31,6 +31,8 @@ import {
   CircleDollarSign,
   Layers,
   BarChart3,
+  MapPin,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
@@ -76,6 +78,10 @@ interface Project {
     fullName: string;
     company?: string;
   };
+  languageObj?: { name: string };
+  locationObj?: { name: string };
+  language?: string;
+  locationPref?: string;
 }
 
 interface Category {
@@ -531,7 +537,6 @@ export default function FreelancerBrowseProjects() {
 
 const ProjectCardGrid = ({ project }: { project: Project }) => {
   const match = calculateMatch(project.skills || []);
-  const comp = getCompetitionData(project.proposalCount || 0);
 
   return (
     <Card className="h-full bg-card border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col group">
@@ -587,14 +592,20 @@ const ProjectCardGrid = ({ project }: { project: Project }) => {
               </span>
             </div>
           </div>
-          <Link to={`/freelancer/projects/${project.id}`}>
-            <Button
-              size="icon"
-              className="h-10 w-10 rounded-xl bg-primary text-white shadow-lg shadow-primary/20 group-hover:translate-x-1 transition-all"
-            >
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-col items-end gap-1 text-right">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground">
+              <MapPin className="w-3 h-3 text-primary" />
+              <span>{project.locationObj?.name || project.locationPref || "Global"}</span>
+            </div>
+            <Link to={`/freelancer/projects/${project.id}`}>
+              <Button
+                size="icon"
+                className="h-10 w-10 rounded-xl bg-primary text-white shadow-lg shadow-primary/20 group-hover:translate-x-1 transition-all"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -623,6 +634,10 @@ const ProjectCardList = ({ project }: { project: Project }) => {
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <Clock className="w-3 h-3" />{" "}
               {new Date(project.createdAt).toLocaleDateString()}
+            </span>
+            <span className="text-xs text-muted-foreground flex items-center gap-1 ml-2">
+              <MapPin className="w-3 h-3 text-primary" />
+              {project.locationObj?.name || project.locationPref || "Global"}
             </span>
           </div>
 

@@ -50,6 +50,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useCategories } from "@/hooks/useCategories";
+import { useMetadata } from "@/hooks/useMetadata";
 
 const SKILL_SUGGESTIONS = [
   "React",
@@ -88,7 +89,7 @@ const PostProjectPage = () => {
     functionalReq: "",
     referenceLinks: "",
     files: [] as File[],
-    budget: 5000,
+    budget: 0,
     budgetType: "fixed",
     projectSize: "medium",
     skills: [] as string[],
@@ -97,6 +98,8 @@ const PostProjectPage = () => {
     deadline: undefined as Date | undefined,
     language: "English",
     locationPref: "Any location",
+    languageId: "",
+    locationId: "",
     termsAccepted: false,
   });
 
@@ -150,6 +153,9 @@ const PostProjectPage = () => {
       .catch(() => toast.error("Failed to load draft data"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ✅ Load metadata (languages/locations) from DB
+  const { languages, locations, loading: metaLoading } = useMetadata();
 
   // ✅ Helper to get selected category object
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
@@ -236,6 +242,8 @@ const PostProjectPage = () => {
         hiringMethod: formData.hiringMethod,
         language: formData.language,
         locationPref: formData.locationPref,
+        languageId: formData.languageId || null,
+        locationId: formData.locationId || null,
         status: "DRAFT",
       };
 
@@ -270,7 +278,7 @@ const PostProjectPage = () => {
   return (
     <DashboardLayout>
       <div className="min-h-[calc(100vh-4rem)] bg-background/50 p-4 md:p-10">
-        <div className="mx-auto max-w-4xl space-y-8 animate-fade-in">
+        <div className="mx-auto max-w-4xl space-y-6 animate-fade-in">
           {/* Header */}
           <div className="flex flex-col items-center text-center space-y-2">
             <Badge
@@ -288,36 +296,38 @@ const PostProjectPage = () => {
           </div>
 
           {/* Progress Stepper */}
-          <div className="relative pt-4 px-4 pb-8">
-            <div className="flex justify-between items-center relative z-10">
-              {steps.map((s) => (
-                <div key={s.id} className="flex flex-col items-center gap-2">
-                  <div
-                    className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all duration-300 border-2",
-                      step >= s.id
-                        ? "bg-primary border-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
-                        : "bg-background border-muted text-muted-foreground",
-                    )}
-                  >
-                    {step > s.id ? <Check className="w-5 h-5" /> : s.id}
+          <div className="bg-card/30 backdrop-blur-md rounded-2xl border-[0.5px] border-black p-6 md:p-8 shadow-sm">
+            <div className="relative">
+              <div className="flex justify-between items-center relative z-10">
+                {steps.map((s) => (
+                  <div key={s.id} className="flex flex-col items-center gap-2">
+                    <div
+                      className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all duration-300 border-2",
+                        step >= s.id
+                          ? "bg-primary border-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
+                          : "bg-background border-muted text-muted-foreground",
+                      )}
+                    >
+                      {step > s.id ? <Check className="w-5 h-5" /> : s.id}
+                    </div>
+                    <span
+                      className={cn(
+                        "text-xs font-semibold uppercase tracking-wider",
+                        step >= s.id ? "text-primary" : "text-muted-foreground",
+                      )}
+                    >
+                      {s.name}
+                    </span>
                   </div>
-                  <span
-                    className={cn(
-                      "text-xs font-semibold uppercase tracking-wider",
-                      step >= s.id ? "text-primary" : "text-muted-foreground",
-                    )}
-                  >
-                    {s.name}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="absolute top-5 left-10 right-10 h-0.5 bg-muted -z-0" />
+              <div
+                className="absolute top-5 left-10 h-0.5 bg-primary transition-all duration-500 ease-in-out -z-0"
+                style={{ width: `${((step - 1) / (steps.length - 1)) * 95}%` }}
+              />
             </div>
-            <div className="absolute top-9 left-10 right-10 h-0.5 bg-muted -z-0" />
-            <div
-              className="absolute top-9 left-10 h-0.5 bg-primary transition-all duration-500 ease-in-out -z-0"
-              style={{ width: `${((step - 1) / (steps.length - 1)) * 95}%` }}
-            />
           </div>
 
           <div className="animate-fade-up">
@@ -977,28 +987,34 @@ const PostProjectPage = () => {
                         Communication Language
                       </label>
                       <Select
-                        value={formData.language}
-                        onValueChange={(val) =>
-                          updateFormData({ language: val })
-                        }
+                        value={formData.languageId || formData.language}
+                        onValueChange={(val) => {
+                          const lang = languages.find((l) => l.id === val);
+                          updateFormData({
+                            languageId: val,
+                            language: lang ? lang.name : val,
+                          });
+                        }}
+                        disabled={metaLoading}
                       >
                         <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select Language" />
+                          <SelectValue
+                            placeholder={
+                              metaLoading
+                                ? "Loading languages..."
+                                : "Select Language"
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          {[
-                            "English",
-                            "Spanish",
-                            "French",
-                            "German",
-                            "Mandarin",
-                            "Hindi",
-                            "Arabic",
-                          ].map((lang) => (
-                            <SelectItem key={lang} value={lang}>
-                              {lang}
+                          {languages.map((lang) => (
+                            <SelectItem key={lang.id} value={lang.id}>
+                              {lang.name}
                             </SelectItem>
                           ))}
+                          {languages.length === 0 && !metaLoading && (
+                            <SelectItem value="English">English</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1008,27 +1024,36 @@ const PostProjectPage = () => {
                         Freelancer Location
                       </label>
                       <Select
-                        value={formData.locationPref}
-                        onValueChange={(val) =>
-                          updateFormData({ locationPref: val })
-                        }
+                        value={formData.locationId || formData.locationPref}
+                        onValueChange={(val) => {
+                          const loc = locations.find((l) => l.id === val);
+                          updateFormData({
+                            locationId: val,
+                            locationPref: loc ? loc.name : val,
+                          });
+                        }}
+                        disabled={metaLoading}
                       >
                         <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select Location Preference" />
+                          <SelectValue
+                            placeholder={
+                              metaLoading
+                                ? "Loading locations..."
+                                : "Select Location Preference"
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          {[
-                            "Any location",
-                            "North America",
-                            "Europe",
-                            "Asia",
-                            "Latin America",
-                            // "Remote only",
-                          ].map((loc) => (
-                            <SelectItem key={loc} value={loc}>
-                              {loc}
+                          {locations.map((loc) => (
+                            <SelectItem key={loc.id} value={loc.id}>
+                              {loc.name}
                             </SelectItem>
                           ))}
+                          {locations.length === 0 && !metaLoading && (
+                            <SelectItem value="Any location">
+                              Any location
+                            </SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1417,6 +1442,10 @@ const PostProjectPage = () => {
                           fd.append("hiringMethod", formData.hiringMethod);
                           fd.append("language", formData.language);
                           fd.append("locationPref", formData.locationPref);
+                          if (formData.languageId)
+                            fd.append("languageId", formData.languageId);
+                          if (formData.locationId)
+                            fd.append("locationId", formData.locationId);
                           fd.append("status", "OPEN");
 
                           formData.skills.forEach((skill) =>
