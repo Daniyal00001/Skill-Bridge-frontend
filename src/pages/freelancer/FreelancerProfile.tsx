@@ -28,9 +28,14 @@ import {
   Globe,
   Verified,
   ShieldCheck,
+  Mail,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { freelancerService } from "@/lib/freelancer.service";
+import { FreelancerOnboardingModal } from "./Onboarding/FreelancerOnboardingModal";
+import { useEffect } from "react";
 
 // Mock Data
 const MOCK_PROFILE = {
@@ -159,6 +164,30 @@ const MOCK_PROFILE = {
 
 export default function FreelancerProfile() {
   const [isAvailable, setIsAvailable] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await freelancerService.getMyProfile();
+        setProfile(res.data);
+        if (res.data.profileCompletion < 100) {
+          setIsModalOpen(true);
+        }
+      } catch (e) {
+        console.error("Failed to fetch profile", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const displayProfile = profile || MOCK_PROFILE;
+  const completion = displayProfile.profileCompletion ?? 0;
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -189,14 +218,23 @@ export default function FreelancerProfile() {
           {/* HEADER SECTION - NO CARD ENCLOSURE FOR A LIGHTER FEEL */}
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8 border-b pb-10 border-border/50">
             <div className="relative group">
+              {/* Circular Progress SVG */}
+              <svg className="absolute -inset-3 w-[calc(100%+24px)] h-[calc(100%+24px)] -rotate-90">
+                <circle cx="50%" cy="50%" r="46%" fill="none" stroke="currentColor" className="text-muted/30" strokeWidth="6" />
+                <circle cx="50%" cy="50%" r="46%" fill="none" stroke="currentColor" className="text-primary transition-all duration-1000 ease-out" strokeWidth="6" strokeDasharray={`${(completion / 100) * 314} 314`} strokeLinecap="round" />
+              </svg>
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-background border px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm z-10">
+                {completion}% Profile
+              </div>
+
               <Avatar className="h-40 w-40 ring-4 ring-primary/10 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
-                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarImage src={displayProfile?.user?.profileImage || "https://github.com/shadcn.png"} />
                 <AvatarFallback className="text-4xl font-black">
-                  AC
+                  {displayProfile.fullName?.split(' ').map((n: string) => n[0]).join('').substring(0, 2) || "AC"}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-4 right-4 w-8 h-8 bg-background rounded-xl flex items-center justify-center shadow-lg border border-border">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+                {displayProfile?.user?.isIdVerified ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <ShieldCheck className="w-5 h-5 text-muted-foreground" />}
               </div>
             </div>
 
@@ -204,22 +242,28 @@ export default function FreelancerProfile() {
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-                    {MOCK_PROFILE.name}
+                    {displayProfile.fullName || MOCK_PROFILE.name}
                   </h1>
                   <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
                     Top Rated
                   </Badge>
                 </div>
                 <p className="text-xl font-medium text-muted-foreground italic">
-                  {MOCK_PROFILE.title}
+                  {displayProfile.tagline || MOCK_PROFILE.title}
                 </p>
               </div>
 
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary" />
-                  {MOCK_PROFILE.location}
+                  {displayProfile.location || MOCK_PROFILE.location}
                 </div>
+                {displayProfile?.user?.email && (
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-primary" />
+                    {displayProfile.user.email}
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <Verified className="w-4 h-4 text-emerald-500" />
                   Payment Verified
@@ -255,7 +299,7 @@ export default function FreelancerProfile() {
                   Hourly Rate
                 </p>
                 <p className="text-4xl font-black text-foreground">
-                  ${MOCK_PROFILE.rate}{" "}
+                  ${displayProfile.hourlyRate || MOCK_PROFILE.rate}{" "}
                   <span className="text-base text-muted-foreground font-medium">
                     / hr
                   </span>
@@ -277,7 +321,7 @@ export default function FreelancerProfile() {
                   Overview
                 </h3>
                 <p className="text-lg text-muted-foreground leading-relaxed font-medium">
-                  {MOCK_PROFILE.bio}
+                  {displayProfile.bio || MOCK_PROFILE.bio}
                 </p>
               </section>
 
@@ -340,7 +384,7 @@ export default function FreelancerProfile() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {MOCK_PROFILE.portfolio.slice(0, 4).map((item) => (
+                  {(displayProfile.portfolioItems?.length > 0 ? displayProfile.portfolioItems : MOCK_PROFILE.portfolio).slice(0, 4).map((item: any) => (
                     <motion.div
                       key={item.id}
                       whileHover={{ y: -5 }}
@@ -348,15 +392,15 @@ export default function FreelancerProfile() {
                     >
                       <div
                         className="aspect-[16/10] w-full"
-                        style={{ background: item.image }}
+                        style={{ background: item.image || "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}
                       />
                       <div className="p-6 space-y-3">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-lg font-black">{item.name}</h4>
+                          <h4 className="text-lg font-black">{item.name || item.title}</h4>
                           <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {item.tech.map((t) => (
+                          {(item.tech || item.techStack || []).map((t: string) => (
                             <span
                               key={t}
                               className="text-[10px] font-bold text-muted-foreground uppercase bg-accent/50 px-2.5 py-1 rounded-md"
@@ -435,16 +479,8 @@ export default function FreelancerProfile() {
                 </h3>
                 <div className="space-y-8">
                   <CompactSkillGroup
-                    title="Frontend Development"
-                    skills={MOCK_PROFILE.skills.frontend}
-                  />
-                  <CompactSkillGroup
-                    title="Backend Systems"
-                    skills={MOCK_PROFILE.skills.backend}
-                  />
-                  <CompactSkillGroup
-                    title="Tools & DevOps"
-                    skills={MOCK_PROFILE.skills.tools}
+                    title="Skills & Technologies"
+                    skills={(displayProfile.skills?.length > 0 ? displayProfile.skills : MOCK_PROFILE.skills.frontend).map((s: any) => ({ name: s.skill?.name || s.name, level: s.proficiencyLevel || s.level }))}
                   />
                 </div>
               </div>
@@ -457,7 +493,7 @@ export default function FreelancerProfile() {
                   Education & Certs
                 </h3>
                 <div className="space-y-6">
-                  {MOCK_PROFILE.education.map((edu) => (
+                  {(displayProfile.educations?.length > 0 ? displayProfile.educations : MOCK_PROFILE.education).map((edu: any) => (
                     <div key={edu.school} className="flex gap-4">
                       <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
                         <GraduationCap className="h-6 w-6 text-primary" />
@@ -476,17 +512,17 @@ export default function FreelancerProfile() {
                     </div>
                   ))}
 
-                  {MOCK_PROFILE.certifications.map((cert) => (
-                    <div key={cert.name} className="flex gap-4">
+                  {(displayProfile.certificates?.length > 0 ? displayProfile.certificates : MOCK_PROFILE.certifications).map((cert: any) => (
+                    <div key={cert.title || cert.name} className="flex gap-4">
                       <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
                         <Award className="h-6 w-6 text-primary" />
                       </div>
                       <div className="space-y-1 text-sm font-semibold">
                         <p className="font-bold text-sm leading-tight">
-                          {cert.name}
+                          {cert.title || cert.name}
                         </p>
                         <p className="text-xs text-muted-foreground font-medium">
-                          {cert.issuer}
+                          {cert.issuingOrganization || cert.issuer}
                         </p>
                       </div>
                     </div>
@@ -500,22 +536,21 @@ export default function FreelancerProfile() {
                   Languages
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {MOCK_PROFILE.languages.map((lang) => (
+                  {(displayProfile.languages?.length > 0 ? displayProfile.languages : MOCK_PROFILE.languages).map((lang: any) => (
                     <Badge
-                      key={lang.name}
+                      key={lang.name || lang}
                       variant="secondary"
                       className="px-4 py-2 rounded-xl text-xs font-bold bg-accent/50 hover:bg-accent border-none"
                     >
-                      {lang.name} ·{" "}
+                      {lang.name || lang} ·{" "}
                       <span className="text-muted-foreground">
-                        {lang.level}
+                        {lang.level || "Native"}
                       </span>
                     </Badge>
                   ))}
                 </div>
               </div>
 
-              {/* AVAILABILITY CALENDAR MOCKUP */}
               <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center">
@@ -526,8 +561,8 @@ export default function FreelancerProfile() {
                   </h4>
                 </div>
                 <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed">
-                  Open for new contracts. Typical response time is{" "}
-                  <b>{"< 1 hour"}</b>.
+                  {displayProfile.availability === "AVAILABLE" ? "Open for new contracts." : "Less than 30hrs/wk."} Typical response time is{" "}
+                  <b>{displayProfile.responseTime || "< 1 hour"}</b>.
                 </p>
                 <Button className="w-full rounded-xl font-bold active:scale-[0.98] transition-transform">
                   Check Calendar
@@ -537,6 +572,15 @@ export default function FreelancerProfile() {
           </div>
         </motion.div>
       </div>
+
+      {!isLoading && profile && (
+        <FreelancerOnboardingModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)}
+          onComplete={() => window.location.reload()} 
+          profile={profile}
+        />
+      )}
     </DashboardLayout>
   );
 }

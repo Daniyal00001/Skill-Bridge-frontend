@@ -27,7 +27,9 @@ import {
   Eye,
   ArrowRight,
   Award,
+  Mail,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
@@ -174,6 +176,7 @@ const StarRow = ({ rating }: { rating: number }) => (
 
 const ClientProfilePage = () => {
   const [client] = useState(MOCK_CLIENT);
+  const { user } = useAuth();
 
   return (
     <DashboardLayout>
@@ -219,13 +222,19 @@ const ClientProfilePage = () => {
                 <div className="space-y-3">
                   <div>
                     <h1 className="text-2xl font-extrabold tracking-tight">
-                      {client.name}
+                      {user?.name || client.name}
                     </h1>
                     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1.5">
                         <Building className="h-3.5 w-3.5 text-primary" />
                         {client.company}
                       </span>
+                      {user?.email && (
+                        <span className="flex items-center gap-1.5">
+                          <Mail className="h-3.5 w-3.5 text-primary" />
+                          {user.email}
+                        </span>
+                      )}
                       <span className="flex items-center gap-1.5">
                         <MapPin className="h-3.5 w-3.5 text-primary" />
                         {client.location}
