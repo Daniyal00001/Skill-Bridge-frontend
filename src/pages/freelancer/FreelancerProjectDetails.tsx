@@ -528,6 +528,57 @@ export default function FreelancerProjectDetails() {
                 </Card>
               ) : (
                 <>
+                  {/* Competition Info */}
+                  <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2rem] p-6 mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" />
+                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">
+                          Competition
+                        </h4>
+                      </div>
+                      <Badge 
+                        variant="secondary" 
+                        className={cn(
+                          "font-black px-3 py-1 text-[10px] uppercase",
+                          (project.proposalCount || 0) < 10 
+                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                            : (project.proposalCount || 0) < 20
+                              ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                              : "bg-red-500/10 text-red-600 border-red-500/20"
+                        )}
+                      >
+                        {(project.proposalCount || 0) < 10 ? "Low" : (project.proposalCount || 0) < 20 ? "Medium" : "High"}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-end justify-between mb-4">
+                      <div>
+                        <p className="text-3xl font-black text-foreground">
+                          {project.proposalCount || 0}
+                        </p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                          Proposals Sent
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-muted-foreground max-w-[140px] leading-tight">
+                          "Clients review first 10 proposals within 24 hours. <span className="text-primary italic">Apply early!</span>"
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Visual bar */}
+                    <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
+                      <div 
+                        className={cn(
+                          "h-full transition-all duration-1000",
+                          (project.proposalCount || 0) < 10 ? "bg-emerald-500 w-[20%]" : (project.proposalCount || 0) < 20 ? "bg-amber-500 w-[60%]" : "bg-red-500 w-[90%]"
+                        )} 
+                      />
+                    </div>
+                  </Card>
+
                   {/* Proposal Form */}
                   <Card className="bg-card/40 backdrop-blur-2xl border-border/40 rounded-[2.5rem] shadow-2xl overflow-hidden border-t-8 border-t-primary">
                     <CardHeader className="p-8 pb-4">
@@ -667,6 +718,28 @@ const ProposalForm = ({
   const [deliveryDays, setDeliveryDays] = useState("30");
   const [coverLetter, setCoverLetter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tokenInfo, setTokenInfo] = useState<{
+    tokenCost: number;
+    currentBalance: number;
+    canAfford: boolean;
+    breakdown: any;
+  } | null>(null);
+  const [tokenLoading, setTokenLoading] = useState(true);
+
+  // Fetch token cost info for this project
+  useEffect(() => {
+    const fetchTokenCost = async () => {
+      try {
+        const res = await api.get(`/proposals/project/${project.id}/token-cost`);
+        setTokenInfo(res.data);
+      } catch {
+        // non-fatal
+      } finally {
+        setTokenLoading(false);
+      }
+    };
+    fetchTokenCost();
+  }, [project.id]);
 
   const fee = Math.round(bid * 0.1);
   const total = bid - fee;
@@ -683,6 +756,12 @@ const ProposalForm = ({
       toast.error("Enter a valid bid amount");
       return;
     }
+    if (tokenInfo && !tokenInfo.canAfford) {
+      toast.error("Insufficient SkillTokens", {
+        description: `You need ${tokenInfo.tokenCost} tokens but only have ${tokenInfo.currentBalance}.`,
+      });
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.post(`/proposals/project/${project.id}`, {
@@ -692,7 +771,7 @@ const ProposalForm = ({
       });
       const newProposal = res.data.proposal;
       toast.success("Proposal submitted! 🎉", {
-        description: `Your $${bid.toLocaleString()} bid is under review by the client.`,
+        description: `Your $${bid.toLocaleString()} bid is live. ${tokenInfo?.tokenCost || 0} SkillTokens deducted.`,
       });
       onSuccess(newProposal);
     } catch (err: any) {
@@ -702,8 +781,82 @@ const ProposalForm = ({
     }
   };
 
+  const canAfford = tokenInfo ? tokenInfo.canAfford : true;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/* ── Token Cost Banner ── */}
+      <div
+        className={cn(
+          "rounded-2xl border p-5 space-y-3",
+          tokenLoading
+            ? "bg-muted/30 border-border/40"
+            : canAfford
+              ? "bg-amber-500/8 border-amber-500/25"
+              : "bg-red-500/8 border-red-500/30"
+        )}
+      >
+        {tokenLoading ? (
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Calculating token cost...
+          </div>
+        ) : tokenInfo ? (
+          <>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={cn(
+                  "p-1.5 rounded-lg",
+                  canAfford ? "bg-amber-500/15" : "bg-red-500/15"
+                )}>
+                  <Zap className={cn("w-4 h-4", canAfford ? "text-amber-500" : "text-red-500")} />
+                </div>
+                <span className="text-sm font-black text-foreground">
+                  SkillTokens Required
+                </span>
+              </div>
+              <span className={cn(
+                "text-2xl font-black",
+                canAfford ? "text-amber-500" : "text-red-500"
+              )}>
+                {tokenInfo.tokenCost}
+              </span>
+            </div>
+
+            <div className="flex justify-between text-xs font-bold text-muted-foreground border-t border-border/40 pt-3">
+              <span>Your balance</span>
+              <span className={cn(
+                "font-black",
+                canAfford ? "text-emerald-500" : "text-red-500"
+              )}>
+                {tokenInfo.currentBalance} tokens
+              </span>
+            </div>
+
+            {!canAfford && (
+              <div className="flex items-start gap-2 bg-red-500/10 rounded-xl p-3 border border-red-500/20">
+                <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                <div className="text-xs font-semibold text-red-600 dark:text-red-400">
+                  <p>Insufficient SkillTokens! You need {tokenInfo.tokenCost - tokenInfo.currentBalance} more tokens.</p>
+                  <Link
+                    to="/freelancer/tokens"
+                    className="underline hover:no-underline mt-1 inline-block"
+                  >
+                    View token info →
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {canAfford && (
+              <div className="text-xs text-muted-foreground/70">
+                After submitting: {tokenInfo.currentBalance - tokenInfo.tokenCost} tokens remaining
+              </div>
+            )}
+          </>
+        ) : null}
+      </div>
+
       {/* Bid */}
       <div className="space-y-4">
         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
@@ -787,12 +940,21 @@ const ProposalForm = ({
       <div className="space-y-4 pt-2">
         <Button
           type="submit"
-          disabled={loading}
-          className="w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-2xl shadow-primary/40 group hover:scale-[1.02] active:scale-[0.98] transition-all"
+          disabled={loading || !canAfford}
+          className={cn(
+            "w-full h-14 rounded-2xl font-black text-lg gap-3 group transition-all",
+            canAfford
+              ? "shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-[0.98]"
+              : "opacity-60 cursor-not-allowed"
+          )}
         >
           {loading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" /> Submitting...
+            </>
+          ) : !canAfford ? (
+            <>
+              <Zap className="w-5 h-5" /> Insufficient Tokens
             </>
           ) : (
             <>
@@ -801,6 +963,12 @@ const ProposalForm = ({
             </>
           )}
         </Button>
+        {canAfford && tokenInfo && (
+          <p className="text-center text-xs text-muted-foreground">
+            Submitting will deduct{" "}
+            <span className="font-bold text-amber-500">{tokenInfo.tokenCost} SkillTokens</span>
+          </p>
+        )}
       </div>
     </form>
   );

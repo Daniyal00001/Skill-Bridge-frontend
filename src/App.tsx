@@ -54,6 +54,7 @@ import { default as FreelancerMessagesPage } from "./pages/freelancer/Freelancer
 import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetails";
 import FreelancerProfile from "./pages/freelancer/FreelancerProfile";
 import FreelancerSettings from "./pages/freelancer/FreelancerSettings";
+import FreelancerTokens from "./pages/freelancer/FreelancerTokens";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -192,6 +193,10 @@ const App = () => (
                   <Route
                     path="/freelancer/settings"
                     element={<FreelancerSettings />}
+                  />
+                  <Route
+                    path="/freelancer/tokens"
+                    element={<FreelancerTokens />}
                   />
                 </Route>
 

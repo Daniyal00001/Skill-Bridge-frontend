@@ -36,6 +36,7 @@ const ProjectProposalsPage = () => {
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   const toggleExpand = (id: string) =>
     setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -84,6 +85,24 @@ const ProjectProposalsPage = () => {
     }
   };
 
+  // Shortlist a proposal
+  const handleShortlist = async (proposalId: string) => {
+    setProcessingId(proposalId);
+    try {
+      await api.patch(`/proposals/${proposalId}/status`, { status: "SHORTLISTED" });
+      setProposals((prev) =>
+        prev.map((p) =>
+          p.id === proposalId ? { ...p, status: "SHORTLISTED" } : p,
+        ),
+      );
+      toast.success("Proposal shortlisted! ⭐");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to shortlist");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   // Reject a proposal
   const handleReject = async (proposalId: string) => {
     setProcessingId(proposalId);
@@ -119,6 +138,11 @@ const ProjectProposalsPage = () => {
 
   const pendingCount = proposals.filter((p) => p.status === "PENDING").length;
   const acceptedCount = proposals.filter((p) => p.status === "ACCEPTED").length;
+  const shortlistedCount = proposals.filter((p) => p.status === "SHORTLISTED").length;
+
+  const displayedProposals = activeTab === "all"
+    ? proposals
+    : proposals.filter(p => p.status === activeTab.toUpperCase());
 
   return (
     <DashboardLayout>
@@ -181,31 +205,25 @@ const ProjectProposalsPage = () => {
               </div>
 
               {/* Proposals count summary */}
-              <div className="flex items-center gap-4 shrink-0">
-                <div className="text-center p-4 rounded-2xl bg-muted/30 border border-border/40 min-w-[80px]">
-                  <p className="text-2xl font-black text-primary">
-                    {proposals.length}
-                  </p>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                    Total
-                  </p>
+              <div className="flex items-center gap-3 shrink-0 flex-wrap">
+                <div className="text-center p-4 rounded-2xl bg-muted/30 border border-border/40 min-w-[70px]">
+                  <p className="text-2xl font-black text-primary">{proposals.length}</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total</p>
                 </div>
-                <div className="text-center p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 min-w-[80px]">
-                  <p className="text-2xl font-black text-amber-600">
-                    {pendingCount}
-                  </p>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                    Pending
-                  </p>
+                <div className="text-center p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 min-w-[70px]">
+                  <p className="text-2xl font-black text-amber-600">{pendingCount}</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pending</p>
                 </div>
+                {shortlistedCount > 0 && (
+                  <div className="text-center p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 min-w-[70px]">
+                    <p className="text-2xl font-black text-blue-600">{shortlistedCount}</p>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Shortlisted</p>
+                  </div>
+                )}
                 {acceptedCount > 0 && (
-                  <div className="text-center p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 min-w-[80px]">
-                    <p className="text-2xl font-black text-emerald-600">
-                      {acceptedCount}
-                    </p>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                      Hired
-                    </p>
+                  <div className="text-center p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 min-w-[70px]">
+                    <p className="text-2xl font-black text-emerald-600">{acceptedCount}</p>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Hired</p>
                   </div>
                 )}
               </div>
@@ -237,14 +255,39 @@ const ProjectProposalsPage = () => {
 
         {/* Proposals List */}
         <div className="space-y-4">
-          <h2 className="text-xl font-black">
-            Received Proposals
-            <span className="text-muted-foreground font-medium text-base ml-2">
-              ({proposals.length})
-            </span>
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black">
+              Received Proposals
+              <span className="text-muted-foreground font-medium text-base ml-2">
+                ({proposals.length})
+              </span>
+            </h2>
+            {/* Filter tabs */}
+            <div className="flex gap-2">
+              {[
+                { label: "All", value: "all" },
+                { label: "Pending", value: "pending" },
+                { label: "Shortlisted ⭐", value: "shortlisted" },
+                { label: "Accepted", value: "accepted" },
+                { label: "Rejected", value: "rejected" },
+              ].map(tab => (
+                <button
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-colors",
+                    activeTab === tab.value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/40 text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          {proposals.length === 0 ? (
+          {displayedProposals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 bg-card/20 rounded-3xl border-2 border-dashed border-border/40 gap-4">
               <Users className="w-12 h-12 text-muted-foreground/30" />
               <h3 className="text-xl font-black text-foreground/70">
@@ -257,13 +300,14 @@ const ProjectProposalsPage = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {proposals.map((proposal) => (
+              {displayedProposals.map((proposal) => (
                 <ProposalCard
                   key={proposal.id}
                   proposal={proposal}
                   isExpanded={!!expandedIds[proposal.id]}
                   onToggleExpand={() => toggleExpand(proposal.id)}
                   onAccept={handleAccept}
+                  onShortlist={handleShortlist}
                   onReject={handleReject}
                   isProcessing={processingId === proposal.id}
                   projectBudget={project?.budget}
@@ -283,6 +327,7 @@ const ProposalCard = ({
   isExpanded,
   onToggleExpand,
   onAccept,
+  onShortlist,
   onReject,
   isProcessing,
   projectBudget,
@@ -291,6 +336,7 @@ const ProposalCard = ({
   isExpanded: boolean;
   onToggleExpand: () => void;
   onAccept: (id: string) => void;
+  onShortlist: (id: string) => void;
   onReject: (id: string) => void;
   isProcessing: boolean;
   projectBudget?: number;
@@ -302,6 +348,10 @@ const ProposalCard = ({
     PENDING: {
       label: "Pending",
       className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    },
+    SHORTLISTED: {
+      label: "Shortlisted ⭐",
+      className: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     },
     ACCEPTED: {
       label: "Hired ✓",
@@ -449,8 +499,8 @@ const ProposalCard = ({
           </div>
         )}
 
-        {/* Action Buttons — only for PENDING proposals */}
-        {status === "PENDING" && (
+        {/* Action Buttons — for PENDING or SHORTLISTED proposals */}
+        {(status === "PENDING" || status === "SHORTLISTED") && (
           <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border/40">
             <Button
               className="flex-1 h-12 rounded-xl font-black text-base gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
@@ -466,6 +516,18 @@ const ProposalCard = ({
                 ? "Processing..."
                 : `Hire for $${proposal.bidAmount?.toLocaleString()}`}
             </Button>
+            
+            {status === "PENDING" && (
+              <Button
+                variant="outline"
+                className="sm:w-auto h-12 rounded-xl font-black border-2 border-primary/40 text-primary hover:bg-primary/5 gap-2"
+                onClick={() => onShortlist(proposal.id)}
+                disabled={isProcessing}
+              >
+                <Star className="w-4 h-4" /> Shortlist
+              </Button>
+            )}
+
             <Button
               variant="outline"
               className="sm:w-auto h-12 rounded-xl font-black border-2 border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/50 gap-2"
@@ -474,6 +536,7 @@ const ProposalCard = ({
             >
               <XCircle className="w-4 h-4" /> Reject
             </Button>
+            
             <Button
               variant="ghost"
               className="sm:w-auto h-12 rounded-xl font-bold gap-2 text-primary hover:bg-primary/10"
@@ -483,17 +546,6 @@ const ProposalCard = ({
                 <MessageSquare className="w-4 h-4" /> Message
               </Link>
             </Button>
-            {freelancer?.id && (
-              <Button
-                variant="ghost"
-                className="sm:w-auto h-12 rounded-xl font-bold gap-2"
-                asChild
-              >
-                <Link to={`/freelancer/profile/${freelancer.id}`}>
-                  <ExternalLink className="w-4 h-4" /> Profile
-                </Link>
-              </Button>
-            )}
           </div>
         )}
 

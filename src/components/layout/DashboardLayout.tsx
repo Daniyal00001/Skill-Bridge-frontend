@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,7 @@ interface NavItem {
   label: string;
   href: string;
   badge?: number;
+  isTokenItem?: boolean;
 }
 
 interface NavGroup {
@@ -64,7 +65,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    if (user?.role === "FREELANCER") {
+      const fetchBalance = async () => {
+        try {
+          const res = await api.get("/tokens/balance");
+          setTokenBalance(res.data.balance);
+        } catch (err) {
+          // silent failure for UI
+        }
+      };
+      fetchBalance();
+      // Polling or refresh interval could be added here if needed
+    }
+  }, [user]);
 
   const getNavGroups = (): NavGroup[] => {
     switch (user?.role) {
@@ -137,6 +154,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 icon: Search,
                 label: "Browse Projects",
                 href: "/freelancer/browse",
+              },
+              {
+                icon: Zap,
+                label: "SkillTokens",
+                href: "/freelancer/tokens",
+                isTokenItem: true,
               },
             ],
           },
@@ -302,6 +325,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             <span className="flex-1 text-[13px] tracking-tight">
                               {item.label}
                             </span>
+                            {item.isTokenItem && tokenBalance !== null && (
+                              <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none h-5 px-1.5 font-black text-[10px] shadow-lg shadow-amber-500/20">
+                                {tokenBalance}
+                              </Badge>
+                            )}
                             {item.badge && (
                               <Badge
                                 variant="destructive"

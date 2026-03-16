@@ -37,6 +37,7 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -118,6 +119,8 @@ export default function FreelancerProposals() {
     total: proposals.length,
     pending: proposals.filter((p) => p.status?.toUpperCase() === "PENDING")
       .length,
+    shortlisted: proposals.filter((p) => p.status?.toUpperCase() === "SHORTLISTED")
+      .length,
     accepted: proposals.filter((p) => p.status?.toUpperCase() === "ACCEPTED")
       .length,
     rejected: proposals.filter((p) => p.status?.toUpperCase() === "REJECTED")
@@ -186,6 +189,7 @@ export default function FreelancerProposals() {
               {[
                 { value: "all", label: `All (${stats.total})` },
                 { value: "pending", label: `Pending (${stats.pending})` },
+                { value: "shortlisted", label: `Shortlisted ⭐ (${stats.shortlisted})` },
                 { value: "accepted", label: `Accepted (${stats.accepted})` },
                 { value: "rejected", label: `Rejected (${stats.rejected})` },
               ].map((tab) => (
@@ -320,6 +324,11 @@ function ProposalCard({
       className: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
       icon: Clock,
     },
+    SHORTLISTED: {
+      label: "Shortlisted ⭐",
+      className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      icon: Star,
+    },
     ACCEPTED: {
       label: "Accepted",
       className: "bg-green-500/10 text-green-500 border-green-500/20",
@@ -351,6 +360,12 @@ function ProposalCard({
               <status.icon className="w-3.5 h-3.5 mr-1.5" />
               {status.label}
             </Badge>
+            {proposal.tokenCost > 0 && (
+              <Badge variant="secondary" className="bg-amber-500/5 text-amber-600 border-amber-500/10 flex items-center gap-1.5 px-2.5 py-0.5 font-bold">
+                <Zap className="w-3 h-3 fill-amber-500 text-amber-500" />
+                {proposal.tokenCost} tokens
+              </Badge>
+            )}
             <span className="text-sm text-muted-foreground">
               Submitted{" "}
               {new Date(proposal.createdAt).toLocaleDateString("en-US", {
@@ -380,7 +395,7 @@ function ProposalCard({
               >
                 <RotateCcw className="w-4 h-4" /> Reuse Letter
               </DropdownMenuItem>
-              {statusKey === "PENDING" && (
+              {(statusKey === "PENDING" || statusKey === "SHORTLISTED") && (
                 <DropdownMenuItem
                   className="gap-2 text-destructive"
                   onClick={() => onWithdraw(proposal.id)}
@@ -483,16 +498,22 @@ function ProposalCard({
 
         {/* Status-specific sections */}
         <div className="pt-4 border-t border-border/50">
-          {statusKey === "PENDING" && (
+          {(statusKey === "PENDING" || statusKey === "SHORTLISTED") && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-                  <div className="absolute inset-0 w-2 h-2 bg-yellow-500 rounded-full animate-ping opacity-75" />
+                  <div className={cn(
+                    "w-2 h-2 rounded-full animate-pulse",
+                    statusKey === "SHORTLISTED" ? "bg-blue-500" : "bg-yellow-500"
+                  )} />
+                  <div className={cn(
+                    "absolute inset-0 w-2 h-2 rounded-full animate-ping opacity-75",
+                    statusKey === "SHORTLISTED" ? "bg-blue-500" : "bg-yellow-500"
+                  )} />
                 </div>
                 <div className="space-y-0.5">
                   <p className="text-sm font-medium">
-                    Awaiting client response
+                    {statusKey === "SHORTLISTED" ? "You are shortlisted! ⭐" : "Awaiting client response"}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {proposal.isViewedByClient ? (
