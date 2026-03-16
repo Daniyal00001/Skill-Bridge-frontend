@@ -159,7 +159,7 @@ export default function FreelancerProjectDetails() {
             <div className="space-y-6">
               <div className="flex flex-wrap gap-2">
                 <Badge className="bg-primary/10 text-primary border-primary/20 font-black uppercase tracking-widest text-[10px] py-1.5 px-3">
-                  {project.category}
+                  {project.category?.name}
                 </Badge>
                 {isUrgent && (
                   <Badge className="bg-red-500/10 text-red-500 border-red-500/20 font-black uppercase tracking-widest text-[10px] py-1.5 px-3 flex items-center gap-1.5">

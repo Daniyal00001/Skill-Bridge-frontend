@@ -417,7 +417,7 @@ function ProposalCard({
                     variant="secondary"
                     className="bg-primary/5 text-primary text-[10px] uppercase tracking-wider font-bold"
                   >
-                    {project.category}
+                    {project.category.name}
                   </Badge>
                 )}
               </div>
