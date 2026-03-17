@@ -38,5 +38,10 @@ export const freelancerService = {
       },
     })
     return response.data
+  },
+
+  updateFreelancerProfile: async (data: any) => {
+    const response = await api.patch('/freelancers/profile', data)
+    return response.data
   }
 }

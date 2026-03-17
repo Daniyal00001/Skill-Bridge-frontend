@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { freelancerService } from "@/lib/freelancer.service"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
+import { SkillSelector } from "@/components/common/SkillSelector"
 
 export function FreelancerOnboardingModal({ 
   isOpen, 
@@ -42,7 +43,7 @@ export function FreelancerOnboardingModal({
     bio: profile?.bio || "",
     availability: profile?.availability || "AVAILABLE",
     experienceLevel: profile?.experienceLevel || "ENTRY",
-    skills: profile?.skills?.map((s: any) => s.skill?.name || s.name).join(", ") || "",
+    skills: profile?.skills?.map((s: any) => s.skill?.name || s.name) || [],
     school: profile?.educations?.[0]?.school || "",
     degree: profile?.educations?.[0]?.degree || "",
     year: profile?.educations?.[0]?.year || "",
@@ -78,10 +79,7 @@ export function FreelancerOnboardingModal({
           experienceLevel: formData.experienceLevel
         })
       } else if (step === 3) {
-        const skillsArray = formData.skills
-          .split(',')
-          .map(s => s.trim())
-          .filter(s => s.length > 0)
+        const skillsArray = (formData.skills as string[])
           .map(s => ({ name: s, level: 3 }))
           
         await freelancerService.updateOnboardingStep3({
@@ -195,8 +193,11 @@ export function FreelancerOnboardingModal({
           {step === 3 && (
             <div className="space-y-4">
                <div className="space-y-2">
-                <Label>Top Skills (comma separated)</Label>
-                <Input name="skills" value={formData.skills} onChange={handleChange} placeholder="React, Node.js, UI/UX" />
+                <Label>Top Skills</Label>
+                <SkillSelector 
+                  selectedSkills={formData.skills as string[]}
+                  onChange={(newSkills) => setFormData(prev => ({ ...prev, skills: newSkills as any }))}
+                />
               </div>
               <div className="pt-4 pb-2"><Label className="text-lg font-bold">Education</Label></div>
               <div className="space-y-2">

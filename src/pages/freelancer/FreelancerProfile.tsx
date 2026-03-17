@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { freelancerService } from "@/lib/freelancer.service";
 import { FreelancerOnboardingModal } from "./Onboarding/FreelancerOnboardingModal";
+import { EditFreelancerProfileModal } from "./EditProfile/EditFreelancerProfileModal";
 import { useEffect } from "react";
 
 // Mock Data
@@ -167,22 +168,24 @@ export default function FreelancerProfile() {
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { user } = useAuth();
   
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await freelancerService.getMyProfile();
-        setProfile(res.data);
-        if (res.data.profileCompletion < 100) {
-          setIsModalOpen(true);
-        }
-      } catch (e) {
-        console.error("Failed to fetch profile", e);
-      } finally {
-        setIsLoading(false);
+  const fetchProfile = async () => {
+    try {
+      const res = await freelancerService.getMyProfile();
+      setProfile(res.data);
+      if (res.data.profileCompletion < 100) {
+        setIsModalOpen(true);
       }
-    };
+    } catch (e) {
+      console.error("Failed to fetch profile", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProfile();
   }, []);
 
@@ -221,7 +224,15 @@ export default function FreelancerProfile() {
               {/* Circular Progress SVG */}
               <svg className="absolute -inset-3 w-[calc(100%+24px)] h-[calc(100%+24px)] -rotate-90">
                 <circle cx="50%" cy="50%" r="46%" fill="none" stroke="currentColor" className="text-muted/30" strokeWidth="6" />
-                <circle cx="50%" cy="50%" r="46%" fill="none" stroke="currentColor" className="text-primary transition-all duration-1000 ease-out" strokeWidth="6" strokeDasharray={`${(completion / 100) * 314} 314`} strokeLinecap="round" />
+                <circle 
+                  cx="50%" cy="50%" r="46%" fill="none" stroke="currentColor" 
+                  className="text-primary transition-all duration-1000 ease-out" 
+                  strokeWidth="6" 
+                  pathLength="100"
+                  strokeDasharray="100" 
+                  strokeDashoffset={100 - completion} 
+                  strokeLinecap="round" 
+                />
               </svg>
               <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-background border px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm z-10">
                 {completion}% Profile
@@ -281,14 +292,10 @@ export default function FreelancerProfile() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="rounded-xl h-12 px-6 font-bold hover:bg-accent active:scale-95 transition-all"
+                  className="rounded-xl h-12 px-6 font-bold hover:bg-accent active:scale-95 transition-all flex items-center gap-2"
+                  onClick={() => setIsEditModalOpen(true)}
                 >
-                  <Link
-                    to="/freelancer/settings"
-                    className="flex items-center gap-2"
-                  >
-                    <Pencil className="w-4 h-4" /> Edit Profile
-                  </Link>
+                  <Pencil className="w-4 h-4" /> Edit Profile
                 </Button>
               </div>
             </div>
@@ -577,7 +584,15 @@ export default function FreelancerProfile() {
         <FreelancerOnboardingModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)}
-          onComplete={() => window.location.reload()} 
+          onComplete={() => fetchProfile()} // refresh profile after onboarding completion
+          profile={profile}
+        />
+      )}
+      {profile && (
+        <EditFreelancerProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onComplete={() => fetchProfile()} // refresh profile after editing
           profile={profile}
         />
       )}
