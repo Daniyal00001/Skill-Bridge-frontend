@@ -382,27 +382,54 @@ export default function FreelancerProfile() {
 
                 <div className="pt-4 space-y-4">
                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Packaged Services (Gigs)</p>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                     {(displayProfile.gigs || []).map((gig: any) => (
-                       <a
-                        key={gig.id}
-                        href={gig.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between p-4 rounded-2xl bg-accent/20 border border-border/50 hover:bg-accent/40 hover:border-primary/20 transition-all group"
-                       >
-                         <div className="flex items-center gap-3">
-                           <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                             <Briefcase className="w-5 h-5 text-primary" />
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                     {(displayProfile.gigs || []).map((gig: any) => {
+                       const isPdf = gig.fileUrl?.toLowerCase().endsWith('.pdf');
+                       const isImage = gig.fileUrl?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                       
+                       return (
+                         <a
+                          key={gig.id}
+                          href={gig.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 bg-accent/10 hover:border-primary/30 transition-all flex flex-col hover:shadow-lg"
+                         >
+                           {isImage ? (
+                             <img 
+                               src={gig.fileUrl} 
+                               alt={gig.title} 
+                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                             />
+                           ) : (
+                             <div className="flex-1 flex items-center justify-center bg-accent/20">
+                               {isPdf ? (
+                                 <div className="flex flex-col items-center gap-2">
+                                   <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                                     <FileText className="w-5 h-5 text-red-500" />
+                                   </div>
+                                   <span className="text-[10px] font-black uppercase text-red-500/60">PDF</span>
+                                 </div>
+                               ) : (
+                                 <Briefcase className="h-8 w-8 text-primary/40" />
+                               )}
+                             </div>
+                           )}
+                           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/80 to-transparent p-3 translate-y-2 group-hover:translate-y-0 transition-transform">
+                             <p className="text-[10px] font-black uppercase tracking-tight text-foreground truncate">
+                               {gig.title}
+                             </p>
+                             <div className="flex items-center justify-between mt-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                               <p className="text-[8px] font-bold text-primary uppercase tracking-widest">View Gig</p>
+                               <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                             </div>
                            </div>
-                           <span className="text-sm font-bold truncate max-w-[200px]">{gig.title}</span>
-                         </div>
-                         <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                       </a>
-                     ))}
+                         </a>
+                       );
+                     })}
                      {(displayProfile.gigs || []).length === 0 && (
-                       <div className="col-span-2 p-6 border border-dashed rounded-2xl text-center">
-                         <p className="text-xs text-muted-foreground">No specific gigs listed. Contact for custom projects.</p>
+                       <div className="col-span-4 p-8 border border-dashed rounded-3xl text-center bg-accent/5">
+                         <p className="text-xs text-muted-foreground font-medium">No active gigs. Contact to discuss custom projects and capabilities.</p>
                        </div>
                      )}
                    </div>
