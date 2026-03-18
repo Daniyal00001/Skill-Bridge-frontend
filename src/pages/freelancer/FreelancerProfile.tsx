@@ -256,7 +256,7 @@ export default function FreelancerProfile() {
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary" />
-                  {displayProfile.location || MOCK_PROFILE.location}
+                  {displayProfile.location || MOCK_PROFILE.location} {displayProfile.region && `· ${displayProfile.region}`}
                 </div>
                 {displayProfile?.user?.email && (
                   <div className="flex items-center gap-2">
@@ -282,13 +282,11 @@ export default function FreelancerProfile() {
                 <Button
                   variant="outline"
                   className="rounded-xl h-12 px-6 font-bold hover:bg-accent active:scale-95 transition-all"
+                  onClick={() => setIsModalOpen(true)}
                 >
-                  <Link
-                    to="/freelancer/settings"
-                    className="flex items-center gap-2"
-                  >
+                  <div className="flex items-center gap-2">
                     <Pencil className="w-4 h-4" /> Edit Profile
-                  </Link>
+                  </div>
                 </Button>
               </div>
             </div>
@@ -384,7 +382,7 @@ export default function FreelancerProfile() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {(displayProfile.portfolioItems?.length > 0 ? displayProfile.portfolioItems : MOCK_PROFILE.portfolio).slice(0, 4).map((item: any) => (
+                  {(displayProfile.gigs?.length > 0 ? displayProfile.gigs : displayProfile.portfolioItems?.length > 0 ? displayProfile.portfolioItems : MOCK_PROFILE.portfolio).slice(0, 4).map((item: any) => (
                     <motion.div
                       key={item.id}
                       whileHover={{ y: -5 }}
@@ -542,9 +540,9 @@ export default function FreelancerProfile() {
                       variant="secondary"
                       className="px-4 py-2 rounded-xl text-xs font-bold bg-accent/50 hover:bg-accent border-none"
                     >
-                      {lang.name || lang} ·{" "}
+                      {typeof lang === 'string' ? lang : lang.name || lang} ·{" "}
                       <span className="text-muted-foreground">
-                        {lang.level || "Native"}
+                        {lang.level || "Fluent"}
                       </span>
                     </Badge>
                   ))}

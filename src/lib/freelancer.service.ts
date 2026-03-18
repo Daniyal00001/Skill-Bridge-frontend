@@ -11,7 +11,7 @@ export const freelancerService = {
     return response.data
   },
 
-  updateOnboardingStep1: async (data: { firstName: string, lastName: string, location: string, preferredClientLocation: string, tagline: string }) => {
+  updateOnboardingStep1: async (data: { firstName: string, lastName: string, phoneNumber?: string, location: string, region: string, tagline: string }) => {
     const response = await api.post('/freelancers/onboarding/step-1', data)
     return response.data
   },
@@ -21,7 +21,7 @@ export const freelancerService = {
     return response.data
   },
 
-  updateOnboardingStep3: async (data: { skills: any[], education: any[], certifications: any[] }) => {
+  updateOnboardingStep3: async (data: { skills?: any[], education?: any[], certifications?: any[], languages?: any[], gigs?: any[] }) => {
     const response = await api.post('/freelancers/onboarding/step-3', data)
     return response.data
   },
@@ -37,6 +37,11 @@ export const freelancerService = {
         'Content-Type': 'multipart/form-data',
       },
     })
+    return response.data
+  },
+
+  updateFreelancerProfile: async (data: any) => {
+    const response = await api.put('/freelancers/profile', data)
     return response.data
   }
 }

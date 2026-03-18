@@ -12,6 +12,7 @@ export interface LocationPreference {
   id: string;
   name: string;
   region: string | null;
+  phoneCode: string | null;
 }
 
 export function useMetadata() {
