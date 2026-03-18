@@ -90,8 +90,12 @@ export default function FreelancerProfile() {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <p className="text-muted-foreground font-medium">Profile not found.</p>
-          <Button onClick={() => setIsModalOpen(true)}>Complete Onboarding</Button>
+          <p className="text-muted-foreground font-medium">
+            Profile not found.
+          </p>
+          <Button onClick={() => setIsModalOpen(true)}>
+            Complete Onboarding
+          </Button>
         </div>
       </DashboardLayout>
     );
@@ -183,14 +187,20 @@ export default function FreelancerProfile() {
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-                    {displayProfile.fullName || (displayProfile.user ? `${displayProfile.user.firstName} ${displayProfile.user.lastName}` : "Unnamed Freelancer")}
+                    {displayProfile.fullName ||
+                      (displayProfile.user
+                        ? `${displayProfile.user.firstName} ${displayProfile.user.lastName}`
+                        : "Unnamed Freelancer")}
                   </h1>
                   <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
                     Top Rated
                   </Badge>
                 </div>
                 <p className="text-xl font-medium text-muted-foreground italic">
-                  {displayProfile.tagline || (displayProfile.experienceLevel ? `${displayProfile.experienceLevel} Professional` : "No tagline set")}
+                  {displayProfile.tagline ||
+                    (displayProfile.experienceLevel
+                      ? `${displayProfile.experienceLevel} Professional`
+                      : "No tagline set")}
                 </p>
               </div>
 
@@ -203,7 +213,10 @@ export default function FreelancerProfile() {
                 {displayProfile?.user?.email && (
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-primary" />
-                    {displayProfile.user.email} · <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Email Verified #</span>
+                    {displayProfile.user.email} ·{" "}
+                    <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+                      Email Verified{" "}
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-2">
@@ -212,7 +225,8 @@ export default function FreelancerProfile() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  {FUTURE_PLACEHOLDERS.reviewsAvg} ({FUTURE_PLACEHOLDERS.reviewsTotal} reviews) #
+                  {FUTURE_PLACEHOLDERS.reviewsAvg} (
+                  {FUTURE_PLACEHOLDERS.reviewsTotal} reviews) #
                 </div>
               </div>
 
@@ -244,17 +258,25 @@ export default function FreelancerProfile() {
                   </span>
                 </p>
               </div>
-              <div className={cn(
-                "flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full border transition-all",
-                displayProfile.availability === "AVAILABLE"
-                  ? "text-green-500 bg-green-500/5 border-green-500/10"
-                  : "text-amber-500 bg-amber-500/5 border-amber-500/10"
-              )}>
-                <div className={cn(
-                  "w-2 h-2 rounded-full animate-pulse",
-                  displayProfile.availability === "AVAILABLE" ? "bg-green-500" : "bg-amber-500"
-                )} />
-                {displayProfile.availability === "AVAILABLE" ? "Available Now" : "Limited Availability"}
+              <div
+                className={cn(
+                  "flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full border transition-all",
+                  displayProfile.availability === "AVAILABLE"
+                    ? "text-green-500 bg-green-500/5 border-green-500/10"
+                    : "text-amber-500 bg-amber-500/5 border-amber-500/10",
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-2 h-2 rounded-full animate-pulse",
+                    displayProfile.availability === "AVAILABLE"
+                      ? "bg-green-500"
+                      : "bg-amber-500",
+                  )}
+                />
+                {displayProfile.availability === "AVAILABLE"
+                  ? "Available Now"
+                  : "Limited Availability"}
               </div>
             </div>
           </div>
@@ -330,13 +352,25 @@ export default function FreelancerProfile() {
                       variant="outline"
                       className="rounded-2xl h-14 px-6 font-bold hover:bg-primary/5 hover:border-primary/40 transition-all group"
                     >
-                      <a href={displayProfile.portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+                      <a
+                        href={displayProfile.portfolio}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3"
+                      >
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                           <Globe className="w-4 h-4 text-primary" />
                         </div>
                         <div className="text-left">
-                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Main Portfolio</p>
-                          <p className="text-sm truncate max-w-[150px]">{displayProfile.portfolio.replace(/^https?:\/\//, '')}</p>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">
+                            Main Portfolio
+                          </p>
+                          <p className="text-sm truncate max-w-[150px]">
+                            {displayProfile.portfolio.replace(
+                              /^https?:\/\//,
+                              "",
+                            )}
+                          </p>
                         </div>
                         <ExternalLink className="w-3 h-3 text-muted-foreground ml-2" />
                       </a>
@@ -348,13 +382,22 @@ export default function FreelancerProfile() {
                       variant="outline"
                       className="rounded-2xl h-14 px-6 font-bold hover:bg-primary/5 hover:border-primary/40 transition-all group"
                     >
-                      <a href={displayProfile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+                      <a
+                        href={displayProfile.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3"
+                      >
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                           <Globe className="w-4 h-4 text-emerald-500" />
                         </div>
                         <div className="text-left">
-                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Website</p>
-                          <p className="text-sm truncate max-w-[150px]">{displayProfile.website.replace(/^https?:\/\//, '')}</p>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">
+                            Website
+                          </p>
+                          <p className="text-sm truncate max-w-[150px]">
+                            {displayProfile.website.replace(/^https?:\/\//, "")}
+                          </p>
                         </div>
                         <ExternalLink className="w-3 h-3 text-muted-foreground ml-2" />
                       </a>
@@ -366,13 +409,22 @@ export default function FreelancerProfile() {
                       variant="outline"
                       className="rounded-2xl h-14 px-6 font-bold hover:bg-primary/5 hover:border-primary/40 transition-all group"
                     >
-                      <a href={displayProfile.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+                      <a
+                        href={displayProfile.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3"
+                      >
                         <div className="h-8 w-8 rounded-lg bg-slate-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                           <Globe className="w-4 h-4 text-slate-700" />
                         </div>
                         <div className="text-left">
-                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">GitHub</p>
-                          <p className="text-sm truncate max-w-[150px]">View Profile</p>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">
+                            GitHub
+                          </p>
+                          <p className="text-sm truncate max-w-[150px]">
+                            View Profile
+                          </p>
                         </div>
                         <ExternalLink className="w-3 h-3 text-muted-foreground ml-2" />
                       </a>
@@ -381,58 +433,69 @@ export default function FreelancerProfile() {
                 </div>
 
                 <div className="pt-4 space-y-4">
-                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Packaged Services (Gigs)</p>
-                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                     {(displayProfile.gigs || []).map((gig: any) => {
-                       const isPdf = gig.fileUrl?.toLowerCase().endsWith('.pdf');
-                       const isImage = gig.fileUrl?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                       
-                       return (
-                         <a
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">
+                    Packaged Services (Gigs)
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {(displayProfile.gigs || []).map((gig: any) => {
+                      const isPdf = gig.fileUrl?.toLowerCase().endsWith(".pdf");
+                      const isImage = gig.fileUrl
+                        ?.toLowerCase()
+                        .match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+                      return (
+                        <a
                           key={gig.id}
                           href={gig.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 bg-accent/10 hover:border-primary/30 transition-all flex flex-col hover:shadow-lg"
-                         >
-                           {isImage ? (
-                             <img 
-                               src={gig.fileUrl} 
-                               alt={gig.title} 
-                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                             />
-                           ) : (
-                             <div className="flex-1 flex items-center justify-center bg-accent/20">
-                               {isPdf ? (
-                                 <div className="flex flex-col items-center gap-2">
-                                   <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                                     <FileText className="w-5 h-5 text-red-500" />
-                                   </div>
-                                   <span className="text-[10px] font-black uppercase text-red-500/60">PDF</span>
-                                 </div>
-                               ) : (
-                                 <Briefcase className="h-8 w-8 text-primary/40" />
-                               )}
-                             </div>
-                           )}
-                           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/80 to-transparent p-3 translate-y-2 group-hover:translate-y-0 transition-transform">
-                             <p className="text-[10px] font-black uppercase tracking-tight text-foreground truncate">
-                               {gig.title}
-                             </p>
-                             <div className="flex items-center justify-between mt-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                               <p className="text-[8px] font-bold text-primary uppercase tracking-widest">View Gig</p>
-                               <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                             </div>
-                           </div>
-                         </a>
-                       );
-                     })}
-                     {(displayProfile.gigs || []).length === 0 && (
-                       <div className="col-span-4 p-8 border border-dashed rounded-3xl text-center bg-accent/5">
-                         <p className="text-xs text-muted-foreground font-medium">No active gigs. Contact to discuss custom projects and capabilities.</p>
-                       </div>
-                     )}
-                   </div>
+                        >
+                          {isImage ? (
+                            <img
+                              src={gig.fileUrl}
+                              alt={gig.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="flex-1 flex items-center justify-center bg-accent/20">
+                              {isPdf ? (
+                                <div className="flex flex-col items-center gap-2">
+                                  <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                                    <FileText className="w-5 h-5 text-red-500" />
+                                  </div>
+                                  <span className="text-[10px] font-black uppercase text-red-500/60">
+                                    PDF
+                                  </span>
+                                </div>
+                              ) : (
+                                <Briefcase className="h-8 w-8 text-primary/40" />
+                              )}
+                            </div>
+                          )}
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/80 to-transparent p-3 translate-y-2 group-hover:translate-y-0 transition-transform">
+                            <p className="text-[10px] font-black uppercase tracking-tight text-foreground truncate">
+                              {gig.title}
+                            </p>
+                            <div className="flex items-center justify-between mt-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                              <p className="text-[8px] font-bold text-primary uppercase tracking-widest">
+                                View Gig
+                              </p>
+                              <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                            </div>
+                          </div>
+                        </a>
+                      );
+                    })}
+                    {(displayProfile.gigs || []).length === 0 && (
+                      <div className="col-span-4 p-8 border border-dashed rounded-3xl text-center bg-accent/5">
+                        <p className="text-xs text-muted-foreground font-medium">
+                          No active gigs. Contact to discuss custom projects and
+                          capabilities.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </section>
 
@@ -483,8 +546,10 @@ export default function FreelancerProfile() {
                   ))}
                   {(displayProfile.workHistory || []).length === 0 && (
                     <div className="p-12 border border-dashed rounded-[3rem] text-center space-y-2 bg-accent/5">
-                       <p className="font-bold">No work history yet #</p>
-                       <p className="text-xs text-muted-foreground tracking-widest uppercase">Verified projects will appear here</p>
+                      <p className="font-bold">No work history yet #</p>
+                      <p className="text-xs text-muted-foreground tracking-widest uppercase">
+                        Verified projects will appear here
+                      </p>
                     </div>
                   )}
                   <Button
@@ -513,7 +578,9 @@ export default function FreelancerProfile() {
                     }))}
                   />
                   {(displayProfile.skills || []).length === 0 && (
-                    <p className="text-xs text-muted-foreground italic">No skills added yet.</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      No skills added yet.
+                    </p>
                   )}
                 </div>
               </div>
@@ -526,17 +593,21 @@ export default function FreelancerProfile() {
                   Preferred Categories
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {(displayProfile.preferredCategories || []).map((cat: string) => (
-                    <Badge
-                      key={cat}
-                      variant="secondary"
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/10 text-purple-700 border-none hover:bg-purple-500/20"
-                    >
-                      {cat.replace(/-/g, ' ')}
-                    </Badge>
-                  ))}
+                  {(displayProfile.preferredCategories || []).map(
+                    (cat: string) => (
+                      <Badge
+                        key={cat}
+                        variant="secondary"
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/10 text-purple-700 border-none hover:bg-purple-500/20"
+                      >
+                        {cat.replace(/-/g, " ")}
+                      </Badge>
+                    ),
+                  )}
                   {(displayProfile.preferredCategories || []).length === 0 && (
-                    <p className="text-xs text-muted-foreground italic">No category preferences set.</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      No category preferences set.
+                    </p>
                   )}
                 </div>
               </div>
@@ -568,25 +639,31 @@ export default function FreelancerProfile() {
                     </div>
                   ))}
                   {(displayProfile.educations || []).length === 0 && (
-                    <p className="text-xs text-muted-foreground italic">No education history added.</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      No education history added.
+                    </p>
                   )}
                   <div className="grid grid-cols-2 gap-3">
                     {(displayProfile.certificates || []).map((cert: any) => {
-                      const isPdf = cert.credentialUrl?.toLowerCase().endsWith('.pdf');
-                      const isImage = cert.credentialUrl?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                      
+                      const isPdf = cert.credentialUrl
+                        ?.toLowerCase()
+                        .endsWith(".pdf");
+                      const isImage = cert.credentialUrl
+                        ?.toLowerCase()
+                        .match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
                       return (
-                        <a 
-                          key={cert.id} 
-                          href={cert.credentialUrl} 
-                          target="_blank" 
+                        <a
+                          key={cert.id}
+                          href={cert.credentialUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 bg-accent/10 hover:border-primary/30 transition-all flex flex-col"
                         >
                           {isImage ? (
-                            <img 
-                              src={cert.credentialUrl} 
-                              alt={cert.title} 
+                            <img
+                              src={cert.credentialUrl}
+                              alt={cert.title}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                           ) : (
@@ -596,7 +673,9 @@ export default function FreelancerProfile() {
                                   <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
                                     <FileText className="w-5 h-5 text-red-500" />
                                   </div>
-                                  <span className="text-[10px] font-black uppercase text-red-500/60">PDF</span>
+                                  <span className="text-[10px] font-black uppercase text-red-500/60">
+                                    PDF
+                                  </span>
                                 </div>
                               ) : (
                                 <Award className="h-8 w-8 text-primary/40" />
@@ -612,20 +691,21 @@ export default function FreelancerProfile() {
                             </p>
                           </div>
                           {!isImage && (
-                             <div className="p-2 mt-auto border-t border-border/20 bg-background/50 group-hover:hidden transition-all">
-                                <p className="text-[10px] font-bold truncate text-foreground/80">
-                                  {cert.title || cert.name}
-                                </p>
-                             </div>
+                            <div className="p-2 mt-auto border-t border-border/20 bg-background/50 group-hover:hidden transition-all">
+                              <p className="text-[10px] font-bold truncate text-foreground/80">
+                                {cert.title || cert.name}
+                              </p>
+                            </div>
                           )}
                         </a>
                       );
                     })}
                   </div>
                   {(displayProfile.certificates || []).length === 0 && (
-                     <p className="text-xs text-muted-foreground italic">No certifications added.</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      No certifications added.
+                    </p>
                   )}
-
                 </div>
               </div>
 
@@ -648,11 +728,12 @@ export default function FreelancerProfile() {
                     </Badge>
                   ))}
                   {(displayProfile.languages || []).length === 0 && (
-                    <p className="text-xs text-muted-foreground italic">No languages added.</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      No languages added.
+                    </p>
                   )}
                 </div>
               </div>
-
             </aside>
           </div>
         </motion.div>

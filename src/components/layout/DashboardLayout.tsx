@@ -36,10 +36,12 @@ import {
   Heart,
   Sun,
   Moon,
+  Sparkles,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { mockNotifications } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
 import logo from "@/assets/logo/logo.png";
 
 interface DashboardLayoutProps {

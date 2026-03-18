@@ -157,6 +157,35 @@ const PostProjectPage = () => {
   // ✅ Load metadata (languages/locations) from DB
   const { languages, locations, loading: metaLoading } = useMetadata();
 
+  // ── Sync IDs when metadata loads ─────────────────────────────────
+  useEffect(() => {
+    if (!metaLoading && locations.length > 0) {
+      // Find "Any location" record
+      const anyLoc = locations.find((l) => l.name === "Any location");
+      if (anyLoc && !formData.locationId) {
+        setFormData((prev) => ({ ...prev, locationId: anyLoc.id }));
+      }
+
+      // Find "English" record
+      const eng = languages.find((l) => l.name === "English");
+      if (eng && !formData.languageId) {
+        setFormData((prev) => ({ ...prev, languageId: eng.id }));
+      }
+    }
+  }, [metaLoading, locations, languages]);
+
+  // ── Extract unique regions for dropdown ──────────────────────────
+  const uniqueRegions = Array.from(
+    new Set(locations.map((l) => l.region).filter(Boolean)),
+  ).sort();
+  // Ensure "Global" is at the top or mapped to "Any location"
+  const regionOptions = uniqueRegions.map((r) => ({
+    id: r === "Global" ? "Any location" : r, // display name
+    value: r, // internal region value
+    recordId: locations.find((l) => l.region === r && l.name === "Any location")
+      ?.id,
+  }));
+
   // ✅ Helper to get selected category object
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
 
@@ -984,7 +1013,7 @@ const PostProjectPage = () => {
                     <div className="space-y-3">
                       <label className="text-sm font-semibold flex items-center gap-2">
                         <Languages className="w-4 h-4 text-muted-foreground" />{" "}
-                        Communication Language
+                        Preferred Communication Language
                       </label>
                       <Select
                         value={formData.languageId || formData.language}
@@ -1021,16 +1050,25 @@ const PostProjectPage = () => {
                     <div className="space-y-3">
                       <label className="text-sm font-semibold flex items-center gap-2">
                         <Globe2 className="w-4 h-4 text-muted-foreground" />{" "}
-                        Freelancer Location
+                        Preferred Freelancer Location
                       </label>
                       <Select
                         value={formData.locationId || formData.locationPref}
                         onValueChange={(val) => {
-                          const loc = locations.find((l) => l.id === val);
-                          updateFormData({
-                            locationId: val,
-                            locationPref: loc ? loc.name : val,
-                          });
+                          // val could be an ID (for "Any location") or a region string
+                          const locRecord = locations.find((l) => l.id === val);
+                          if (locRecord) {
+                            updateFormData({
+                              locationId: val,
+                              locationPref: locRecord.name,
+                            });
+                          } else {
+                            // It's a region string
+                            updateFormData({
+                              locationId: "",
+                              locationPref: val,
+                            });
+                          }
                         }}
                         disabled={metaLoading}
                       >
@@ -1044,9 +1082,13 @@ const PostProjectPage = () => {
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          {locations.map((loc) => (
-                            <SelectItem key={loc.id} value={loc.id}>
-                              {loc.name}
+                          {/* Show regions instead of countries */}
+                          {regionOptions.map((opt) => (
+                            <SelectItem
+                              key={opt.value}
+                              value={opt.recordId || opt.value}
+                            >
+                              {opt.id}
                             </SelectItem>
                           ))}
                           {locations.length === 0 && !metaLoading && (
