@@ -35,7 +35,6 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { freelancerService } from "@/lib/freelancer.service";
 import { FreelancerOnboardingModal } from "./Onboarding/FreelancerOnboardingModal";
-import { EditFreelancerProfileModal } from "./EditProfile/EditFreelancerProfileModal";
 import { useEffect } from "react";
 
 // Mock Data
@@ -168,7 +167,6 @@ export default function FreelancerProfile() {
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { user } = useAuth();
 
   const fetchProfile = async () => {
@@ -646,14 +644,6 @@ export default function FreelancerProfile() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onComplete={() => fetchProfile()} // refresh profile after onboarding completion
-          profile={profile}
-        />
-      )}
-      {profile && (
-        <EditFreelancerProfileModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onComplete={() => fetchProfile()} // refresh profile after editing
           profile={profile}
         />
       )}

@@ -74,11 +74,17 @@ export function FreelancerOnboardingModal({
     availability: profile?.availability || "AVAILABLE",
     experienceLevel: profile?.experienceLevel || "ENTRY",
     skills:
-      profile?.skills?.map((s: any) => s.skill?.name || s.name).join(", ") ||
-      "",
-    school: profile?.educations?.[0]?.school || "",
-    degree: profile?.educations?.[0]?.degree || "",
-    year: profile?.educations?.[0]?.year || "",
+      profile?.skills?.map((s: any) => ({
+        name: s.skill?.name || s.name,
+        level: s.proficiencyLevel || 3,
+      })) || [],
+    educations: profile?.educations || [
+      { school: "", degree: "", year: "", level: "University" },
+    ],
+    languages:
+      profile?.languages?.map((l: any) =>
+        typeof l === "string" ? { name: l } : l,
+      ) || [],
     github: profile?.github || "",
     linkedin: profile?.linkedin || "",
     portfolio: profile?.portfolio || "",
@@ -112,6 +118,18 @@ export function FreelancerOnboardingModal({
         } catch (e) {
           console.error("Auto-save Step 2 failed", e);
         }
+      } else if (step === 3) {
+        try {
+          await freelancerService.updateOnboardingStep3({
+            skills: formData.skills,
+            education: formData.educations.filter(
+              (e: any) => e.school && e.degree,
+            ),
+            languages: formData.languages,
+          });
+        } catch (e) {
+          console.error("Auto-save Step 3 failed", e);
+        }
       } else if (step === 5) {
         try {
           await freelancerService.updateOnboardingStep5({
@@ -124,7 +142,7 @@ export function FreelancerOnboardingModal({
           console.error("Auto-save Step 5 failed", e);
         }
       }
-    }, 2000); // 2 second debounce
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [formData, step]);
@@ -199,24 +217,6 @@ export function FreelancerOnboardingModal({
         });
         return;
       }
-    } else if (step === 2) {
-      if (!formData.hourlyRate || Number(formData.hourlyRate) < 5) {
-        toast({
-          title: "Validation Error",
-          description: "Minimum hourly rate is $5.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (!formData.bio || formData.bio.length < 100) {
-        toast({
-          title: "Validation Error",
-          description:
-            "Bio must be at least 100 characters for a quality profile.",
-          variant: "destructive",
-        });
-        return;
-      }
     } else if (step === 3) {
       if (formData.skills.length === 0) {
         toast({
@@ -247,12 +247,6 @@ export function FreelancerOnboardingModal({
           experienceLevel: formData.experienceLevel,
         });
       } else if (step === 3) {
-        const skillsArray = formData.skills
-          .split(",")
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0)
-          .map((s) => ({ name: s, level: 3 }));
-
         await freelancerService.updateOnboardingStep3({
           skills: formData.skills,
           education: formData.educations.filter(
@@ -320,8 +314,8 @@ export function FreelancerOnboardingModal({
     }
   };
 
-  const addSkill = async (skillName: string) => {
-    if (!skillName.trim()) return;
+  const addSkill = async (name: string) => {
+    if (!name.trim()) return;
     if (formData.skills.length >= 10) {
       toast({
         title: "Limit Reached",
@@ -332,20 +326,17 @@ export function FreelancerOnboardingModal({
     }
     if (
       formData.skills.some(
-        (s: any) => s.name.toLowerCase() === skillName.toLowerCase(),
+        (s: any) => s.name.toLowerCase() === name.toLowerCase(),
       )
     )
       return;
+
     const newSkills = [
       ...formData.skills,
-      { name: skillName.trim(), level: parseInt(skillLevel) },
+      { name: name.trim(), level: parseInt(skillLevel) },
     ];
-    setFormData((prev) => ({
-      ...prev,
-      skills: newSkills,
-    }));
+    setFormData((prev) => ({ ...prev, skills: newSkills }));
     setSkillInput("");
-    setSkillLevel("3");
 
     // Immediate Auto-save
     try {
@@ -361,10 +352,7 @@ export function FreelancerOnboardingModal({
 
   const removeSkill = async (name: string) => {
     const newSkills = formData.skills.filter((s: any) => s.name !== name);
-    setFormData((prev) => ({
-      ...prev,
-      skills: newSkills,
-    }));
+    setFormData((prev) => ({ ...prev, skills: newSkills }));
 
     // Immediate Auto-save
     try {
@@ -651,15 +639,101 @@ export function FreelancerOnboardingModal({
           )}
 
           {step === 3 && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Top Skills (comma separated)</Label>
-                <Input
-                  name="skills"
-                  value={formData.skills}
-                  onChange={handleChange}
-                  placeholder="React, Node.js, UI/UX"
-                />
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <Label className="text-sm font-bold flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-primary" /> Your Skills &
+                  Expertise
+                  {formData.skills.length < 10 && (
+                    <span className="text-[10px] text-muted-foreground font-medium ml-auto">
+                      You can add {10 - formData.skills.length} more
+                    </span>
+                  )}
+                </Label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-h-[100px] p-4 border rounded-2xl bg-muted/5 shadow-inner overflow-y-auto max-h-[200px]">
+                  {formData.skills.map((s: any) => (
+                    <div
+                      key={s.name}
+                      className="flex items-center justify-between p-3 bg-card border rounded-xl shadow-sm group hover:border-primary/50 transition-all"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-sm">{s.name}</span>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "h-1 w-3 rounded-full transition-colors",
+                                i <= s.level ? "bg-primary" : "bg-muted",
+                              )}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-all"
+                        onClick={() => removeSkill(s.name)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {formData.skills.length === 0 && (
+                    <div className="col-span-full flex flex-col items-center justify-center text-muted-foreground py-4">
+                      <p className="text-sm italic opacity-50">
+                        No skills added yet
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 items-end bg-card p-4 border rounded-2xl shadow-sm">
+                  <div className="flex-1 space-y-2 w-full">
+                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Skill Name
+                    </Label>
+                    <Input
+                      placeholder="e.g. React, Python, UI Design"
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addSkill(skillInput);
+                        }
+                      }}
+                      className="rounded-xl h-11 border-none bg-muted/50 focus-visible:ring-primary"
+                    />
+                  </div>
+                  <div className="w-full sm:w-32 space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Level
+                    </Label>
+                    <Select value={skillLevel} onValueChange={setSkillLevel}>
+                      <SelectTrigger className="rounded-xl h-11 border-none bg-muted/50">
+                        <SelectValue placeholder="Level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Beginner</SelectItem>
+                        <SelectItem value="2">Elementary</SelectItem>
+                        <SelectItem value="3">Intermediate</SelectItem>
+                        <SelectItem value="4">Advanced</SelectItem>
+                        <SelectItem value="5">Expert</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    type="button"
+                    className="h-11 rounded-xl px-4 font-bold shadow-lg shadow-primary/20"
+                    onClick={() => addSkill(skillInput)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Add
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-4 pt-4 border-t">
@@ -866,106 +940,132 @@ export function FreelancerOnboardingModal({
               <div className="space-y-4 border-t pt-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-lg font-bold">
-                    Certifications (Max 4)
+                    Certifications (Max 4 Total)
                   </Label>
-                  {certifications.length < 4 && (
+                  {profile?.certificates?.length + certifications.filter(c => c.file).length < 4 && (
                     <span className="text-xs text-muted-foreground font-medium">
-                      You can upload {4 - certifications.length} more
+                      You can upload {4 - (profile?.certificates?.length || 0)} more
                     </span>
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col gap-2 p-3 border rounded-xl bg-card"
-                    >
-                      <Input
-                        placeholder="Cert Title"
-                        value={certifications[i]?.title || ""}
-                        onChange={(e) => {
-                          const newCerts = [...certifications];
-                          newCerts[i] = {
-                            ...newCerts[i],
-                            title: e.target.value,
-                          };
-                          setCertifications(newCerts);
-                        }}
-                      />
-                      <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
-                        {files.certFiles[i] ? (
-                          <span className="text-[10px] font-bold truncate px-2">
-                            {files.certFiles[i]?.name}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground">
-                            Upload File
-                          </span>
+                  {[0, 1, 2, 3].map((i) => {
+                    const existingCert = profile?.certificates?.[i];
+                    return (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex flex-col gap-2 p-3 border rounded-xl bg-card transition-all",
+                          existingCert && "opacity-60 bg-muted/30 grayscale-[50%]"
                         )}
+                      >
                         <Input
-                          type="file"
-                          accept="image/*,application/pdf"
-                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          placeholder="Cert Title"
+                          value={existingCert ? existingCert.title : (certifications[i]?.title || "")}
+                          disabled={!!existingCert}
                           onChange={(e) => {
-                            const newFiles = [...files.certFiles];
-                            newFiles[i] = e.target.files?.[0] || null;
-                            setFiles((p) => ({ ...p, certFiles: newFiles }));
+                            const newCerts = [...certifications];
+                            newCerts[i] = {
+                              ...newCerts[i],
+                              title: e.target.value,
+                            };
+                            setCertifications(newCerts);
                           }}
                         />
+                        <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
+                          {existingCert ? (
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-primary">
+                              <CheckCircle2 className="w-3 h-3" /> Already Uploaded
+                            </div>
+                          ) : files.certFiles[i] ? (
+                            <span className="text-[10px] font-bold truncate px-2">
+                              {files.certFiles[i]?.name}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground">
+                              Upload File
+                            </span>
+                          )}
+                          {!existingCert && (
+                            <Input
+                              type="file"
+                              accept="image/*,application/pdf"
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                              onChange={(e) => {
+                                const newFiles = [...files.certFiles];
+                                newFiles[i] = e.target.files?.[0] || null;
+                                setFiles((p) => ({ ...p, certFiles: newFiles }));
+                              }}
+                            />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
               <div className="space-y-4 border-t pt-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-lg font-bold">
-                    Gigs / Portfolios (Max 4)
+                    Gigs / Portfolios (Max 4 Total)
                   </Label>
-                  {gigs.length < 4 && (
+                  {profile?.gigs?.length + gigs.filter(g => g.file).length < 4 && (
                     <span className="text-xs text-muted-foreground font-medium">
-                      You can upload {4 - gigs.length} more
+                      You can upload {4 - (profile?.gigs?.length || 0)} more
                     </span>
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col gap-2 p-3 border rounded-xl bg-card"
-                    >
-                      <Input
-                        placeholder="Project Title"
-                        value={gigs[i]?.title || ""}
-                        onChange={(e) => {
-                          const newGigs = [...gigs];
-                          newGigs[i] = { ...newGigs[i], title: e.target.value };
-                          setGigs(newGigs);
-                        }}
-                      />
-                      <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
-                        {files.gigFiles[i] ? (
-                          <span className="text-[10px] font-bold truncate px-2">
-                            {files.gigFiles[i]?.name}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground">
-                            Upload Preview
-                          </span>
+                  {[0, 1, 2, 3].map((i) => {
+                    const existingGig = profile?.gigs?.[i];
+                    return (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex flex-col gap-2 p-3 border rounded-xl bg-card transition-all",
+                          existingGig && "opacity-60 bg-muted/30 grayscale-[50%]"
                         )}
+                      >
                         <Input
-                          type="file"
-                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          placeholder="Project Title"
+                          value={existingGig ? existingGig.title : (gigs[i]?.title || "")}
+                          disabled={!!existingGig}
                           onChange={(e) => {
-                            const newFiles = [...files.gigFiles];
-                            newFiles[i] = e.target.files?.[0] || null;
-                            setFiles((p) => ({ ...p, gigFiles: newFiles }));
+                            const newGigs = [...gigs];
+                            newGigs[i] = { ...newGigs[i], title: e.target.value };
+                            setGigs(newGigs);
                           }}
                         />
+                        <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
+                          {existingGig ? (
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-primary">
+                              <CheckCircle2 className="w-3 h-3" /> Already Uploaded
+                            </div>
+                          ) : files.gigFiles[i] ? (
+                            <span className="text-[10px] font-bold truncate px-2">
+                              {files.gigFiles[i]?.name}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground">
+                              Upload Preview
+                            </span>
+                          )}
+                          {!existingGig && (
+                            <Input
+                              type="file"
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                              onChange={(e) => {
+                                const newFiles = [...files.gigFiles];
+                                newFiles[i] = e.target.files?.[0] || null;
+                                setFiles((p) => ({ ...p, gigFiles: newFiles }));
+                              }}
+                            />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
