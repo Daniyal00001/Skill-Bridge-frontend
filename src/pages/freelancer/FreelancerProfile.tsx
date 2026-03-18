@@ -55,11 +55,11 @@ export default function FreelancerProfile() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (shouldAutoOpen = false) => {
     try {
       const res = await freelancerService.getMyProfile();
       setProfile(res.data);
-      if (res.data.profileCompletion < 100) {
+      if (shouldAutoOpen && res.data.profileCompletion < 100) {
         setIsModalOpen(true);
       }
     } catch (e) {
@@ -70,7 +70,7 @@ export default function FreelancerProfile() {
   };
 
   useEffect(() => {
-    fetchProfile();
+    fetchProfile(true);
   }, []);
 
   const displayProfile = profile;
@@ -744,9 +744,9 @@ export default function FreelancerProfile() {
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
-            fetchProfile();
+            fetchProfile(false);
           }}
-          onComplete={() => fetchProfile()} // refresh profile after onboarding completion
+          onComplete={() => fetchProfile(false)} // refresh profile after onboarding completion
           profile={profile}
         />
       )}
