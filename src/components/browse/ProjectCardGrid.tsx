@@ -53,17 +53,7 @@ export const ProjectCardGrid = ({
   );
 
   return (
-    <Card className="h-full bg-white border border-blue-100 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/60 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col group relative">
-      {/* ── AI Scoped ribbon ──────────────────────────── */}
-      {project.isAiScoped && (
-        <div className="absolute top-0 right-0">
-          <div className="bg-violet-500 text-white text-[9px] font-bold px-2.5 py-1 rounded-bl-xl flex items-center gap-1">
-            <Sparkles className="w-2.5 h-2.5" />
-            AI Scoped
-          </div>
-        </div>
-      )}
-
+    <Card className="h-full min-h-[340px] bg-white border border-blue-100 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/60 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col group relative">
       <CardHeader className="p-5 pb-0">
         <div className="flex items-start justify-between mb-3 pr-16">
           <Badge className="bg-blue-50 text-blue-600 border-blue-100 text-[10px] font-semibold py-0.5 px-2.5 rounded-lg">
@@ -92,7 +82,7 @@ export const ProjectCardGrid = ({
           to={`/freelancer/projects/${project.id}`}
           onClick={() => onView(project.id, project.category?.slug)}
         >
-          <h3 className="text-sm font-bold leading-snug line-clamp-2 text-slate-800 hover:text-blue-500 transition-colors">
+          <h3 className="text-sm font-bold leading-snug line-clamp-2 text-slate-800 hover:text-blue-500 transition-colors break-words">
             {project.title}
           </h3>
         </Link>
@@ -100,7 +90,7 @@ export const ProjectCardGrid = ({
 
       <CardContent className="p-5 pt-3 flex-1 flex flex-col gap-3">
         {/* Description */}
-        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed break-words overflow-hidden">
           {project.description}
         </p>
 

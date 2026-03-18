@@ -9,7 +9,8 @@
  * ─────────────────────────────────────────────────────────────
  */
 
-import { Search, Sparkles, BadgeCheck } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -50,6 +51,19 @@ export const FilterBar = ({
   onCategoryTrack,
   compact = false,
 }: FilterBarProps) => {
+  // ── Local state for budget to prevent focus loss/typing lag ──
+  const [localMin, setLocalMin] = useState(filters.budgetMin);
+  const [localMax, setLocalMax] = useState(filters.budgetMax);
+
+  // Sync with global filters (e.g. on reset)
+  useEffect(() => {
+    setLocalMin(filters.budgetMin);
+  }, [filters.budgetMin]);
+
+  useEffect(() => {
+    setLocalMax(filters.budgetMax);
+  }, [filters.budgetMax]);
+
   const hasActiveFilters =
     filters.search ||
     filters.categorySlug ||
@@ -57,8 +71,7 @@ export const FilterBar = ({
     filters.budgetMax ||
     filters.experienceLevel ||
     filters.size ||
-    filters.clientVerified ||
-    filters.isAiScoped;
+    filters.clientVerified;
 
   return (
     <div
@@ -122,9 +135,12 @@ export const FilterBar = ({
             <Input
               placeholder="Min"
               type="number"
-              value={filters.budgetMin}
-              onChange={(e) => onFilterChange("budgetMin", e.target.value)}
-              className="pl-5 h-8 w-16 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300"
+              value={localMin}
+              onChange={(e) => {
+                setLocalMin(e.target.value);
+                onFilterChange("budgetMin", e.target.value);
+              }}
+              className="pl-5 h-8 w-20 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300 transition-all"
             />
           </div>
           <span className="text-slate-300 text-xs">—</span>
@@ -135,9 +151,12 @@ export const FilterBar = ({
             <Input
               placeholder="Max"
               type="number"
-              value={filters.budgetMax}
-              onChange={(e) => onFilterChange("budgetMax", e.target.value)}
-              className="pl-5 h-8 w-16 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300"
+              value={localMax}
+              onChange={(e) => {
+                setLocalMax(e.target.value);
+                onFilterChange("budgetMax", e.target.value);
+              }}
+              className="pl-5 h-8 w-20 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300 transition-all"
             />
           </div>
         </div>
@@ -189,18 +208,12 @@ export const FilterBar = ({
       {/* ── Toggle chips ───────────────────────────────── */}
       <div className="flex items-center gap-1.5">
         <ChipButton
-          label="Verified"
+          label="Verified Client"
           icon={<BadgeCheck className="w-3 h-3" />}
           active={filters.clientVerified}
           onClick={() =>
             onFilterChange("clientVerified", !filters.clientVerified)
           }
-        />
-        <ChipButton
-          label="AI Scoped"
-          icon={<Sparkles className="w-3 h-3" />}
-          active={filters.isAiScoped}
-          onClick={() => onFilterChange("isAiScoped", !filters.isAiScoped)}
         />
       </div>
 

@@ -138,7 +138,7 @@ export default function FreelancerBrowseProjects() {
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-10 py-10 space-y-8">
         {/* ── Header ───────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
@@ -268,9 +268,7 @@ export default function FreelancerBrowseProjects() {
                   >
                     <ScrollRow>
                       {sections.recommended.map((p) => (
-                        <div key={p.id} className="w-[320px] shrink-0">
-                          <ProjectCardGrid {...cardProps(p)} />
-                        </div>
+                        <ProjectCardGrid key={p.id} {...cardProps(p)} />
                       ))}
                     </ScrollRow>
                   </Section>
@@ -285,9 +283,7 @@ export default function FreelancerBrowseProjects() {
                   >
                     <ScrollRow>
                       {sections.newProjects.map((p) => (
-                        <div key={p.id} className="w-[320px] shrink-0">
-                          <ProjectCardGrid {...cardProps(p)} />
-                        </div>
+                        <ProjectCardGrid key={p.id} {...cardProps(p)} />
                       ))}
                     </ScrollRow>
                   </Section>
@@ -302,9 +298,7 @@ export default function FreelancerBrowseProjects() {
                   >
                     <ScrollRow>
                       {sections.lowCompetition.map((p) => (
-                        <div key={p.id} className="w-[320px] shrink-0">
-                          <ProjectCardGrid {...cardProps(p)} />
-                        </div>
+                        <ProjectCardGrid key={p.id} {...cardProps(p)} />
                       ))}
                     </ScrollRow>
                   </Section>
@@ -319,31 +313,21 @@ export default function FreelancerBrowseProjects() {
                   >
                     <ScrollRow>
                       {sections.highBudget.map((p) => (
-                        <div key={p.id} className="w-[320px] shrink-0">
-                          <ProjectCardGrid {...cardProps(p)} />
-                        </div>
+                        <ProjectCardGrid key={p.id} {...cardProps(p)} />
                       ))}
                     </ScrollRow>
                   </Section>
                 )}
 
-                {/* Divider before main feed */}
-                <div className="flex items-center gap-3 pt-2">
-                  <div className="h-px flex-1 bg-blue-50" />
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                    All Projects
-                  </span>
-                  <div className="h-px flex-1 bg-blue-50" />
-                </div>
               </div>
             )}
 
             {/* ── Main Feed ─────────────────────────────── */}
             <div
               className={cn(
-                "grid gap-4",
+                "grid gap-6",
                 view === "grid"
-                  ? "md:grid-cols-2 xl:grid-cols-3"
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                   : "grid-cols-1",
               )}
             >
@@ -443,9 +427,9 @@ const Section = ({
   </div>
 );
 
-// ── Horizontal scroll row for sections ────────────────────────
+// ── Grid row for sections ────────────────────────
 const ScrollRow = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {children}
   </div>
 );
