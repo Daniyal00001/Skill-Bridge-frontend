@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { freelancerService } from "@/lib/freelancer.service";
+import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Loader2,
@@ -26,6 +27,8 @@ import {
   Upload,
   CheckCircle2,
   Briefcase,
+  Heart,
+  Sparkles,
 } from "lucide-react";
 import { useMetadata } from "@/hooks/useMetadata";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -60,6 +63,13 @@ export function FreelancerOnboardingModal({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { locations, languages: metadataLanguages } = useMetadata();
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    api
+      .get("/categories")
+      .then((res) => setCategories(res.data.categories || []));
+  }, []);
 
   // State
   const [formData, setFormData] = useState({
@@ -89,6 +99,7 @@ export function FreelancerOnboardingModal({
     linkedin: profile?.linkedin || "",
     portfolio: profile?.portfolio || "",
     website: profile?.website || "",
+    preferredCategories: profile?.preferredCategories || [],
   });
 
   // Debounced Auto-save for Step 1, 2, 5
@@ -253,6 +264,7 @@ export function FreelancerOnboardingModal({
             (e: any) => e.school && e.degree,
           ),
           languages: formData.languages,
+          preferredCategories: formData.preferredCategories,
         });
       } else if (step === 4) {
         if (!files.profileImage && !profile?.user?.profileImage) {
@@ -294,6 +306,7 @@ export function FreelancerOnboardingModal({
           linkedin: formData.linkedin,
           portfolio: formData.portfolio,
           website: formData.website,
+          preferredCategories: formData.preferredCategories,
         });
         toast({
           title: "Profile Completed!",
@@ -866,6 +879,75 @@ export function FreelancerOnboardingModal({
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Preferred Categories */}
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex flex-col gap-1">
+                  <Label className="text-lg font-bold flex items-center gap-2">
+                    {/* <Heart className="w-5 h-5 text-purple-500 fill-purple-500" /> */}
+                    Preferred Categories
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Select categories you're most interested in to get better
+                    matching projects.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {categories.map((cat: any) => {
+                    const isSelected = formData.preferredCategories.includes(
+                      cat.slug,
+                    );
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          if (
+                            !isSelected &&
+                            formData.preferredCategories.length >= 4
+                          ) {
+                            toast({
+                              title: "Limit Reached",
+                              description:
+                                "You can select a maximum of 4 preferred categories.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          setFormData((prev) => ({
+                            ...prev,
+                            preferredCategories: isSelected
+                              ? prev.preferredCategories.filter(
+                                  (s: string) => s !== cat.slug,
+                                )
+                              : [...prev.preferredCategories, cat.slug],
+                          }));
+                        }}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold transition-all border text-left",
+                          isSelected
+                            ? "bg-purple-50 border-purple-200 text-purple-700 shadow-sm"
+                            : "bg-slate-50 border-slate-100 text-slate-500 hover:bg-slate-100",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "w-4 h-4 rounded-full border flex items-center justify-center shrink-0",
+                            isSelected
+                              ? "bg-purple-500 border-purple-500"
+                              : "bg-white border-slate-200",
+                          )}
+                        >
+                          {isSelected && (
+                            <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                          )}
+                        </div>
+                        <span className="truncate">{cat.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
@@ -942,9 +1024,12 @@ export function FreelancerOnboardingModal({
                   <Label className="text-lg font-bold">
                     Certifications (Max 4 Total)
                   </Label>
-                  {profile?.certificates?.length + certifications.filter(c => c.file).length < 4 && (
+                  {profile?.certificates?.length +
+                    certifications.filter((c) => c.file).length <
+                    4 && (
                     <span className="text-xs text-muted-foreground font-medium">
-                      You can upload {4 - (profile?.certificates?.length || 0)} more
+                      You can upload {4 - (profile?.certificates?.length || 0)}{" "}
+                      more
                     </span>
                   )}
                 </div>
@@ -956,12 +1041,17 @@ export function FreelancerOnboardingModal({
                         key={i}
                         className={cn(
                           "flex flex-col gap-2 p-3 border rounded-xl bg-card transition-all",
-                          existingCert && "opacity-60 bg-muted/30 grayscale-[50%]"
+                          existingCert &&
+                            "opacity-60 bg-muted/30 grayscale-[50%]",
                         )}
                       >
                         <Input
                           placeholder="Cert Title"
-                          value={existingCert ? existingCert.title : (certifications[i]?.title || "")}
+                          value={
+                            existingCert
+                              ? existingCert.title
+                              : certifications[i]?.title || ""
+                          }
                           disabled={!!existingCert}
                           onChange={(e) => {
                             const newCerts = [...certifications];
@@ -975,7 +1065,8 @@ export function FreelancerOnboardingModal({
                         <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
                           {existingCert ? (
                             <div className="flex items-center gap-2 text-[10px] font-bold text-primary">
-                              <CheckCircle2 className="w-3 h-3" /> Already Uploaded
+                              <CheckCircle2 className="w-3 h-3" /> Already
+                              Uploaded
                             </div>
                           ) : files.certFiles[i] ? (
                             <span className="text-[10px] font-bold truncate px-2">
@@ -994,7 +1085,10 @@ export function FreelancerOnboardingModal({
                               onChange={(e) => {
                                 const newFiles = [...files.certFiles];
                                 newFiles[i] = e.target.files?.[0] || null;
-                                setFiles((p) => ({ ...p, certFiles: newFiles }));
+                                setFiles((p) => ({
+                                  ...p,
+                                  certFiles: newFiles,
+                                }));
                               }}
                             />
                           )}
@@ -1010,7 +1104,8 @@ export function FreelancerOnboardingModal({
                   <Label className="text-lg font-bold">
                     Gigs / Portfolios (Max 4 Total)
                   </Label>
-                  {profile?.gigs?.length + gigs.filter(g => g.file).length < 4 && (
+                  {profile?.gigs?.length + gigs.filter((g) => g.file).length <
+                    4 && (
                     <span className="text-xs text-muted-foreground font-medium">
                       You can upload {4 - (profile?.gigs?.length || 0)} more
                     </span>
@@ -1024,23 +1119,32 @@ export function FreelancerOnboardingModal({
                         key={i}
                         className={cn(
                           "flex flex-col gap-2 p-3 border rounded-xl bg-card transition-all",
-                          existingGig && "opacity-60 bg-muted/30 grayscale-[50%]"
+                          existingGig &&
+                            "opacity-60 bg-muted/30 grayscale-[50%]",
                         )}
                       >
                         <Input
                           placeholder="Project Title"
-                          value={existingGig ? existingGig.title : (gigs[i]?.title || "")}
+                          value={
+                            existingGig
+                              ? existingGig.title
+                              : gigs[i]?.title || ""
+                          }
                           disabled={!!existingGig}
                           onChange={(e) => {
                             const newGigs = [...gigs];
-                            newGigs[i] = { ...newGigs[i], title: e.target.value };
+                            newGigs[i] = {
+                              ...newGigs[i],
+                              title: e.target.value,
+                            };
                             setGigs(newGigs);
                           }}
                         />
                         <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
                           {existingGig ? (
                             <div className="flex items-center gap-2 text-[10px] font-bold text-primary">
-                              <CheckCircle2 className="w-3 h-3" /> Already Uploaded
+                              <CheckCircle2 className="w-3 h-3" /> Already
+                              Uploaded
                             </div>
                           ) : files.gigFiles[i] ? (
                             <span className="text-[10px] font-bold truncate px-2">

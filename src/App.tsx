@@ -55,6 +55,7 @@ import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetail
 import FreelancerProfile from "./pages/freelancer/FreelancerProfile";
 import FreelancerSettings from "./pages/freelancer/FreelancerSettings";
 import FreelancerTokens from "./pages/freelancer/FreelancerTokens";
+import SavedProjects from "./pages/freelancer/SavedProjects";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -197,6 +198,10 @@ const App = () => (
                   <Route
                     path="/freelancer/tokens"
                     element={<FreelancerTokens />}
+                  />
+                  <Route
+                    path="/freelancer/saved"
+                    element={<SavedProjects />}
                   />
                 </Route>
 

@@ -39,6 +39,7 @@ export const freelancerService = {
     certifications?: any[];
     languages?: any[];
     gigs?: any[];
+    preferredCategories?: string[];
   }) => {
     const response = await api.post("/freelancers/onboarding/step-3", data);
     return response.data;
@@ -49,6 +50,7 @@ export const freelancerService = {
     linkedin?: string;
     portfolio?: string;
     website?: string;
+    preferredCategories?: string[];
   }) => {
     const response = await api.post("/freelancers/onboarding/step-5", data);
     return response.data;
@@ -68,7 +70,7 @@ export const freelancerService = {
   },
 
   updateFreelancerProfile: async (data: any) => {
-    const response = await api.put("/freelancers/profile", data);
+    const response = await api.patch("/freelancers/profile", data);
     return response.data;
   },
 };

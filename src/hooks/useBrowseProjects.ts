@@ -65,7 +65,6 @@ export interface BrowseFilters {
   experienceLevel: string | null;
   size: string | null;
   clientVerified: boolean;
-  isAiScoped: boolean;
 }
 
 export type SortOption =
@@ -86,7 +85,6 @@ export function useBrowseProjects() {
     experienceLevel: null,
     size: null,
     clientVerified: false,
-    isAiScoped: false,
   });
   const [sort, setSort] = useState<SortOption>("best_match");
 
@@ -119,7 +117,7 @@ export function useBrowseProjects() {
         params.set("experienceLevel", filters.experienceLevel);
       if (filters.size) params.set("size", filters.size);
       if (filters.clientVerified) params.set("clientVerified", "true");
-      if (filters.isAiScoped) params.set("isAiScoped", "true");
+      if (filters.clientVerified) params.set("clientVerified", "true");
       return params.toString();
     },
     [filters, sort]
@@ -190,7 +188,6 @@ export function useBrowseProjects() {
       experienceLevel: null,
       size: null,
       clientVerified: false,
-      isAiScoped: false,
     });
     setSort("best_match");
   }, []);
@@ -208,11 +205,7 @@ export function useBrowseProjects() {
       });
 
       try {
-        if (isSaved) {
-          await api.delete("/track/save", { data: { projectId } });
-        } else {
-          await api.post("/track/save", { projectId, categorySlug });
-        }
+        await api.post(`/browse/projects/${projectId}/save`);
       } catch {
         // Revert optimistic update on failure
         setSavedIds((prev) => {
@@ -227,9 +220,9 @@ export function useBrowseProjects() {
 
   // ── Track project view (fire and forget) ─────────────────
   const trackView = useCallback(
-    (projectId: string, categorySlug?: string) => {
+    (projectId: string) => {
       api
-        .post("/track/view", { projectId, categorySlug })
+        .post(`/browse/projects/${projectId}/view`)
         .catch(() => {}); // silently ignore errors
     },
     []

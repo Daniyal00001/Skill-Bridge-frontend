@@ -32,10 +32,10 @@ import {
   Zap,
   LogOut,
   User,
-  Sparkles,
+  Laptop,
+  Heart,
   Sun,
   Moon,
-  Laptop,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { mockNotifications } from "@/lib/mockData";
@@ -160,6 +160,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 label: "SkillTokens",
                 href: "/freelancer/tokens",
                 isTokenItem: true,
+              },
+              {
+                icon: Heart,
+                label: "Saved Projects",
+                href: "/freelancer/saved",
               },
             ],
           },

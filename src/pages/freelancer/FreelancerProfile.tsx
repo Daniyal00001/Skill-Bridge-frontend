@@ -520,6 +520,29 @@ export default function FreelancerProfile() {
 
               <Separator className="bg-border/40" />
 
+              {/* PREFERRED CATEGORIES */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-purple-500">
+                  Preferred Categories
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {(displayProfile.preferredCategories || []).map((cat: string) => (
+                    <Badge
+                      key={cat}
+                      variant="secondary"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/10 text-purple-700 border-none hover:bg-purple-500/20"
+                    >
+                      {cat.replace(/-/g, ' ')}
+                    </Badge>
+                  ))}
+                  {(displayProfile.preferredCategories || []).length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">No category preferences set.</p>
+                  )}
+                </div>
+              </div>
+
+              <Separator className="bg-border/40" />
+
               {/* DETAILS SECTION */}
               <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
