@@ -29,6 +29,10 @@ import {
   Briefcase,
   Heart,
   Sparkles,
+  User,
+  Globe,
+  Settings,
+  Layers,
 } from "lucide-react";
 import { useMetadata } from "@/hooks/useMetadata";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
@@ -61,6 +65,7 @@ export function FreelancerOnboardingModal({
 
   const [step, setStep] = useState(initialStep);
   const [isLoading, setIsLoading] = useState(false);
+  const [localCompletion, setLocalCompletion] = useState(profile?.profileCompletion || 0);
   const { toast } = useToast();
   const { locations, languages: metadataLanguages } = useMetadata();
   const [categories, setCategories] = useState<any[]>([]);
@@ -177,6 +182,14 @@ export function FreelancerOnboardingModal({
     gigFiles: [null, null, null, null],
   });
 
+  const TABS = [
+    { id: 1, label: "Personal", icon: User, isComplete: !!(formData.firstName && formData.location && formData.tagline) },
+    { id: 2, label: "Professional", icon: Briefcase, isComplete: !!(formData.hourlyRate && formData.bio) },
+    { id: 3, label: "Skills & Edu", icon: Sparkles, isComplete: formData.skills.length > 0 },
+    { id: 4, label: "Media", icon: Upload, isComplete: !!(profile?.user?.profileImage || files.profileImage) },
+    { id: 5, label: "Links", icon: Globe, isComplete: !!(formData.portfolio || formData.preferredCategories.length > 0) },
+  ];
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -242,7 +255,7 @@ export function FreelancerOnboardingModal({
     setIsLoading(true);
     try {
       if (step === 1) {
-        await freelancerService.updateOnboardingStep1({
+        const res = await freelancerService.updateOnboardingStep1({
           firstName: formData.firstName,
           lastName: formData.lastName,
           phoneNumber: formData.phoneNumber,
@@ -250,15 +263,17 @@ export function FreelancerOnboardingModal({
           region: formData.region,
           tagline: formData.tagline,
         });
+        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
       } else if (step === 2) {
-        await freelancerService.updateOnboardingStep2({
+        const res = await freelancerService.updateOnboardingStep2({
           hourlyRate: Number(formData.hourlyRate),
           bio: formData.bio,
           availability: formData.availability,
           experienceLevel: formData.experienceLevel,
         });
+        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
       } else if (step === 3) {
-        await freelancerService.updateOnboardingStep3({
+        const res = await freelancerService.updateOnboardingStep3({
           skills: formData.skills,
           education: formData.educations.filter(
             (e: any) => e.school && e.degree,
@@ -266,6 +281,8 @@ export function FreelancerOnboardingModal({
           languages: formData.languages,
           preferredCategories: formData.preferredCategories,
         });
+        // Note: Step 3 might not return completion in some versions, but we should check
+        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
       } else if (step === 4) {
         if (!files.profileImage && !profile?.user?.profileImage) {
           toast({
@@ -299,23 +316,29 @@ export function FreelancerOnboardingModal({
           }
         });
 
-        await freelancerService.uploadOnboardingFiles(formPayload);
+        const res = await freelancerService.uploadOnboardingFiles(formPayload);
+        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
       } else if (step === 5) {
-        await freelancerService.updateOnboardingStep5({
+        const res = await freelancerService.updateOnboardingStep5({
           github: formData.github,
           linkedin: formData.linkedin,
           portfolio: formData.portfolio,
           website: formData.website,
           preferredCategories: formData.preferredCategories,
         });
+        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
         toast({
-          title: "Profile Completed!",
-          description: "Welcome to SkillBridge!",
+          title: "Profile Updated!",
+          description: "Your changes have been saved.",
         });
-        onComplete();
-        return;
+        // Don't close immediately if they want to keep editing tabs
+        // onComplete(); 
+        // return;
       }
-      setStep((prev) => prev + 1);
+      
+      if (step < 5) {
+        setStep((prev) => prev + 1);
+      }
     } catch (error: any) {
       console.error("Save error:", error);
       const message =
@@ -489,10 +512,53 @@ export function FreelancerOnboardingModal({
     >
       <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[90vh] p-0 overflow-hidden border-none shadow-2xl rounded-3xl bg-background flex flex-col">
         <DialogHeader className="p-6 pb-2 shrink-0">
-          <DialogTitle>Complete Your Profile ({step}/5)</DialogTitle>
-          <DialogDescription>
-            Boost your profile visibility by completing these steps.
-          </DialogDescription>
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <DialogTitle className="text-2xl font-black text-foreground">Complete Your Profile</DialogTitle>
+              <DialogDescription className="text-xs font-medium">
+                Fill in your details to reach 100% and start bidding.
+              </DialogDescription>
+            </div>
+            <div className="flex flex-col items-end gap-1.5 min-w-[120px]">
+              <div className="flex items-center gap-2 text-xs font-bold text-primary">
+                <Sparkles className="w-3 h-3" />
+                <span>{localCompletion}% Complete</span>
+              </div>
+              <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden border border-border/20">
+                <div 
+                  className="h-full bg-primary transition-all duration-1000" 
+                  style={{ width: `${localCompletion}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* TAB NAVIGATION */}
+          <div className="flex items-center gap-1 bg-accent/30 p-1 rounded-2xl mt-4 overflow-x-auto no-scrollbar">
+            {TABS.map((t) => {
+              const isActive = step === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setStep(t.id)}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap relative",
+                    isActive 
+                      ? "bg-background text-primary shadow-sm" 
+                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                  )}
+                >
+                  <t.icon className={cn("w-3.5 h-3.5", isActive ? "text-primary" : "text-muted-foreground")} />
+                  {t.label}
+                  {t.isComplete && !isActive && (
+                    <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-0.5 border-2 border-background shadow-sm">
+                      <CheckCircle2 className="w-2 h-2 text-white" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-6">
@@ -1217,18 +1283,28 @@ export function FreelancerOnboardingModal({
                 disabled={isLoading}
                 className="rounded-xl px-6"
               >
-                Back
+                Previous Section
               </Button>
             )}
           </div>
-          <Button
-            onClick={handleNext}
-            disabled={isLoading}
-            className="rounded-xl px-8 font-bold shadow-lg shadow-primary/20"
-          >
-            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {step === 5 ? "Complete Profile" : "Next Step"}
-          </Button>
+          <div className="flex gap-3">
+             <Button
+              variant="ghost"
+              onClick={onClose}
+              disabled={isLoading}
+              className="rounded-xl px-6 font-bold text-muted-foreground hover:text-foreground"
+            >
+              Close
+            </Button>
+            <Button
+              onClick={handleNext}
+              disabled={isLoading}
+              className="rounded-xl px-8 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
+            >
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {step === 5 ? "Save & Close" : "Save & Continue"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
