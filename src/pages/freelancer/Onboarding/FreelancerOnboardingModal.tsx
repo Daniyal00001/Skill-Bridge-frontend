@@ -19,9 +19,16 @@ import {
 } from "@/components/ui/select";
 import { freelancerService } from "@/lib/freelancer.service";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Plus, X, Upload, CheckCircle2, Briefcase } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  X,
+  Upload,
+  CheckCircle2,
+  Briefcase,
+} from "lucide-react";
 import { useMetadata } from "@/hooks/useMetadata";
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -66,15 +73,18 @@ export function FreelancerOnboardingModal({
     bio: profile?.bio || "",
     availability: profile?.availability || "AVAILABLE",
     experienceLevel: profile?.experienceLevel || "ENTRY",
-    skills: profile?.skills?.map((s: any) => ({ name: s.skill?.name || s.name, level: s.proficiencyLevel || 3 })) || [],
-    educations: profile?.educations || [{ school: "", degree: "", year: "", level: "University" }],
-    languages: profile?.languages?.map((l: any) => typeof l === 'string' ? { name: l, level: "Fluent" } : l) || [],
+    skills:
+      profile?.skills?.map((s: any) => s.skill?.name || s.name).join(", ") ||
+      "",
+    school: profile?.educations?.[0]?.school || "",
+    degree: profile?.educations?.[0]?.degree || "",
+    year: profile?.educations?.[0]?.year || "",
     github: profile?.github || "",
     linkedin: profile?.linkedin || "",
     portfolio: profile?.portfolio || "",
     website: profile?.website || "",
   });
-  
+
   // Debounced Auto-save for Step 1, 2, 5
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -121,7 +131,9 @@ export function FreelancerOnboardingModal({
 
   const [skillInput, setSkillInput] = useState("");
   const [skillLevel, setSkillLevel] = useState("3");
-  const [certifications, setCertifications] = useState<any[]>(profile?.certificates || []);
+  const [certifications, setCertifications] = useState<any[]>(
+    profile?.certificates || [],
+  );
   const [gigs, setGigs] = useState<any[]>(profile?.gigs || []);
 
   const [files, setFiles] = useState<{
@@ -147,37 +159,71 @@ export function FreelancerOnboardingModal({
     if (step === 1) {
       const phoneNumber = parsePhoneNumberFromString(formData.phoneNumber);
       if (!formData.firstName || formData.firstName.length < 2) {
-        toast({ title: "Validation Error", description: "First name must be at least 2 characters.", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description: "First name must be at least 2 characters.",
+          variant: "destructive",
+        });
         return;
       }
       if (!formData.lastName || formData.lastName.length < 2) {
-        toast({ title: "Validation Error", description: "Last name must be at least 2 characters.", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description: "Last name must be at least 2 characters.",
+          variant: "destructive",
+        });
         return;
       }
       if (!formData.tagline || formData.tagline.length < 10) {
-        toast({ title: "Validation Error", description: "Tagline must be at least 10 characters.", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description: "Tagline must be at least 10 characters.",
+          variant: "destructive",
+        });
         return;
       }
       if (!formData.phoneNumber || !phoneNumber || !phoneNumber.isValid()) {
-        toast({ title: "Validation Error", description: "Please enter a valid international phone number (e.g., +92...).", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description:
+            "Please enter a valid international phone number (e.g., +92...).",
+          variant: "destructive",
+        });
         return;
       }
       if (!formData.location) {
-        toast({ title: "Validation Error", description: "Please select your country.", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description: "Please select your country.",
+          variant: "destructive",
+        });
         return;
       }
     } else if (step === 2) {
       if (!formData.hourlyRate || Number(formData.hourlyRate) < 5) {
-        toast({ title: "Validation Error", description: "Minimum hourly rate is $5.", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description: "Minimum hourly rate is $5.",
+          variant: "destructive",
+        });
         return;
       }
       if (!formData.bio || formData.bio.length < 100) {
-        toast({ title: "Validation Error", description: "Bio must be at least 100 characters for a quality profile.", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description:
+            "Bio must be at least 100 characters for a quality profile.",
+          variant: "destructive",
+        });
         return;
       }
     } else if (step === 3) {
       if (formData.skills.length === 0) {
-        toast({ title: "Validation Error", description: "Please add at least one skill.", variant: "destructive" });
+        toast({
+          title: "Validation Error",
+          description: "Please add at least one skill.",
+          variant: "destructive",
+        });
         return;
       }
     }
@@ -201,37 +247,53 @@ export function FreelancerOnboardingModal({
           experienceLevel: formData.experienceLevel,
         });
       } else if (step === 3) {
+        const skillsArray = formData.skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0)
+          .map((s) => ({ name: s, level: 3 }));
+
         await freelancerService.updateOnboardingStep3({
           skills: formData.skills,
-          education: formData.educations.filter((e: any) => e.school && e.degree),
+          education: formData.educations.filter(
+            (e: any) => e.school && e.degree,
+          ),
           languages: formData.languages,
         });
       } else if (step === 4) {
         if (!files.profileImage && !profile?.user?.profileImage) {
-          toast({ title: "Validation Error", description: "Please upload a profile picture.", variant: "destructive" });
+          toast({
+            title: "Validation Error",
+            description: "Please upload a profile picture.",
+            variant: "destructive",
+          });
           setIsLoading(false);
           return;
         }
         const formPayload = new FormData();
-        if (files.idDocument) formPayload.append("idDocument", files.idDocument);
-        if (files.profileImage) formPayload.append("profileImage", files.profileImage);
-        
+        if (files.idDocument)
+          formPayload.append("idDocument", files.idDocument);
+        if (files.profileImage)
+          formPayload.append("profileImage", files.profileImage);
+
         files.certFiles.forEach((file, i) => {
           if (file) {
             formPayload.append("certFiles", file);
-            formPayload.append("certTitles", certifications[i]?.title || `Certificate ${i+1}`);
+            formPayload.append(
+              "certTitles",
+              certifications[i]?.title || `Certificate ${i + 1}`,
+            );
           }
         });
 
         files.gigFiles.forEach((file, i) => {
           if (file) {
             formPayload.append("gigFiles", file);
-            formPayload.append("gigTitles", gigs[i]?.title || `Gig ${i+1}`);
+            formPayload.append("gigTitles", gigs[i]?.title || `Gig ${i + 1}`);
           }
         });
-        
-        await freelancerService.uploadOnboardingFiles(formPayload);
 
+        await freelancerService.uploadOnboardingFiles(formPayload);
       } else if (step === 5) {
         await freelancerService.updateOnboardingStep5({
           github: formData.github,
@@ -239,14 +301,19 @@ export function FreelancerOnboardingModal({
           portfolio: formData.portfolio,
           website: formData.website,
         });
-        toast({ title: "Profile Completed!", description: "Welcome to SkillBridge!" });
+        toast({
+          title: "Profile Completed!",
+          description: "Welcome to SkillBridge!",
+        });
         onComplete();
         return;
       }
       setStep((prev) => prev + 1);
     } catch (error: any) {
       console.error("Save error:", error);
-      const message = error.response?.data?.message || "Failed to save details. Please try again.";
+      const message =
+        error.response?.data?.message ||
+        "Failed to save details. Please try again.";
       toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setIsLoading(false);
@@ -259,19 +326,27 @@ export function FreelancerOnboardingModal({
       toast({
         title: "Limit Reached",
         description: "You can add a maximum of 10 skills.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    if (formData.skills.some((s: any) => s.name.toLowerCase() === skillName.toLowerCase())) return;
-    const newSkills = [...formData.skills, { name: skillName.trim(), level: parseInt(skillLevel) }];
-    setFormData(prev => ({
+    if (
+      formData.skills.some(
+        (s: any) => s.name.toLowerCase() === skillName.toLowerCase(),
+      )
+    )
+      return;
+    const newSkills = [
+      ...formData.skills,
+      { name: skillName.trim(), level: parseInt(skillLevel) },
+    ];
+    setFormData((prev) => ({
       ...prev,
-      skills: newSkills
+      skills: newSkills,
     }));
     setSkillInput("");
     setSkillLevel("3");
-    
+
     // Immediate Auto-save
     try {
       await freelancerService.updateOnboardingStep3({
@@ -286,11 +361,11 @@ export function FreelancerOnboardingModal({
 
   const removeSkill = async (name: string) => {
     const newSkills = formData.skills.filter((s: any) => s.name !== name);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      skills: newSkills
+      skills: newSkills,
     }));
-    
+
     // Immediate Auto-save
     try {
       await freelancerService.updateOnboardingStep3({
@@ -304,41 +379,49 @@ export function FreelancerOnboardingModal({
   };
 
   const addEducation = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      educations: [...prev.educations, { school: "", degree: "", year: "", level: "University" }]
+      educations: [
+        ...prev.educations,
+        { school: "", degree: "", year: "", level: "University" },
+      ],
     }));
   };
 
   const updateEducation = (index: number, field: string, value: string) => {
     const newEdus = [...formData.educations];
     newEdus[index] = { ...newEdus[index], [field]: value };
-    setFormData(prev => ({ ...prev, educations: newEdus }));
+    setFormData((prev) => ({ ...prev, educations: newEdus }));
   };
 
   const removeEducation = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      educations: prev.educations.filter((_, i) => i !== index)
+      educations: prev.educations.filter((_, i) => i !== index),
     }));
   };
 
   const handlePhoneChange = (phone: string) => {
-    setFormData(prev => ({ ...prev, phoneNumber: phone }));
-    
+    setFormData((prev) => ({ ...prev, phoneNumber: phone }));
+
     // Auto-detect country and region from phone number
-    if (phone.startsWith('+')) {
+    if (phone.startsWith("+")) {
       const phoneNumber = parsePhoneNumberFromString(phone);
       if (phoneNumber && phoneNumber.isValid()) {
         const countryCode = phoneNumber.countryCallingCode;
-        const matchedLocation = locations.find(loc => loc.phoneCode === countryCode);
+        const matchedLocation = locations.find(
+          (loc) => loc.phoneCode === countryCode,
+        );
         if (matchedLocation) {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             location: matchedLocation.name,
-            region: matchedLocation.region || ""
+            region: matchedLocation.region || "",
           }));
-          toast({ title: "Location Detected", description: `We've set your country to ${matchedLocation.name}` });
+          toast({
+            title: "Location Detected",
+            description: `We've set your country to ${matchedLocation.name}`,
+          });
         }
       }
     }
@@ -350,17 +433,22 @@ export function FreelancerOnboardingModal({
       toast({
         title: "Limit Reached",
         description: "You can add a maximum of 3 languages.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    if (formData.languages.some((l: any) => (typeof l === 'string' ? l : l.name) === name)) return;
+    if (
+      formData.languages.some(
+        (l: any) => (typeof l === "string" ? l : l.name) === name,
+      )
+    )
+      return;
     const newLangs = [...formData.languages, { name }];
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      languages: newLangs
+      languages: newLangs,
     }));
-    
+
     // Immediate Auto-save
     try {
       await freelancerService.updateOnboardingStep3({
@@ -372,11 +460,13 @@ export function FreelancerOnboardingModal({
       console.error("Auto-save add language failed", e);
     }
   };
-  
+
   const removeLanguage = async (index: number) => {
-    const newLangs = formData.languages.filter((_: any, i: number) => i !== index);
-    setFormData(prev => ({ ...prev, languages: newLangs }));
-    
+    const newLangs = formData.languages.filter(
+      (_: any, i: number) => i !== index,
+    );
+    setFormData((prev) => ({ ...prev, languages: newLangs }));
+
     // Immediate Auto-save
     try {
       await freelancerService.updateOnboardingStep3({
@@ -445,7 +535,11 @@ export function FreelancerOnboardingModal({
                   placeholder="+92 300 1234567"
                   className={cn(
                     "rounded-xl",
-                    formData.phoneNumber && !parsePhoneNumberFromString(formData.phoneNumber)?.isValid() && "border-destructive focus-visible:ring-destructive"
+                    formData.phoneNumber &&
+                      !parsePhoneNumberFromString(
+                        formData.phoneNumber,
+                      )?.isValid() &&
+                      "border-destructive focus-visible:ring-destructive",
                   )}
                 />
                 <p className="text-[10px] text-muted-foreground">
@@ -458,8 +552,14 @@ export function FreelancerOnboardingModal({
                   <Label>Country</Label>
                   <Select
                     onValueChange={(val) => {
-                      const country = (locations || []).find((c: any) => c.name === val) as any;
-                      setFormData((p) => ({ ...p, location: val, region: country?.region || "" }));
+                      const country = (locations || []).find(
+                        (c: any) => c.name === val,
+                      ) as any;
+                      setFormData((p) => ({
+                        ...p,
+                        location: val,
+                        region: country?.region || "",
+                      }));
                     }}
                     value={formData.location}
                   >
@@ -468,7 +568,9 @@ export function FreelancerOnboardingModal({
                     </SelectTrigger>
                     <SelectContent>
                       {(locations || []).map((c: any) => (
-                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                        <SelectItem key={c.id} value={c.name}>
+                          {c.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -539,9 +641,7 @@ export function FreelancerOnboardingModal({
                       <SelectValue placeholder="Select Availability" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="AVAILABLE">
-                        Available
-                      </SelectItem>
+                      <SelectItem value="AVAILABLE">Available</SelectItem>
                       <SelectItem value="UNAVAILABLE">Not Available</SelectItem>
                     </SelectContent>
                   </Select>
@@ -551,101 +651,36 @@ export function FreelancerOnboardingModal({
           )}
 
           {step === 3 && (
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <Label className="text-sm font-bold flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-primary" /> Your Skills & Expertise
-                </Label>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[100px] p-4 border rounded-xl bg-muted/10 shadow-inner">
-                  {formData.skills.map((s: any) => (
-                    <div key={s.name} className="flex items-center justify-between p-3 bg-card border rounded-xl shadow-sm group hover:border-primary/50 transition-all">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-bold text-sm">{s.name}</span>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <div 
-                              key={i} 
-                              className={cn(
-                                "h-1.5 w-4 rounded-full transition-colors",
-                                i <= s.level ? "bg-primary" : "bg-muted"
-                              )} 
-                            />
-                          ))}
-                          <span className="text-[10px] ml-2 text-muted-foreground font-bold uppercase tracking-tighter">
-                            {s.level === 1 ? "Beginner" : s.level === 2 ? "Elementary" : s.level === 3 ? "Intermediate" : s.level === 4 ? "Advanced" : "Expert"}
-                          </span>
-                        </div>
-                      </div>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-all"
-                        onClick={() => removeSkill(s.name)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  {formData.skills.length === 0 && (
-                    <div className="col-span-full flex flex-col items-center justify-center text-muted-foreground py-4">
-                      <p className="text-sm italic">No skills added yet</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 items-end">
-                  <div className="flex-1 space-y-2 w-full">
-                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Skill Name</Label>
-                    <Input
-                      placeholder="e.g. React, Python, UI Design"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addSkill(skillInput);
-                        }
-                      }}
-                      className="rounded-xl h-11"
-                    />
-                  </div>
-                  <div className="w-full sm:w-40 space-y-2">
-                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Level</Label>
-                    <Select value={skillLevel} onValueChange={setSkillLevel}>
-                      <SelectTrigger className="rounded-xl h-11">
-                        <SelectValue placeholder="Level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 - Beginner</SelectItem>
-                        <SelectItem value="2">2 - Elementary</SelectItem>
-                        <SelectItem value="3">3 - Intermediate</SelectItem>
-                        <SelectItem value="4">4 - Advanced</SelectItem>
-                        <SelectItem value="5">5 - Expert</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button 
-                    type="button" 
-                    className="h-11 rounded-xl px-4 font-bold shadow-lg shadow-primary/20"
-                    onClick={() => addSkill(skillInput)}
-                  >
-                    <Plus className="w-4 h-4 mr-2" /> Add
-                  </Button>
-                </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Top Skills (comma separated)</Label>
+                <Input
+                  name="skills"
+                  value={formData.skills}
+                  onChange={handleChange}
+                  placeholder="React, Node.js, UI/UX"
+                />
               </div>
 
               <div className="space-y-4 pt-4 border-t">
                 <div className="flex items-center justify-between pt-2">
                   <Label className="text-lg font-bold">Education</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={addEducation} className="text-primary font-bold">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={addEducation}
+                    className="text-primary font-bold"
+                  >
                     <Plus className="w-4 h-4 mr-1" /> Add More
                   </Button>
                 </div>
-                
+
                 {formData.educations.map((edu: any, idx: number) => (
-                  <div key={idx} className="p-4 border rounded-xl space-y-4 relative group bg-card shadow-sm">
+                  <div
+                    key={idx}
+                    className="p-4 border rounded-xl space-y-4 relative group bg-card shadow-sm"
+                  >
                     {idx > 0 && (
                       <Button
                         type="button"
@@ -661,17 +696,27 @@ export function FreelancerOnboardingModal({
                       <div className="space-y-2">
                         <Label>Level / Class</Label>
                         <Select
-                          onValueChange={(val) => updateEducation(idx, "level", val)}
+                          onValueChange={(val) =>
+                            updateEducation(idx, "level", val)
+                          }
                           defaultValue={edu.level}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select Level" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="School">School (Class 1-10)</SelectItem>
-                            <SelectItem value="College">College (High School / Inter)</SelectItem>
-                            <SelectItem value="University">University (Bachelor+)</SelectItem>
-                            <SelectItem value="Other">Other Certification</SelectItem>
+                            <SelectItem value="School">
+                              School (Class 1-10)
+                            </SelectItem>
+                            <SelectItem value="College">
+                              College (High School / Inter)
+                            </SelectItem>
+                            <SelectItem value="University">
+                              University (Bachelor+)
+                            </SelectItem>
+                            <SelectItem value="Other">
+                              Other Certification
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -679,7 +724,9 @@ export function FreelancerOnboardingModal({
                         <Label>Graduation Year</Label>
                         <Input
                           value={edu.year}
-                          onChange={(e) => updateEducation(idx, "year", e.target.value)}
+                          onChange={(e) =>
+                            updateEducation(idx, "year", e.target.value)
+                          }
                           placeholder="2024"
                         />
                       </div>
@@ -688,7 +735,9 @@ export function FreelancerOnboardingModal({
                       <Label>School / University Name</Label>
                       <Input
                         value={edu.school}
-                        onChange={(e) => updateEducation(idx, "school", e.target.value)}
+                        onChange={(e) =>
+                          updateEducation(idx, "school", e.target.value)
+                        }
                         placeholder="E.g. FAST NUCES"
                       />
                     </div>
@@ -696,7 +745,9 @@ export function FreelancerOnboardingModal({
                       <Label>Degree / Major</Label>
                       <Input
                         value={edu.degree}
-                        onChange={(e) => updateEducation(idx, "degree", e.target.value)}
+                        onChange={(e) =>
+                          updateEducation(idx, "degree", e.target.value)
+                        }
                         placeholder="E.g. BS in Computer Science"
                       />
                     </div>
@@ -715,9 +766,16 @@ export function FreelancerOnboardingModal({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {formData.languages.map((l: any, i: number) => (
-                    <Badge key={i} variant="outline" className="px-3 py-1 gap-2 bg-primary/5 border-primary/20">
-                      {typeof l === 'string' ? l : l.name}
-                      <X className="w-3 h-3 cursor-pointer" onClick={() => removeLanguage(i)} />
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="px-3 py-1 gap-2 bg-primary/5 border-primary/20"
+                    >
+                      {typeof l === "string" ? l : l.name}
+                      <X
+                        className="w-3 h-3 cursor-pointer"
+                        onClick={() => removeLanguage(i)}
+                      />
                     </Badge>
                   ))}
                 </div>
@@ -727,7 +785,9 @@ export function FreelancerOnboardingModal({
                   </SelectTrigger>
                   <SelectContent>
                     {(metadataLanguages || []).map((l: any) => (
-                      <SelectItem key={l.id} value={l.name}>{l.name}</SelectItem>
+                      <SelectItem key={l.id} value={l.name}>
+                        {l.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -745,19 +805,27 @@ export function FreelancerOnboardingModal({
                   <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 gap-2 hover:bg-muted/50 transition-colors cursor-pointer relative overflow-hidden group">
                     {files.profileImage ? (
                       <div className="flex items-center gap-2 text-green-500 font-bold text-sm">
-                        <CheckCircle2 className="w-4 h-4" /> {files.profileImage.name}
+                        <CheckCircle2 className="w-4 h-4" />{" "}
+                        {files.profileImage.name}
                       </div>
                     ) : (
                       <div className="text-center">
                         <p className="text-xs font-semibold">Click to upload</p>
-                        <p className="text-[10px] text-muted-foreground">PNG, JPG up to 5MB</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          PNG, JPG up to 5MB
+                        </p>
                       </div>
                     )}
                     <Input
                       type="file"
                       accept="image/*"
                       className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={(e) => setFiles(p => ({...p, profileImage: e.target.files?.[0] || null}))}
+                      onChange={(e) =>
+                        setFiles((p) => ({
+                          ...p,
+                          profileImage: e.target.files?.[0] || null,
+                        }))
+                      }
                     />
                   </div>
                 </div>
@@ -768,18 +836,28 @@ export function FreelancerOnboardingModal({
                   <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 gap-2 hover:bg-muted/50 transition-colors cursor-pointer relative overflow-hidden">
                     {files.idDocument ? (
                       <div className="flex items-center gap-2 text-green-500 font-bold text-sm">
-                        <CheckCircle2 className="w-4 h-4" /> {files.idDocument.name}
+                        <CheckCircle2 className="w-4 h-4" />{" "}
+                        {files.idDocument.name}
                       </div>
                     ) : (
                       <div className="text-center">
-                         <p className="text-xs font-semibold">National ID / Passport</p>
-                         <p className="text-[10px] text-muted-foreground">PDF, JPG</p>
+                        <p className="text-xs font-semibold">
+                          National ID / Passport
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          PDF, JPG
+                        </p>
                       </div>
                     )}
                     <Input
                       type="file"
                       className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={(e) => setFiles(p => ({...p, idDocument: e.target.files?.[0] || null}))}
+                      onChange={(e) =>
+                        setFiles((p) => ({
+                          ...p,
+                          idDocument: e.target.files?.[0] || null,
+                        }))
+                      }
                     />
                   </div>
                 </div>
@@ -787,7 +865,9 @@ export function FreelancerOnboardingModal({
 
               <div className="space-y-4 border-t pt-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">Certifications (Max 4)</Label>
+                  <Label className="text-lg font-bold">
+                    Certifications (Max 4)
+                  </Label>
                   {certifications.length < 4 && (
                     <span className="text-xs text-muted-foreground font-medium">
                       You can upload {4 - certifications.length} more
@@ -796,33 +876,43 @@ export function FreelancerOnboardingModal({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="flex flex-col gap-2 p-3 border rounded-xl bg-card">
-                       <Input 
-                        placeholder="Cert Title" 
+                    <div
+                      key={i}
+                      className="flex flex-col gap-2 p-3 border rounded-xl bg-card"
+                    >
+                      <Input
+                        placeholder="Cert Title"
                         value={certifications[i]?.title || ""}
                         onChange={(e) => {
                           const newCerts = [...certifications];
-                          newCerts[i] = { ...newCerts[i], title: e.target.value };
+                          newCerts[i] = {
+                            ...newCerts[i],
+                            title: e.target.value,
+                          };
                           setCertifications(newCerts);
                         }}
-                       />
-                       <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
-                          {files.certFiles[i] ? (
-                            <span className="text-[10px] font-bold truncate px-2">{files.certFiles[i]?.name}</span>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground">Upload File</span>
-                          )}
-                          <Input 
-                            type="file" 
-                            accept="image/*,application/pdf"
-                            className="absolute inset-0 opacity-0 cursor-pointer" 
-                            onChange={(e) => {
-                              const newFiles = [...files.certFiles];
-                              newFiles[i] = e.target.files?.[0] || null;
-                              setFiles(p => ({...p, certFiles: newFiles}));
-                            }}
-                          />
-                       </div>
+                      />
+                      <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
+                        {files.certFiles[i] ? (
+                          <span className="text-[10px] font-bold truncate px-2">
+                            {files.certFiles[i]?.name}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">
+                            Upload File
+                          </span>
+                        )}
+                        <Input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            const newFiles = [...files.certFiles];
+                            newFiles[i] = e.target.files?.[0] || null;
+                            setFiles((p) => ({ ...p, certFiles: newFiles }));
+                          }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -830,7 +920,9 @@ export function FreelancerOnboardingModal({
 
               <div className="space-y-4 border-t pt-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">Gigs / Portfolios (Max 4)</Label>
+                  <Label className="text-lg font-bold">
+                    Gigs / Portfolios (Max 4)
+                  </Label>
                   {gigs.length < 4 && (
                     <span className="text-xs text-muted-foreground font-medium">
                       You can upload {4 - gigs.length} more
@@ -839,32 +931,39 @@ export function FreelancerOnboardingModal({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="flex flex-col gap-2 p-3 border rounded-xl bg-card">
-                       <Input 
-                        placeholder="Project Title" 
+                    <div
+                      key={i}
+                      className="flex flex-col gap-2 p-3 border rounded-xl bg-card"
+                    >
+                      <Input
+                        placeholder="Project Title"
                         value={gigs[i]?.title || ""}
                         onChange={(e) => {
                           const newGigs = [...gigs];
                           newGigs[i] = { ...newGigs[i], title: e.target.value };
                           setGigs(newGigs);
                         }}
-                       />
-                       <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
-                          {files.gigFiles[i] ? (
-                            <span className="text-[10px] font-bold truncate px-2">{files.gigFiles[i]?.name}</span>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground">Upload Preview</span>
-                          )}
-                          <Input 
-                            type="file" 
-                            className="absolute inset-0 opacity-0 cursor-pointer" 
-                            onChange={(e) => {
-                              const newFiles = [...files.gigFiles];
-                              newFiles[i] = e.target.files?.[0] || null;
-                              setFiles(p => ({...p, gigFiles: newFiles}));
-                            }}
-                          />
-                       </div>
+                      />
+                      <div className="relative h-10 border border-dashed rounded flex items-center justify-center bg-muted/30">
+                        {files.gigFiles[i] ? (
+                          <span className="text-[10px] font-bold truncate px-2">
+                            {files.gigFiles[i]?.name}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">
+                            Upload Preview
+                          </span>
+                        )}
+                        <Input
+                          type="file"
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            const newFiles = [...files.gigFiles];
+                            newFiles[i] = e.target.files?.[0] || null;
+                            setFiles((p) => ({ ...p, gigFiles: newFiles }));
+                          }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -918,7 +1017,11 @@ export function FreelancerOnboardingModal({
               </Button>
             )}
           </div>
-          <Button onClick={handleNext} disabled={isLoading} className="rounded-xl px-8 font-bold shadow-lg shadow-primary/20">
+          <Button
+            onClick={handleNext}
+            disabled={isLoading}
+            className="rounded-xl px-8 font-bold shadow-lg shadow-primary/20"
+          >
             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {step === 5 ? "Complete Profile" : "Next Step"}
           </Button>
