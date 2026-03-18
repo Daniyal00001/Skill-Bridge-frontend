@@ -29,6 +29,7 @@ import {
   Verified,
   ShieldCheck,
   Mail,
+  FileText,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -38,128 +39,13 @@ import { FreelancerOnboardingModal } from "./Onboarding/FreelancerOnboardingModa
 import { useEffect } from "react";
 
 // Mock Data
-const MOCK_PROFILE = {
-  name: "Alex Chen",
-  title: "Senior Full Stack Developer",
-  location: "Dallas, TX",
-  timezone: "UTC-6",
-  memberSince: "Jan 2023",
-  lastActive: "Today",
-  bio: "Passionate full-stack developer with over 8 years of experience building scalable web applications. I specialize in React, Node.js, and cloud architecture. My goal is to deliver clean, maintainable code and exceptional user experiences. I've helped numerous startups launch their MVPs and scale to thousands of users. Always eager to tackle complex technical challenges and learn new technologies.",
-  availability: "Available for Work",
-  rate: 85,
-  availabilityType: "Full-time (40hrs/week)",
-  preferredContract: "Fixed + Hourly",
-  jobSuccess: 94,
-  projectsCompleted: 52,
-  repeatClientRate: 78,
-  responseTime: "< 1 hour",
-  languages: [
-    { name: "English", level: "Native" },
-    { name: "Urdu", level: "Native" },
-  ],
-  education: [
-    { school: "FAST NUCES", degree: "BS in Computer Science", year: "2022" },
-  ],
-  certifications: [
-    { name: "AWS Certified Developer", issuer: "Amazon Web Services" },
-    { name: "Meta Front-End Certificate", issuer: "Meta" },
-  ],
-  skills: {
-    frontend: [
-      { name: "React", level: 5 },
-      { name: "TypeScript", level: 4 },
-      { name: "Next.js", level: 5 },
-      { name: "Tailwind", level: 5 },
-    ],
-    backend: [
-      { name: "Node.js", level: 4 },
-      { name: "Python", level: 3 },
-      { name: "PostgreSQL", level: 4 },
-    ],
-    tools: [
-      { name: "AWS", level: 3 },
-      { name: "Docker", level: 3 },
-      { name: "Git", level: 5 },
-    ],
-  },
-  portfolio: [
-    {
-      id: "p1",
-      name: "SaaS Analytics Dashboard",
-      tech: ["Next.js", "Tailwind", "Recharts"],
-      image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    },
-    {
-      id: "p2",
-      name: "E-commerce Mobile App",
-      tech: ["React Native", "Firebase"],
-      image: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)",
-    },
-    {
-      id: "p3",
-      name: "Real-time Chat Platform",
-      tech: ["Socket.io", "Node.js", "Redis"],
-      image: "linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)",
-    },
-    {
-      id: "p4",
-      name: "Crypto Trading Bot",
-      tech: ["Python", "FastAPI", "PostgreSQL"],
-      image: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-    },
-  ],
-  workHistory: [
-    {
-      id: "w1",
-      title: "Full Stack Dashboard Development",
-      client: "TechCorp",
-      rating: 5.0,
-      date: "March 2024",
-      amount: 4500,
-      comment:
-        "Alex is an exceptional developer. He delivered the project ahead of schedule and the quality of code was top-notch. Highly recommended!",
-    },
-    {
-      id: "w2",
-      title: "React Components Library",
-      client: "DesignMasters",
-      rating: 4.8,
-      date: "Jan 2024",
-      amount: 2800,
-      comment:
-        "Great work on the UI components. Very responsive and easy to work with.",
-    },
-    {
-      id: "w3",
-      title: "Backend API Optimization",
-      client: "DataFlow",
-      rating: 5.0,
-      date: "Nov 2023",
-      amount: 3500,
-      comment:
-        "Significantly improved our system performance. Alex knows his way around databases and caching.",
-    },
-  ],
-  reviews_stats: {
-    average: 4.9,
-    total: 47,
-    breakdown: [
-      { stars: 5, count: 38, percentage: 81 },
-      { stars: 4, count: 7, percentage: 15 },
-      { stars: 3, count: 2, percentage: 4 },
-      { stars: 2, count: 0, percentage: 0 },
-      { stars: 1, count: 0, percentage: 0 },
-    ],
-  },
-  completion: {
-    percentage: 85,
-    missing: [
-      "Add phone verification",
-      "Add 2 more portfolio items",
-      "Complete work history",
-    ],
-  },
+// Placeholder for features not built yet
+const FUTURE_PLACEHOLDERS = {
+  jobSuccess: "100%",
+  projectsCompleted: 0,
+  repeatClientRate: "0%",
+  reviewsAvg: "5.0",
+  reviewsTotal: 0,
 };
 
 export default function FreelancerProfile() {
@@ -187,8 +73,29 @@ export default function FreelancerProfile() {
     fetchProfile();
   }, []);
 
-  const displayProfile = profile || MOCK_PROFILE;
-  const completion = displayProfile.profileCompletion ?? 0;
+  const displayProfile = profile;
+  const completion = displayProfile?.profileCompletion ?? 0;
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!displayProfile) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+          <p className="text-muted-foreground font-medium">Profile not found.</p>
+          <Button onClick={() => setIsModalOpen(true)}>Complete Onboarding</Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -276,37 +183,36 @@ export default function FreelancerProfile() {
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-                    {displayProfile.fullName || MOCK_PROFILE.name}
+                    {displayProfile.fullName || (displayProfile.user ? `${displayProfile.user.firstName} ${displayProfile.user.lastName}` : "Unnamed Freelancer")}
                   </h1>
                   <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
                     Top Rated
                   </Badge>
                 </div>
                 <p className="text-xl font-medium text-muted-foreground italic">
-                  {displayProfile.tagline || MOCK_PROFILE.title}
+                  {displayProfile.tagline || (displayProfile.experienceLevel ? `${displayProfile.experienceLevel} Professional` : "No tagline set")}
                 </p>
               </div>
 
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary" />
-                  {displayProfile.location || MOCK_PROFILE.location}{" "}
+                  {displayProfile.location || "Location not set"}{" "}
                   {displayProfile.region && `· ${displayProfile.region}`}
                 </div>
                 {displayProfile?.user?.email && (
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-primary" />
-                    {displayProfile.user.email}
+                    {displayProfile.user.email} · <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Email Verified #</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2">
                   <Verified className="w-4 h-4 text-emerald-500" />
-                  Payment Verified
+                  Payment Verified #
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  {MOCK_PROFILE.reviews_stats.average} (
-                  {MOCK_PROFILE.reviews_stats.total} reviews)
+                  {FUTURE_PLACEHOLDERS.reviewsAvg} ({FUTURE_PLACEHOLDERS.reviewsTotal} reviews) #
                 </div>
               </div>
 
@@ -332,15 +238,23 @@ export default function FreelancerProfile() {
                   Hourly Rate
                 </p>
                 <p className="text-4xl font-black text-foreground">
-                  ${displayProfile.hourlyRate || MOCK_PROFILE.rate}{" "}
+                  ${displayProfile.hourlyRate || "0"}{" "}
                   <span className="text-base text-muted-foreground font-medium">
                     / hr
                   </span>
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm font-bold text-green-500 bg-green-500/5 px-4 py-2 rounded-full border border-green-500/10">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                Available Now
+              <div className={cn(
+                "flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full border transition-all",
+                displayProfile.availability === "AVAILABLE"
+                  ? "text-green-500 bg-green-500/5 border-green-500/10"
+                  : "text-amber-500 bg-amber-500/5 border-amber-500/10"
+              )}>
+                <div className={cn(
+                  "w-2 h-2 rounded-full animate-pulse",
+                  displayProfile.availability === "AVAILABLE" ? "bg-green-500" : "bg-amber-500"
+                )} />
+                {displayProfile.availability === "AVAILABLE" ? "Available Now" : "Limited Availability"}
               </div>
             </div>
           </div>
@@ -354,7 +268,7 @@ export default function FreelancerProfile() {
                   Overview
                 </h3>
                 <p className="text-lg text-muted-foreground leading-relaxed font-medium">
-                  {displayProfile.bio || MOCK_PROFILE.bio}
+                  {displayProfile.bio || "No overview provided."}
                 </p>
               </section>
 
@@ -363,25 +277,25 @@ export default function FreelancerProfile() {
                 {[
                   {
                     label: "Job Success",
-                    value: `${MOCK_PROFILE.jobSuccess}%`,
+                    value: `${FUTURE_PLACEHOLDERS.jobSuccess} #`,
                     icon: ShieldCheck,
                     color: "text-blue-500",
                   },
                   {
                     label: "Completed",
-                    value: MOCK_PROFILE.projectsCompleted,
+                    value: `${FUTURE_PLACEHOLDERS.projectsCompleted} #`,
                     icon: CheckCircle2,
                     color: "text-emerald-500",
                   },
                   {
                     label: "Repeat Hires",
-                    value: `${MOCK_PROFILE.repeatClientRate}%`,
+                    value: `${FUTURE_PLACEHOLDERS.repeatClientRate} #`,
                     icon: Zap,
                     color: "text-amber-500",
                   },
                   {
                     label: "Level",
-                    value: "Expert",
+                    value: displayProfile.experienceLevel || "Expert",
                     icon: TrendingUp,
                     color: "text-purple-500",
                   },
@@ -402,64 +316,96 @@ export default function FreelancerProfile() {
               </div>
 
               {/* PORTFOLIO SECTION */}
-              <section className="space-y-8">
+              <section className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
-                    Portfolio
+                    Portfolio & External Links
                   </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="font-bold gap-2 text-primary hover:bg-primary/5"
-                  >
-                    View All <ChevronRight className="w-4 h-4" />
-                  </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {(displayProfile.gigs?.length > 0
-                    ? displayProfile.gigs
-                    : displayProfile.portfolioItems?.length > 0
-                      ? displayProfile.portfolioItems
-                      : MOCK_PROFILE.portfolio
-                  )
-                    .slice(0, 4)
-                    .map((item: any) => (
-                      <motion.div
-                        key={item.id}
-                        whileHover={{ y: -5 }}
-                        className="group cursor-pointer rounded-3xl overflow-hidden border border-border/40 bg-card/40 hover:bg-card hover:shadow-2xl hover:shadow-foreground/5 transition-all duration-500"
-                      >
-                        <div
-                          className="aspect-[16/10] w-full"
-                          style={{
-                            background:
-                              item.image ||
-                              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          }}
-                        />
-                        <div className="p-6 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-lg font-black">
-                              {item.name || item.title}
-                            </h4>
-                            <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {(item.tech || item.techStack || []).map(
-                              (t: string) => (
-                                <span
-                                  key={t}
-                                  className="text-[10px] font-bold text-muted-foreground uppercase bg-accent/50 px-2.5 py-1 rounded-md"
-                                >
-                                  {t}
-                                </span>
-                              ),
-                            )}
-                          </div>
+                <div className="flex flex-wrap gap-4">
+                  {displayProfile.portfolio && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="rounded-2xl h-14 px-6 font-bold hover:bg-primary/5 hover:border-primary/40 transition-all group"
+                    >
+                      <a href={displayProfile.portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Globe className="w-4 h-4 text-primary" />
                         </div>
-                      </motion.div>
-                    ))}
+                        <div className="text-left">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Main Portfolio</p>
+                          <p className="text-sm truncate max-w-[150px]">{displayProfile.portfolio.replace(/^https?:\/\//, '')}</p>
+                        </div>
+                        <ExternalLink className="w-3 h-3 text-muted-foreground ml-2" />
+                      </a>
+                    </Button>
+                  )}
+                  {displayProfile.website && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="rounded-2xl h-14 px-6 font-bold hover:bg-primary/5 hover:border-primary/40 transition-all group"
+                    >
+                      <a href={displayProfile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Globe className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Website</p>
+                          <p className="text-sm truncate max-w-[150px]">{displayProfile.website.replace(/^https?:\/\//, '')}</p>
+                        </div>
+                        <ExternalLink className="w-3 h-3 text-muted-foreground ml-2" />
+                      </a>
+                    </Button>
+                  )}
+                  {displayProfile.github && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="rounded-2xl h-14 px-6 font-bold hover:bg-primary/5 hover:border-primary/40 transition-all group"
+                    >
+                      <a href={displayProfile.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-slate-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Globe className="w-4 h-4 text-slate-700" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">GitHub</p>
+                          <p className="text-sm truncate max-w-[150px]">View Profile</p>
+                        </div>
+                        <ExternalLink className="w-3 h-3 text-muted-foreground ml-2" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+
+                <div className="pt-4 space-y-4">
+                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Packaged Services (Gigs)</p>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                     {(displayProfile.gigs || []).map((gig: any) => (
+                       <a
+                        key={gig.id}
+                        href={gig.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-4 rounded-2xl bg-accent/20 border border-border/50 hover:bg-accent/40 hover:border-primary/20 transition-all group"
+                       >
+                         <div className="flex items-center gap-3">
+                           <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                             <Briefcase className="w-5 h-5 text-primary" />
+                           </div>
+                           <span className="text-sm font-bold truncate max-w-[200px]">{gig.title}</span>
+                         </div>
+                         <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                       </a>
+                     ))}
+                     {(displayProfile.gigs || []).length === 0 && (
+                       <div className="col-span-2 p-6 border border-dashed rounded-2xl text-center">
+                         <p className="text-xs text-muted-foreground">No specific gigs listed. Contact for custom projects.</p>
+                       </div>
+                     )}
+                   </div>
                 </div>
               </section>
 
@@ -469,7 +415,7 @@ export default function FreelancerProfile() {
                   Work History & Reviews
                 </h3>
                 <div className="space-y-6">
-                  {MOCK_PROFILE.workHistory.map((work) => (
+                  {(displayProfile.workHistory || []).map((work: any) => (
                     <div
                       key={work.id}
                       className="p-8 rounded-[2.5rem] bg-card border border-border/40 hover:border-primary/20 transition-all space-y-6"
@@ -508,11 +454,17 @@ export default function FreelancerProfile() {
                       </div>
                     </div>
                   ))}
+                  {(displayProfile.workHistory || []).length === 0 && (
+                    <div className="p-12 border border-dashed rounded-[3rem] text-center space-y-2 bg-accent/5">
+                       <p className="font-bold">No work history yet #</p>
+                       <p className="text-xs text-muted-foreground tracking-widest uppercase">Verified projects will appear here</p>
+                    </div>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-primary/5 hover:border-primary/40 shadow-sm transition-all active:scale-[0.98]"
                   >
-                    Load More Projects
+                    View All Feedback #
                   </Button>
                 </div>
               </section>
@@ -528,14 +480,14 @@ export default function FreelancerProfile() {
                 <div className="space-y-8">
                   <CompactSkillGroup
                     title="Skills & Technologies"
-                    skills={(displayProfile.skills?.length > 0
-                      ? displayProfile.skills
-                      : MOCK_PROFILE.skills.frontend
-                    ).map((s: any) => ({
+                    skills={(displayProfile.skills || []).map((s: any) => ({
                       name: s.skill?.name || s.name,
-                      level: s.proficiencyLevel || s.level,
+                      level: s.proficiencyLevel || s.level || 3,
                     }))}
                   />
+                  {(displayProfile.skills || []).length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">No skills added yet.</p>
+                  )}
                 </div>
               </div>
 
@@ -547,11 +499,8 @@ export default function FreelancerProfile() {
                   Education & Certs
                 </h3>
                 <div className="space-y-6">
-                  {(displayProfile.educations?.length > 0
-                    ? displayProfile.educations
-                    : MOCK_PROFILE.education
-                  ).map((edu: any) => (
-                    <div key={edu.school} className="flex gap-4">
+                  {(displayProfile.educations || []).map((edu: any) => (
+                    <div key={edu.school + edu.degree} className="flex gap-4">
                       <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
                         <GraduationCap className="h-6 w-6 text-primary" />
                       </div>
@@ -568,25 +517,65 @@ export default function FreelancerProfile() {
                       </div>
                     </div>
                   ))}
+                  {(displayProfile.educations || []).length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">No education history added.</p>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    {(displayProfile.certificates || []).map((cert: any) => {
+                      const isPdf = cert.credentialUrl?.toLowerCase().endsWith('.pdf');
+                      const isImage = cert.credentialUrl?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                      
+                      return (
+                        <a 
+                          key={cert.id} 
+                          href={cert.credentialUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 bg-accent/10 hover:border-primary/30 transition-all flex flex-col"
+                        >
+                          {isImage ? (
+                            <img 
+                              src={cert.credentialUrl} 
+                              alt={cert.title} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="flex-1 flex items-center justify-center bg-accent/20">
+                              {isPdf ? (
+                                <div className="flex flex-col items-center gap-2">
+                                  <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                                    <FileText className="w-5 h-5 text-red-500" />
+                                  </div>
+                                  <span className="text-[10px] font-black uppercase text-red-500/60">PDF</span>
+                                </div>
+                              ) : (
+                                <Award className="h-8 w-8 text-primary/40" />
+                              )}
+                            </div>
+                          )}
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-2 translate-y-full group-hover:translate-y-0 transition-transform">
+                            <p className="text-[10px] font-bold truncate text-foreground leading-tight">
+                              {cert.title || cert.name}
+                            </p>
+                            <p className="text-[8px] text-muted-foreground truncate opacity-80">
+                              {cert.issuingOrganization || "Verified"}
+                            </p>
+                          </div>
+                          {!isImage && (
+                             <div className="p-2 mt-auto border-t border-border/20 bg-background/50 group-hover:hidden transition-all">
+                                <p className="text-[10px] font-bold truncate text-foreground/80">
+                                  {cert.title || cert.name}
+                                </p>
+                             </div>
+                          )}
+                        </a>
+                      );
+                    })}
+                  </div>
+                  {(displayProfile.certificates || []).length === 0 && (
+                     <p className="text-xs text-muted-foreground italic">No certifications added.</p>
+                  )}
 
-                  {(displayProfile.certificates?.length > 0
-                    ? displayProfile.certificates
-                    : MOCK_PROFILE.certifications
-                  ).map((cert: any) => (
-                    <div key={cert.title || cert.name} className="flex gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-accent flex items-center justify-center shrink-0">
-                        <Award className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="space-y-1 text-sm font-semibold">
-                        <p className="font-bold text-sm leading-tight">
-                          {cert.title || cert.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground font-medium">
-                          {cert.issuingOrganization || cert.issuer}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
 
@@ -596,10 +585,7 @@ export default function FreelancerProfile() {
                   Languages
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {(displayProfile.languages?.length > 0
-                    ? displayProfile.languages
-                    : MOCK_PROFILE.languages
-                  ).map((lang: any) => (
+                  {(displayProfile.languages || []).map((lang: any) => (
                     <Badge
                       key={lang.name || lang}
                       variant="secondary"
@@ -611,29 +597,12 @@ export default function FreelancerProfile() {
                       </span>
                     </Badge>
                   ))}
+                  {(displayProfile.languages || []).length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">No languages added.</p>
+                  )}
                 </div>
               </div>
 
-              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-primary" />
-                  </div>
-                  <h4 className="font-black text-sm uppercase tracking-widest">
-                    Availability
-                  </h4>
-                </div>
-                <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed">
-                  {displayProfile.availability === "AVAILABLE"
-                    ? "Open for new contracts."
-                    : "Less than 30hrs/wk."}{" "}
-                  Typical response time is{" "}
-                  <b>{displayProfile.responseTime || "< 1 hour"}</b>.
-                </p>
-                <Button className="w-full rounded-xl font-bold active:scale-[0.98] transition-transform">
-                  Check Calendar
-                </Button>
-              </div>
             </aside>
           </div>
         </motion.div>
