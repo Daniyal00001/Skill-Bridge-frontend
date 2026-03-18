@@ -187,7 +187,7 @@ export const ProjectCardGrid = ({
                 )}
               >
                 {isSaved ? (
-                  <BookmarkCheck className="w-3.5 h-3.5" />
+                  <BookmarkCheck className="w-3.5 h-3.5 fill-current" />
                 ) : (
                   <Bookmark className="w-3.5 h-3.5" />
                 )}

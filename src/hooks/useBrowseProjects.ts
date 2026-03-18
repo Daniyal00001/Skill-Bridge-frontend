@@ -46,6 +46,7 @@ export interface ScoredProject {
     totalHires?: number;
     hireRate?: number;
   };
+  isSaved?: boolean;
   locationObj?: { name: string };
 }
 
@@ -129,11 +130,24 @@ export function useBrowseProjects() {
     cursorRef.current = undefined;
     try {
       const res = await api.get(`/browse/projects?${buildParams()}`);
-      setProjects(res.data.projects);
+      const projects = res.data.projects as ScoredProject[];
+      setProjects(projects);
       setSections(res.data.sections);
       setTotal(res.data.total);
       setHasMore(res.data.hasMore);
       cursorRef.current = res.data.cursor;
+
+      // Sync savedIds from backend results
+      const newlySaved = new Set<string>();
+      projects.forEach(p => { if (p.isSaved) newlySaved.add(p.id); });
+      // Also check sections
+      const sections = res.data.sections as BrowseSections;
+      if (sections) {
+        Object.values(sections).forEach((sectionProjects: ScoredProject[]) => {
+          sectionProjects.forEach(p => { if (p.isSaved) newlySaved.add(p.id); });
+        });
+      }
+      setSavedIds(newlySaved);
     } catch (err) {
       console.error("[Browse] Fetch failed:", err);
     } finally {
@@ -150,9 +164,17 @@ export function useBrowseProjects() {
         `/browse/projects?${buildParams(cursorRef.current)}`
       );
       // APPEND to existing list — not replace
-      setProjects((prev) => [...prev, ...res.data.projects]);
+      const newProjects = res.data.projects as ScoredProject[];
+      setProjects((prev) => [...prev, ...newProjects]);
       setHasMore(res.data.hasMore);
       cursorRef.current = res.data.cursor;
+
+      // Sync savedIds from new projects
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        newProjects.forEach(p => { if (p.isSaved) next.add(p.id); });
+        return next;
+      });
     } catch (err) {
       console.error("[Browse] Load more failed:", err);
     } finally {

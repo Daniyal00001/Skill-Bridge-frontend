@@ -152,7 +152,7 @@ export const ProjectCardList = ({
               )}
             >
               {isSaved ? (
-                <BookmarkCheck className="w-4 h-4" />
+                <BookmarkCheck className="w-4 h-4 fill-current" />
               ) : (
                 <Bookmark className="w-4 h-4" />
               )}

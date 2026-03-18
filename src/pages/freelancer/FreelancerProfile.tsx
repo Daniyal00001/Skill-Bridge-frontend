@@ -661,7 +661,10 @@ export default function FreelancerProfile() {
       {!isLoading && profile && (
         <FreelancerOnboardingModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            fetchProfile();
+          }}
           onComplete={() => fetchProfile()} // refresh profile after onboarding completion
           profile={profile}
         />

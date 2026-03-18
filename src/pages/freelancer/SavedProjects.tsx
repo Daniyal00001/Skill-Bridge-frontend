@@ -65,7 +65,7 @@ export default function SavedProjects() {
           height: 500,
           borderRadius: "50%",
           transform: "translate(30%, -30%)",
-          background: "radial-gradient(ellipse at center, rgba(168,85,247,0.08) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse at center, rgba(59,130,246,0.08) 0%, transparent 70%)",
         }}
       />
 
@@ -73,7 +73,7 @@ export default function SavedProjects() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-purple-500 mb-1">
+            <div className="flex items-center gap-2 text-blue-500 mb-1">
               <Heart className="w-4 h-4 fill-current" />
               <span className="text-[10px] font-bold uppercase tracking-widest">Personal Bookmarks</span>
             </div>
@@ -99,7 +99,7 @@ export default function SavedProjects() {
                 size="icon"
                 className={cn(
                   "h-8 w-8 rounded-lg transition-all",
-                  view === "grid" ? "bg-white shadow-sm text-purple-500" : "text-slate-400 hover:text-slate-600"
+                  view === "grid" ? "bg-white shadow-sm text-blue-500" : "text-slate-400 hover:text-slate-600"
                 )}
                 onClick={() => setView("grid")}
               >
@@ -110,7 +110,7 @@ export default function SavedProjects() {
                 size="icon"
                 className={cn(
                   "h-8 w-8 rounded-lg transition-all",
-                  view === "list" ? "bg-white shadow-sm text-purple-500" : "text-slate-400 hover:text-slate-600"
+                  view === "list" ? "bg-white shadow-sm text-blue-500" : "text-slate-400 hover:text-slate-600"
                 )}
                 onClick={() => setView("list")}
               >
@@ -159,7 +159,7 @@ export default function SavedProjects() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-24 bg-white/50 backdrop-blur-md rounded-3xl border border-dashed border-slate-200 text-center">
-            <div className="w-20 h-20 bg-purple-50 rounded-full flex items-center justify-center mb-6 text-purple-300">
+            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 text-blue-300">
               <Bookmark className="w-10 h-10" />
             </div>
             <h3 className="text-xl font-bold text-slate-800">No saved projects yet</h3>
@@ -167,7 +167,7 @@ export default function SavedProjects() {
               Bookmark projects you're interested in while browsing to keep track of them here.
             </p>
             <Link to="/freelancer/browse" className="mt-8">
-              <Button className="rounded-xl bg-purple-500 hover:bg-purple-600 text-white px-8 gap-2">
+              <Button className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white px-8 gap-2">
                 <Sparkles className="w-4 h-4" />
                 Start Browsing
               </Button>
