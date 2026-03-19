@@ -28,7 +28,10 @@ import {
   Loader2,
   CheckCircle2,
   Briefcase,
-  Calendar
+  Calendar,
+  UploadCloud,
+  FileText,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -44,6 +47,7 @@ export default function FreelancerSubmitProposal() {
   const [bid, setBid] = useState<number>(0);
   const [deliveryDays, setDeliveryDays] = useState("30");
   const [coverLetter, setCoverLetter] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   
   const [tokenInfo, setTokenInfo] = useState<{
@@ -126,10 +130,19 @@ export default function FreelancerSubmitProposal() {
     }
     setSubmitting(true);
     try {
-      await api.post(`/proposals/project/${projectId}`, {
-        bidAmount: bid,
-        deliveryDays: parseInt(deliveryDays),
-        coverLetter,
+      const formData = new FormData();
+      formData.append("bidAmount", String(bid));
+      formData.append("deliveryDays", String(deliveryDays));
+      formData.append("coverLetter", coverLetter);
+      
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      await api.post(`/proposals/project/${projectId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       toast.success("Proposal submitted! 🎉", {
         description: `Your $${bid.toLocaleString()} bid is live. ${tokenInfo?.tokenCost || 0} SkillTokens deducted.`,
@@ -304,6 +317,96 @@ export default function FreelancerSubmitProposal() {
                         <AlertCircle className="w-3 h-3" />
                         Please write at least 50 characters to submit a competitive proposal.
                       </p>
+                    )}
+                  </div>
+
+                  <Separator className="bg-border/40" />
+
+                  {/* Attachments */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
+                      <div className="w-1 h-6 bg-primary rounded-full" /> Attachments
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-auto bg-muted/50 px-3 py-1 rounded-full">
+                        Optional • Max 5 files
+                      </span>
+                    </h3>
+                    
+                    <div className="border-2 border-dashed border-border/40 rounded-[2rem] p-10 text-center hover:bg-primary/5 transition-all group relative overflow-hidden">
+                      <input
+                        type="file"
+                        multiple
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        onChange={(e) => {
+                          if (!e.target.files) return;
+                          const ALLOWED = ["image/jpeg", "image/png", "application/pdf"];
+                          const selected = Array.from(e.target.files);
+                          
+                          const valid = selected.filter((f) => ALLOWED.includes(f.type));
+                          const invalid = selected.filter((f) => !ALLOWED.includes(f.type));
+                          
+                          if (invalid.length > 0) {
+                            toast.error(`${invalid.length} file(s) skipped`, {
+                              description: "Only JPG, PNG and PDF are allowed.",
+                            });
+                          }
+                          
+                          if (files.length + valid.length > 5) {
+                            toast.warning("Limit reached", {
+                              description: "You can only attach up to 5 files.",
+                            });
+                            return;
+                          }
+                          
+                          if (valid.length > 0) {
+                            setFiles([...files, ...valid]);
+                          }
+                          e.target.value = "";
+                        }}
+                      />
+                      <div className="space-y-4">
+                        <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                          <UploadCloud className="w-8 h-8 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-base font-black text-foreground">
+                            Click or drag to upload documents
+                          </p>
+                          <p className="text-xs text-muted-foreground font-medium mt-1">
+                            Support for PDF, JPG, PNG (Max 10MB per file)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {files.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {files.map((file, i) => (
+                          <div
+                            key={i}
+                            className="bg-background/50 border border-border/40 p-4 rounded-2xl flex items-center gap-4 group animate-in zoom-in-95 duration-200"
+                          >
+                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+                              <FileText className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-black truncate">{file.name}</p>
+                              <p className="text-[10px] text-muted-foreground font-medium">
+                                {(file.size / (1024 * 1024)).toFixed(2)} MB
+                              </p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                              onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
 

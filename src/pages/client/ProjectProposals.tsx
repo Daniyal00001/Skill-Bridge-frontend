@@ -22,6 +22,7 @@ import {
   Briefcase,
   Award,
   TrendingUp,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -496,6 +497,48 @@ const ProposalCard = ({
                 </>
               )}
             </button>
+          </div>
+        )}
+
+        {/* Attachments */}
+        {proposal.attachments && proposal.attachments.length > 0 && (
+          <div className="space-y-3">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+              <FileText className="w-3 h-3" /> Attachments ({proposal.attachments.length})
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {proposal.attachments.map((url: string, i: number) => {
+                const isImage = url.match(/\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i);
+                return (
+                  <a
+                    key={i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative flex flex-col items-center gap-2 p-2 rounded-xl bg-muted/30 border border-border/40 hover:bg-primary/5 hover:border-primary/20 transition-all overflow-hidden"
+                  >
+                    {isImage ? (
+                      <div className="w-20 h-14 rounded-lg overflow-hidden border border-border/20 bg-background">
+                        <img 
+                          src={url} 
+                          alt="attachment" 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-20 h-14 rounded-lg bg-background flex items-center justify-center border border-border/20">
+                        <FileText className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                    )}
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-primary/90 text-white p-1 rounded-md shadow-sm">
+                        <ExternalLink className="w-2 h-2" />
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
           </div>
         )}
 

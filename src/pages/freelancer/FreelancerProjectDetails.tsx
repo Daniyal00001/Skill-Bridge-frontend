@@ -168,10 +168,10 @@ export default function FreelancerProjectDetails() {
                     Posted {new Date(project.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <span>{project._count?.proposals || 0} proposals</span>
-                </div>
+                </div> */}
                 {project.budget && (
                   <div className="flex items-center gap-2">
                     <DollarSign className="w-4 h-4 text-emerald-500" />
