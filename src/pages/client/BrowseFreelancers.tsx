@@ -170,7 +170,7 @@ const BrowseFreelancersPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
             Browse Freelancers
@@ -182,7 +182,7 @@ const BrowseFreelancersPage = () => {
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Simplified Sidebar Filters */}
-          <aside className="w-full lg:w-64 shrink-0 space-y-6">
+          <aside className="w-full lg:w-64 shrink-0 space-y-6 min-w-0 max-w-full">
             <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="flex items-center gap-2 font-bold text-sm text-slate-900">
@@ -332,7 +332,7 @@ const BrowseFreelancersPage = () => {
           </aside>
 
           {/* Main Feed */}
-          <main className="flex-1 space-y-6">
+          <main className="flex-1 space-y-6 min-w-0">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-slate-500">
                 Found{" "}
