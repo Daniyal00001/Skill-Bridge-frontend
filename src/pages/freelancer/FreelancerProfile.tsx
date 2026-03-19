@@ -188,9 +188,8 @@ export default function FreelancerProfile() {
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                     {displayProfile.fullName ||
-                      (displayProfile.user
-                        ? `${displayProfile.user.firstName} ${displayProfile.user.lastName}`
-                        : "Unnamed Freelancer")}
+                      displayProfile.user?.name ||
+                      "Unnamed Freelancer"}
                   </h1>
                   <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
                     Top Rated
@@ -285,11 +284,11 @@ export default function FreelancerProfile() {
             {/* MAIN CONTENT AREA */}
             <div className="lg:col-span-8 space-y-12">
               {/* DESCRIPTION SECTION */}
-              <section className="space-y-4">
+              <section className="space-y-4 max-w-full overflow-hidden">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
                   Overview
                 </h3>
-                <p className="text-lg text-muted-foreground leading-relaxed font-medium">
+                <p className="text-lg text-muted-foreground leading-relaxed font-medium break-words whitespace-pre-wrap max-w-full">
                   {displayProfile.bio || "No overview provided."}
                 </p>
               </section>
