@@ -36,6 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 
 export default function FreelancerSubmitProposal() {
   const { projectId } = useParams();
@@ -50,6 +51,14 @@ export default function FreelancerSubmitProposal() {
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   
+  const tempDiv = typeof document !== 'undefined' ? document.createElement("div") : null;
+  const getCoverLetterTextLength = (html: string) => {
+    if (!tempDiv) return 0;
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent?.length || 0;
+  };
+  const coverLetterTextLength = getCoverLetterTextLength(coverLetter);
+
   const [tokenInfo, setTokenInfo] = useState<{
     tokenCost: number;
     currentBalance: number;
@@ -298,26 +307,42 @@ export default function FreelancerSubmitProposal() {
                       <span
                         className={cn(
                           "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full",
-                          coverLetter.length < 50 
+                          coverLetterTextLength < 50 
                             ? "bg-amber-500/10 text-amber-500" 
                             : "bg-emerald-500/10 text-emerald-500",
                         )}
                       >
-                        {coverLetter.length} / 1000
+                        {coverLetterTextLength} / 2000
                       </span>
                     </div>
-                    <Textarea
-                      placeholder="Introduce yourself, explain why you're a great fit for this project, and outline your approach..."
-                      className="min-h-[250px] bg-background/50 border-border/40 rounded-[2rem] p-6 font-medium text-[15px] leading-relaxed resize-y hover:border-primary/30 transition-colors focus:border-primary"
+                    <RichTextEditor
                       value={coverLetter}
-                      onChange={(e) => setCoverLetter(e.target.value.slice(0, 1000))}
+                      onChange={(value) => {
+                        // For validation, we might want to check text length
+                        const tempDiv = document.createElement("div");
+                        tempDiv.innerHTML = value;
+                        const textLength = tempDiv.textContent?.length || 0;
+                        
+                        if (textLength <= 2000) {
+                          setCoverLetter(value);
+                        }
+                      }}
+                      placeholder="Introduce yourself, explain why you're a great fit for this project, and outline your approach..."
                     />
-                    {coverLetter.length < 50 && coverLetter.length > 0 && (
-                      <p className="text-xs font-bold text-amber-500 px-2 flex items-center gap-2">
-                        <AlertCircle className="w-3 h-3" />
-                        Please write at least 50 characters to submit a competitive proposal.
-                      </p>
-                    )}
+                    {(() => {
+                      const tempDiv = document.createElement("div");
+                      tempDiv.innerHTML = coverLetter;
+                      const textLength = tempDiv.textContent?.length || 0;
+                      if (textLength < 50 && textLength > 0) {
+                        return (
+                          <p className="text-xs font-bold text-amber-500 px-2 flex items-center gap-2">
+                            <AlertCircle className="w-3 h-3" />
+                            Please write at least 50 characters to submit a competitive proposal.
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
 
                   <Separator className="bg-border/40" />
@@ -414,7 +439,7 @@ export default function FreelancerSubmitProposal() {
                   <div className="pt-6">
                     <Button
                       type="submit"
-                      disabled={submitting || coverLetter.length < 50 || !canAfford || !bid}
+                      disabled={submitting || coverLetterTextLength < 50 || !canAfford || !bid}
                       className="w-full h-16 rounded-2xl text-lg font-black bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] shadow-xl hover:shadow-primary/25 transition-all text-white disabled:opacity-50 disabled:hover:scale-100 disabled:shadow-none"
                     >
                       {submitting ? (

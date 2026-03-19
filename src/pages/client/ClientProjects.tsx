@@ -56,6 +56,7 @@ const ClientProjectsPage = () => {
   const [activeTab, setActiveTab] = useState("active");
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // Fetch client's own projects
   useEffect(() => {

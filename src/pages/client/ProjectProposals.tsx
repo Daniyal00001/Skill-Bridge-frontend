@@ -475,14 +475,13 @@ const ProposalCard = ({
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
               Cover Letter
             </p>
-            <p
+            <div
               className={cn(
-                "text-sm text-muted-foreground leading-relaxed transition-all duration-300",
+                "text-sm text-muted-foreground leading-relaxed transition-all duration-300 prose prose-sm dark:prose-invert max-w-none prose-p:my-0 prose-headings:my-1",
                 !isExpanded && "line-clamp-3",
               )}
-            >
-              {proposal.coverLetter}
-            </p>
+              dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
+            />
             <button
               onClick={onToggleExpand}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
