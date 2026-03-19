@@ -122,7 +122,7 @@ export default function FreelancerProjectDetails() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-[1400px] mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8">
+      <div className="max-w-[1400px] w-full mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8 min-w-0">
         {/* Breadcrumb */}
         <div className="mb-8">
           <Button
@@ -158,7 +158,7 @@ export default function FreelancerProjectDetails() {
                   </Badge>
                 )}
               </div>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.1]">
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.1] break-words">
                 {project.title}
               </h1>
               <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-muted-foreground">
@@ -243,11 +243,11 @@ export default function FreelancerProjectDetails() {
                   Project
                 </h3>
                 {project.shortDesc && (
-                  <p className="text-lg text-foreground/90 font-bold mb-4">
+                  <p className="text-lg text-foreground/90 font-bold mb-4 break-words">
                     {project.shortDesc}
                   </p>
                 )}
-                <p className="text-muted-foreground text-lg leading-relaxed font-medium whitespace-pre-line">
+                <p className="text-muted-foreground text-lg leading-relaxed font-medium whitespace-pre-line break-words">
                   {project.description}
                 </p>
               </section>
@@ -258,7 +258,7 @@ export default function FreelancerProjectDetails() {
                     <div className="w-1 h-6 bg-primary rounded-full" /> What We
                     Need
                   </h3>
-                  <div className="bg-muted/30 p-8 rounded-[2rem] border border-border/40 font-medium text-lg leading-loose text-foreground/80 whitespace-pre-line">
+                  <div className="bg-muted/30 p-8 rounded-[2rem] border border-border/40 font-medium text-lg leading-loose text-foreground/80 whitespace-pre-line break-words">
                     {project.requirements}
                   </div>
                 </section>

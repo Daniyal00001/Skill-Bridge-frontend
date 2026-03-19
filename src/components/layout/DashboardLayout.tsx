@@ -255,7 +255,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex w-full overflow-x-hidden">
       {/* Sidebar */}
       <aside
         className={cn(
@@ -314,8 +314,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                               ? "bg-primary/8 text-primary font-semibold"
                               : "bg-primary/8 text-primary font-semibold border-primary"
                             : sidebarCollapsed
-                              ? "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground"
-                              : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
+                              ? "text-muted-foreground/80 hover:bg-primary/5 hover:text-foreground"
+                              : "text-muted-foreground/80 hover:bg-primary/5 hover:text-foreground border-transparent",
                         )}
                       >
                         <item.icon
@@ -393,7 +393,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             : "gap-3 px-3 py-2",
                           isActive
                             ? "bg-primary/8 text-primary font-semibold border-primary"
-                            : "text-muted-foreground/80 hover:bg-accent/50 hover:text-foreground border-transparent",
+                            : "text-muted-foreground/80 hover:bg-primary/5 hover:text-foreground border-transparent",
                         )}
                       >
                         <item.icon
@@ -472,7 +472,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <div
         className={cn(
-          "flex-1 transition-all duration-300 ease-in-out",
+          "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out",
           sidebarCollapsed ? "ml-16" : "ml-60",
         )}
       >
@@ -598,7 +598,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-6">{children}</main>
+        <main className="p-6 flex-1 min-w-0">{children}</main>
       </div>
     </div>
   );

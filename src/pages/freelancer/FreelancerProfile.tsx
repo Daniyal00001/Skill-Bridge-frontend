@@ -323,7 +323,7 @@ export default function FreelancerProfile() {
                 ].map((stat) => (
                   <div
                     key={stat.label}
-                    className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-accent/50 transition-colors"
+                    className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-primary/5 transition-colors"
                   >
                     <stat.icon className={cn("w-6 h-6", stat.color)} />
                     <div>
@@ -457,7 +457,7 @@ export default function FreelancerProfile() {
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                           ) : (
-                            <div className="flex-1 flex items-center justify-center bg-accent/20">
+                            <div className="flex-1 flex items-center justify-center bg-primary/5">
                               {isPdf ? (
                                 <div className="flex flex-col items-center gap-2">
                                   <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
@@ -544,7 +544,7 @@ export default function FreelancerProfile() {
                     </div>
                   ))}
                   {(displayProfile.workHistory || []).length === 0 && (
-                    <div className="p-12 border border-dashed rounded-[3rem] text-center space-y-2 bg-accent/5">
+                    <div className="p-12 border border-dashed rounded-[3rem] text-center space-y-2 bg-primary/5">
                       <p className="font-bold">No work history yet #</p>
                       <p className="text-xs text-muted-foreground tracking-widest uppercase">
                         Verified projects will appear here
