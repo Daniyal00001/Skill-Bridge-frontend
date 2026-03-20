@@ -115,6 +115,33 @@ const MyProposalsPage = () => {
             Rejected
           </Badge>
         );
+      case "CANCELLED":
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-gray-500/15 text-gray-700 hover:bg-gray-500/25 border-gray-200"
+          >
+            Project Deleted
+          </Badge>
+        );
+      case "WITHDRAWN":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-orange-500/15 text-orange-700 hover:bg-orange-500/25 border-orange-200"
+          >
+            Withdrawn
+          </Badge>
+        );
+      case "SHORTLISTED":
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-blue-500/15 text-blue-700 hover:bg-blue-500/25 border-blue-200"
+          >
+            Shortlisted
+          </Badge>
+        );
       default:
         return (
           <Badge
@@ -185,6 +212,7 @@ const MyProposalsPage = () => {
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="accepted">Accepted</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="withdrawn">Withdrawn</SelectItem>
               </SelectContent>
             </Select>
           </div>
