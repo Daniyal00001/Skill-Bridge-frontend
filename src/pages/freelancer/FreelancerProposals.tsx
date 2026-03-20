@@ -568,13 +568,48 @@ function ProposalCard({
                     <p className="text-sm text-foreground/80">
                       Please review the suggested milestones and accept them to proceed, or withdraw your proposal.
                     </p>
-                    <div className="mt-4 space-y-2">
-                      {proposal.clientRequestedMilestones?.map((m: any, i: number) => (
-                        <div key={i} className="flex justify-between items-center text-sm bg-background/50 p-2 rounded-lg border border-border/50">
-                          <span>{i + 1}. {m.title}</span>
-                          <span className="font-bold text-primary">${m.amount}</span>
+
+                    {/* Comparison Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      {/* Original Side */}
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase">Your Original Plan</p>
+                        <div className="p-3 rounded-xl bg-background/30 border border-border/40 space-y-2">
+                          <p className="text-xs font-bold flex justify-between">
+                            Revisions: <span>{proposal.generalRevisionLimit === -1 ? "Unlimited" : proposal.generalRevisionLimit || 3}</span>
+                          </p>
+                          <div className="space-y-1">
+                            {(!proposal.proposalMilestones || proposal.proposalMilestones.length === 0) ? (
+                              <p className="text-[10px] italic text-muted-foreground">No milestones defined</p>
+                            ) : (
+                              proposal.proposalMilestones.map((m: any, idx: number) => (
+                                <div key={idx} className="flex justify-between text-[10px]">
+                                  <span className="truncate max-w-[100px]">{m.title}</span>
+                                  <span className="font-bold">${m.amount}</span>
+                                </div>
+                              ))
+                            )}
+                          </div>
                         </div>
-                      ))}
+                      </div>
+
+                      {/* Client Side */}
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-blue-500 uppercase">Client's Request</p>
+                        <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-2">
+                          <p className="text-xs font-bold flex justify-between text-blue-700">
+                            Revisions: <span>{proposal.clientRequestedMilestones?.[0]?.allowedRevisions === -1 ? "Unlimited" : (proposal.clientRequestedMilestones?.[0]?.allowedRevisions || proposal.generalRevisionLimit || 3)}</span>
+                          </p>
+                          <div className="space-y-1">
+                            {proposal.clientRequestedMilestones?.map((m: any, idx: number) => (
+                              <div key={idx} className="flex justify-between text-[10px] text-blue-600">
+                                <span className="truncate max-w-[100px] font-bold">{m.title}</span>
+                                <span className="font-bold">${m.amount}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

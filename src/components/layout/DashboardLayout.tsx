@@ -184,11 +184,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 label: "My Contracts",
                 href: "/freelancer/contracts",
               },
-              {
+              /* {
                 icon: Briefcase,
                 label: "Active Projects",
                 href: "/freelancer/projects",
-              },
+              }, */
             ],
           },
           {

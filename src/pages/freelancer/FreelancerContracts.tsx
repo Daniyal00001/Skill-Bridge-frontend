@@ -99,8 +99,8 @@ const ContractCard = ({ contract, role }: { contract: any; role: "CLIENT" | "FRE
       <CardContent className="p-0">
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-start gap-4">
-            <Link to={detailLink} className="group-hover:text-primary transition-colors">
-              <h3 className="font-black text-lg line-clamp-2 leading-tight">
+            <Link to={detailLink} className="group-hover:text-primary transition-colors flex-1 min-w-0">
+              <h3 className="font-black text-lg line-clamp-2 leading-tight break-words">
                 {contract.title}
               </h3>
             </Link>

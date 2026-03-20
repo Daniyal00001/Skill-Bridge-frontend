@@ -149,37 +149,7 @@ const ProjectProposalsPage = () => {
     });
   };
 
-  // Opens the milestone modal before hiring
-  const openHireModal = (proposal: any) => {
-    const rawMilestones: any[] = getActiveMilestones(proposal);
-    if (rawMilestones.length > 0) {
-      // Freelancer provided milestones — show editable version
-      setMilestoneModal({
-        open: true,
-        proposalId: proposal.id,
-        mode: "edit",
-        purpose: "HIRE", // Set purpose for hiring
-        bidAmount: proposal.bidAmount,
-        milestones: rawMilestones.map((m: any) => ({
-          title: m.title || "",
-          description: m.description || "",
-          amount: String(m.amount || ""),
-          dueDate: m.dueDate ? m.dueDate.substring(0, 10) : "",
-          allowedRevisions: String(m.allowedRevisions || 3),
-        })),
-      });
-    } else {
-      // No milestones — client must define them
-      setMilestoneModal({
-        open: true,
-        proposalId: proposal.id,
-        mode: "setup",
-        purpose: "HIRE", // Set purpose for hiring
-        bidAmount: proposal.bidAmount,
-        milestones: [{ title: "", description: "", amount: "", dueDate: "", allowedRevisions: String(proposal.generalRevisionLimit || 3) }],
-      });
-    }
-  };
+  // The direct hire logic has replaced openHireModal. Missing milestones are now routed to openNegotiationModal.
 
   const confirmAction = async () => {
     const { proposalId, milestones, purpose, bidAmount } = milestoneModal;
@@ -228,45 +198,8 @@ const ProjectProposalsPage = () => {
         });
         const res = await api.get(`/proposals/project/${projectId}`);
         setProposals(res.data.proposals);
-      } else {
-        await api.patch(`/proposals/${proposalId}/status`, {
-          status: "ACCEPTED",
-          clientMilestones: milestones.map((m, i) => ({
-            title: m.title,
-            description: m.description || undefined,
-            amount: Number(m.amount),
-            dueDate: m.dueDate || undefined,
-            allowedRevisions: Number(m.allowedRevisions),
-            order: i,
-          })),
-        });
-        toast.success("Freelancer hired! Contract created with milestones. 🎉");
-        setMilestoneModal({
-          open: false,
-          proposalId: "",
-          mode: "setup",
-          purpose: "HIRE",
-          milestones: [],
-          bidAmount: 0,
-        });
-        const res = await api.get(`/proposals/project/${projectId}`);
-        setProposals(res.data.proposals);
-        // Fetch the contract to navigate to it
-        try {
-          const cRes = await api.get(`/contracts/project/${projectId}`);
-          const contractId = cRes.data.contract?.id;
-          if (contractId) {
-            setTimeout(
-              () => navigate(`/client/contracts/${contractId}`),
-              1200
-            );
-          } else {
-            setTimeout(() => navigate(`/client/projects/${projectId}`), 1200);
-          }
-        } catch {
-          setTimeout(() => navigate(`/client/projects/${projectId}`), 1200);
-        }
       }
+      // purpose: "HIRE" branch has been removed as direct hire takes place without the modal.
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to process request.");
     } finally {
@@ -547,9 +480,9 @@ const ProjectProposalsPage = () => {
                   isExpanded={!!expandedIds[proposal.id]}
                   onToggleExpand={() => toggleExpand(proposal.id)}
                   onHire={
-                    getActiveMilestones(proposal).length > 0
+                    proposal.negotiationStatus === "FREELANCER_ACCEPTED" || (!proposal.negotiationStatus && getActiveMilestones(proposal).length > 0)
                       ? () => handleDirectHire(proposal)
-                      : () => openHireModal(proposal)
+                      : () => openNegotiationModal(proposal)
                   }
                   onNegotiate={() => openNegotiationModal(proposal)}
                   onShortlist={handleShortlist}
@@ -582,17 +515,17 @@ const ProjectProposalsPage = () => {
             <DialogTitle className="font-black text-xl flex items-center gap-2">
               <ListChecks className="w-5 h-5 text-primary" />
               {milestoneModal.purpose === "NEGOTIATE"
-                ? "Suggest Milestone Changes"
-                : milestoneModal.mode === "edit"
-                ? "Review & Edit Milestone Plan"
-                : "Define Milestone Plan"}
+                ? milestoneModal.mode === "setup"
+                  ? "Define & Propose Milestone Plan"
+                  : "Suggest Milestone Changes"
+                : "Review & Edit Milestone Plan"}
             </DialogTitle>
             <DialogDescription>
               {milestoneModal.purpose === "NEGOTIATE"
-                ? "Suggest changes to the freelancer's milestones. If you submit changes, the freelancer must review and approve them before the contract can begin."
-                : milestoneModal.mode === "edit"
-                ? "The freelancer proposed these milestones. You can edit titles, amounts, and revision limits before finalizing the contract."
-                : "No milestones were provided. Define the payment plan and revision limits before creating the contract."}
+                ? milestoneModal.mode === "setup"
+                  ? "No milestones were provided. Define the payment plan and revision limits, then send it to the freelancer for approval."
+                  : "Suggest changes to the freelancer's milestones. If you submit changes, the freelancer must review and approve them before the contract can begin."
+                : "The freelancer proposed these milestones. You can edit titles, amounts, and revision limits before finalizing the contract."}
             </DialogDescription>
           </DialogHeader>
 
@@ -786,7 +719,11 @@ const ProjectProposalsPage = () => {
                 ) : (
                   <CheckCircle2 className="w-4 h-4" />
                 )}
-                {milestoneModal.purpose === "NEGOTIATE" ? "Send Edit Request" : "Confirm & Create Contract"}
+                {milestoneModal.purpose === "NEGOTIATE" 
+                  ? milestoneModal.mode === "setup" 
+                    ? "Send Plan for Approval" 
+                    : "Send Edit Request" 
+                  : "Confirm & Create Contract"}
               </Button>
             </div>
           </div>
@@ -909,7 +846,7 @@ const ProposalCard = ({
                 {hasMilestones && (
                   <div className="flex items-center gap-1 text-xs font-bold text-primary">
                     <ListChecks className="w-3 h-3" />{" "}
-                    {proposal.proposalMilestones.length} milestones
+                    {activeMilestones.length} milestones
                   </div>
                 )}
               </div>
@@ -922,6 +859,38 @@ const ProposalCard = ({
             {cfg.label}
           </Badge>
         </div>
+
+        {/* Negotiation Comparison Banner */}
+        {(proposal.negotiationStatus === "CLIENT_PROPOSED" || proposal.negotiationStatus === "FREELANCER_ACCEPTED") && (
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 space-y-3">
+             <div className="flex items-center gap-2 text-primary">
+                <ListChecks className="w-4 h-4" />
+                <h4 className="text-sm font-black uppercase tracking-wider">Negotiation Summary</h4>
+             </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Freelancer's Original</p>
+                  <p className="text-xs font-bold">Revisions: <span className="text-muted-foreground">{proposal.generalRevisionLimit === -1 ? "Unlimited" : (proposal.generalRevisionLimit || 3)}</span></p>
+                  <p className="text-[10px] text-muted-foreground">Milestones: {proposal.proposalMilestones?.length || 0}</p>
+                </div>
+                <div className="space-y-1 border-l border-border/40 pl-4">
+                  <p className="text-[10px] font-black text-primary uppercase">{proposal.negotiationStatus === "FREELANCER_ACCEPTED" ? "Agreed Plan" : "Your Request"}</p>
+                  <p className="text-xs font-bold">Revisions: <span className="text-primary">{proposal.clientRequestedMilestones?.[0]?.allowedRevisions === -1 ? "Unlimited" : (proposal.clientRequestedMilestones?.[0]?.allowedRevisions || proposal.generalRevisionLimit || 3)}</span></p>
+                  <p className="text-[10px] text-primary">Milestones: {proposal.clientRequestedMilestones?.length || 0}</p>
+                </div>
+             </div>
+             {proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
+                <p className="text-[10px] italic text-muted-foreground pt-1 border-t border-border/20">
+                  Waiting for the freelancer to review and accept these changes.
+                </p>
+             ) : (
+                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 pt-1 border-t border-emerald-500/20 flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {freelancer?.name || "The freelancer"} has accepted your changes! You can now hire them to start the contract.
+                </p>
+             )}
+          </div>
+        )}
 
         {/* Bid Details */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-muted/30 border border-border/40">
@@ -981,7 +950,7 @@ const ProposalCard = ({
               className="flex items-center gap-2 text-sm font-black text-primary hover:underline"
             >
               <ListChecks className="w-4 h-4" />
-              Milestone Plan ({proposal.proposalMilestones.length} milestones)
+              Milestone Plan ({activeMilestones.length} milestones)
               {milestoneExpanded ? (
                 <ChevronUp className="w-3.5 h-3.5" />
               ) : (
@@ -1125,7 +1094,7 @@ const ProposalCard = ({
             <Button
               className="flex-1 h-12 rounded-xl font-black text-base gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
               onClick={onHire}
-              disabled={isProcessing}
+              disabled={isProcessing || proposal.negotiationStatus === "CLIENT_PROPOSED"}
             >
               {isProcessing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -1134,9 +1103,13 @@ const ProposalCard = ({
               )}
               {isProcessing
                 ? "Processing..."
+                : proposal.negotiationStatus === "CLIENT_PROPOSED"
+                ? "Waiting for Freelancer..."
+                : proposal.negotiationStatus === "FREELANCER_ACCEPTED"
+                ? "Accept & Hire Freelancer"
                 : hasMilestones
                 ? "Hire Freelancer"
-                : `Setup Plan & Hire Freelancer →`}
+                : "Setup Plan & Hire Freelancer →"}
             </Button>
 
             {status === "PENDING" && (
