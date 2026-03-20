@@ -135,6 +135,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 href: "/client/messages",
                 badge: 2,
               },
+              { icon: Briefcase, label: "My Contracts", href: "/client/contracts" },
               { icon: Star, label: "Reviews", href: "/client/reviews" },
             ],
           },
@@ -177,6 +178,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 icon: FileText,
                 label: "My Proposals",
                 href: "/freelancer/proposals",
+              },
+              {
+                icon: Briefcase,
+                label: "My Contracts",
+                href: "/freelancer/contracts",
               },
               {
                 icon: Briefcase,

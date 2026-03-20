@@ -34,6 +34,7 @@ import {
   DollarSign,
   Clock,
   Loader2,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -264,7 +265,20 @@ const MyProposalsPage = () => {
                           : "—"}
                       </TableCell>
                       <TableCell>{getStatusBadge(proposal.status)}</TableCell>
-                      <TableCell className="text-right pr-6">
+                      <TableCell className="text-right pr-6 space-x-2">
+                        {proposal.status === "ACCEPTED" && proposal.contract?.id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-200"
+                          >
+                            <Link to={`/client/contracts/${proposal.contract.id}`}>
+                              View Contract{" "}
+                              <FileText className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"

@@ -38,6 +38,7 @@ import {
   ChevronUp,
   Loader2,
   Zap,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -86,6 +87,22 @@ export default function FreelancerProposals() {
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Failed to withdraw proposal",
+      );
+    }
+  };
+
+  const handleAcceptChanges = async (proposalId: string) => {
+    try {
+      await api.post(`/proposals/${proposalId}/accept-changes`);
+      setProposals((prev) =>
+        prev.map((p) =>
+          p.id === proposalId ? { ...p, negotiationStatus: "FREELANCER_ACCEPTED" } : p
+        )
+      );
+      toast.success("Milestone changes accepted! Waiting for client to hire you.");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || "Failed to accept changes",
       );
     }
   };
@@ -264,6 +281,7 @@ export default function FreelancerProposals() {
                   isExpanded={!!expandedLetters[proposal.id]}
                   onToggleExpand={() => toggleExpand(proposal.id)}
                   onWithdraw={handleWithdraw}
+                  onAcceptChanges={handleAcceptChanges}
                 />
               ))
             ) : (
@@ -331,11 +349,13 @@ function ProposalCard({
   isExpanded,
   onToggleExpand,
   onWithdraw,
+  onAcceptChanges,
 }: {
   proposal: any;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onWithdraw: (id: string) => void;
+  onAcceptChanges: (id: string) => void;
 }) {
   const statusConfig: Record<
     string,
@@ -535,53 +555,116 @@ function ProposalCard({
         {/* Status-specific sections */}
         <div className="pt-4 border-t border-border/50">
           {(statusKey === "PENDING" || statusKey === "SHORTLISTED") && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div
-                    className={cn(
-                      "w-2 h-2 rounded-full animate-pulse",
-                      statusKey === "SHORTLISTED"
-                        ? "bg-blue-500"
-                        : "bg-yellow-500",
-                    )}
-                  />
-                  <div
-                    className={cn(
-                      "absolute inset-0 w-2 h-2 rounded-full animate-ping opacity-75",
-                      statusKey === "SHORTLISTED"
-                        ? "bg-blue-500"
-                        : "bg-yellow-500",
-                    )}
-                  />
+            proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
+             <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
+                    <ListChecks className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-blue-600 dark:text-blue-400">
+                      Client proposed milestone changes!
+                    </h4>
+                    <p className="text-sm text-foreground/80">
+                      Please review the suggested milestones and accept them to proceed, or withdraw your proposal.
+                    </p>
+                    <div className="mt-4 space-y-2">
+                      {proposal.clientRequestedMilestones?.map((m: any, i: number) => (
+                        <div key={i} className="flex justify-between items-center text-sm bg-background/50 p-2 rounded-lg border border-border/50">
+                          <span>{i + 1}. {m.title}</span>
+                          <span className="font-bold text-primary">${m.amount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium">
-                    {statusKey === "SHORTLISTED"
-                      ? "You are shortlisted! ⭐"
-                      : "Awaiting client response"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {proposal.isViewedByClient ? (
-                      <span className="text-green-500 flex items-center gap-1">
-                        Client viewed your proposal{" "}
-                        <CheckCircle className="w-3 h-3" />
-                      </span>
-                    ) : (
-                      "Not yet viewed by client"
-                    )}
-                  </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6"
+                    onClick={() => onAcceptChanges(proposal.id)}
+                  >
+                    Accept Changes
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full px-6 border-destructive/30 hover:bg-destructive/10 text-destructive"
+                    onClick={() => onWithdraw(proposal.id)}
+                  >
+                    Reject & Withdraw
+                  </Button>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-                onClick={() => onWithdraw(proposal.id)}
-              >
-                Withdraw Proposal
-              </Button>
-            </div>
+            ) : proposal.negotiationStatus === "FREELANCER_ACCEPTED" ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 shrink-0">
+                    <CheckCircle className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium">Changes Accepted</p>
+                    <p className="text-xs text-muted-foreground">Waiting for client to finalize the contract.</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                  onClick={() => onWithdraw(proposal.id)}
+                >
+                  Withdraw Proposal
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div
+                      className={cn(
+                        "w-2 h-2 rounded-full animate-pulse",
+                        statusKey === "SHORTLISTED"
+                          ? "bg-blue-500"
+                          : "bg-yellow-500",
+                      )}
+                    />
+                    <div
+                      className={cn(
+                        "absolute inset-0 w-2 h-2 rounded-full animate-ping opacity-75",
+                        statusKey === "SHORTLISTED"
+                          ? "bg-blue-500"
+                          : "bg-yellow-500",
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium">
+                      {statusKey === "SHORTLISTED"
+                        ? "You are shortlisted! ⭐"
+                        : "Awaiting client response"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {proposal.isViewedByClient ? (
+                        <span className="text-green-500 flex items-center gap-1">
+                          Client viewed your proposal{" "}
+                          <CheckCircle className="w-3 h-3" />
+                        </span>
+                      ) : (
+                        "Not yet viewed by client"
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                  onClick={() => onWithdraw(proposal.id)}
+                >
+                  Withdraw Proposal
+                </Button>
+              </div>
+            )
           )}
 
           {statusKey === "ACCEPTED" && (

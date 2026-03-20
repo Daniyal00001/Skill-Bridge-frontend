@@ -31,27 +31,49 @@ import {
   Calendar,
   UploadCloud,
   FileText,
-  X
+  X,
+  Plus,
+  Trash2,
+  ListChecks,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 
+interface MilestoneInput {
+  title: string;
+  description: string;
+  amount: string;
+  dueDate: string;
+  allowedRevisions: string;
+}
+
 export default function FreelancerSubmitProposal() {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  
+
   const [project, setProject] = useState<any>(null);
   const [loadingProject, setLoadingProject] = useState(true);
-  
+
   const [bid, setBid] = useState<number>(0);
   const [deliveryDays, setDeliveryDays] = useState("30");
+  const [generalRevisionLimit, setGeneralRevisionLimit] = useState("3");
   const [coverLetter, setCoverLetter] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  
-  const tempDiv = typeof document !== 'undefined' ? document.createElement("div") : null;
+
+  // Milestone state
+  const [milestonesEnabled, setMilestonesEnabled] = useState(false);
+  const [milestones, setMilestones] = useState<MilestoneInput[]>([
+    { title: "", description: "", amount: "", dueDate: "", allowedRevisions: "3" },
+  ]);
+  const [milestonesSectionOpen, setMilestonesSectionOpen] = useState(false);
+
+  const tempDiv =
+    typeof document !== "undefined" ? document.createElement("div") : null;
   const getCoverLetterTextLength = (html: string) => {
     if (!tempDiv) return 0;
     tempDiv.innerHTML = html;
@@ -83,8 +105,7 @@ export default function FreelancerSubmitProposal() {
         // Check for existing proposal
         const myRes = await api.get("/proposals/my");
         const existing = myRes.data.proposals?.find(
-          (p: any) =>
-            p.project?.id === projectId || p.projectId === projectId,
+          (p: any) => p.project?.id === projectId || p.projectId === projectId,
         );
         if (existing) setAlreadyApplied(true);
       } catch (err) {
@@ -137,13 +158,55 @@ export default function FreelancerSubmitProposal() {
       });
       return;
     }
+
+    // Milestone validation
+    if (milestonesEnabled) {
+      for (const m of milestones) {
+        if (!m.title.trim() || !m.amount) {
+          toast.error("Each milestone needs a title and amount.");
+          return;
+        }
+        if (Number(m.amount) <= 0) {
+          toast.error("Milestone amounts must be greater than 0.");
+          return;
+        }
+      }
+      const milestoneTotal = milestones.reduce(
+        (s, m) => s + Number(m.amount),
+        0,
+      );
+      if (Math.abs(milestoneTotal - bid) > 0.01) {
+        toast.error("Milestone amounts must add up to your bid amount.", {
+          description: `Total milestones: $${milestoneTotal.toFixed(2)} vs Bid: $${bid.toFixed(2)}`,
+        });
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       const formData = new FormData();
       formData.append("bidAmount", String(bid));
       formData.append("deliveryDays", String(deliveryDays));
+      formData.append("generalRevisionLimit", generalRevisionLimit);
       formData.append("coverLetter", coverLetter);
-      
+
+      if (milestonesEnabled) {
+        formData.append(
+          "milestones",
+          JSON.stringify(
+            milestones.map((m, i) => ({
+              title: m.title,
+              description: m.description || undefined,
+              amount: Number(m.amount),
+              dueDate: m.dueDate || undefined,
+              allowedRevisions: Number(m.allowedRevisions),
+              order: i,
+            })),
+          ),
+        );
+      }
+
       files.forEach((file) => {
         formData.append("files", file);
       });
@@ -164,12 +227,44 @@ export default function FreelancerSubmitProposal() {
     }
   };
 
+  const addMilestone = () =>
+    setMilestones((prev) => [
+      ...prev,
+      { title: "", description: "", amount: "", dueDate: "", allowedRevisions: "3" },
+    ]);
+
+  const removeMilestone = (idx: number) =>
+    setMilestones((prev) => prev.filter((_, i) => i !== idx));
+
+  const updateMilestone = (
+    idx: number,
+    field: keyof MilestoneInput,
+    value: string,
+  ) =>
+    setMilestones((prev) =>
+      prev.map((m, i) =>
+        i === idx
+          ? {
+              ...m,
+              [field]:
+                field === "amount"
+                  ? value === ""
+                    ? ""
+                    : String(Math.max(0, Number(value)))
+                  : value,
+            }
+          : m,
+      ),
+    );
+
   if (loadingProject) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh] gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground font-medium">Preparing proposal...</p>
+          <p className="text-muted-foreground font-medium">
+            Preparing proposal...
+          </p>
         </div>
       </DashboardLayout>
     );
@@ -182,7 +277,6 @@ export default function FreelancerSubmitProposal() {
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-        
         {/* Header Section */}
         <div className="flex items-center gap-4 mb-8">
           <Button
@@ -221,18 +315,17 @@ export default function FreelancerSubmitProposal() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
             {/* Left: The Form */}
             <div className="lg:col-span-8 flex flex-col gap-8">
               <Card className="bg-card/40 backdrop-blur-2xl border-border/40 rounded-[2.5rem] shadow-2xl p-8 border-t-8 border-t-primary">
                 <form onSubmit={handleSubmit} className="space-y-10">
-                  
                   {/* Bid Information */}
                   <div className="space-y-6">
                     <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
-                      <div className="w-1 h-6 bg-primary rounded-full" /> Terms & Payment
+                      <div className="w-1 h-6 bg-primary rounded-full" /> Terms
+                      & Payment
                     </h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
@@ -248,7 +341,7 @@ export default function FreelancerSubmitProposal() {
                             className="pl-14 h-16 bg-background/50 border-border/40 rounded-2xl font-black text-xl hover:border-primary/30 transition-colors focus:border-primary"
                           />
                         </div>
-                        
+
                         <div className="bg-muted/30 p-5 rounded-2xl border border-border/40 space-y-3">
                           <div className="flex justify-between text-xs font-bold text-muted-foreground">
                             <span>Platform Fee (10%)</span>
@@ -257,16 +350,21 @@ export default function FreelancerSubmitProposal() {
                           <Separator className="bg-border/20" />
                           <div className="flex justify-between text-base font-black text-foreground">
                             <span>You Receive</span>
-                            <span className="text-emerald-500">${total.toLocaleString()}</span>
+                            <span className="text-emerald-500">
+                              ${total.toLocaleString()}
+                            </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                           Estimated Delivery
                         </Label>
-                        <Select value={deliveryDays} onValueChange={setDeliveryDays}>
+                        <Select
+                          value={deliveryDays}
+                          onValueChange={setDeliveryDays}
+                        >
                           <SelectTrigger className="h-16 px-6 bg-background/50 border-border/40 rounded-2xl font-black text-lg hover:border-primary/30 transition-colors">
                             <SelectValue />
                           </SelectTrigger>
@@ -293,6 +391,37 @@ export default function FreelancerSubmitProposal() {
                           Be realistic. Clients appreciate honest timelines.
                         </p>
                       </div>
+
+                      <div className="space-y-4">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                          Revision Limit (Overall)
+                        </Label>
+                        <Select
+                          value={generalRevisionLimit}
+                          onValueChange={setGeneralRevisionLimit}
+                          disabled={milestonesEnabled}
+                        >
+                          <SelectTrigger className={cn(
+                            "h-16 px-6 bg-background/50 border-border/40 rounded-2xl font-black text-lg hover:border-primary/30 transition-colors",
+                            milestonesEnabled && "opacity-50 cursor-not-allowed bg-muted"
+                          )}>
+                            <SelectValue placeholder="Select revisions" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl border-border/40">
+                            <SelectItem value="1" className="font-bold py-3">1 Revision</SelectItem>
+                            <SelectItem value="2" className="font-bold py-3">2 Revisions</SelectItem>
+                            <SelectItem value="3" className="font-bold py-3">3 Revisions (Standard)</SelectItem>
+                            <SelectItem value="5" className="font-bold py-3">5 Revisions</SelectItem>
+                            <SelectItem value="10" className="font-bold py-3">10 Revisions</SelectItem>
+                            <SelectItem value="-1" className="font-bold py-3">Unlimited Revisions</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground font-medium px-2">
+                          {milestonesEnabled 
+                            ? "Disabled: Milestones have individual revision limits." 
+                            : "Total revisions allowed for this project."}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -302,13 +431,14 @@ export default function FreelancerSubmitProposal() {
                   <div className="space-y-6">
                     <div className="flex justify-between items-center">
                       <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
-                        <div className="w-1 h-6 bg-primary rounded-full" /> Cover Letter
+                        <div className="w-1 h-6 bg-primary rounded-full" />{" "}
+                        Cover Letter
                       </h3>
                       <span
                         className={cn(
                           "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full",
-                          coverLetterTextLength < 50 
-                            ? "bg-amber-500/10 text-amber-500" 
+                          coverLetterTextLength < 50
+                            ? "bg-amber-500/10 text-amber-500"
                             : "bg-emerald-500/10 text-emerald-500",
                         )}
                       >
@@ -322,7 +452,7 @@ export default function FreelancerSubmitProposal() {
                         const tempDiv = document.createElement("div");
                         tempDiv.innerHTML = value;
                         const textLength = tempDiv.textContent?.length || 0;
-                        
+
                         if (textLength <= 2000) {
                           setCoverLetter(value);
                         }
@@ -337,7 +467,8 @@ export default function FreelancerSubmitProposal() {
                         return (
                           <p className="text-xs font-bold text-amber-500 px-2 flex items-center gap-2">
                             <AlertCircle className="w-3 h-3" />
-                            Please write at least 50 characters to submit a competitive proposal.
+                            Please write at least 50 characters to submit a
+                            competitive proposal.
                           </p>
                         );
                       }
@@ -347,15 +478,220 @@ export default function FreelancerSubmitProposal() {
 
                   <Separator className="bg-border/40" />
 
-                  {/* Attachments */}
+                  {/* Milestone Plan */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
+                        <div className="w-1 h-6 bg-primary rounded-full" />{" "}
+                        Milestone Plan
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground bg-muted/50 px-3 py-1 rounded-full ml-2">
+                          Optional
+                        </span>
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMilestonesEnabled(!milestonesEnabled);
+                          setMilestonesSectionOpen(!milestonesEnabled);
+                        }}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black transition-all border-2",
+                          milestonesEnabled
+                            ? "bg-primary/10 text-primary border-primary/30"
+                            : "bg-muted/40 text-muted-foreground border-border/40 hover:bg-muted",
+                        )}
+                      >
+                        <ListChecks className="w-4 h-4" />
+                        {milestonesEnabled ? "Milestones On" : "Add Milestones"}
+                        {milestonesEnabled ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+
+                    {milestonesEnabled && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                          <p className="text-xs font-bold text-blue-600">
+                            💡 Milestone amounts must add up to your total bid
+                            of <strong>${bid.toLocaleString()}</strong>. Both
+                            parties must agree on milestones before work begins.
+                          </p>
+                        </div>
+
+                        {milestones.map((m, idx) => (
+                          <div
+                            key={idx}
+                            className="p-5 bg-muted/20 rounded-2xl border border-border/30 space-y-4"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-black text-muted-foreground uppercase tracking-widest">
+                                Milestone {idx + 1}
+                              </span>
+                              {milestones.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeMilestone(idx)}
+                                  className="w-7 h-7 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                  Title *
+                                </Label>
+                                <Input
+                                  value={m.title}
+                                  onChange={(e) =>
+                                    updateMilestone(
+                                      idx,
+                                      "title",
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder="e.g. Initial Design Mockups"
+                                  className="h-11 rounded-xl bg-background/60"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                  Amount ($) *
+                                </Label>
+                                <div className="relative">
+                                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    value={m.amount}
+                                    onChange={(e) =>
+                                      updateMilestone(
+                                        idx,
+                                        "amount",
+                                        e.target.value,
+                                      )
+                                    }
+                                    placeholder="500"
+                                    className="h-11 pl-9 rounded-xl bg-background/60"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                  Description
+                                </Label>
+                                <Textarea
+                                  value={m.description}
+                                  onChange={(e) =>
+                                    updateMilestone(
+                                      idx,
+                                      "description",
+                                      e.target.value,
+                                    )
+                                  }
+                                  rows={3}
+                                  placeholder="What will be delivered?"
+                                  className="rounded-xl bg-background/60 p-3 resize-none"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                  Due Date (Optional)
+                                </Label>
+                                <Input
+                                  type="date"
+                                  value={m.dueDate}
+                                  onChange={(e) =>
+                                    updateMilestone(
+                                      idx,
+                                      "dueDate",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="h-11 rounded-xl bg-background/60"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-2 pt-2">
+                              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                Milestone Revision Limit
+                              </Label>
+                              <Select
+                                value={m.allowedRevisions}
+                                onValueChange={(val) =>
+                                  updateMilestone(idx, "allowedRevisions", val)
+                                }
+                              >
+                                <SelectTrigger className="h-11 rounded-xl bg-background/60 w-full md:w-1/2">
+                                  <SelectValue placeholder="Select revisions" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-border/40">
+                                  <SelectItem value="1">1 Revision</SelectItem>
+                                  <SelectItem value="2">2 Revisions</SelectItem>
+                                  <SelectItem value="3">3 Revisions (Standard)</SelectItem>
+                                  <SelectItem value="5">5 Revisions</SelectItem>
+                                  <SelectItem value="10">10 Revisions</SelectItem>
+                                  <SelectItem value="-1">Unlimited Revisions</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <p className="text-[10px] text-muted-foreground font-medium">
+                                Revisions allowed specifically for this milestone.
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+
+                        <div className="flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={addMilestone}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-primary hover:bg-primary/10 transition-colors border-2 border-primary/20"
+                          >
+                            <Plus className="w-4 h-4" /> Add Another Milestone
+                          </button>
+                          <div className="text-sm font-black">
+                            Total:{" "}
+                            <span
+                              className={cn(
+                                milestones.reduce(
+                                  (s, m) => s + Number(m.amount || 0),
+                                  0,
+                                ) === bid
+                                  ? "text-emerald-600"
+                                  : "text-red-500",
+                              )}
+                            >
+                              $
+                              {milestones
+                                .reduce((s, m) => s + Number(m.amount || 0), 0)
+                                .toLocaleString()}
+                            </span>{" "}
+                            / ${bid.toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator className="bg-border/40" />
                   <div className="space-y-6">
                     <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
-                      <div className="w-1 h-6 bg-primary rounded-full" /> Attachments
+                      <div className="w-1 h-6 bg-primary rounded-full" />{" "}
+                      Attachments
                       <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-auto bg-muted/50 px-3 py-1 rounded-full">
                         Optional • Max 5 files
                       </span>
                     </h3>
-                    
+
                     <div className="border-2 border-dashed border-border/40 rounded-[2rem] p-10 text-center hover:bg-primary/5 transition-all group relative overflow-hidden">
                       <input
                         type="file"
@@ -364,25 +700,33 @@ export default function FreelancerSubmitProposal() {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         onChange={(e) => {
                           if (!e.target.files) return;
-                          const ALLOWED = ["image/jpeg", "image/png", "application/pdf"];
+                          const ALLOWED = [
+                            "image/jpeg",
+                            "image/png",
+                            "application/pdf",
+                          ];
                           const selected = Array.from(e.target.files);
-                          
-                          const valid = selected.filter((f) => ALLOWED.includes(f.type));
-                          const invalid = selected.filter((f) => !ALLOWED.includes(f.type));
-                          
+
+                          const valid = selected.filter((f) =>
+                            ALLOWED.includes(f.type),
+                          );
+                          const invalid = selected.filter(
+                            (f) => !ALLOWED.includes(f.type),
+                          );
+
                           if (invalid.length > 0) {
                             toast.error(`${invalid.length} file(s) skipped`, {
                               description: "Only JPG, PNG and PDF are allowed.",
                             });
                           }
-                          
+
                           if (files.length + valid.length > 5) {
                             toast.warning("Limit reached", {
                               description: "You can only attach up to 5 files.",
                             });
                             return;
                           }
-                          
+
                           if (valid.length > 0) {
                             setFiles([...files, ...valid]);
                           }
@@ -415,7 +759,9 @@ export default function FreelancerSubmitProposal() {
                               <FileText className="w-5 h-5 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-black truncate">{file.name}</p>
+                              <p className="text-sm font-black truncate">
+                                {file.name}
+                              </p>
                               <p className="text-[10px] text-muted-foreground font-medium">
                                 {(file.size / (1024 * 1024)).toFixed(2)} MB
                               </p>
@@ -425,7 +771,9 @@ export default function FreelancerSubmitProposal() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-lg hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                              onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
+                              onClick={() =>
+                                setFiles(files.filter((_, idx) => idx !== i))
+                              }
                             >
                               <X className="w-4 h-4" />
                             </Button>
@@ -439,7 +787,12 @@ export default function FreelancerSubmitProposal() {
                   <div className="pt-6">
                     <Button
                       type="submit"
-                      disabled={submitting || coverLetterTextLength < 50 || !canAfford || !bid}
+                      disabled={
+                        submitting ||
+                        coverLetterTextLength < 50 ||
+                        !canAfford ||
+                        !bid
+                      }
                       className="w-full h-16 rounded-2xl text-lg font-black bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] shadow-xl hover:shadow-primary/25 transition-all text-white disabled:opacity-50 disabled:hover:scale-100 disabled:shadow-none"
                     >
                       {submitting ? (
@@ -458,9 +811,9 @@ export default function FreelancerSubmitProposal() {
 
             {/* Right: Project Summary & Token Cost */}
             <div className="lg:col-span-4 space-y-8">
-              
               {/* Token Cost Card */}
-              <Card className={cn(
+              <Card
+                className={cn(
                   "rounded-[2.5rem] border p-8 shadow-lg transition-colors border-t-4",
                   tokenLoading
                     ? "bg-card/40 border-border/40"
@@ -470,14 +823,21 @@ export default function FreelancerSubmitProposal() {
                 )}
               >
                 <h3 className="font-black tracking-tight mb-6 flex items-center gap-2 text-lg">
-                  <Zap className={cn("w-5 h-5", canAfford ? "text-amber-500" : "text-red-500")} />
+                  <Zap
+                    className={cn(
+                      "w-5 h-5",
+                      canAfford ? "text-amber-500" : "text-red-500",
+                    )}
+                  />
                   SkillTokens Required
                 </h3>
-                
+
                 {tokenLoading ? (
                   <div className="flex flex-col items-center justify-center p-6 gap-3 text-muted-foreground">
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-sm font-bold">Calculating cost...</span>
+                    <span className="text-sm font-bold">
+                      Calculating cost...
+                    </span>
                   </div>
                 ) : tokenInfo ? (
                   <div className="space-y-6">
@@ -485,43 +845,52 @@ export default function FreelancerSubmitProposal() {
                       <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
                         Cost to Apply
                       </span>
-                      <span className={cn(
-                        "text-5xl font-black tracking-tighter leading-none",
-                        canAfford ? "text-amber-500" : "text-red-500"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-5xl font-black tracking-tighter leading-none",
+                          canAfford ? "text-amber-500" : "text-red-500",
+                        )}
+                      >
                         {tokenInfo.tokenCost}
                       </span>
                     </div>
 
                     <div className="space-y-3 pt-6 border-t border-border/40">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="font-bold text-muted-foreground tracking-wide">Your Balance</span>
-                        <span className={cn(
-                          "font-black text-lg",
-                          canAfford ? "text-emerald-500" : "text-red-500"
-                        )}>
+                        <span className="font-bold text-muted-foreground tracking-wide">
+                          Your Balance
+                        </span>
+                        <span
+                          className={cn(
+                            "font-black text-lg",
+                            canAfford ? "text-emerald-500" : "text-red-500",
+                          )}
+                        >
                           {tokenInfo.currentBalance}
                         </span>
                       </div>
-                      
+
                       {!canAfford && (
                         <div className="bg-red-500/10 rounded-xl p-4 border border-red-500/20 mt-4">
                           <p className="text-xs font-bold text-red-600 dark:text-red-400 mb-2 leading-relaxed">
-                            You need {tokenInfo.tokenCost - tokenInfo.currentBalance} more tokens to apply.
+                            You need{" "}
+                            {tokenInfo.tokenCost - tokenInfo.currentBalance}{" "}
+                            more tokens to apply.
                           </p>
-                          <Button 
-                            asChild 
-                            size="sm" 
+                          <Button
+                            asChild
+                            size="sm"
                             className="w-full bg-red-600 hover:bg-red-700 text-white font-bold"
                           >
                             <Link to="/freelancer/tokens">Get SkillTokens</Link>
                           </Button>
                         </div>
                       )}
-                      
+
                       {canAfford && (
                         <p className="text-xs font-bold text-muted-foreground/60 text-right">
-                          Remaining after: {tokenInfo.currentBalance - tokenInfo.tokenCost}
+                          Remaining after:{" "}
+                          {tokenInfo.currentBalance - tokenInfo.tokenCost}
                         </p>
                       )}
                     </div>
@@ -543,9 +912,9 @@ export default function FreelancerSubmitProposal() {
                       {project.shortDesc || project.description}
                     </p>
                   </div>
-                  
+
                   <Separator className="bg-border/40" />
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <div className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1.5">
@@ -576,13 +945,14 @@ export default function FreelancerSubmitProposal() {
                   <Button
                     variant="link"
                     className="p-0 h-auto font-bold text-primary hover:text-primary/80"
-                    onClick={() => navigate(`/freelancer/projects/${projectId}`)}
+                    onClick={() =>
+                      navigate(`/freelancer/projects/${projectId}`)
+                    }
                   >
                     View Full Details →
                   </Button>
                 </div>
               </Card>
-
             </div>
           </div>
         )}

@@ -1,0 +1,184 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Briefcase,
+  Search,
+  Clock,
+  CheckCircle2,
+  DollarSign,
+  ArrowRight,
+  Loader2,
+  TrendingUp,
+} from "lucide-react";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const FreelancerContractsPage = () => {
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContracts = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get("/contracts");
+        setContracts(res.data.contracts);
+      } catch (err) {
+        toast.error("Failed to load contracts");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContracts();
+  }, []);
+
+  return (
+    <DashboardLayout>
+      <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in max-w-6xl">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight">Active Contracts</h1>
+            <p className="text-muted-foreground font-medium mt-1">
+              Manage your projects, submit milestones, and track your hard-earned skillTokens.
+            </p>
+          </div>
+          <Button asChild className="rounded-xl h-12 px-6 font-bold shadow-lg shadow-primary/20">
+            <Link to="/freelancer/browse">
+              <Search className="w-4 h-4 mr-2" /> Find More Work
+            </Link>
+          </Button>
+        </div>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-muted-foreground font-medium">Fetching active contracts...</p>
+          </div>
+        ) : contracts.length === 0 ? (
+          <Card className="border-2 border-dashed border-border/60 bg-card/20 py-24 rounded-[2.5rem]">
+            <CardContent className="flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+                <Briefcase className="w-10 h-10 text-muted-foreground/40" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black">No active contracts yet</h3>
+                <p className="text-muted-foreground max-w-xs mx-auto">
+                  Submit high-quality proposals with milestone plans to win your first contract.
+                </p>
+              </div>
+              <Button asChild className="rounded-xl h-12 px-8 font-bold shadow-lg">
+                <Link to="/freelancer/browse">Explore Projects</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {contracts.map((contract) => (
+              <ContractCard key={contract.id} contract={contract} role="FREELANCER" />
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+// Reusing some logic but styled for freelancer perspective
+const ContractCard = ({ contract, role }: { contract: any; role: "CLIENT" | "FREELANCER" }) => {
+  const detailLink = `/freelancer/contracts/${contract.id}`;
+
+  return (
+    <Card className="group overflow-hidden border-border/40 hover:border-primary/40 transition-all duration-300 rounded-[2rem] bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-xl">
+      <CardContent className="p-0">
+        <div className="p-6 space-y-6">
+          <div className="flex justify-between items-start gap-4">
+            <Link to={detailLink} className="group-hover:text-primary transition-colors">
+              <h3 className="font-black text-lg line-clamp-2 leading-tight">
+                {contract.title}
+              </h3>
+            </Link>
+            <Badge className={cn(
+              "font-bold text-[10px] uppercase tracking-widest px-2 py-1",
+              contract.status === "ACTIVE" 
+                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+            )}>
+              {contract.status}
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border/20">
+            <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
+              <AvatarImage src={contract.freelancer.image} />
+              <AvatarFallback className="font-black text-xs">
+                {contract.freelancer.name[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground mb-0.5">
+                Contract With
+              </p>
+              <p className="font-bold text-sm truncate">{contract.freelancer.name}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between items-end">
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">
+                  Earned / Total
+                </p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-black">${contract.earnedAmount.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground font-bold">/ ${contract.totalAmount.toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="text-right space-y-1">
+                <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">
+                  Progress
+                </p>
+                <p className="font-black text-sm text-primary">{contract.progress}%</p>
+              </div>
+            </div>
+            <Progress value={contract.progress} className="h-2 rounded-full bg-muted shadow-inner" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+              <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground flex items-center gap-1 mb-1">
+                <DollarSign className="w-3 h-3 text-emerald-500" /> Milestone Earned
+              </p>
+              <p className="font-black text-lg">${contract.earnedAmount.toLocaleString()}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+              <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground flex items-center gap-1 mb-1">
+                <TrendingUp className="w-3 h-3 text-blue-500" /> Win Rate impact
+              </p>
+              <p className="font-black text-xs text-foreground/80 mt-1">
+                +{Math.round(contract.progress / 10)}% Quality
+              </p>
+            </div>
+          </div>
+        </div>
+        <Button 
+          variant="ghost" 
+          className="w-full rounded-none h-14 font-black border-t border-border/20 text-primary hover:bg-primary hover:text-white transition-all gap-2"
+          asChild
+        >
+          <Link to={detailLink}>
+            Work on Milestones <ArrowRight className="w-4 h-4" />
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default FreelancerContractsPage;
