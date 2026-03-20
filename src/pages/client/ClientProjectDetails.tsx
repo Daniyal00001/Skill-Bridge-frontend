@@ -215,7 +215,7 @@ const ClientProjectDetailsPage = () => {
                     </Link>
                   </Button>
                 </div>
-                <h1 className="text-3xl font-black tracking-tight leading-tight">
+                <h1 className="text-3xl font-black tracking-tight leading-tight break-words">
                   {project.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 mt-6">
@@ -277,8 +277,8 @@ const ClientProjectDetailsPage = () => {
 
               <CardContent className="p-0">
                 <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="w-full justify-start rounded-none border-b bg-transparent h-14 px-8 gap-8">
-                    {["overview", "requirements", "milestones"].map((tab) => (
+                  <TabsList className="grid grid-cols-2 w-full rounded-none border-b bg-transparent h-14 px-0">
+                    {["overview", "requirements"].map((tab) => (
                       <TabsTrigger
                         key={tab}
                         value={tab}
@@ -457,112 +457,7 @@ const ClientProjectDetailsPage = () => {
                     </div>
                   </TabsContent>
 
-                  {/* Milestones Tab */}
-                  <TabsContent
-                    value="milestones"
-                    className="p-8 space-y-6 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
-                  >
-                    {milestones.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                        <p className="font-medium">No milestones added yet.</p>
-                        {contract && (
-                          <p className="text-sm mt-1">
-                            Add milestones from the contract page.
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      milestones.map((milestone: any, idx: number) => (
-                        <div
-                          key={milestone.id}
-                          className={cn(
-                            "flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border group hover:border-primary/20 transition-all",
-                            milestone.status === "APPROVED"
-                              ? "bg-emerald-500/5 border-emerald-500/20"
-                              : milestone.status === "SUBMITTED"
-                                ? "bg-amber-500/10 border-amber-500/30"
-                                : "bg-muted/20 border-border/50",
-                          )}
-                        >
-                          <div className="flex items-center gap-5">
-                            <div
-                              className={cn(
-                                "w-12 h-12 rounded-full flex items-center justify-center font-black text-lg border",
-                                milestone.status === "APPROVED"
-                                  ? "bg-emerald-500 text-white border-0"
-                                  : milestone.status === "SUBMITTED"
-                                    ? "bg-amber-500 text-white border-0"
-                                    : "bg-background",
-                              )}
-                            >
-                              {milestone.status === "APPROVED" ? (
-                                <CheckCircle2 className="w-6 h-6" />
-                              ) : (
-                                idx + 1
-                              )}
-                            </div>
-                            <div>
-                              <h5 className="font-black text-lg">
-                                {milestone.title}
-                              </h5>
-                              <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1.5 font-bold text-foreground">
-                                  <DollarSign className="w-3.5 h-3.5" /> $
-                                  {milestone.amount?.toLocaleString()}
-                                </span>
-                                {milestone.dueDate && (
-                                  <span className="flex items-center gap-1.5">
-                                    <Calendar className="w-3.5 h-3.5" />
-                                    {new Date(
-                                      milestone.dueDate,
-                                    ).toLocaleDateString()}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                "px-4 py-1.5 font-black tracking-widest text-[10px]",
-                                milestone.status === "APPROVED"
-                                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                                  : milestone.status === "SUBMITTED"
-                                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                                    : "bg-muted text-muted-foreground",
-                              )}
-                            >
-                              {milestone.status}
-                            </Badge>
-                            {milestone.status === "SUBMITTED" && (
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold gap-1"
-                                  onClick={() =>
-                                    handleApproveMilestone(milestone.id)
-                                  }
-                                >
-                                  <CheckCircle2 className="w-3.5 h-3.5" />{" "}
-                                  Approve
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="rounded-xl font-bold border-amber-500/30 text-amber-600"
-                                  onClick={() => handleRevision(milestone.id)}
-                                >
-                                  Revise
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </TabsContent>
+                  {/* Milestones Tab content removed as per user request */}
                 </Tabs>
               </CardContent>
             </Card>
@@ -574,7 +469,7 @@ const ClientProjectDetailsPage = () => {
                   <Clock className="w-3.5 h-3.5" /> Work Submitted — Pending
                   Your Review
                 </div>
-                <h4 className="text-xl font-black">
+                <h4 className="text-xl font-black break-words">
                   {hiredDeveloper?.name} submitted "{pendingReview.title}"
                 </h4>
                 {pendingReview.submissionNote && (
@@ -787,7 +682,7 @@ const ClientProjectDetailsPage = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h5 className="font-black text-lg truncate">
+                        <h5 className="font-black text-lg break-words">
                           {hiredDeveloper.name}
                         </h5>
                         <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
