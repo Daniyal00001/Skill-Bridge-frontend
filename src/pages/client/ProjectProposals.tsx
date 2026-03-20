@@ -127,7 +127,12 @@ const ProjectProposalsPage = () => {
       setIsProcessing(true);
       await api.patch(`/proposals/${proposal.id}/status`, { status: "ACCEPTED" });
       toast.success("Freelancer hired successfully! 🚀");
-      navigate("/client/dashboard");
+      try {
+        const res = await api.get(`/contracts/project/${projectId}`);
+        navigate(`/client/contracts/${res.data.contract.id}`);
+      } catch {
+        navigate("/client/dashboard");
+      }
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to hire freelancer");
     } finally {

@@ -460,9 +460,15 @@ export default function ClientContractDetail() {
                       {/* Submitted deliverables */}
                       {milestone.status === "SUBMITTED" && (
                         <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 space-y-3">
-                          <p className="text-xs font-black text-purple-600 uppercase tracking-widest">
-                            Freelancer's Deliverables
-                          </p>
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs font-black text-purple-600 uppercase tracking-widest">
+                              Freelancer's Deliverables
+                            </p>
+                            <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-[10px] font-black gap-1.5 animate-pulse">
+                              <AlertCircle className="w-3 h-3" />
+                              Review within 3 days or payment releases automatically
+                            </Badge>
+                          </div>
                           {milestone.deliverables && (
                             <p className="text-sm">{milestone.deliverables}</p>
                           )}
