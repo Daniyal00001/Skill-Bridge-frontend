@@ -187,7 +187,7 @@ const App = () => (
                   />
                   <Route
                     path="/freelancer/projects"
-                    element={<FreelancerProjectsPage />}
+                    element={<Navigate to="/freelancer/contracts" replace />}
                   />
                   <Route
                     path="/freelancer/messages"

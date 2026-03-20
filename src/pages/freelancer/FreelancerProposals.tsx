@@ -110,8 +110,11 @@ export default function FreelancerProposals() {
   const filteredProposals = useMemo(() => {
     return proposals
       .filter((proposal) => {
-        const matchesTab =
-          activeTab === "all" || proposal.status?.toLowerCase() === activeTab;
+        const effectiveStatus =
+          proposal.project?.status === "CANCELLED"
+            ? "cancelled"
+            : proposal.status?.toLowerCase();
+        const matchesTab = activeTab === "all" || effectiveStatus === activeTab;
         const matchesSearch =
           proposal.project?.title
             ?.toLowerCase()
@@ -138,10 +141,15 @@ export default function FreelancerProposals() {
 
   const stats = {
     total: proposals.length,
-    pending: proposals.filter((p) => p.status?.toUpperCase() === "PENDING")
-      .length,
+    pending: proposals.filter(
+      (p) =>
+        p.status?.toUpperCase() === "PENDING" &&
+        p.project?.status !== "CANCELLED",
+    ).length,
     shortlisted: proposals.filter(
-      (p) => p.status?.toUpperCase() === "SHORTLISTED",
+      (p) =>
+        p.status?.toUpperCase() === "SHORTLISTED" &&
+        p.project?.status !== "CANCELLED",
     ).length,
     accepted: proposals.filter((p) => p.status?.toUpperCase() === "ACCEPTED")
       .length,
@@ -149,6 +157,11 @@ export default function FreelancerProposals() {
       .length,
     withdrawn: proposals.filter((p) => p.status?.toUpperCase() === "WITHDRAWN")
       .length,
+    cancelled: proposals.filter(
+      (p) =>
+        p.status?.toUpperCase() === "CANCELLED" ||
+        p.project?.status === "CANCELLED",
+    ).length,
     winRate:
       proposals.length > 0
         ? Math.round(
@@ -226,6 +239,10 @@ export default function FreelancerProposals() {
                   {
                     value: "withdrawn",
                     label: `Withdrawn (${stats.withdrawn})`,
+                  },
+                  {
+                    value: "cancelled",
+                    label: `Cancelled (${stats.cancelled})`,
                   },
                 ].map((tab) => (
                   <TabsTrigger
@@ -386,13 +403,20 @@ function ProposalCard({
       className: "bg-gray-500/10 text-gray-500 border-gray-500/20",
       icon: Trash2,
     },
+    CANCELLED: {
+      label: "Project Cancelled",
+      className: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+      icon: XCircle,
+    },
   };
 
-  const statusKey = proposal.status?.toUpperCase() || "PENDING";
-  const status = statusConfig[statusKey] || statusConfig["PENDING"];
   const project = proposal.project;
   const client = project?.client;
   const contract = proposal.contract;
+
+  let statusKey = proposal.status?.toUpperCase() || "PENDING";
+  if (project?.status === "CANCELLED") statusKey = "CANCELLED";
+  const status = statusConfig[statusKey] || statusConfig["PENDING"];
 
   return (
     <Card className="group border-border/40 hover:border-primary/40 rounded-[2.5rem] transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-xl w-full">

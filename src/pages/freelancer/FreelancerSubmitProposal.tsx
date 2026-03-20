@@ -110,7 +110,7 @@ export default function FreelancerSubmitProposal() {
         if (existing) setAlreadyApplied(true);
       } catch (err) {
         toast.error("Failed to load project details");
-        navigate("/freelancer/projects");
+        navigate("/freelancer/browse");
       } finally {
         setLoadingProject(false);
       }

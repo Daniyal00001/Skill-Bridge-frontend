@@ -28,6 +28,16 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   MoreVertical,
   Search,
   Plus,
@@ -76,17 +86,12 @@ const ClientProjectsPage = () => {
 
   // Delete project
   const handleDelete = async (projectId: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this project? This cannot be undone.",
-      )
-    )
-      return;
     try {
       await api.delete(`/projects/${projectId}`);
-      toast.success("Project deleted.");
+      toast.success("Project cancelled and bidders refunded.");
       const res = await api.get("/projects/client/my");
       setProjects(res.data.projects);
+      setConfirmDeleteId(null);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to delete project");
     }
@@ -238,9 +243,9 @@ const ClientProjectsPage = () => {
           <CardHeader className="p-8 pb-4 flex flex-row items-start justify-between">
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-2xl font-black tracking-tight">
+                <h2 className="text-2xl font-black tracking-tight break-words">
                   <Link
-                    to={`/client/projects/${project.id}`}
+                    to={`/client/contracts/${contract.id}`}
                     className="hover:text-primary transition-colors"
                   >
                     {project.title}
@@ -397,7 +402,7 @@ const ClientProjectsPage = () => {
                         )}
                       </div>
                       <div>
-                        <p className="font-black text-sm">{milestone.title}</p>
+                        <p className="font-black text-sm break-words">{milestone.title}</p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
                           {milestone.status} · $
                           {milestone.amount?.toLocaleString()}
@@ -416,7 +421,7 @@ const ClientProjectsPage = () => {
                   <div className="flex items-center gap-2 text-amber-600 font-black text-xs uppercase tracking-widest mb-2">
                     <Clock className="w-3.5 h-3.5" /> Pending Review
                   </div>
-                  <h4 className="text-xl font-black">
+                  <h4 className="text-xl font-black break-words">
                     {hiredDeveloper.name} submitted work for "
                     {pendingReview.title}"
                   </h4>
@@ -480,7 +485,7 @@ const ClientProjectsPage = () => {
               </div>
             </div>
             <Button asChild className="font-black h-12 px-8 rounded-xl gap-2">
-              <Link to={`/client/projects/${project.id}`}>
+              <Link to={`/client/contracts/${contract.id}`}>
                 View Full Details <ChevronRight className="w-5 h-5" />
               </Link>
             </Button>
@@ -547,13 +552,13 @@ const ClientProjectsPage = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <CardTitle className="text-xl mt-4 line-clamp-1 hover:text-primary transition-colors">
+          <CardTitle className="text-xl mt-4 break-words hover:text-primary transition-colors">
             <Link to={`/client/projects/${project.id}`}>{project.title}</Link>
           </CardTitle>
         </CardHeader>
 
         <CardContent className="p-5 space-y-6 flex-1">
-          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed break-words">
             {project.description}
           </p>
 
@@ -658,8 +663,20 @@ const ClientProjectsPage = () => {
               <Link to={`/client/projects/${project.id}/proposals`}>
                 View Bids
               </Link>
+            ) : project.status === "DRAFT" ? (
+              <Link to={`/client/post-project?draftId=${project.id}`}>
+                Continue
+              </Link>
             ) : (
-              <Link to={`/client/projects/${project.id}`}>Manage</Link>
+              <Link
+                to={
+                  project.contract?.id
+                    ? `/client/contracts/${project.contract.id}`
+                    : `/client/projects/${project.id}`
+                }
+              >
+                Manage
+              </Link>
             )}
           </Button>
         </CardFooter>
@@ -835,6 +852,37 @@ const ClientProjectsPage = () => {
             </Button>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <AlertDialog
+          open={!!confirmDeleteId}
+          onOpenChange={(open) => !open && setConfirmDeleteId(null)}
+        >
+          <AlertDialogContent className="rounded-2xl border-2 border-border shadow-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl font-black flex items-center gap-3 text-destructive">
+                <AlertTriangle className="w-8 h-8" /> Cancel Project?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-base text-muted-foreground mt-4 leading-relaxed">
+                This action cannot be undone. All freelancers who submitted
+                proposals will be **notified** and their **Skill Tokens will be
+                refunded** immediately. The project will be moved to your
+                cancelled records.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-8 gap-3">
+              <AlertDialogCancel className="rounded-xl h-12 font-bold px-6">
+                No, Keep Project
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => confirmDeleteId && handleDelete(confirmDeleteId)}
+                className="rounded-xl h-12 font-bold px-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg shadow-destructive/20"
+              >
+                Yes, Cancel Project
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );

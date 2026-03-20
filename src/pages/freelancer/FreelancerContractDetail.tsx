@@ -142,7 +142,7 @@ export default function FreelancerContractDetail() {
       setContract(res.data.contract);
     } catch {
       toast.error("Failed to load contract");
-      navigate("/freelancer/projects");
+      navigate("/freelancer/contracts");
     } finally {
       setLoading(false);
     }
@@ -206,7 +206,7 @@ export default function FreelancerContractDetail() {
     try {
       await api.delete(`/contracts/${contractId}/reject`);
       toast.success("Offer rejected. Redirecting...");
-      navigate("/freelancer/projects");
+      navigate("/freelancer/contracts");
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to reject offer");
     } finally {
@@ -245,7 +245,7 @@ export default function FreelancerContractDetail() {
           <Button
             variant="ghost"
             className="w-10 h-10 p-0 rounded-xl"
-            onClick={() => navigate(`/freelancer/projects`)}
+            onClick={() => navigate(`/freelancer/contracts`)}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
