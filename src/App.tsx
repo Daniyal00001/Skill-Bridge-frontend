@@ -44,6 +44,7 @@ import MyProposalsPage from "./pages/client/MyProposals";
 import ClientProfilePage from "./pages/client/ClientProfile";
 import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
+import NegotiationPage from "./pages/client/NegotiationPage";
 
 // Freelancer Pages
 import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
@@ -162,8 +163,11 @@ const App = () => (
                     path="/client/help-me-find"
                     element={<AIAssistantPage />}
                   />
+                  <Route
+                    path="/client/negotiation/:sessionId"
+                    element={<NegotiationPage />}
+                  />
                 </Route>
-
                 {/* ── Freelancer Only ───────────────────────────────── */}
                 <Route element={<RoleRoute allowedRole="FREELANCER" />}>
                   <Route path="/freelancer" element={<FreelancerDashboard />} />
