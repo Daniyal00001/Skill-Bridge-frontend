@@ -156,11 +156,11 @@ export default function FreelancerTokens() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2 p-4 bg-background/60 rounded-xl border border-border/50">
                 <div className="flex items-center gap-2 text-sm font-bold text-primary">
                   <Briefcase className="w-4 h-4" />
-                  Budget-Based Cost
+                  Fixed Budget
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <div className="flex justify-between"><span>Under $50</span><Badge variant="outline" className="text-[10px] h-4">2 tokens</Badge></div>
@@ -169,6 +169,20 @@ export default function FreelancerTokens() {
                   <div className="flex justify-between"><span>$200 – $499</span><Badge variant="outline" className="text-[10px] h-4">8 tokens</Badge></div>
                   <div className="flex justify-between"><span>$500 – $999</span><Badge variant="outline" className="text-[10px] h-4">12 tokens</Badge></div>
                   <div className="flex justify-between"><span>$1000+</span><Badge variant="outline" className="text-[10px] h-4">16 tokens</Badge></div>
+                </div>
+              </div>
+              <div className="space-y-2 p-4 bg-background/60 rounded-xl border border-border/50">
+                <div className="flex items-center gap-2 text-sm font-bold text-primary">
+                  <Zap className="w-4 h-4" />
+                  Hourly Rate
+                </div>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <div className="flex justify-between"><span>Under $5/hr</span><Badge variant="outline" className="text-[10px] h-4">1 token</Badge></div>
+                  <div className="flex justify-between"><span>$5 – $9/hr</span><Badge variant="outline" className="text-[10px] h-4">2 tokens</Badge></div>
+                  <div className="flex justify-between"><span>$10 – $19/hr</span><Badge variant="outline" className="text-[10px] h-4">3 tokens</Badge></div>
+                  <div className="flex justify-between"><span>$20 – $39/hr</span><Badge variant="outline" className="text-[10px] h-4">5 tokens</Badge></div>
+                  <div className="flex justify-between"><span>$40 – $79/hr</span><Badge variant="outline" className="text-[10px] h-4">7 tokens</Badge></div>
+                  <div className="flex justify-between"><span>$80+/hr</span><Badge variant="outline" className="text-[10px] h-4">10 tokens</Badge></div>
                 </div>
               </div>
               <div className="space-y-2 p-4 bg-background/60 rounded-xl border border-border/50">

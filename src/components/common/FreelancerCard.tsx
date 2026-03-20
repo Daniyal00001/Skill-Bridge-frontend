@@ -57,40 +57,52 @@ export function FreelancerCard({
     availabilityColors[freelancer.availability] || "bg-slate-300";
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200 border border-slate-200 bg-white">
-      <CardContent className="p-5">
-        <div className="flex gap-5">
+    <Card className="w-full max-w-full hover:shadow-md transition-shadow duration-200 border border-slate-200 bg-white overflow-hidden">
+      <CardContent className="p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
           {/* Avatar and Info */}
-          <div className="relative shrink-0">
-            <Avatar className="h-14 w-14">
-              <AvatarImage
-                src={freelancer.profileImage || freelancer.avatar}
-                alt={freelancer.name}
+          <div className="flex items-center sm:items-start gap-4 sm:relative shrink-0">
+            <div className="relative">
+              <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
+                <AvatarImage
+                  src={freelancer.profileImage || freelancer.avatar}
+                  alt={freelancer.name}
+                />
+                <AvatarFallback className="bg-slate-100 text-slate-600 font-semibold">
+                  {freelancer.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <span
+                className={cn(
+                  "absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2 border-white",
+                  statusColor,
+                )}
               />
-              <AvatarFallback className="bg-slate-100 text-slate-600 font-semibold">
-                {freelancer.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <span
-              className={cn(
-                "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white",
-                statusColor,
-              )}
-            />
+            </div>
+            {/* On mobile, name and rate are next to avatar in this flex container. On desktop, they are in the next flex-1 div. */}
+            <div className="flex-1 sm:hidden min-w-0">
+              <h3 className="text-base font-bold text-slate-900 truncate flex items-center gap-1.5">
+                {freelancer.name}
+                <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+              </h3>
+              <p className="text-xs font-medium text-slate-500 truncate">
+                {freelancer.title}
+              </p>
+            </div>
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
+            <div className="hidden sm:flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0">
                 <h3 className="text-base font-bold text-slate-900 truncate">
                   {freelancer.name}
                 </h3>
                 <CheckCircle className="w-4 h-4 text-primary shrink-0" />
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 {freelancer.hourlyRate ? (
                   <>
                     <span className="text-lg font-bold text-slate-900">
@@ -106,11 +118,20 @@ export function FreelancerCard({
               </div>
             </div>
 
-            <p className="text-sm font-medium text-slate-600 mb-2 truncate">
+            <p className="hidden sm:block text-sm font-medium text-slate-600 mb-2 truncate">
               {freelancer.title}
             </p>
 
-            <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs text-slate-500 font-medium">
+              <div className="flex items-center gap-1 sm:hidden shrink-0">
+                {freelancer.hourlyRate ? (
+                  <span className="text-sm font-bold text-slate-900">
+                    ${freelancer.hourlyRate}/hr
+                  </span>
+                ) : (
+                  <span className="text-xs font-bold text-slate-400">Rate TBD</span>
+                )}
+              </div>
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                 <span className="text-slate-800">
@@ -126,7 +147,7 @@ export function FreelancerCard({
           </div>
         </div>
 
-        <p className="text-sm text-slate-600 mt-4 line-clamp-2 leading-relaxed">
+        <p className="text-sm text-slate-600 mt-4 line-clamp-2 leading-relaxed break-words">
           {freelancer.bio}
         </p>
 

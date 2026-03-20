@@ -49,18 +49,6 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api } from "@/lib/api";
 
-// Freelancer's skills — in future, pull from profile API
-const FREELANCER_SKILLS = ["React", "TypeScript", "Node.js", "MongoDB", "AWS"];
-
-const calculateMatchScore = (projectSkills: any[]): number => {
-  if (!projectSkills?.length) return 0;
-  const overlap = projectSkills.filter((s) => {
-    const name = s.skill?.name || s.name || s;
-    return typeof name === "string" && FREELANCER_SKILLS.includes(name);
-  });
-  return Math.round((overlap.length / projectSkills.length) * 100);
-};
-
 const getDaysLeft = (deadline: string) => {
   if (!deadline) return null;
   const diff = (new Date(deadline).getTime() - Date.now()) / (1000 * 3600 * 24);
@@ -69,6 +57,7 @@ const getDaysLeft = (deadline: string) => {
 
 export default function FreelancerProjectDetails() {
   const { projectId } = useParams();
+  const navigate = useNavigate();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [myProposal, setMyProposal] = useState<any>(null); // existing proposal if any
@@ -99,10 +88,6 @@ export default function FreelancerProjectDetails() {
     fetchData();
   }, [projectId]);
 
-  const matchScore = useMemo(
-    () => calculateMatchScore(project?.skills || []),
-    [project],
-  );
   const daysLeft = useMemo(() => getDaysLeft(project?.deadline), [project]);
   const isUrgent = daysLeft !== null && daysLeft < 7;
 
@@ -137,7 +122,7 @@ export default function FreelancerProjectDetails() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-[1400px] mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8">
+      <div className="max-w-[1400px] w-full mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8 min-w-0">
         {/* Breadcrumb */}
         <div className="mb-8">
           <Button
@@ -173,7 +158,7 @@ export default function FreelancerProjectDetails() {
                   </Badge>
                 )}
               </div>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.1]">
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.1] break-words">
                 {project.title}
               </h1>
               <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-muted-foreground">
@@ -183,10 +168,10 @@ export default function FreelancerProjectDetails() {
                     Posted {new Date(project.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <span>{project._count?.proposals || 0} proposals</span>
-                </div>
+                </div> */}
                 {project.budget && (
                   <div className="flex items-center gap-2">
                     <DollarSign className="w-4 h-4 text-emerald-500" />
@@ -257,7 +242,12 @@ export default function FreelancerProjectDetails() {
                   <div className="w-1 h-6 bg-primary rounded-full" /> About This
                   Project
                 </h3>
-                <p className="text-muted-foreground text-lg leading-relaxed font-medium whitespace-pre-line">
+                {project.shortDesc && (
+                  <p className="text-lg text-foreground/90 font-bold mb-4 break-words">
+                    {project.shortDesc}
+                  </p>
+                )}
+                <p className="text-muted-foreground text-lg leading-relaxed font-medium whitespace-pre-line break-words">
                   {project.description}
                 </p>
               </section>
@@ -268,7 +258,7 @@ export default function FreelancerProjectDetails() {
                     <div className="w-1 h-6 bg-primary rounded-full" /> What We
                     Need
                   </h3>
-                  <div className="bg-muted/30 p-8 rounded-[2rem] border border-border/40 font-medium text-lg leading-loose text-foreground/80 whitespace-pre-line">
+                  <div className="bg-muted/30 p-8 rounded-[2rem] border border-border/40 font-medium text-lg leading-loose text-foreground/80 whitespace-pre-line break-words">
                     {project.requirements}
                   </div>
                 </section>
@@ -279,13 +269,68 @@ export default function FreelancerProjectDetails() {
                   <p className="text-muted-foreground/60 uppercase text-[10px] font-black tracking-[0.2em]">
                     Reference Assets
                   </p>
-                  <Badge
+                  <Button
+                    asChild
                     variant="secondary"
-                    className="cursor-pointer py-2 px-4 rounded-xl font-bold flex items-center gap-2 w-fit"
+                    className="rounded-xl font-bold flex items-center gap-2 w-fit"
                   >
-                    {project.referenceLinks}
-                    <ExternalLink className="w-3 h-3" />
-                  </Badge>
+                    <a
+                      href={project.referenceLinks}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Globe className="w-4 h-4" />
+                      View External Link
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </a>
+                  </Button>
+                </section>
+              )}
+
+              {project.attachments && project.attachments.length > 0 && (
+                <section className="space-y-4">
+                  <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
+                    <div className="w-1 h-6 bg-primary rounded-full" /> Attached
+                    Documents
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {project.attachments.map((url: string, index: number) => {
+                      const isImage = /\.(jpg|jpeg|png|webp|gif)($|\?)/i.test(
+                        url,
+                      );
+                      return (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative flex flex-col items-center justify-center p-4 rounded-2xl border border-border/40 bg-card hover:border-primary/40 hover:shadow-lg transition-all h-32 overflow-hidden"
+                        >
+                          {isImage ? (
+                            <img
+                              src={url}
+                              alt={`Attachment ${index + 1}`}
+                              className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                              <ExternalLink className="w-6 h-6" />
+                            </div>
+                          )}
+                          <div
+                            className={cn(
+                              "mt-2 text-xs font-bold truncate w-full text-center z-10",
+                              isImage
+                                ? "text-white drop-shadow-md bg-black/40 px-2 py-1 rounded-md"
+                                : "",
+                            )}
+                          >
+                            Document {index + 1}
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
                 </section>
               )}
             </div>
@@ -339,155 +384,54 @@ export default function FreelancerProjectDetails() {
                 <DetailGridItem
                   icon={Globe}
                   label="Language"
-                  value={project.languageObj?.name || project.language || "English"}
+                  value={
+                    project.languageObj?.name || project.language || "English"
+                  }
                   subValue="Preferred"
                 />
                 <DetailGridItem
                   icon={MapPin}
                   label="Location"
-                  value={project.locationObj?.name || project.locationPref || "Any location"}
+                  value={
+                    project.locationObj?.name ||
+                    project.locationPref ||
+                    "Any location"
+                  }
                   subValue="Preference"
                 />
               </div>
             </Card>
 
             {/* Required Skills */}
-            <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] p-8 shadow-xl border-t-4 border-t-emerald-500/40">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                <h3 className="text-2xl font-black tracking-tight">
-                  Required Skills
-                </h3>
-                <div className="flex items-center gap-4 bg-emerald-500/10 py-3 px-6 rounded-2xl border border-emerald-500/20">
-                  <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
-                      Match Score
-                    </span>
-                    <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 leading-none">
-                      {matchScore}%
-                    </span>
-                  </div>
-                  <div className="h-10 w-px bg-emerald-500/20" />
-                  <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-                    {matchScore >= 60
-                      ? "Great fit!"
-                      : matchScore >= 30
-                        ? "Partial match"
-                        : "Low match"}
-                  </p>
+            {project.skills && project.skills.length > 0 && (
+              <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] p-8 shadow-xl border-t-4 border-t-emerald-500/40">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-black tracking-tight">
+                    Required Skills
+                  </h3>
                 </div>
-              </div>
-              <div className="space-y-8">
-                {project.skills?.filter((s: any) => {
-                  const name = s.skill?.name || s.name;
-                  return FREELANCER_SKILLS.includes(name);
-                }).length > 0 && (
-                  <div className="space-y-4">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-70">
-                      Your Matching Skills
-                    </Label>
-                    <div className="flex flex-wrap gap-3">
-                      {project.skills
-                        .filter((s: any) => {
-                          const name = s.skill?.name || s.name;
-                          return FREELANCER_SKILLS.includes(name);
-                        })
-                        .map((skill: any) => {
-                          const name = skill.skill?.name || skill.name;
-                          return (
-                            <Badge
-                              key={skill.id || name}
-                              className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-2 px-5 rounded-xl font-bold text-sm"
-                            >
-                              {name}
-                            </Badge>
-                          );
-                        })}
-                    </div>
-                  </div>
-                )}
-                {project.skills?.filter((s: any) => {
-                  const name = s.skill?.name || s.name;
-                  return !FREELANCER_SKILLS.includes(name);
-                }).length > 0 && (
-                  <div className="space-y-4">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-70">
-                      Other Requirements
-                    </Label>
-                    <div className="flex flex-wrap gap-3">
-                      {project.skills
-                        .filter((s: any) => {
-                          const name = s.skill?.name || s.name;
-                          return !FREELANCER_SKILLS.includes(name);
-                        })
-                        .map((skill: any) => {
-                          const name = skill.skill?.name || skill.name;
-                          return (
-                            <Badge
-                              key={skill.id || name}
-                              variant="outline"
-                              className="bg-background/40 border-border/60 py-2 px-5 rounded-xl font-bold text-sm text-muted-foreground"
-                            >
-                              {name}
-                            </Badge>
-                          );
-                        })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </Card>
+                <div className="flex flex-wrap gap-3">
+                  {project.skills.map((skill: any) => {
+                    const name = skill.skill?.name || skill.name;
+                    return (
+                      <Badge
+                        key={skill.id || name}
+                        variant="secondary"
+                        className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-2 px-5 rounded-xl font-bold text-sm"
+                      >
+                        {name}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
           </div>
 
           {/* ── RIGHT: Proposal Sidebar ── */}
           <aside className="lg:col-span-4 space-y-8">
             <div className="sticky top-10 space-y-8">
               {/* Competition Card */}
-              <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] p-8 shadow-2xl">
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-black flex items-center gap-2">
-                      <Users className="w-5 h-5 text-primary" /> Competition
-                    </h3>
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "font-black uppercase text-[10px]",
-                        (project._count?.proposals || 0) > 15
-                          ? "bg-red-500/10 text-red-500 border-red-500/20"
-                          : (project._count?.proposals || 0) > 8
-                            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                            : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-                      )}
-                    >
-                      {(project._count?.proposals || 0) > 15
-                        ? "High"
-                        : (project._count?.proposals || 0) > 8
-                          ? "Medium"
-                          : "Low"}
-                    </Badge>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-xs font-black uppercase tracking-widest text-muted-foreground">
-                      <span>Proposals Sent</span>
-                      <span className="text-foreground">
-                        {project._count?.proposals || 0} / 20
-                      </span>
-                    </div>
-                    <div className="h-3 w-full bg-muted/40 rounded-full overflow-hidden border border-border/20">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary to-blue-500 transition-all duration-1000"
-                        style={{
-                          width: `${Math.min(((project._count?.proposals || 0) / 20) * 100, 100)}%`,
-                        }}
-                      />
-                    </div>
-                    <p className="text-[11px] font-bold text-muted-foreground italic">
-                      "Clients review first 10 proposals within 24 hours. Apply
-                      early!"
-                    </p>
-                  </div>
-                </div>
-              </Card>
 
               {/* Already applied banner */}
               {myProposal ? (
@@ -544,25 +488,32 @@ export default function FreelancerProjectDetails() {
                           Competition
                         </h4>
                       </div>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={cn(
                           "font-black px-3 py-1 text-[10px] uppercase",
-                          (project.proposalCount || 0) < 10 
+                          (project.proposalCount || 0) < 15
                             ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                            : (project.proposalCount || 0) < 20
+                            : (project.proposalCount || 0) < 35
                               ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                              : "bg-red-500/10 text-red-600 border-red-500/20"
+                              : "bg-red-500/10 text-red-600 border-red-500/20",
                         )}
                       >
-                        {(project.proposalCount || 0) < 10 ? "Low" : (project.proposalCount || 0) < 20 ? "Medium" : "High"}
+                        {(project.proposalCount || 0) < 15
+                          ? "Low"
+                          : (project.proposalCount || 0) < 35
+                            ? "Medium"
+                            : "High"}
                       </Badge>
                     </div>
 
                     <div className="flex items-end justify-between mb-4">
                       <div>
                         <p className="text-3xl font-black text-foreground">
-                          {project.proposalCount || 0}
+                          {project.proposalCount || 0}{" "}
+                          <span className="text-sm text-muted-foreground font-bold">
+                            / 50
+                          </span>
                         </p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                           Proposals Sent
@@ -570,42 +521,51 @@ export default function FreelancerProjectDetails() {
                       </div>
                       <div className="text-right">
                         <p className="text-xs font-bold text-muted-foreground max-w-[140px] leading-tight">
-                          "Clients review first 10 proposals within 24 hours. <span className="text-primary italic">Apply early!</span>"
+                          High competition means you need to stand out.{" "}
+                          <span className="text-primary italic">
+                            Make your bid count!
+                          </span>
                         </p>
                       </div>
                     </div>
-                    
+
                     {/* Visual bar */}
                     <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={cn(
                           "h-full transition-all duration-1000",
-                          (project.proposalCount || 0) < 10 ? "bg-emerald-500 w-[20%]" : (project.proposalCount || 0) < 20 ? "bg-amber-500 w-[60%]" : "bg-red-500 w-[90%]"
-                        )} 
+                          (project.proposalCount || 0) < 15
+                            ? "bg-emerald-500"
+                            : (project.proposalCount || 0) < 35
+                              ? "bg-amber-500"
+                              : "bg-red-500",
+                        )}
+                        style={{
+                          width: `${Math.min(((project.proposalCount || 0) / 50) * 100, 100)}%`,
+                        }}
                       />
                     </div>
                   </Card>
 
-                  {/* Proposal Form */}
-                  <Card className="bg-card/40 backdrop-blur-2xl border-border/40 rounded-[2.5rem] shadow-2xl overflow-hidden border-t-8 border-t-primary">
-                    <CardHeader className="p-8 pb-4">
-                      <CardTitle className="text-2xl font-black tracking-tight">
-                        Submit Proposal
-                      </CardTitle>
-                      <CardDescription className="font-medium pt-2 italic">
-                        Applying for{" "}
-                        <span className="font-black text-foreground">
-                          {project.experienceLevel || "this"}
-                        </span>{" "}
-                        level position.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-8">
-                      <ProposalForm
-                        project={project}
-                        onSuccess={(p) => setMyProposal(p)}
-                      />
-                    </CardContent>
+                  {/* Submit Proposal CTA */}
+                  <Card className="bg-primary/5 border-primary/20 backdrop-blur-2xl rounded-[2.5rem] shadow-xl overflow-hidden border-t-8 border-t-primary p-8 text-center space-y-6">
+                    <h3 className="text-2xl font-black tracking-tight">
+                      Ready to start working?
+                    </h3>
+                    <p className="text-muted-foreground font-medium pb-2 text-sm">
+                      Draft a professional proposal and offer your best rate for
+                      this project.
+                    </p>
+                    <Button
+                      size="lg"
+                      className="w-full h-16 rounded-2xl text-sm font-black bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] shadow-xl hover:shadow-primary/25 transition-all text-white"
+                      asChild
+                    >
+                      <Link to={`/freelancer/projects/${projectId}/proposal`}>
+                        Create Proposal Now
+                        <ArrowRight className="ml-2 w-5 h-5" />
+                      </Link>
+                    </Button>
                   </Card>
 
                   {/* Tips */}
@@ -712,271 +672,3 @@ const DetailGridItem = ({
     </div>
   </div>
 );
-
-// ── Proposal Form ───────────────────────────────────────────────────────────────
-const ProposalForm = ({
-  project,
-  onSuccess,
-}: {
-  project: any;
-  onSuccess: (p: any) => void;
-}) => {
-  const [bid, setBid] = useState<number>(project.budget || 0);
-  const [deliveryDays, setDeliveryDays] = useState("30");
-  const [coverLetter, setCoverLetter] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [tokenInfo, setTokenInfo] = useState<{
-    tokenCost: number;
-    currentBalance: number;
-    canAfford: boolean;
-    breakdown: any;
-  } | null>(null);
-  const [tokenLoading, setTokenLoading] = useState(true);
-
-  // Fetch token cost info for this project
-  useEffect(() => {
-    const fetchTokenCost = async () => {
-      try {
-        const res = await api.get(`/proposals/project/${project.id}/token-cost`);
-        setTokenInfo(res.data);
-      } catch {
-        // non-fatal
-      } finally {
-        setTokenLoading(false);
-      }
-    };
-    fetchTokenCost();
-  }, [project.id]);
-
-  const fee = Math.round(bid * 0.1);
-  const total = bid - fee;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (coverLetter.length < 50) {
-      toast.error("Cover letter too short!", {
-        description: "Write at least 50 characters about your approach.",
-      });
-      return;
-    }
-    if (!bid || bid <= 0) {
-      toast.error("Enter a valid bid amount");
-      return;
-    }
-    if (tokenInfo && !tokenInfo.canAfford) {
-      toast.error("Insufficient SkillTokens", {
-        description: `You need ${tokenInfo.tokenCost} tokens but only have ${tokenInfo.currentBalance}.`,
-      });
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await api.post(`/proposals/project/${project.id}`, {
-        bidAmount: bid,
-        deliveryDays: parseInt(deliveryDays),
-        coverLetter,
-      });
-      const newProposal = res.data.proposal;
-      toast.success("Proposal submitted! 🎉", {
-        description: `Your $${bid.toLocaleString()} bid is live. ${tokenInfo?.tokenCost || 0} SkillTokens deducted.`,
-      });
-      onSuccess(newProposal);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to submit proposal");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const canAfford = tokenInfo ? tokenInfo.canAfford : true;
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* ── Token Cost Banner ── */}
-      <div
-        className={cn(
-          "rounded-2xl border p-5 space-y-3",
-          tokenLoading
-            ? "bg-muted/30 border-border/40"
-            : canAfford
-              ? "bg-amber-500/8 border-amber-500/25"
-              : "bg-red-500/8 border-red-500/30"
-        )}
-      >
-        {tokenLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Calculating token cost...
-          </div>
-        ) : tokenInfo ? (
-          <>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className={cn(
-                  "p-1.5 rounded-lg",
-                  canAfford ? "bg-amber-500/15" : "bg-red-500/15"
-                )}>
-                  <Zap className={cn("w-4 h-4", canAfford ? "text-amber-500" : "text-red-500")} />
-                </div>
-                <span className="text-sm font-black text-foreground">
-                  SkillTokens Required
-                </span>
-              </div>
-              <span className={cn(
-                "text-2xl font-black",
-                canAfford ? "text-amber-500" : "text-red-500"
-              )}>
-                {tokenInfo.tokenCost}
-              </span>
-            </div>
-
-            <div className="flex justify-between text-xs font-bold text-muted-foreground border-t border-border/40 pt-3">
-              <span>Your balance</span>
-              <span className={cn(
-                "font-black",
-                canAfford ? "text-emerald-500" : "text-red-500"
-              )}>
-                {tokenInfo.currentBalance} tokens
-              </span>
-            </div>
-
-            {!canAfford && (
-              <div className="flex items-start gap-2 bg-red-500/10 rounded-xl p-3 border border-red-500/20">
-                <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                <div className="text-xs font-semibold text-red-600 dark:text-red-400">
-                  <p>Insufficient SkillTokens! You need {tokenInfo.tokenCost - tokenInfo.currentBalance} more tokens.</p>
-                  <Link
-                    to="/freelancer/tokens"
-                    className="underline hover:no-underline mt-1 inline-block"
-                  >
-                    View token info →
-                  </Link>
-                </div>
-              </div>
-            )}
-
-            {canAfford && (
-              <div className="text-xs text-muted-foreground/70">
-                After submitting: {tokenInfo.currentBalance - tokenInfo.tokenCost} tokens remaining
-              </div>
-            )}
-          </>
-        ) : null}
-      </div>
-
-      {/* Bid */}
-      <div className="space-y-4">
-        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-          Your Bid Amount
-        </Label>
-        <div className="relative group">
-          <DollarSign className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <Input
-            type="number"
-            value={bid}
-            onChange={(e) => setBid(Number(e.target.value))}
-            placeholder={`Budget: $${project.budget?.toLocaleString()}`}
-            className="pl-14 h-16 bg-background/50 border-border/40 rounded-2xl font-black text-xl"
-          />
-        </div>
-        <div className="bg-muted/30 p-5 rounded-2xl border border-border/40 space-y-3">
-          <div className="flex justify-between text-xs font-bold text-muted-foreground">
-            <span>Platform Fee (10%)</span>
-            <span>-${fee.toLocaleString()}</span>
-          </div>
-          <Separator className="bg-border/20" />
-          <div className="flex justify-between text-base font-black text-foreground">
-            <span>You Receive</span>
-            <span className="text-emerald-500">${total.toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Delivery */}
-      <div className="space-y-3">
-        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-          Delivery (days)
-        </Label>
-        <Select value={deliveryDays} onValueChange={setDeliveryDays}>
-          <SelectTrigger className="h-14 bg-background/50 border-border/40 rounded-xl font-bold">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {[
-              { label: "1 Week", value: "7" },
-              { label: "2 Weeks", value: "14" },
-              { label: "1 Month", value: "30" },
-              { label: "2 Months", value: "60" },
-              { label: "3 Months", value: "90" },
-            ].map((opt) => (
-              <SelectItem
-                key={opt.value}
-                value={opt.value}
-                className="font-bold"
-              >
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Cover Letter */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-            Cover Letter
-          </Label>
-          <span
-            className={cn(
-              "text-[9px] font-black uppercase",
-              coverLetter.length < 50 ? "text-amber-500" : "text-emerald-500",
-            )}
-          >
-            {coverLetter.length} / 1000
-          </span>
-        </div>
-        <Textarea
-          placeholder="Explain why you're the best fit for this project. Mention relevant experience, your approach, and why the client should pick you..."
-          className="min-h-[200px] bg-background/50 border-border/40 rounded-[2rem] p-6 font-medium text-sm leading-relaxed"
-          value={coverLetter}
-          onChange={(e) => setCoverLetter(e.target.value.slice(0, 1000))}
-        />
-      </div>
-
-      <div className="space-y-4 pt-2">
-        <Button
-          type="submit"
-          disabled={loading || !canAfford}
-          className={cn(
-            "w-full h-14 rounded-2xl font-black text-lg gap-3 group transition-all",
-            canAfford
-              ? "shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-[0.98]"
-              : "opacity-60 cursor-not-allowed"
-          )}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" /> Submitting...
-            </>
-          ) : !canAfford ? (
-            <>
-              <Zap className="w-5 h-5" /> Insufficient Tokens
-            </>
-          ) : (
-            <>
-              Submit Proposal{" "}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
-        </Button>
-        {canAfford && tokenInfo && (
-          <p className="text-center text-xs text-muted-foreground">
-            Submitting will deduct{" "}
-            <span className="font-bold text-amber-500">{tokenInfo.tokenCost} SkillTokens</span>
-          </p>
-        )}
-      </div>
-    </form>
-  );
-};

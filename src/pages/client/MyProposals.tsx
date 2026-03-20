@@ -34,6 +34,7 @@ import {
   DollarSign,
   Clock,
   Loader2,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -114,6 +115,33 @@ const MyProposalsPage = () => {
             Rejected
           </Badge>
         );
+      case "CANCELLED":
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-gray-500/15 text-gray-700 hover:bg-gray-500/25 border-gray-200"
+          >
+            Project Deleted
+          </Badge>
+        );
+      case "WITHDRAWN":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-orange-500/15 text-orange-700 hover:bg-orange-500/25 border-orange-200"
+          >
+            Withdrawn
+          </Badge>
+        );
+      case "SHORTLISTED":
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-blue-500/15 text-blue-700 hover:bg-blue-500/25 border-blue-200"
+          >
+            Shortlisted
+          </Badge>
+        );
       default:
         return (
           <Badge
@@ -184,6 +212,7 @@ const MyProposalsPage = () => {
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="accepted">Accepted</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="withdrawn">Withdrawn</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -264,7 +293,20 @@ const MyProposalsPage = () => {
                           : "—"}
                       </TableCell>
                       <TableCell>{getStatusBadge(proposal.status)}</TableCell>
-                      <TableCell className="text-right pr-6">
+                      <TableCell className="text-right pr-6 space-x-2">
+                        {proposal.status === "ACCEPTED" && proposal.contract?.id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-200"
+                          >
+                            <Link to={`/client/contracts/${proposal.contract.id}`}>
+                              View Contract{" "}
+                              <FileText className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"

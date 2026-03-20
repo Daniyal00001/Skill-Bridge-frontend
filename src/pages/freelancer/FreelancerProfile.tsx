@@ -55,11 +55,11 @@ export default function FreelancerProfile() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (shouldAutoOpen = false) => {
     try {
       const res = await freelancerService.getMyProfile();
       setProfile(res.data);
-      if (res.data.profileCompletion < 100) {
+      if (shouldAutoOpen && res.data.profileCompletion < 100) {
         setIsModalOpen(true);
       }
     } catch (e) {
@@ -70,7 +70,7 @@ export default function FreelancerProfile() {
   };
 
   useEffect(() => {
-    fetchProfile();
+    fetchProfile(true);
   }, []);
 
   const displayProfile = profile;
@@ -188,9 +188,8 @@ export default function FreelancerProfile() {
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                     {displayProfile.fullName ||
-                      (displayProfile.user
-                        ? `${displayProfile.user.firstName} ${displayProfile.user.lastName}`
-                        : "Unnamed Freelancer")}
+                      displayProfile.user?.name ||
+                      "Unnamed Freelancer"}
                   </h1>
                   <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
                     Top Rated
@@ -285,11 +284,11 @@ export default function FreelancerProfile() {
             {/* MAIN CONTENT AREA */}
             <div className="lg:col-span-8 space-y-12">
               {/* DESCRIPTION SECTION */}
-              <section className="space-y-4">
+              <section className="space-y-4 max-w-full overflow-hidden">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
                   Overview
                 </h3>
-                <p className="text-lg text-muted-foreground leading-relaxed font-medium">
+                <p className="text-lg text-muted-foreground leading-relaxed font-medium break-words whitespace-pre-wrap max-w-full">
                   {displayProfile.bio || "No overview provided."}
                 </p>
               </section>
@@ -324,7 +323,7 @@ export default function FreelancerProfile() {
                 ].map((stat) => (
                   <div
                     key={stat.label}
-                    className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-accent/50 transition-colors"
+                    className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-primary/5 transition-colors"
                   >
                     <stat.icon className={cn("w-6 h-6", stat.color)} />
                     <div>
@@ -458,7 +457,7 @@ export default function FreelancerProfile() {
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                           ) : (
-                            <div className="flex-1 flex items-center justify-center bg-accent/20">
+                            <div className="flex-1 flex items-center justify-center bg-primary/5">
                               {isPdf ? (
                                 <div className="flex flex-col items-center gap-2">
                                   <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
@@ -545,7 +544,7 @@ export default function FreelancerProfile() {
                     </div>
                   ))}
                   {(displayProfile.workHistory || []).length === 0 && (
-                    <div className="p-12 border border-dashed rounded-[3rem] text-center space-y-2 bg-accent/5">
+                    <div className="p-12 border border-dashed rounded-[3rem] text-center space-y-2 bg-primary/5">
                       <p className="font-bold">No work history yet #</p>
                       <p className="text-xs text-muted-foreground tracking-widest uppercase">
                         Verified projects will appear here
@@ -744,9 +743,9 @@ export default function FreelancerProfile() {
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
-            fetchProfile();
+            fetchProfile(false);
           }}
-          onComplete={() => fetchProfile()} // refresh profile after onboarding completion
+          onComplete={() => fetchProfile(false)} // refresh profile after onboarding completion
           profile={profile}
         />
       )}

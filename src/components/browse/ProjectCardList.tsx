@@ -11,7 +11,6 @@ import {
   Clock,
   MapPin,
   Users,
-  Sparkles,
   BadgeCheck,
   Star,
   Bookmark,
@@ -48,13 +47,6 @@ export const ProjectCardList = ({
             <Badge className="bg-blue-50 text-blue-600 border-blue-100 text-[10px] font-semibold py-0.5 px-2 rounded-md">
               {project.category?.name}
             </Badge>
-
-            {project.isAiScoped && (
-              <span className="flex items-center gap-0.5 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-md">
-                <Sparkles className="w-3 h-3" />
-                AI Scoped
-              </span>
-            )}
 
             {project.matchPercentage > 0 && (
               <span

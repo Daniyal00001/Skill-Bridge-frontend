@@ -52,7 +52,7 @@ export function FreelancerOnboardingModal({
 }) {
   // Determine the starting step based on what's missing
   let initialStep = 1;
-  if (profile?.user?.firstName && profile?.location && profile?.tagline)
+  if (profile?.fullName || profile?.user?.name && profile?.location && profile?.tagline)
     initialStep = 2;
   if (initialStep === 2 && profile?.hourlyRate && profile?.bio) initialStep = 3;
   if (initialStep === 3 && profile?.skills?.length > 0) initialStep = 4;
@@ -78,8 +78,7 @@ export function FreelancerOnboardingModal({
 
   // State
   const [formData, setFormData] = useState({
-    firstName: profile?.user?.firstName || "",
-    lastName: profile?.user?.lastName || "",
+    fullName: profile?.fullName || profile?.user?.name || "",
     phoneNumber: profile?.user?.phoneNumber || "",
     location: profile?.location || "",
     region: profile?.region || "",
@@ -113,8 +112,7 @@ export function FreelancerOnboardingModal({
       if (step === 1) {
         try {
           await freelancerService.updateOnboardingStep1({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
+            fullName: formData.fullName,
             phoneNumber: formData.phoneNumber,
             location: formData.location,
             region: formData.region,
@@ -183,7 +181,7 @@ export function FreelancerOnboardingModal({
   });
 
   const TABS = [
-    { id: 1, label: "Personal", icon: User, isComplete: !!(formData.firstName && formData.location && formData.tagline) },
+    { id: 1, label: "Personal", icon: User, isComplete: !!(formData.fullName && formData.location && formData.tagline) },
     { id: 2, label: "Professional", icon: Briefcase, isComplete: !!(formData.hourlyRate && formData.bio) },
     { id: 3, label: "Skills & Edu", icon: Sparkles, isComplete: formData.skills.length > 0 },
     { id: 4, label: "Media", icon: Upload, isComplete: !!(profile?.user?.profileImage || files.profileImage) },
@@ -200,18 +198,10 @@ export function FreelancerOnboardingModal({
     // Basic Validation
     if (step === 1) {
       const phoneNumber = parsePhoneNumberFromString(formData.phoneNumber);
-      if (!formData.firstName || formData.firstName.length < 2) {
+      if (!formData.fullName || formData.fullName.length < 3) {
         toast({
           title: "Validation Error",
-          description: "First name must be at least 2 characters.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (!formData.lastName || formData.lastName.length < 2) {
-        toast({
-          title: "Validation Error",
-          description: "Last name must be at least 2 characters.",
+          description: "Full name must be at least 3 characters.",
           variant: "destructive",
         });
         return;
@@ -256,8 +246,7 @@ export function FreelancerOnboardingModal({
     try {
       if (step === 1) {
         const res = await freelancerService.updateOnboardingStep1({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          fullName: formData.fullName,
           phoneNumber: formData.phoneNumber,
           location: formData.location,
           region: formData.region,
@@ -564,23 +553,14 @@ export function FreelancerOnboardingModal({
         <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-6">
           {step === 1 && (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>First Name</Label>
+                  <Label>Full Name</Label>
                   <Input
-                    name="firstName"
-                    value={formData.firstName}
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleChange}
-                    placeholder="John"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Last Name</Label>
-                  <Input
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    placeholder="Doe"
+                    placeholder="John Doe"
                   />
                 </div>
               </div>

@@ -45,6 +45,8 @@ import ClientProfilePage from "./pages/client/ClientProfile";
 import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
 import NegotiationPage from "./pages/client/NegotiationPage";
+import ClientContractDetail from "./pages/client/ClientContractDetail";
+import ClientContracts from "./pages/client/ClientContracts";
 
 // Freelancer Pages
 import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
@@ -57,6 +59,9 @@ import FreelancerProfile from "./pages/freelancer/FreelancerProfile";
 import FreelancerSettings from "./pages/freelancer/FreelancerSettings";
 import FreelancerTokens from "./pages/freelancer/FreelancerTokens";
 import SavedProjects from "./pages/freelancer/SavedProjects";
+import FreelancerSubmitProposal from "./pages/freelancer/FreelancerSubmitProposal";
+import FreelancerContractDetail from "./pages/freelancer/FreelancerContractDetail";
+import FreelancerContracts from "./pages/freelancer/FreelancerContracts";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -153,6 +158,11 @@ const App = () => (
                     path="/client/proposals"
                     element={<MyProposalsPage />}
                   />
+                  <Route path="/client/contracts" element={<ClientContracts />} />
+                  <Route
+                    path="/client/contracts/:contractId"
+                    element={<ClientContractDetail />}
+                  />
                   <Route
                     path="/client/profile"
                     element={<ClientProfilePage />}
@@ -181,7 +191,7 @@ const App = () => (
                   />
                   <Route
                     path="/freelancer/projects"
-                    element={<FreelancerProjectsPage />}
+                    element={<Navigate to="/freelancer/contracts" replace />}
                   />
                   <Route
                     path="/freelancer/messages"
@@ -194,6 +204,18 @@ const App = () => (
                   <Route
                     path="/freelancer/projects/:projectId"
                     element={<FreelancerProjectDetails />}
+                  />
+                  <Route
+                    path="/freelancer/projects/:projectId/proposal"
+                    element={<FreelancerSubmitProposal />}
+                  />
+                  <Route
+                    path="/freelancer/contracts"
+                    element={<FreelancerContracts />}
+                  />
+                  <Route
+                    path="/freelancer/contracts/:contractId"
+                    element={<FreelancerContractDetail />}
                   />
                   <Route
                     path="/freelancer/settings"

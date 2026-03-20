@@ -118,7 +118,6 @@ export function useBrowseProjects() {
         params.set("experienceLevel", filters.experienceLevel);
       if (filters.size) params.set("size", filters.size);
       if (filters.clientVerified) params.set("clientVerified", "true");
-      if (filters.clientVerified) params.set("clientVerified", "true");
       return params.toString();
     },
     [filters, sort]

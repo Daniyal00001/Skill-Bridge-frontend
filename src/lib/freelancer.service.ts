@@ -12,8 +12,7 @@ export const freelancerService = {
   },
 
   updateOnboardingStep1: async (data: {
-    firstName: string;
-    lastName: string;
+    fullName: string;
     phoneNumber?: string;
     location: string;
     region: string;

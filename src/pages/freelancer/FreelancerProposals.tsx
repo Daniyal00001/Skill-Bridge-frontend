@@ -38,6 +38,7 @@ import {
   ChevronUp,
   Loader2,
   Zap,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -77,8 +78,12 @@ export default function FreelancerProposals() {
   const handleWithdraw = async (proposalId: string) => {
     try {
       await api.delete(`/proposals/${proposalId}/withdraw`);
-      setProposals((prev) => prev.filter((p) => p.id !== proposalId));
-      toast.success("Proposal withdrawn.");
+      setProposals((prev) =>
+        prev.map((p) =>
+          p.id === proposalId ? { ...p, status: "WITHDRAWN" } : p
+        )
+      );
+      toast.success("Proposal withdrawn successfully.");
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Failed to withdraw proposal",
@@ -86,11 +91,30 @@ export default function FreelancerProposals() {
     }
   };
 
+  const handleAcceptChanges = async (proposalId: string) => {
+    try {
+      await api.post(`/proposals/${proposalId}/accept-changes`);
+      setProposals((prev) =>
+        prev.map((p) =>
+          p.id === proposalId ? { ...p, negotiationStatus: "FREELANCER_ACCEPTED" } : p
+        )
+      );
+      toast.success("Milestone changes accepted! Waiting for client to hire you.");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || "Failed to accept changes",
+      );
+    }
+  };
+
   const filteredProposals = useMemo(() => {
     return proposals
       .filter((proposal) => {
-        const matchesTab =
-          activeTab === "all" || proposal.status?.toLowerCase() === activeTab;
+        const effectiveStatus =
+          proposal.project?.status === "CANCELLED"
+            ? "cancelled"
+            : proposal.status?.toLowerCase();
+        const matchesTab = activeTab === "all" || effectiveStatus === activeTab;
         const matchesSearch =
           proposal.project?.title
             ?.toLowerCase()
@@ -117,14 +141,27 @@ export default function FreelancerProposals() {
 
   const stats = {
     total: proposals.length,
-    pending: proposals.filter((p) => p.status?.toUpperCase() === "PENDING")
-      .length,
-    shortlisted: proposals.filter((p) => p.status?.toUpperCase() === "SHORTLISTED")
-      .length,
+    pending: proposals.filter(
+      (p) =>
+        p.status?.toUpperCase() === "PENDING" &&
+        p.project?.status !== "CANCELLED",
+    ).length,
+    shortlisted: proposals.filter(
+      (p) =>
+        p.status?.toUpperCase() === "SHORTLISTED" &&
+        p.project?.status !== "CANCELLED",
+    ).length,
     accepted: proposals.filter((p) => p.status?.toUpperCase() === "ACCEPTED")
       .length,
     rejected: proposals.filter((p) => p.status?.toUpperCase() === "REJECTED")
       .length,
+    withdrawn: proposals.filter((p) => p.status?.toUpperCase() === "WITHDRAWN")
+      .length,
+    cancelled: proposals.filter(
+      (p) =>
+        p.status?.toUpperCase() === "CANCELLED" ||
+        p.project?.status === "CANCELLED",
+    ).length,
     winRate:
       proposals.length > 0
         ? Math.round(
@@ -138,84 +175,101 @@ export default function FreelancerProposals() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8">
+      <div className="max-w-6xl w-full mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 md:p-8 min-w-0">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">
-            My Proposals
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Track and manage all your bids
-          </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-foreground">
+              My Proposals
+            </h1>
+            <p className="text-muted-foreground font-medium tracking-wide mt-1">
+              Track and manage all your bids
+            </p>
+          </div>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
           <StatCard
-            icon={<Inbox className="w-5 h-5 text-blue-500" />}
+            icon={<Inbox className="w-6 h-6 text-blue-500" />}
             label="Total Sent"
             value={stats.total}
           />
           <StatCard
-            icon={<Clock className="w-5 h-5 text-yellow-500" />}
+            icon={<Clock className="w-6 h-6 text-yellow-500" />}
             label="Pending"
             value={stats.pending}
           />
           <StatCard
-            icon={<CheckCircle className="w-5 h-5 text-green-500" />}
+            icon={<CheckCircle className="w-6 h-6 text-green-500" />}
             label="Accepted"
             value={stats.accepted}
           />
           <StatCard
-            icon={<XCircle className="w-5 h-5 text-red-500" />}
+            icon={<XCircle className="w-6 h-6 text-red-500" />}
             label="Rejected"
             value={stats.rejected}
           />
           <StatCard
-            icon={<TrendingUp className="w-5 h-5 text-purple-500" />}
+            icon={<TrendingUp className="w-6 h-6 text-purple-500" />}
             label="Win Rate"
             value={`${stats.winRate}%`}
           />
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col lg:flex-row gap-4 justify-between items-center bg-card p-2 rounded-xl border border-border shadow-sm">
-          <Tabs
-            defaultValue="all"
-            className="w-full lg:w-auto"
-            onValueChange={setActiveTab}
-          >
-            <TabsList className="bg-transparent border-none">
-              {[
-                { value: "all", label: `All (${stats.total})` },
-                { value: "pending", label: `Pending (${stats.pending})` },
-                { value: "shortlisted", label: `Shortlisted ⭐ (${stats.shortlisted})` },
-                { value: "accepted", label: `Accepted (${stats.accepted})` },
-                { value: "rejected", label: `Rejected (${stats.rejected})` },
-              ].map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="rounded-lg px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        {/* Filters Section */}
+        <div className="space-y-4">
+          {/* Status Tabs Row */}
+          <div className="bg-card p-2 rounded-xl border border-border shadow-sm w-full overflow-hidden">
+            <Tabs
+              defaultValue="all"
+              className="w-full overflow-x-auto scrollbar-none pb-2 lg:pb-0"
+              onValueChange={setActiveTab}
+            >
+              <TabsList className="bg-transparent border-none w-max">
+                {[
+                  { value: "all", label: `All (${stats.total})` },
+                  { value: "pending", label: `Pending (${stats.pending})` },
+                  {
+                    value: "shortlisted",
+                    label: `Shortlisted ⭐ (${stats.shortlisted})`,
+                  },
+                  { value: "accepted", label: `Accepted (${stats.accepted})` },
+                  { value: "rejected", label: `Rejected (${stats.rejected})` },
+                  {
+                    value: "withdrawn",
+                    label: `Withdrawn (${stats.withdrawn})`,
+                  },
+                  {
+                    value: "cancelled",
+                    label: `Cancelled (${stats.cancelled})`,
+                  },
+                ].map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="rounded-lg px-6 data-[state=active]:bg-[#4051B5] data-[state=active]:text-primary-foreground transition-all"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
 
-          <div className="flex items-center gap-3 w-full lg:w-auto">
-            <div className="relative flex-1 lg:w-64">
+          {/* Search & Sort Row */}
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-card p-3 rounded-xl border border-border shadow-sm">
+            <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search projects..."
-                className="pl-10 bg-accent/50 border-none focus-visible:ring-1 h-10"
+                className="pl-10 bg-primary/5 border-none focus-visible:ring-1 h-10 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[160px] bg-accent/50 border-none h-10">
+              <SelectTrigger className="w-full md:w-[180px] bg-primary/5 border-none h-10">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -244,6 +298,7 @@ export default function FreelancerProposals() {
                   isExpanded={!!expandedLetters[proposal.id]}
                   onToggleExpand={() => toggleExpand(proposal.id)}
                   onWithdraw={handleWithdraw}
+                  onAcceptChanges={handleAcceptChanges}
                 />
               ))
             ) : (
@@ -290,14 +345,16 @@ function StatCard({
   value: string | number;
 }) {
   return (
-    <Card className="bg-card/50 border-none shadow-none ring-1 ring-border">
-      <CardContent className="p-4 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+    <Card className="bg-card/40 backdrop-blur-xl border-border/40 shadow-sm hover:shadow-md transition-all rounded-[2rem]">
+      <CardContent className="p-6 flex flex-col items-start gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-primary/5 flex flex-shrink-0 items-center justify-center p-3">
           {icon}
         </div>
         <div>
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="text-xl font-bold">{value}</p>
+          <p className="text-3xl font-black text-foreground">{value}</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            {label}
+          </p>
         </div>
       </CardContent>
     </Card>
@@ -309,11 +366,13 @@ function ProposalCard({
   isExpanded,
   onToggleExpand,
   onWithdraw,
+  onAcceptChanges,
 }: {
   proposal: any;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onWithdraw: (id: string) => void;
+  onAcceptChanges: (id: string) => void;
 }) {
   const statusConfig: Record<
     string,
@@ -339,17 +398,29 @@ function ProposalCard({
       className: "bg-red-500/10 text-red-500 border-red-500/20",
       icon: XCircle,
     },
+    WITHDRAWN: {
+      label: "Withdrawn",
+      className: "bg-gray-500/10 text-gray-500 border-gray-500/20",
+      icon: Trash2,
+    },
+    CANCELLED: {
+      label: "Project Cancelled",
+      className: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+      icon: XCircle,
+    },
   };
 
-  const statusKey = proposal.status?.toUpperCase() || "PENDING";
-  const status = statusConfig[statusKey] || statusConfig["PENDING"];
   const project = proposal.project;
   const client = project?.client;
   const contract = proposal.contract;
 
+  let statusKey = proposal.status?.toUpperCase() || "PENDING";
+  if (project?.status === "CANCELLED") statusKey = "CANCELLED";
+  const status = statusConfig[statusKey] || statusConfig["PENDING"];
+
   return (
-    <Card className="group border-border hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm">
-      <CardContent className="p-6 space-y-6">
+    <Card className="group border-border/40 hover:border-primary/40 rounded-[2.5rem] transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-xl w-full">
+      <CardContent className="p-8 space-y-8 max-w-full overflow-hidden">
         {/* Top Row */}
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -361,7 +432,10 @@ function ProposalCard({
               {status.label}
             </Badge>
             {proposal.tokenCost > 0 && (
-              <Badge variant="secondary" className="bg-amber-500/5 text-amber-600 border-amber-500/10 flex items-center gap-1.5 px-2.5 py-0.5 font-bold">
+              <Badge
+                variant="secondary"
+                className="bg-amber-500/5 text-amber-600 border-amber-500/10 flex items-center gap-1.5 px-2.5 py-0.5 font-bold"
+              >
                 <Zap className="w-3 h-3 fill-amber-500 text-amber-500" />
                 {proposal.tokenCost} tokens
               </Badge>
@@ -408,19 +482,19 @@ function ProposalCard({
         </div>
 
         {/* Project Info */}
-        <div className="space-y-3">
+        <div className="space-y-4 max-w-full">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="space-y-1">
+            <div className="space-y-2 max-w-full">
               <Link
                 to={`/freelancer/projects/${project?.id}`}
-                className="text-xl font-bold hover:text-primary transition-colors inline-block"
+                className="text-2xl font-black hover:text-primary transition-colors inline-block break-words whitespace-pre-wrap max-w-full line-clamp-3"
               >
                 {project?.title || "Project"}
               </Link>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {client && (
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-accent/50 rounded-full text-xs font-medium">
-                    <Avatar className="w-4 h-4">
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/5 rounded-full text-xs font-bold text-foreground">
+                    <Avatar className="w-5 h-5">
                       <AvatarImage src={client.profileImage} />
                       <AvatarFallback>{client.name?.charAt(0)}</AvatarFallback>
                     </Avatar>
@@ -430,7 +504,7 @@ function ProposalCard({
                 {project?.category && (
                   <Badge
                     variant="secondary"
-                    className="bg-primary/5 text-primary text-[10px] uppercase tracking-wider font-bold"
+                    className="bg-primary/5 text-primary text-[10px] uppercase tracking-[0.2em] font-black py-1 px-3"
                   >
                     {project.category.name}
                   </Badge>
@@ -441,7 +515,7 @@ function ProposalCard({
         </div>
 
         {/* Bid Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-xl bg-accent/30 border border-border/50">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-xl bg-primary/5 border border-border/50">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-tight">
               Your Bid
@@ -470,11 +544,17 @@ function ProposalCard({
 
         {/* Cover Letter */}
         {proposal.coverLetter && (
-          <div className="space-y-2">
+          <div className="space-y-3 bg-primary/5 p-6 rounded-3xl border border-border/30 max-w-full overflow-hidden">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
+              Your Cover Letter
+            </h4>
             <p
               className={cn(
-                "text-sm text-muted-foreground leading-relaxed transition-all duration-300",
-                !isExpanded && "line-clamp-2",
+                "text-sm text-foreground/80 font-medium leading-relaxed transition-all duration-300 w-full min-w-0",
+                !isExpanded
+                  ? "line-clamp-1 break-words"
+                  : "break-words whitespace-pre-wrap",
               )}
             >
               {proposal.coverLetter}
@@ -499,43 +579,208 @@ function ProposalCard({
         {/* Status-specific sections */}
         <div className="pt-4 border-t border-border/50">
           {(statusKey === "PENDING" || statusKey === "SHORTLISTED") && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className={cn(
-                    "w-2 h-2 rounded-full animate-pulse",
-                    statusKey === "SHORTLISTED" ? "bg-blue-500" : "bg-yellow-500"
-                  )} />
-                  <div className={cn(
-                    "absolute inset-0 w-2 h-2 rounded-full animate-ping opacity-75",
-                    statusKey === "SHORTLISTED" ? "bg-blue-500" : "bg-yellow-500"
-                  )} />
+            proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS" ? (
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-5 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white shrink-0">
+                    <ListChecks className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-purple-600 dark:text-purple-400">
+                      Client requested more revisions!
+                    </h4>
+                    <p className="text-sm text-foreground/80">
+                      The client wants additional revisions for this project. Review and accept to proceed, or withdraw.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase">Your Offer</p>
+                        <div className="p-3 rounded-xl bg-background/30 border border-border/40">
+                          <p className="text-xs font-bold flex justify-between">
+                            Revisions: <span>{proposal.generalRevisionLimit === -1 ? "Unlimited" : proposal.generalRevisionLimit || 3}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-purple-500 uppercase">Client's Request</p>
+                        <div className="p-3 rounded-xl bg-purple-500/5 border border-purple-500/20">
+                          <p className="text-xs font-bold flex justify-between text-purple-700">
+                            Revisions:{" "}
+                            <span>
+                              {proposal.clientRequestedRevisions === -1
+                                ? "Unlimited"
+                                : proposal.clientRequestedRevisions ?? "—"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium">
-                    {statusKey === "SHORTLISTED" ? "You are shortlisted! ⭐" : "Awaiting client response"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {proposal.isViewedByClient ? (
-                      <span className="text-green-500 flex items-center gap-1">
-                        Client viewed your proposal{" "}
-                        <CheckCircle className="w-3 h-3" />
-                      </span>
-                    ) : (
-                      "Not yet viewed by client"
-                    )}
-                  </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6"
+                    onClick={() => onAcceptChanges(proposal.id)}
+                  >
+                    Accept Revision Request
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full px-6 border-destructive/30 hover:bg-destructive/10 text-destructive"
+                    onClick={() => onWithdraw(proposal.id)}
+                  >
+                    Reject & Withdraw
+                  </Button>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-                onClick={() => onWithdraw(proposal.id)}
-              >
-                Withdraw Proposal
-              </Button>
-            </div>
+            ) : proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
+             <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
+                    <ListChecks className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-blue-600 dark:text-blue-400">
+                      Client proposed milestone changes!
+                    </h4>
+                    <p className="text-sm text-foreground/80">
+                      Please review the suggested milestones and accept them to proceed, or withdraw your proposal.
+                    </p>
+
+                    {/* Comparison Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      {/* Original Side */}
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase">Your Original Plan</p>
+                        <div className="p-3 rounded-xl bg-background/30 border border-border/40 space-y-2">
+                          <p className="text-xs font-bold flex justify-between">
+                            Revisions: <span>{proposal.generalRevisionLimit === -1 ? "Unlimited" : proposal.generalRevisionLimit || 3}</span>
+                          </p>
+                          <div className="space-y-1">
+                            {(!proposal.proposalMilestones || proposal.proposalMilestones.length === 0) ? (
+                              <p className="text-[10px] italic text-muted-foreground">No milestones defined</p>
+                            ) : (
+                              proposal.proposalMilestones.map((m: any, idx: number) => (
+                                <div key={idx} className="flex justify-between text-[10px]">
+                                  <span className="truncate max-w-[100px]">{m.title}</span>
+                                  <span className="font-bold">${m.amount}</span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Client Side */}
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-blue-500 uppercase">Client's Request</p>
+                        <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-2">
+                          <p className="text-xs font-bold flex justify-between text-blue-700">
+                            Revisions: <span>{proposal.clientRequestedMilestones?.[0]?.allowedRevisions === -1 ? "Unlimited" : (proposal.clientRequestedMilestones?.[0]?.allowedRevisions || proposal.generalRevisionLimit || 3)}</span>
+                          </p>
+                          <div className="space-y-1">
+                            {proposal.clientRequestedMilestones?.map((m: any, idx: number) => (
+                              <div key={idx} className="flex justify-between text-[10px] text-blue-600">
+                                <span className="truncate max-w-[100px] font-bold">{m.title}</span>
+                                <span className="font-bold">${m.amount}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6"
+                    onClick={() => onAcceptChanges(proposal.id)}
+                  >
+                    Accept Changes
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full px-6 border-destructive/30 hover:bg-destructive/10 text-destructive"
+                    onClick={() => onWithdraw(proposal.id)}
+                  >
+                    Reject & Withdraw
+                  </Button>
+                </div>
+              </div>
+            ) : proposal.negotiationStatus === "FREELANCER_ACCEPTED" ? (
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 shrink-0">
+                    <CheckCircle className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium">Changes Accepted</p>
+                    <p className="text-xs text-muted-foreground">Waiting for client to finalize the contract.</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                  onClick={() => onWithdraw(proposal.id)}
+                >
+                  Withdraw Proposal
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div
+                      className={cn(
+                        "w-2 h-2 rounded-full animate-pulse",
+                        statusKey === "SHORTLISTED"
+                          ? "bg-blue-500"
+                          : "bg-yellow-500",
+                      )}
+                    />
+                    <div
+                      className={cn(
+                        "absolute inset-0 w-2 h-2 rounded-full animate-ping opacity-75",
+                        statusKey === "SHORTLISTED"
+                          ? "bg-blue-500"
+                          : "bg-yellow-500",
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium">
+                      {statusKey === "SHORTLISTED"
+                        ? "You are shortlisted! ⭐"
+                        : "Awaiting client response"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {proposal.isViewedByClient ? (
+                        <span className="text-green-500 flex items-center gap-1">
+                          Client viewed your proposal{" "}
+                          <CheckCircle className="w-3 h-3" />
+                        </span>
+                      ) : (
+                        "Not yet viewed by client"
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                  onClick={() => onWithdraw(proposal.id)}
+                >
+                  Withdraw Proposal
+                </Button>
+              </div>
+            )
           )}
 
           {statusKey === "ACCEPTED" && (
@@ -617,6 +862,31 @@ function ProposalCard({
                 >
                   <Copy className="w-3.5 h-3.5 mr-2" /> Copy Letter
                 </Button>
+              </div>
+            </div>
+          )}
+
+          {statusKey === "WITHDRAWN" && (
+            <div className="bg-gray-500/5 border border-gray-500/10 rounded-2xl p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">
+                    You withdrew your proposal from this project
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Your SkillTokens have been refunded to your wallet. You are no longer under consideration for this role.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 text-xs rounded-full"
+                    asChild
+                  >
+                    <Link to="/freelancer/browse">Find Other Projects</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           )}
