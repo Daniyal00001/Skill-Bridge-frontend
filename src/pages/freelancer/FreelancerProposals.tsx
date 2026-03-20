@@ -579,7 +579,63 @@ function ProposalCard({
         {/* Status-specific sections */}
         <div className="pt-4 border-t border-border/50">
           {(statusKey === "PENDING" || statusKey === "SHORTLISTED") && (
-            proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
+            proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS" ? (
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-5 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white shrink-0">
+                    <ListChecks className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-purple-600 dark:text-purple-400">
+                      Client requested more revisions!
+                    </h4>
+                    <p className="text-sm text-foreground/80">
+                      The client wants additional revisions for this project. Review and accept to proceed, or withdraw.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase">Your Offer</p>
+                        <div className="p-3 rounded-xl bg-background/30 border border-border/40">
+                          <p className="text-xs font-bold flex justify-between">
+                            Revisions: <span>{proposal.generalRevisionLimit === -1 ? "Unlimited" : proposal.generalRevisionLimit || 3}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black text-purple-500 uppercase">Client's Request</p>
+                        <div className="p-3 rounded-xl bg-purple-500/5 border border-purple-500/20">
+                          <p className="text-xs font-bold flex justify-between text-purple-700">
+                            Revisions:{" "}
+                            <span>
+                              {proposal.clientRequestedRevisions === -1
+                                ? "Unlimited"
+                                : proposal.clientRequestedRevisions ?? "—"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6"
+                    onClick={() => onAcceptChanges(proposal.id)}
+                  >
+                    Accept Revision Request
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full px-6 border-destructive/30 hover:bg-destructive/10 text-destructive"
+                    onClick={() => onWithdraw(proposal.id)}
+                  >
+                    Reject & Withdraw
+                  </Button>
+                </div>
+              </div>
+            ) : proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
              <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
@@ -656,6 +712,7 @@ function ProposalCard({
                 </div>
               </div>
             ) : proposal.negotiationStatus === "FREELANCER_ACCEPTED" ? (
+
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 shrink-0">

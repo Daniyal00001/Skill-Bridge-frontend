@@ -87,6 +87,19 @@ const ProjectProposalsPage = () => {
     bidAmount: 0,
   });
 
+  // Revision request modal state
+  const [revisionModal, setRevisionModal] = useState<{
+    open: boolean;
+    proposalId: string;
+    freelancerRevisions: number;
+    requested: string;
+  }>({
+    open: false,
+    proposalId: "",
+    freelancerRevisions: 3,
+    requested: "5",
+  });
+
   const toggleExpand = (id: string) =>
     setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
 
@@ -119,6 +132,35 @@ const ProjectProposalsPage = () => {
       toast.error(err?.response?.data?.message || "Failed to hire freelancer");
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const openRevisionModal = (proposal: any) => {
+    setRevisionModal({
+      open: true,
+      proposalId: proposal.id,
+      freelancerRevisions:
+        proposal.generalRevisionLimit === -1 ? -1 : proposal.generalRevisionLimit || 3,
+      requested: String(
+        (proposal.generalRevisionLimit === -1 ? 5 : (proposal.generalRevisionLimit || 3)) + 2
+      ),
+    });
+  };
+
+  const handleSubmitRevisionRequest = async () => {
+    try {
+      setProcessingId(revisionModal.proposalId);
+      await api.post(`/proposals/${revisionModal.proposalId}/request-revisions`, {
+        requestedRevisions: Number(revisionModal.requested),
+      });
+      toast.success("Revision request sent to freelancer.");
+      setRevisionModal({ open: false, proposalId: "", freelancerRevisions: 3, requested: "5" });
+      const res = await api.get(`/proposals/project/${projectId}`);
+      setProposals(res.data.proposals);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to send revision request.");
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -479,12 +521,9 @@ const ProjectProposalsPage = () => {
                   proposal={proposal}
                   isExpanded={!!expandedIds[proposal.id]}
                   onToggleExpand={() => toggleExpand(proposal.id)}
-                  onHire={
-                    proposal.negotiationStatus === "FREELANCER_ACCEPTED" || (!proposal.negotiationStatus && getActiveMilestones(proposal).length > 0)
-                      ? () => handleDirectHire(proposal)
-                      : () => openNegotiationModal(proposal)
-                  }
+                  onHire={() => handleDirectHire(proposal)}
                   onNegotiate={() => openNegotiationModal(proposal)}
+                  onRequestRevisions={() => openRevisionModal(proposal)}
                   onShortlist={handleShortlist}
                   onReject={handleReject}
                   isProcessing={processingId === proposal.id}
@@ -496,6 +535,83 @@ const ProjectProposalsPage = () => {
         </div>
       </div>
 
+      {/* ── Revision Request Modal ── */}
+      <Dialog
+        open={revisionModal.open}
+        onOpenChange={(o) => {
+          if (!o)
+            setRevisionModal({ open: false, proposalId: "", freelancerRevisions: 3, requested: "5" });
+        }}
+      >
+        <DialogContent className="rounded-2xl max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-black text-xl flex items-center gap-2">
+              <Shield className="w-5 h-5 text-primary" />
+              Request More Revisions
+            </DialogTitle>
+            <DialogDescription>
+              The freelancer offered{" "}
+              <strong>
+                {revisionModal.freelancerRevisions === -1
+                  ? "unlimited"
+                  : revisionModal.freelancerRevisions}
+              </strong>{" "}
+              revision{revisionModal.freelancerRevisions !== 1 ? "s" : ""}. You can request more
+              below. The freelancer must accept before you hire.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                Revisions You Need
+              </Label>
+              <Select
+                value={revisionModal.requested}
+                onValueChange={(v) =>
+                  setRevisionModal((p) => ({ ...p, requested: v }))
+                }
+              >
+                <SelectTrigger className="h-10 rounded-xl bg-background/60">
+                  <SelectValue placeholder="Select revisions" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border/40">
+                  {[1, 2, 3, 5, 7, 10].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n} Revision{n !== 1 ? "s" : ""}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="-1">Unlimited Revisions</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Separator />
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl"
+                onClick={() =>
+                  setRevisionModal({ open: false, proposalId: "", freelancerRevisions: 3, requested: "5" })
+                }
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 rounded-xl bg-primary hover:bg-primary/90 text-white font-black gap-2"
+                onClick={handleSubmitRevisionRequest}
+                disabled={!!processingId}
+              >
+                {processingId ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )}
+                Send Request
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* ── Milestone Setup / Edit Modal ── */}
       <Dialog
         open={milestoneModal.open}
@@ -505,6 +621,7 @@ const ProjectProposalsPage = () => {
               open: false,
               proposalId: "",
               mode: "setup",
+              purpose: "HIRE",
               milestones: [],
               bidAmount: 0,
             });
@@ -740,6 +857,7 @@ const ProposalCard = ({
   onToggleExpand,
   onHire,
   onNegotiate,
+  onRequestRevisions,
   onShortlist,
   onReject,
   isProcessing,
@@ -750,6 +868,7 @@ const ProposalCard = ({
   onToggleExpand: () => void;
   onHire: () => void;
   onNegotiate: () => void;
+  onRequestRevisions: () => void;
   onShortlist: (id: string) => void;
   onReject: (id: string) => void;
   isProcessing: boolean;
@@ -1108,57 +1227,103 @@ const ProposalCard = ({
 
         {/* Action Buttons — for PENDING or SHORTLISTED */}
         {(status === "PENDING" || status === "SHORTLISTED") && (
-          <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border/40">
-            <Button
-              className="flex-1 h-12 rounded-xl font-black text-base gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
-              onClick={onHire}
-              disabled={isProcessing || proposal.negotiationStatus === "CLIENT_PROPOSED"}
-            >
-              {isProcessing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <CheckCircle2 className="w-5 h-5" />
-              )}
-              {isProcessing
-                ? "Processing..."
-                : proposal.negotiationStatus === "CLIENT_PROPOSED"
-                ? "Waiting for Freelancer..."
-                : proposal.negotiationStatus === "FREELANCER_ACCEPTED"
-                ? "Accept & Hire Freelancer"
-                : hasMilestones
-                ? "Hire Freelancer"
-                : "Setup Plan & Hire Freelancer →"}
-            </Button>
+          <div className="space-y-3 pt-2 border-t border-border/40">
+            {/* Primary hire row */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                className="flex-1 h-12 rounded-xl font-black text-base gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+                onClick={onHire}
+                disabled={
+                  isProcessing ||
+                  proposal.negotiationStatus === "CLIENT_PROPOSED" ||
+                  proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS"
+                }
+              >
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-5 h-5" />
+                )}
+                {isProcessing
+                  ? "Processing..."
+                  : proposal.negotiationStatus === "CLIENT_PROPOSED"
+                  ? "Waiting for Freelancer..."
+                  : proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS"
+                  ? "Waiting for Freelancer..."
+                  : proposal.negotiationStatus === "FREELANCER_ACCEPTED"
+                  ? "Accept & Hire Freelancer"
+                  : "Hire Freelancer"}
+              </Button>
 
-            {status === "PENDING" && (
+              {status === "PENDING" && (
+                <Button
+                  variant="outline"
+                  className="sm:w-auto h-12 rounded-xl font-black border-2 border-primary/40 text-primary hover:bg-primary/5 gap-2"
+                  onClick={() => onShortlist(proposal.id)}
+                  disabled={isProcessing}
+                >
+                  <Star className="w-4 h-4" /> Shortlist
+                </Button>
+              )}
+
               <Button
                 variant="outline"
-                className="sm:w-auto h-12 rounded-xl font-black border-2 border-primary/40 text-primary hover:bg-primary/5 gap-2"
-                onClick={() => onShortlist(proposal.id)}
+                className="sm:w-auto h-12 rounded-xl font-black border-2 border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/50 gap-2"
+                onClick={() => onReject(proposal.id)}
                 disabled={isProcessing}
               >
-                <Star className="w-4 h-4" /> Shortlist
+                <XCircle className="w-4 h-4" /> Reject
               </Button>
+
+              <Button
+                variant="ghost"
+                className="sm:w-auto h-12 rounded-xl font-bold gap-2 text-primary hover:bg-primary/10"
+                asChild
+              >
+                <Link to="/client/messages">
+                  <MessageSquare className="w-4 h-4" /> Message
+                </Link>
+              </Button>
+            </div>
+
+            {/* Optional negotiation actions — only show when not already in a pending negotiation */}
+            {!proposal.negotiationStatus && (
+              <div className="flex flex-wrap gap-2">
+                {!hasMilestones && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 rounded-lg text-xs font-bold border-primary/30 text-primary hover:bg-primary/5 gap-1.5"
+                      onClick={onRequestRevisions}
+                      disabled={isProcessing}
+                    >
+                      <Edit2 className="w-3 h-3" /> Request More Revisions
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 rounded-lg text-xs font-bold border-blue-500/30 text-blue-600 hover:bg-blue-500/5 gap-1.5"
+                      onClick={onNegotiate}
+                      disabled={isProcessing}
+                    >
+                      <ListChecks className="w-3 h-3" /> Add Milestones
+                    </Button>
+                  </>
+                )}
+                {hasMilestones && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-lg text-xs font-bold border-border/50 text-muted-foreground hover:text-primary gap-1.5"
+                    onClick={onNegotiate}
+                    disabled={isProcessing}
+                  >
+                    <Edit2 className="w-3 h-3" /> Edit Milestones
+                  </Button>
+                )}
+              </div>
             )}
-
-            <Button
-              variant="outline"
-              className="sm:w-auto h-12 rounded-xl font-black border-2 border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/50 gap-2"
-              onClick={() => onReject(proposal.id)}
-              disabled={isProcessing}
-            >
-              <XCircle className="w-4 h-4" /> Reject
-            </Button>
-
-            <Button
-              variant="ghost"
-              className="sm:w-auto h-12 rounded-xl font-bold gap-2 text-primary hover:bg-primary/10"
-              asChild
-            >
-              <Link to="/client/messages">
-                <MessageSquare className="w-4 h-4" /> Message
-              </Link>
-            </Button>
           </div>
         )}
       </CardContent>
