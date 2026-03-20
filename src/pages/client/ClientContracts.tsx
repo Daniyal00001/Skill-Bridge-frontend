@@ -54,7 +54,6 @@ const ClientContractsPage = () => {
 
       if (activeTab === "active") return c.status === "ACTIVE";
       if (activeTab === "completed") return c.status === "COMPLETED";
-      if (activeTab === "cancelled") return c.status === "CANCELLED";
       return true;
     });
   }, [contracts, searchTerm, activeTab]);
@@ -87,7 +86,6 @@ const ClientContractsPage = () => {
               {[
                 { value: "active", label: "Active" },
                 { value: "completed", label: "Completed" },
-                { value: "cancelled", label: "Cancelled" },
                 { value: "all", label: "All" },
               ].map((tab) => (
                 <TabsTrigger
