@@ -15,21 +15,26 @@ import {
   ArrowRight,
   Loader2,
   TrendingUp,
+  Filter,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { useMemo } from "react";
 const FreelancerContractsPage = () => {
   const [contracts, setContracts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("active");
 
   useEffect(() => {
     const fetchContracts = async () => {
       setLoading(true);
       try {
         const res = await api.get("/contracts");
-        setContracts(res.data.contracts);
+        setContracts(res.data.contracts || []);
       } catch (err) {
         toast.error("Failed to load contracts");
       } finally {
@@ -38,6 +43,20 @@ const FreelancerContractsPage = () => {
     };
     fetchContracts();
   }, []);
+
+  const filteredContracts = useMemo(() => {
+    return contracts.filter((c) => {
+      const title = c.title || c.project?.title || "";
+      const matchSearch = title.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!matchSearch) return false;
+
+      if (activeTab === "active") return c.status === "ACTIVE";
+      if (activeTab === "pending") return c.status === "OFFER_PENDING";
+      if (activeTab === "completed") return c.status === "COMPLETED";
+      if (activeTab === "cancelled") return c.status === "CANCELLED";
+      return true;
+    });
+  }, [contracts, searchTerm, activeTab]);
 
   return (
     <DashboardLayout>
@@ -56,31 +75,70 @@ const FreelancerContractsPage = () => {
           </Button>
         </div>
 
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="bg-muted/50 p-1 rounded-2xl border border-border/20"
+          >
+            <TabsList className="bg-transparent gap-2 h-12">
+              {[
+                { value: "active", label: "Active" },
+                { value: "pending", label: "Offer Pending" },
+                { value: "completed", label: "Completed" },
+                { value: "cancelled", label: "Cancelled" },
+                { value: "all", label: "All" },
+              ].map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="rounded-xl font-black px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search contracts..."
+              className="pl-12 h-14 bg-card/40 border-border/40 rounded-2xl font-medium"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
             <p className="text-muted-foreground font-medium">Fetching active contracts...</p>
           </div>
-        ) : contracts.length === 0 ? (
+        ) : filteredContracts.length === 0 ? (
           <Card className="border-2 border-dashed border-border/60 bg-card/20 py-24 rounded-[2.5rem]">
             <CardContent className="flex flex-col items-center justify-center text-center space-y-4">
               <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
                 <Briefcase className="w-10 h-10 text-muted-foreground/40" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black">No active contracts yet</h3>
+                <h3 className="text-2xl font-black">{searchTerm ? "No matching contracts" : "No active contracts yet"}</h3>
                 <p className="text-muted-foreground max-w-xs mx-auto">
-                  Submit high-quality proposals with milestone plans to win your first contract.
+                  {searchTerm ? "Try adjusting your search terms." : "Submit high-quality proposals with milestone plans to win your first contract."}
                 </p>
               </div>
-              <Button asChild className="rounded-xl h-12 px-8 font-bold shadow-lg">
-                <Link to="/freelancer/browse">Explore Projects</Link>
-              </Button>
+              {!searchTerm && (
+                <Button asChild className="rounded-xl h-12 px-8 font-bold shadow-lg">
+                  <Link to="/freelancer/browse">Explore Projects</Link>
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {contracts.map((contract) => (
+            {filteredContracts.map((contract) => (
               <ContractCard key={contract.id} contract={contract} role="FREELANCER" />
             ))}
           </div>

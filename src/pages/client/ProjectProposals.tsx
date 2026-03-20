@@ -776,6 +776,10 @@ const ProposalCard = ({
       label: "Rejected",
       className: "bg-red-500/10 text-red-600 border-red-500/20",
     },
+    WITHDRAWN: {
+      label: "Withdrawn ✕",
+      className: "bg-gray-500/10 text-gray-500 border-gray-500/20",
+    },
   };
 
   const cfg = statusConfig[status] || statusConfig["PENDING"];
@@ -798,10 +802,19 @@ const ProposalCard = ({
         "border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 overflow-hidden",
         status === "ACCEPTED" && "border-emerald-500/30 bg-emerald-500/5",
         status === "REJECTED" && "opacity-60",
+        status === "WITHDRAWN" && "opacity-50 grayscale-0 border-gray-500/10 bg-muted/10 ring-0",
         status === "PENDING" && "hover:border-primary/30 hover:shadow-lg"
       )}
     >
       <CardContent className="p-6 space-y-6">
+        {status === "WITHDRAWN" && (
+          <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500 mb-2">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+            <p className="text-sm font-bold text-amber-700 leading-tight">
+              Freelancer has withdrawn this proposal. You can no longer hire or negotiate for this bid.
+            </p>
+          </div>
+        )}
         {/* Top Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
