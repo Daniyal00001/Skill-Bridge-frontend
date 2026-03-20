@@ -1021,16 +1021,21 @@ const ProposalCard = ({
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
               Cover Letter
             </p>
-            <div
-              className={cn(
-                "text-sm text-muted-foreground leading-relaxed transition-all duration-300 prose prose-sm dark:prose-invert max-w-none prose-p:my-0 prose-headings:my-1",
-                !isExpanded && "line-clamp-3"
+            <div className="bg-muted/30 p-5 rounded-2xl border border-border/40 relative group/cover">
+              <div
+                className={cn(
+                  "text-sm text-foreground/80 leading-relaxed transition-all duration-300 prose prose-sm dark:prose-invert max-w-none prose-p:mb-4 last:prose-p:mb-0 whitespace-pre-wrap",
+                  !isExpanded && "line-clamp-[5] max-h-[120px] overflow-hidden"
+                )}
+                dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
+              />
+              {!isExpanded && (
+                 <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-muted/50 to-transparent pointer-events-none rounded-b-2xl" />
               )}
-              dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
-            />
+            </div>
             <button
               onClick={onToggleExpand}
-              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+              className="text-xs font-black text-primary hover:underline flex items-center gap-1.5 px-1 w-fit mt-1"
             >
               {isExpanded ? (
                 <>
