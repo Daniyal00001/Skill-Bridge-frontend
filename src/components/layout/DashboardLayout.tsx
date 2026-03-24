@@ -228,6 +228,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             items: [
               { icon: Users, label: "Users", href: "/admin/users" },
               { icon: FolderOpen, label: "Projects", href: "/admin/projects" },
+              { icon: Star, label: "Skills", href: "/admin/skills" },
               {
                 icon: AlertTriangle,
                 label: "Disputes",

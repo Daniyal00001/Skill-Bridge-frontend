@@ -51,6 +51,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useCategories } from "@/hooks/useCategories";
 import { useMetadata } from "@/hooks/useMetadata";
+import { SkillAutocomplete } from "@/components/common/SkillAutocomplete";
 
 const SKILL_SUGGESTIONS = [
   "React",
@@ -974,31 +975,30 @@ const PostProjectPage = () => {
                           </button>
                         ))}
                       <div className="flex flex-col gap-1">
-                        <Input
-                          placeholder="Type custom skill & press Enter..."
+                        <SkillAutocomplete
                           value={customSkill}
-                          onChange={(e) => {
-                            if (e.target.value.length <= VALIDATION.skill.max)
-                              setCustomSkill(e.target.value);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && customSkill.trim()) {
-                              e.preventDefault();
-                              const trimmed = customSkill.trim();
-                              if (trimmed.length < VALIDATION.skill.min) {
-                                toast.error(
-                                  `Skill must be at least ${VALIDATION.skill.min} characters`,
-                                );
-                                return;
-                              }
-                              if (!formData.skills.includes(trimmed))
-                                updateFormData({
-                                  skills: [...formData.skills, trimmed],
-                                });
-                              setCustomSkill("");
+                          onChange={(val) => {
+                            if (val.length <= VALIDATION.skill.max) {
+                              setCustomSkill(val);
                             }
                           }}
-                          className="h-8 w-[240px] text-xs rounded-full border-dashed focus-visible:ring-primary/30"
+                          onSelect={(skillName) => {
+                            const trimmed = skillName.trim();
+                            if (trimmed.length < VALIDATION.skill.min) {
+                              toast.error(
+                                `Skill must be at least ${VALIDATION.skill.min} characters`,
+                              );
+                              return;
+                            }
+                            if (!formData.skills.includes(trimmed)) {
+                              updateFormData({
+                                skills: [...formData.skills, trimmed],
+                              });
+                            }
+                            setCustomSkill("");
+                          }}
+                          placeholder="Type custom skill & press Enter..."
+                          className="w-[240px] [&_.relative>input]:h-8 [&_.relative>input]:text-xs [&_.relative>input]:rounded-full [&_.relative>input]:border-dashed [&_.relative>input]:focus-visible:ring-primary/30"
                         />
                         <div className="flex justify-end w-[240px] pr-2">
                           <p className="text-[10px] text-muted-foreground">

@@ -38,6 +38,7 @@ import { useMetadata } from "@/hooks/useMetadata";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { SkillAutocomplete } from "@/components/common/SkillAutocomplete";
 
 export function FreelancerOnboardingModal({
   isOpen,
@@ -755,17 +756,14 @@ export function FreelancerOnboardingModal({
                     <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                       Skill Name
                     </Label>
-                    <Input
-                      placeholder="e.g. React, Python, UI Design"
+                    <SkillAutocomplete
                       value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addSkill(skillInput);
-                        }
+                      onChange={setSkillInput}
+                      onSelect={(skillName) => {
+                        addSkill(skillName);
                       }}
-                      className="rounded-xl h-11 border-none bg-muted/50 focus-visible:ring-primary"
+                      placeholder="e.g. React, Python, UI Design"
+                      className="[&_.relative>input]:rounded-xl [&_.relative>input]:h-11 [&_.relative>input]:border-none [&_.relative>input]:bg-muted/50 [&_.relative>input]:focus-visible:ring-primary"
                     />
                   </div>
                   <div className="w-full sm:w-32 space-y-2">
