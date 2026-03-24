@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,12 +40,14 @@ import {
   Zap,
   ListChecks,
   FileText,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export default function FreelancerProposals() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -375,6 +377,7 @@ function ProposalCard({
   onWithdraw: (id: string) => void;
   onAcceptChanges: (id: string) => void;
 }) {
+  const navigate = useNavigate();
   const statusConfig: Record<
     string,
     { label: string; className: string; icon: React.ElementType }
@@ -420,7 +423,10 @@ function ProposalCard({
   const status = statusConfig[statusKey] || statusConfig["PENDING"];
 
   return (
-    <Card className="group border-border/40 hover:border-primary/40 rounded-[2.5rem] transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-xl w-full">
+    <Card 
+      className="group border-border/40 hover:border-primary/40 rounded-[2.5rem] transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-xl w-full cursor-pointer"
+      onClick={() => navigate(`/freelancer/proposals/${proposal.id}`)}
+    >
       <CardContent className="p-8 space-y-8 max-w-full overflow-hidden">
         {/* Top Row */}
         <div className="flex justify-between items-start">
@@ -463,7 +469,17 @@ function ProposalCard({
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
                 className="gap-2"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/freelancer/proposals/${proposal.id}`);
+                }}
+              >
+                <FileText className="w-4 h-4" /> View Full Proposal
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="gap-2"
+                onClick={(e) => {
+                  e.stopPropagation();
                   navigator.clipboard.writeText(proposal.coverLetter || "");
                   toast.success("Cover letter copied!");
                 }}
@@ -489,6 +505,7 @@ function ProposalCard({
               <Link
                 to={`/freelancer/projects/${project?.id}`}
                 className="text-2xl font-black hover:text-primary transition-colors inline-block break-words whitespace-pre-wrap max-w-full line-clamp-3"
+                onClick={(e) => e.stopPropagation()}
               >
                 {project?.title || "Project"}
               </Link>
@@ -510,6 +527,17 @@ function ProposalCard({
                     {project.category.name}
                   </Badge>
                 )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 rounded-lg font-black gap-1.5 text-primary hover:bg-primary/10 transition-all ml-auto md:ml-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/freelancer/proposals/${proposal.id}`);
+                  }}
+                >
+                  View Details <ChevronRight className="w-3 h-3" />
+                </Button>
               </div>
             </div>
           </div>
@@ -558,7 +586,10 @@ function ProposalCard({
               dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
             />
             <button
-              onClick={onToggleExpand}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExpand();
+              }}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
             >
               {isExpanded ? (
@@ -590,6 +621,7 @@ function ProposalCard({
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     className="group relative flex flex-col items-center gap-2 p-2 rounded-xl bg-muted/30 border border-border/40 hover:bg-primary/5 hover:border-primary/20 transition-all overflow-hidden"
                   >
                     {isImage ? (

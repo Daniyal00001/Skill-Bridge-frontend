@@ -46,6 +46,7 @@ import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
 import NegotiationPage from "./pages/client/NegotiationPage";
 import ClientContractDetail from "./pages/client/ClientContractDetail";
+import ClientProposalDetail from "./pages/client/ClientProposalDetail";
 import ClientContracts from "./pages/client/ClientContracts";
 
 // Freelancer Pages
@@ -62,6 +63,7 @@ import SavedProjects from "./pages/freelancer/SavedProjects";
 import FreelancerSubmitProposal from "./pages/freelancer/FreelancerSubmitProposal";
 import FreelancerContractDetail from "./pages/freelancer/FreelancerContractDetail";
 import FreelancerContracts from "./pages/freelancer/FreelancerContracts";
+import FreelancerProposalDetail from "./pages/freelancer/FreelancerProposalDetail";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -132,6 +134,10 @@ const App = () => (
                     element={<ProjectProposalsPage />}
                   />
                   <Route
+                    path="/client/projects/:projectId/proposals/:proposalId"
+                    element={<ClientProposalDetail />}
+                  />
+                  <Route
                     path="/client/messages"
                     element={<ClientMessagesPage />}
                   />
@@ -189,6 +195,10 @@ const App = () => (
                   <Route
                     path="/freelancer/proposals"
                     element={<FreelancerProposalsPage />}
+                  />
+                  <Route
+                    path="/freelancer/proposals/:proposalId"
+                    element={<FreelancerProposalDetail />}
                   />
                   <Route
                     path="/freelancer/projects"

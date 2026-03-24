@@ -533,6 +533,7 @@ const ProjectProposalsPage = () => {
                   onReject={handleReject}
                   isProcessing={processingId === proposal.id}
                   projectBudget={project?.budget}
+                  projectId={projectId || ""}
                 />
               ))}
             </div>
@@ -824,7 +825,8 @@ const ProjectProposalsPage = () => {
                     open: false,
                     proposalId: "",
                     mode: "setup",
-                    milestones: [],
+                    purpose: "HIRE",
+                    milestones: [] as MilestoneInput[],
                     bidAmount: 0,
                   })
                 }
@@ -867,6 +869,7 @@ const ProposalCard = ({
   onReject,
   isProcessing,
   projectBudget,
+  projectId,
 }: {
   proposal: any;
   isExpanded: boolean;
@@ -878,7 +881,9 @@ const ProposalCard = ({
   onReject: (id: string) => void;
   isProcessing: boolean;
   projectBudget?: number;
+  projectId: string;
 }) => {
+  const navigate = useNavigate();
   const freelancer = proposal.freelancer;
   const status = proposal.status?.toUpperCase();
   const [milestoneExpanded, setMilestoneExpanded] = useState(false);
@@ -922,12 +927,13 @@ const ProposalCard = ({
 
   return (
     <Card
+      onClick={() => navigate(`/client/projects/${projectId}/proposals/${proposal.id}`)}
       className={cn(
-        "border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 overflow-hidden",
+        "border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 overflow-hidden cursor-pointer",
         status === "ACCEPTED" && "border-emerald-500/30 bg-emerald-500/5",
         status === "REJECTED" && "opacity-60",
         status === "WITHDRAWN" && "opacity-50 grayscale-0 border-gray-500/10 bg-muted/10 ring-0",
-        status === "PENDING" && "hover:border-primary/30 hover:shadow-lg"
+        status === "PENDING" && "hover:border-primary/30 hover:shadow-lg hover:bg-muted/30"
       )}
     >
       <CardContent className="p-6 space-y-6">
@@ -989,12 +995,24 @@ const ProposalCard = ({
               </div>
             </div>
           </div>
-          <Badge
-            variant="outline"
-            className={cn("font-bold text-xs shrink-0", cfg.className)}
-          >
-            {cfg.label}
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-xl font-black text-[10px] uppercase tracking-widest gap-2 bg-primary/5 border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/40 transition-all shadow-sm"
+              asChild
+            >
+              <Link to={`/client/projects/${projectId}/proposals/${proposal.id}`}>
+                Review Proposal <ExternalLink className="w-3 h-3" />
+              </Link>
+            </Button>
+            <Badge
+              variant="outline"
+              className={cn("font-bold text-xs shrink-0 px-3 py-1", cfg.className)}
+            >
+              {cfg.label}
+            </Badge>
+          </div>
         </div>
 
         {/* Negotiation Comparison Banner */}
@@ -1083,7 +1101,10 @@ const ProposalCard = ({
         {hasMilestones && (
           <div className="space-y-3">
             <button
-              onClick={() => setMilestoneExpanded((p) => !p)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setMilestoneExpanded((p) => !p);
+              }}
               className="flex items-center gap-2 text-sm font-black text-primary hover:underline"
             >
               <ListChecks className="w-4 h-4" />
@@ -1136,10 +1157,10 @@ const ProposalCard = ({
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onNegotiate();
-                        }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNegotiate();
+                      }}
                         title="Negotiate/Edit this milestone"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -1171,7 +1192,10 @@ const ProposalCard = ({
               )}
             </div>
             <button
-              onClick={onToggleExpand}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExpand();
+              }}
               className="text-xs font-black text-primary hover:underline flex items-center gap-1.5 px-1 w-fit mt-1"
             >
               {isExpanded ? (
@@ -1237,7 +1261,10 @@ const ProposalCard = ({
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 className="flex-1 h-12 rounded-xl font-black text-base gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
-                onClick={onHire}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onHire();
+                }}
                 disabled={
                   isProcessing ||
                   proposal.negotiationStatus === "CLIENT_PROPOSED" ||
@@ -1264,7 +1291,10 @@ const ProposalCard = ({
                 <Button
                   variant="outline"
                   className="sm:w-auto h-12 rounded-xl font-black border-2 border-primary/40 text-primary hover:bg-primary/5 gap-2"
-                  onClick={() => onShortlist(proposal.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShortlist(proposal.id);
+                  }}
                   disabled={isProcessing}
                 >
                   <Star className="w-4 h-4" /> Shortlist
@@ -1274,7 +1304,10 @@ const ProposalCard = ({
               <Button
                 variant="outline"
                 className="sm:w-auto h-12 rounded-xl font-black border-2 border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/50 gap-2"
-                onClick={() => onReject(proposal.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReject(proposal.id);
+                }}
                 disabled={isProcessing}
               >
                 <XCircle className="w-4 h-4" /> Reject
@@ -1285,7 +1318,7 @@ const ProposalCard = ({
                 className="sm:w-auto h-12 rounded-xl font-bold gap-2 text-primary hover:bg-primary/10"
                 asChild
               >
-                <Link to="/client/messages">
+                <Link to="/client/messages" onClick={(e) => e.stopPropagation()}>
                   <MessageSquare className="w-4 h-4" /> Message
                 </Link>
               </Button>
@@ -1300,7 +1333,10 @@ const ProposalCard = ({
                       variant="outline"
                       size="sm"
                       className="h-8 rounded-lg text-xs font-bold border-primary/30 text-primary hover:bg-primary/5 gap-1.5"
-                      onClick={onRequestRevisions}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRequestRevisions();
+                      }}
                       disabled={isProcessing}
                     >
                       <Edit2 className="w-3 h-3" /> Request More Revisions
@@ -1321,7 +1357,10 @@ const ProposalCard = ({
                     variant="outline"
                     size="sm"
                     className="h-8 rounded-lg text-xs font-bold border-border/50 text-muted-foreground hover:text-primary gap-1.5"
-                    onClick={onNegotiate}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onNegotiate();
+                    }}
                     disabled={isProcessing}
                   >
                     <Edit2 className="w-3 h-3" /> Edit Milestones
