@@ -69,8 +69,8 @@ const SKILL_SUGGESTIONS = [
 const VALIDATION = {
   title: { min: 5, max: 80 },
   shortDesc: { min: 10, max: 120 },
-  fullDesc: { min: 30, max: 2000 },
-  functionalReq: { min: 20, max: 2000 },
+  fullDesc: { min: 30, max: 3000 },
+  functionalReq: { min: 20, max: 3000 },
   skill: { min: 2, max: 30 },
 };
 
@@ -541,7 +541,7 @@ const PostProjectPage = () => {
                 <CardContent className="space-y-8">
                   <div className="space-y-1">
                     <label className="text-sm font-semibold">
-                      Describe your vision *
+                      Describe your vision (up to 3000 words) *
                     </label>
                     <Textarea
                       placeholder="What's the big picture? Why are you building this?"
@@ -569,7 +569,7 @@ const PostProjectPage = () => {
 
                   <div className="space-y-1">
                     <label className="text-sm font-semibold">
-                      Functional Requirements *
+                      Functional Requirements (up to 3000 words) *
                     </label>
                     <Textarea
                       placeholder="List specific features or modules you need..."
