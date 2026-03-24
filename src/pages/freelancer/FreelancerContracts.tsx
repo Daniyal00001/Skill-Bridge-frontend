@@ -51,7 +51,6 @@ const FreelancerContractsPage = () => {
       if (!matchSearch) return false;
 
       if (activeTab === "active") return c.status === "ACTIVE";
-      if (activeTab === "pending") return c.status === "OFFER_PENDING";
       if (activeTab === "completed") return c.status === "COMPLETED";
       if (activeTab === "cancelled") return c.status === "CANCELLED";
       return true;
@@ -85,7 +84,6 @@ const FreelancerContractsPage = () => {
             <TabsList className="bg-transparent gap-2 h-12">
               {[
                 { value: "active", label: "Active" },
-                { value: "pending", label: "Offer Pending" },
                 { value: "completed", label: "Completed" },
                 { value: "cancelled", label: "Cancelled" },
                 { value: "all", label: "All" },

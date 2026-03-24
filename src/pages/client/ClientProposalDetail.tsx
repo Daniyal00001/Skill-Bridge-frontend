@@ -43,6 +43,7 @@ import {
   Edit2,
   PlusCircle,
   DollarSign,
+  History,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -97,7 +98,7 @@ const ClientProposalDetail = () => {
 
   const milestoneTotal = milestoneModal.milestones.reduce(
     (s, m) => s + Number(m.amount || 0),
-    0
+    0,
   );
   const milestoneTotalMatch =
     Math.abs(milestoneTotal - milestoneModal.bidAmount) < 0.01;
@@ -126,8 +127,12 @@ const ClientProposalDetail = () => {
     setProcessingAction(newStatus);
     try {
       await api.patch(`/proposals/${proposalId}/status`, { status: newStatus });
-      toast.success(newStatus === "ACCEPTED" ? "Freelancer hired! 🚀" : `Proposal ${newStatus.toLowerCase()}!`);
-      
+      toast.success(
+        newStatus === "ACCEPTED"
+          ? "Freelancer hired! 🚀"
+          : `Proposal ${newStatus.toLowerCase()}!`,
+      );
+
       if (newStatus === "ACCEPTED") {
         try {
           const res = await api.get(`/contracts/project/${projectId}`);
@@ -139,7 +144,10 @@ const ClientProposalDetail = () => {
         setProposal({ ...proposal, status: newStatus });
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || `Failed to update status to ${newStatus}`);
+      toast.error(
+        err?.response?.data?.message ||
+          `Failed to update status to ${newStatus}`,
+      );
     } finally {
       setProcessingAction(null);
     }
@@ -150,9 +158,13 @@ const ClientProposalDetail = () => {
       open: true,
       proposalId: proposal.id,
       freelancerRevisions:
-        proposal.generalRevisionLimit === -1 ? -1 : proposal.generalRevisionLimit || 3,
+        proposal.generalRevisionLimit === -1
+          ? -1
+          : proposal.generalRevisionLimit || 3,
       requested: String(
-        (proposal.generalRevisionLimit === -1 ? 5 : (proposal.generalRevisionLimit || 3)) + 2
+        (proposal.generalRevisionLimit === -1
+          ? 5
+          : proposal.generalRevisionLimit || 3) + 2,
       ),
     });
   };
@@ -164,18 +176,27 @@ const ClientProposalDetail = () => {
         requestedRevisions: Number(revisionModal.requested),
       });
       toast.success("Revision request sent to freelancer.");
-      setRevisionModal({ open: false, proposalId: "", freelancerRevisions: 3, requested: "5" });
+      setRevisionModal({
+        open: false,
+        proposalId: "",
+        freelancerRevisions: 3,
+        requested: "5",
+      });
       const res = await api.get(`/proposals/${proposalId}`);
       setProposal(res.data.proposal);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to send revision request.");
+      toast.error(
+        err?.response?.data?.message || "Failed to send revision request.",
+      );
     } finally {
       setProcessingAction(null);
     }
   };
 
   const getActiveMilestonesList = (p: any) => {
-    return (p.negotiationStatus === "FREELANCER_ACCEPTED" || p.negotiationStatus === "CLIENT_PROPOSED") && p.clientRequestedMilestones
+    return (p.negotiationStatus === "FREELANCER_ACCEPTED" ||
+      p.negotiationStatus === "CLIENT_PROPOSED") &&
+      p.clientRequestedMilestones
       ? p.clientRequestedMilestones
       : p.proposalMilestones || [];
   };
@@ -188,15 +209,24 @@ const ClientProposalDetail = () => {
       purpose: "NEGOTIATE",
       mode: rawMilestones.length > 0 ? "edit" : "setup",
       bidAmount: proposal.bidAmount || 0,
-      milestones: rawMilestones.length > 0
-        ? rawMilestones.map((m: any) => ({
-            title: m.title || "",
-            description: m.description || "",
-            amount: String(m.amount || ""),
-            dueDate: m.dueDate ? m.dueDate.substring(0, 10) : "",
-            allowedRevisions: String(m.allowedRevisions || 3),
-          }))
-        : [{ title: "", description: "", amount: "", dueDate: "", allowedRevisions: "3" }],
+      milestones:
+        rawMilestones.length > 0
+          ? rawMilestones.map((m: any) => ({
+              title: m.title || "",
+              description: m.description || "",
+              amount: String(m.amount || ""),
+              dueDate: m.dueDate ? m.dueDate.substring(0, 10) : "",
+              allowedRevisions: String(m.allowedRevisions || 3),
+            }))
+          : [
+              {
+                title: "",
+                description: "",
+                amount: "",
+                dueDate: "",
+                allowedRevisions: "3",
+              },
+            ],
     });
   };
 
@@ -217,7 +247,7 @@ const ClientProposalDetail = () => {
     if (Math.abs(total - bidAmount) > 0.01) {
       toast.error(
         `Milestone amounts must add up to the bid amount ($${bidAmount.toLocaleString()}).`,
-        { description: `Current total: $${total.toFixed(2)}` }
+        { description: `Current total: $${total.toFixed(2)}` },
       );
       return;
     }
@@ -234,7 +264,9 @@ const ClientProposalDetail = () => {
           order: i,
         })),
       });
-      toast.success("Changes suggested to the freelancer. Waiting for approval.");
+      toast.success(
+        "Changes suggested to the freelancer. Waiting for approval.",
+      );
       setMilestoneModal({
         open: false,
         proposalId: "",
@@ -257,7 +289,13 @@ const ClientProposalDetail = () => {
       ...p,
       milestones: [
         ...p.milestones,
-        { title: "", description: "", amount: "", dueDate: "", allowedRevisions: "3" },
+        {
+          title: "",
+          description: "",
+          amount: "",
+          dueDate: "",
+          allowedRevisions: "3",
+        },
       ],
     }));
 
@@ -267,7 +305,11 @@ const ClientProposalDetail = () => {
       milestones: p.milestones.filter((_, i) => i !== idx),
     }));
 
-  const updateMilestone = (idx: number, field: keyof MilestoneInput, value: string) =>
+  const updateMilestone = (
+    idx: number,
+    field: keyof MilestoneInput,
+    value: string,
+  ) =>
     setMilestoneModal((p) => ({
       ...p,
       milestones: p.milestones.map((m, i) =>
@@ -281,7 +323,7 @@ const ClientProposalDetail = () => {
                     : String(Math.max(0, Number(value)))
                   : value,
             }
-          : m
+          : m,
       ),
     }));
 
@@ -301,28 +343,37 @@ const ClientProposalDetail = () => {
   if (!proposal || !project) return null;
 
   const freelancer = proposal.freelancer;
-  const milestones = (proposal.negotiationStatus === "FREELANCER_ACCEPTED" || proposal.negotiationStatus === "CLIENT_PROPOSED") && proposal.clientRequestedMilestones
+  const milestones =
+    (proposal.negotiationStatus === "FREELANCER_ACCEPTED" ||
+      proposal.negotiationStatus === "CLIENT_PROPOSED") &&
+    proposal.clientRequestedMilestones
       ? proposal.clientRequestedMilestones
       : proposal.proposalMilestones || [];
 
   return (
     <DashboardLayout>
       <div className="container max-w-6xl mx-auto space-y-8 p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        
         {/* Navigation & Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               className="h-12 w-12 rounded-2xl bg-muted/50 hover:bg-muted"
-              onClick={() => navigate(`/client/projects/${projectId}/proposals`)}
+              onClick={() =>
+                navigate(`/client/projects/${projectId}/proposals`)
+              }
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight">Review Proposal</h1>
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight">
+                Review Proposal
+              </h1>
               <p className="text-muted-foreground font-medium flex items-center gap-2 mt-1">
-                Project: <span className="text-foreground font-bold">{project.title}</span>
+                Project:{" "}
+                <span className="text-foreground font-bold">
+                  {project.title}
+                </span>
               </p>
             </div>
           </div>
@@ -332,22 +383,24 @@ const ClientProposalDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Main Content (Left) */}
           <div className="lg:col-span-2 space-y-8">
-            
             {/* Freelancer Header */}
             <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
               <CardContent className="p-8">
                 <div className="flex flex-col md:flex-row gap-8">
                   <Avatar className="h-24 w-24 ring-8 ring-primary/5">
                     <AvatarImage src={freelancer?.profileImage} />
-                    <AvatarFallback className="text-3xl font-black">{freelancer?.name?.[0]}</AvatarFallback>
+                    <AvatarFallback className="text-3xl font-black">
+                      {freelancer?.name?.[0]}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <h2 className="text-2xl font-black tracking-tight">{freelancer?.name}</h2>
+                        <h2 className="text-2xl font-black tracking-tight">
+                          {freelancer?.name}
+                        </h2>
                         <p className="text-muted-foreground font-black text-sm uppercase tracking-widest opacity-60">
                           {freelancer?.title || "Professional Developer"}
                         </p>
@@ -357,7 +410,7 @@ const ClientProposalDetail = () => {
                         {freelancer?.rating?.toFixed(1) || "5.0"}
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-4">
                       <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
                         <Briefcase className="w-4 h-4 text-primary/60" />
@@ -365,7 +418,11 @@ const ClientProposalDetail = () => {
                       </div>
                       <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground border-l border-border/40 pl-4">
                         <Clock className="w-4 h-4 text-primary/60" />
-                        Joined {new Date(freelancer?.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                        Joined{" "}
+                        {new Date(freelancer?.createdAt).toLocaleDateString(
+                          undefined,
+                          { month: "long", year: "numeric" },
+                        )}
                       </div>
                     </div>
                   </div>
@@ -377,12 +434,14 @@ const ClientProposalDetail = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3 ml-2">
                 <div className="w-1.5 h-6 bg-primary rounded-full" />
-                <h3 className="text-xl font-black tracking-tight">Cover Letter</h3>
+                <h3 className="text-xl font-black tracking-tight">
+                  Cover Letter
+                </h3>
               </div>
               <Card className="border-border/40 bg-card/40 backdrop-blur-sm rounded-[2.5rem] overflow-hidden">
                 <CardContent className="p-10">
-                  <div 
-                    className="prose prose-lg dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-foreground/90 prose-p:mb-6 last:prose-p:mb-0 prose-headings:font-black prose-strong:font-black"
+                  <div
+                    className="prose prose-lg dark:prose-invert max-w-none break-words overflow-hidden prose-p:leading-relaxed prose-p:text-foreground/90 prose-p:mb-6 last:prose-p:mb-0 prose-headings:font-black prose-strong:font-black"
                     dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
                   />
                 </CardContent>
@@ -394,56 +453,76 @@ const ClientProposalDetail = () => {
               <div className="flex items-center justify-between gap-3 ml-2 pr-2">
                 <div className="flex items-center gap-3">
                   <div className="w-1.5 h-6 bg-primary rounded-full" />
-                  <h3 className="text-xl font-black tracking-tight">Milestone Strategy</h3>
+                  <h3 className="text-xl font-black tracking-tight">
+                    Milestone Strategy
+                  </h3>
                 </div>
-                {proposal.status !== "ACCEPTED" && proposal.status !== "REJECTED" && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-10 rounded-2xl font-black gap-2 text-primary hover:bg-primary/10 bg-primary/5 px-4"
-                    onClick={openNegotiationModal}
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    {milestones.length === 0 ? "Setup Plan" : "Edit Plan"}
-                  </Button>
-                )}
+                {proposal.status !== "ACCEPTED" &&
+                  proposal.status !== "REJECTED" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 rounded-2xl font-black gap-2 text-primary hover:bg-primary/10 bg-primary/5 px-4"
+                      onClick={openNegotiationModal}
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      {milestones.length === 0 ? "Setup Plan" : "Edit Plan"}
+                    </Button>
+                  )}
               </div>
-              
+
               {milestones.length > 0 ? (
                 <div className="space-y-3">
                   {milestones.map((m: any, i: number) => (
-                    <div key={i} className="p-6 rounded-3xl bg-muted/20 border border-border/40 flex flex-col gap-6 group hover:bg-muted/30 transition-all">
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-6">
-                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary text-sm shrink-0 border border-primary/20">
-                                    {i + 1}
-                                </div>
-                                <div className="space-y-1 min-w-0">
-                                    <p className="font-black text-lg break-words">{m.title}</p>
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant="outline" className="text-[10px] font-black uppercase tracking-tighter border-primary/20 bg-primary/5 text-primary rounded-md">
-                                            {m.allowedRevisions === -1 ? 'Unlimited' : m.allowedRevisions} Revisions
-                                        </Badge>
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40">Milestone {i + 1}</span>
-                                    </div>
-                                </div>
+                    <div
+                      key={i}
+                      className="p-6 rounded-3xl bg-muted/20 border border-border/40 flex flex-col gap-6 group hover:bg-muted/30 transition-all"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-6">
+                          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary text-sm shrink-0 border border-primary/20">
+                            {i + 1}
+                          </div>
+                          <div className="space-y-1 min-w-0">
+                            <p className="font-black text-lg break-words">
+                              {m.title}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] font-black uppercase tracking-tighter border-primary/20 bg-primary/5 text-primary rounded-md"
+                              >
+                                {m.allowedRevisions === -1
+                                  ? "Unlimited"
+                                  : m.allowedRevisions}{" "}
+                                Revisions
+                              </Badge>
+                              <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40">
+                                Milestone {i + 1}
+                              </span>
                             </div>
-                            <div className="text-right shrink-0">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-1">Release Amount</p>
-                                <p className="text-3xl font-black text-primary">${Number(m.amount).toLocaleString()}</p>
-                            </div>
+                          </div>
                         </div>
-                        {m.description && (
-                            <div className="space-y-3">
-                                <Separator className="bg-border/10" />
-                                <div className="flex gap-4">
-                                    <div className="w-1 h-full bg-primary/20 rounded-full shrink-0" />
-                                    <p className="text-sm text-muted-foreground font-medium leading-relaxed italic opacity-80">
-                                        {m.description}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+                        <div className="text-right shrink-0">
+                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-1">
+                            Release Amount
+                          </p>
+                          <p className="text-3xl font-black text-primary">
+                            ${Number(m.amount).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      {m.description && (
+                        <div className="space-y-3">
+                          <Separator className="bg-border/10" />
+                          <div className="flex gap-4">
+                            <div className="w-1 h-full bg-primary/20 rounded-full shrink-0" />
+                            <p className="text-sm text-muted-foreground font-medium leading-relaxed italic opacity-80">
+                              {m.description}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -452,12 +531,15 @@ const ClientProposalDetail = () => {
                   <div className="w-16 h-16 rounded-3xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
                     <ListChecks className="w-8 h-8 text-primary/40" />
                   </div>
-                  <h4 className="text-lg font-black opacity-80 mb-2">No Milestone Plan Defined</h4>
+                  <h4 className="text-lg font-black opacity-80 mb-2">
+                    No Milestone Plan Defined
+                  </h4>
                   <p className="text-sm text-muted-foreground font-medium max-w-sm mx-auto mb-8">
-                    Defining milestones early ensures payment clarity and project predictability. 
-                    You can propose a custom milestone schedule to the freelancer.
+                    Defining milestones early ensures payment clarity and
+                    project predictability. You can propose a custom milestone
+                    schedule to the freelancer.
                   </p>
-                  <Button 
+                  <Button
                     variant="outline"
                     className="h-14 rounded-2xl font-black gap-2 border-2 border-primary/20 text-primary hover:bg-primary/5 px-8"
                     onClick={openNegotiationModal}
@@ -473,11 +555,15 @@ const ClientProposalDetail = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-3 ml-2">
                   <div className="w-1.5 h-6 bg-primary rounded-full" />
-                  <h3 className="text-xl font-black tracking-tight">Supporting Documents ({proposal.attachments.length})</h3>
+                  <h3 className="text-xl font-black tracking-tight">
+                    Supporting Documents ({proposal.attachments.length})
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {proposal.attachments.map((url: string, i: number) => {
-                    const isImage = url.match(/\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i);
+                    const isImage = url.match(
+                      /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i,
+                    );
                     return (
                       <a
                         key={i}
@@ -488,7 +574,11 @@ const ClientProposalDetail = () => {
                       >
                         {isImage ? (
                           <div className="w-full aspect-video rounded-2xl overflow-hidden border border-border/20 shadow-sm">
-                            <img src={url} alt="attachment" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <img
+                              src={url}
+                              alt="attachment"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
                           </div>
                         ) : (
                           <div className="w-full aspect-video rounded-2xl bg-muted/50 flex items-center justify-center border border-border/20 group-hover:scale-105 transition-transform duration-500">
@@ -513,26 +603,41 @@ const ClientProposalDetail = () => {
 
           {/* Sidebar Actions (Right) */}
           <div className="space-y-6 lg:sticky lg:top-8 self-start">
-            
             {/* Action Card */}
             <Card className="border-primary/20 bg-primary/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-primary/5 border-2">
               <CardContent className="p-8 space-y-8 text-center md:text-left">
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Your Investment</p>
-                    <p className="text-5xl font-black text-center">${proposal.bidAmount?.toLocaleString()}</p>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
+                      Your Investment
+                    </p>
+                    <p className="text-5xl font-black text-center">
+                      ${proposal.bidAmount?.toLocaleString()}
+                    </p>
                     <p className="text-center text-xs font-bold text-muted-foreground mt-2 italic opacity-60">
                       vs {project.budget?.toLocaleString()} Project Budget
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-background/40 p-4 rounded-3xl border border-border/20 text-center">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase opacity-60">Delivery</p>
-                      <p className="text-lg font-black">{proposal.deliveryDays} Days</p>
+                      <p className="text-[10px] font-black text-muted-foreground uppercase opacity-60">
+                        Delivery
+                      </p>
+                      <p className="text-lg font-black">
+                        {proposal.deliveryDays} Days
+                      </p>
                     </div>
                     <div className="bg-background/40 p-4 rounded-3xl border border-border/20 text-center">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase opacity-60">Revisions</p>
-                      <p className="text-lg font-black">{proposal.generalRevisionLimit === -1 ? "Inf." : proposal.generalRevisionLimit || 3}</p>
+                      <p className="text-[10px] font-black text-muted-foreground uppercase opacity-60">
+                        Revisions
+                      </p>
+                      <p className="text-lg font-black">
+                        {milestones.length > 0
+                          ? "Milestone-based"
+                          : proposal.generalRevisionLimit === -1
+                            ? "Inf."
+                            : proposal.generalRevisionLimit || 3}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -541,96 +646,213 @@ const ClientProposalDetail = () => {
                   {proposal.status === "ACCEPTED" && proposal.contract?.id ? (
                     <Button
                       className="w-full h-16 rounded-[1.5rem] font-black text-lg gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
-                      onClick={() => navigate(`/client/contracts/${proposal.contract.id}`)}
+                      onClick={() =>
+                        navigate(`/client/contracts/${proposal.contract.id}`)
+                      }
                     >
                       <Shield className="w-6 h-6" /> View Contract
                     </Button>
                   ) : (
-                    <Button
-                      className="w-full h-16 rounded-[1.5rem] font-black text-lg gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
-                      onClick={() => handleStatusUpdate("ACCEPTED")}
-                      disabled={!!processingAction || proposal.status === "ACCEPTED" || proposal.status === "REJECTED"}
-                    >
-                      {processingAction === "ACCEPTED" ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-6 h-6" />}
-                      {proposal.status === "ACCEPTED" ? "Hired ✓" : "Hire Freelancer"}
-                    </Button>
-                  )}
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      variant="outline"
-                      className="h-14 rounded-2xl font-black gap-2 border-2 border-primary/20 text-primary hover:bg-primary/5"
-                      onClick={() => handleStatusUpdate("SHORTLISTED")}
-                      disabled={!!processingAction || proposal.status === "SHORTLISTED"}
-                    >
-                      <Star className={cn("w-4 h-4", proposal.status === "SHORTLISTED" && "fill-primary")} /> {proposal.status === "SHORTLISTED" ? "Shortlisted" : "Shortlist"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-14 rounded-2xl font-black gap-2 border-2 text-muted-foreground hover:text-red-500 hover:border-red-500/30"
-                      onClick={() => handleStatusUpdate("REJECTED")}
-                      disabled={!!processingAction || proposal.status === "REJECTED"}
-                    >
-                      <XCircle className="w-4 h-4" /> Reject
-                    </Button>
-                  </div>
+                    <>
+                      {proposal.status !== "REJECTED" && (
+                        <>
+                          <Button
+                            className="w-full h-16 rounded-[1.5rem] font-black text-lg gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
+                            onClick={() => handleStatusUpdate("ACCEPTED")}
+                            disabled={
+                              !!processingAction ||
+                              proposal.status === "ACCEPTED"
+                            }
+                          >
+                            {processingAction === "ACCEPTED" ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="w-5 h-5" />
+                            )}
+                            {proposal.status === "ACCEPTED"
+                              ? "Hired ✓"
+                              : proposal.negotiationStatus ===
+                                  "FREELANCER_ACCEPTED"
+                                ? "Finalize Contract & Hire"
+                                : "Hire Freelancer"}
+                          </Button>
 
+                          <div className="grid grid-cols-2 gap-3">
+                            <Button
+                              variant="outline"
+                              className="h-14 rounded-2xl font-black gap-2 border-2 border-primary/20 text-primary hover:bg-primary/5"
+                              onClick={() => handleStatusUpdate("SHORTLISTED")}
+                              disabled={
+                                !!processingAction ||
+                                proposal.status === "SHORTLISTED"
+                              }
+                            >
+                              <Star
+                                className={cn(
+                                  "w-4 h-4",
+                                  proposal.status === "SHORTLISTED" &&
+                                    "fill-primary",
+                                )}
+                              />{" "}
+                              {proposal.status === "SHORTLISTED"
+                                ? "Shortlisted"
+                                : "Shortlist"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="h-14 rounded-2xl font-black gap-2 border-2 text-muted-foreground hover:text-red-500 hover:border-red-500/30"
+                              onClick={() => handleStatusUpdate("REJECTED")}
+                              disabled={
+                                !!processingAction ||
+                                proposal.status === "REJECTED"
+                              }
+                            >
+                              <XCircle className="w-4 h-4" /> Reject
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
             {/* Negotiation Tools */}
-            {proposal.status !== "ACCEPTED" && proposal.status !== "REJECTED" && !proposal.negotiationStatus && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 px-4">
-                  <div className="w-1 h-4 bg-primary rounded-full" />
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Negotiation Tools</p>
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                  <Button
-                    variant="outline"
-                    className="h-14 rounded-2xl font-bold border-2 border-primary/20 text-primary hover:bg-primary/5 flex items-center justify-between px-6 group"
-                    onClick={openNegotiationModal}
-                    disabled={!!processingAction}
-                  >
-                    <div className="flex items-center gap-3">
-                      <ListChecks className="w-5 h-5" />
-                      {milestones.length === 0 ? "Setup Milestone Plan" : "Negotiate Milestones"}
+            {proposal.status !== "ACCEPTED" &&
+              proposal.status !== "REJECTED" && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 px-4">
+                    <div className="w-1 h-4 bg-primary rounded-full" />
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                      Negotiation Tools
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    <Button
+                      variant="outline"
+                      className="h-14 rounded-2xl font-bold border-2 border-primary/20 text-primary hover:bg-primary/5 flex items-center justify-between px-6 group"
+                      onClick={openNegotiationModal}
+                      disabled={!!processingAction}
+                    >
+                      <div className="flex items-center gap-3">
+                        <ListChecks className="w-5 h-5" />
+                        {milestones.length === 0
+                          ? "Setup Milestone Plan"
+                          : "Negotiate Milestones"}
+                      </div>
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full h-14 rounded-2xl font-bold border-2 border-border/40 text-muted-foreground hover:text-primary hover:border-primary/20 flex items-center justify-between px-6 group"
+                        onClick={openRevisionModal}
+                        disabled={!!processingAction || milestones.length > 0}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Shield className="w-5 h-5" />
+                          Request More Revisions
+                        </div>
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                      {milestones.length > 0 && (
+                        <p className="text-[10px] text-muted-foreground font-medium px-4 leading-tight italic opacity-70">
+                          Revisions are now managed within individual
+                          milestones. Use "Negotiate Milestones" to adjust
+                          limits.
+                        </p>
+                      )}
                     </div>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    className="h-14 rounded-2xl font-bold border-2 border-border/40 text-muted-foreground hover:text-primary hover:border-primary/20 flex items-center justify-between px-6 group"
-                    onClick={openRevisionModal}
-                    disabled={!!processingAction}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Shield className="w-5 h-5" />
-                      Request More Revisions
-                    </div>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
+                  </div>
                 </div>
+              )}
+
+            {/* Negotiation Status Banners */}
+            {(proposal.negotiationStatus === "CLIENT_PROPOSED" ||
+              proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS") && (
+              <div className="bg-amber-500/5 border border-amber-500/20 rounded-[2rem] p-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-amber-600">
+                    <History className="w-5 h-5" />
+                    <h4 className="text-sm font-black uppercase tracking-wider">
+                      Negotiation Summary
+                    </h4>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-black px-3 py-1"
+                  >
+                    Pending Review
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">
+                      Freelancer's Original
+                    </p>
+                    <div className="bg-muted/30 p-4 rounded-2xl border border-border/20">
+                      {(proposal.proposalMilestones || []).length > 0 ? (
+                        <p className="text-lg font-black">
+                          {proposal.proposalMilestones?.length || 0} Milestones
+                        </p>
+                      ) : (
+                        <p className="text-lg font-black">
+                          {proposal.generalRevisionLimit === -1
+                            ? "Unlimited"
+                            : proposal.generalRevisionLimit || 3}{" "}
+                          Revisions
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest pl-1">
+                      Your Request
+                    </p>
+                    <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20">
+                      {(proposal.clientRequestedMilestones || []).length > 0 ? (
+                        <p className="text-lg font-black text-amber-600">
+                          {proposal.clientRequestedMilestones?.length || 0}{" "}
+                          Milestones
+                        </p>
+                      ) : (
+                        <p className="text-lg font-black text-amber-600">
+                          {proposal.clientRequestedRevisions === -1
+                            ? "Unlimited"
+                            : proposal.clientRequestedRevisions}{" "}
+                          Revisions
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs font-medium text-muted-foreground italic border-t border-border/10 pt-4 px-1">
+                  Waiting for the freelancer to review and accept these changes.
+                </p>
               </div>
             )}
 
-            {/* Negotiation Status Banner */}
-            {proposal.negotiationStatus === "CLIENT_PROPOSED" && (
-              <div className="bg-primary/5 border border-primary/20 rounded-[2rem] p-6 flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Clock className="w-6 h-6 text-primary" />
+            {proposal.negotiationStatus === "FREELANCER_ACCEPTED" && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] p-6 flex gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-lg shadow-emerald-500/5">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center shrink-0 text-white shadow-lg shadow-emerald-500/20">
+                  <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-black text-primary uppercase tracking-tight">Pending Approval</h4>
-                  <p className="text-[10px] text-muted-foreground font-bold leading-relaxed">
-                    You've proposed changes. We're waiting for the freelancer to review and accept them.
+                  <h4 className="text-sm font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">
+                    Changes Accepted! 🎉
+                  </h4>
+                  <p className="text-xs text-foreground/80 font-bold leading-relaxed">
+                    The freelancer has accepted your proposed terms and
+                    milestones. You can now finalize the contract to start the
+                    project.
                   </p>
                 </div>
               </div>
             )}
-
           </div>
         </div>
 
@@ -639,7 +861,12 @@ const ClientProposalDetail = () => {
           open={revisionModal.open}
           onOpenChange={(o) => {
             if (!o)
-              setRevisionModal({ open: false, proposalId: "", freelancerRevisions: 3, requested: "5" });
+              setRevisionModal({
+                open: false,
+                proposalId: "",
+                freelancerRevisions: 3,
+                requested: "5",
+              });
           }}
         >
           <DialogContent className="rounded-[2rem] max-w-md border-border/40 bg-card/95 backdrop-blur-xl">
@@ -655,8 +882,9 @@ const ClientProposalDetail = () => {
                     ? "unlimited"
                     : revisionModal.freelancerRevisions}
                 </span>{" "}
-                revision{revisionModal.freelancerRevisions !== 1 ? "s" : ""}. You can request more
-                below. The freelancer must accept before you hire.
+                revision{revisionModal.freelancerRevisions !== 1 ? "s" : ""}.
+                You can request more below. The freelancer must accept before
+                you hire.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
@@ -675,11 +903,17 @@ const ClientProposalDetail = () => {
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
                     {[1, 2, 3, 5, 7, 10].map((n) => (
-                      <SelectItem key={n} value={String(n)} className="font-bold">
+                      <SelectItem
+                        key={n}
+                        value={String(n)}
+                        className="font-bold"
+                      >
                         {n} Revision{n !== 1 ? "s" : ""}
                       </SelectItem>
                     ))}
-                    <SelectItem value="-1" className="font-bold">Unlimited Revisions</SelectItem>
+                    <SelectItem value="-1" className="font-bold">
+                      Unlimited Revisions
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -689,7 +923,12 @@ const ClientProposalDetail = () => {
                   variant="outline"
                   className="flex-1 h-12 rounded-2xl font-black border-2 border-border/40"
                   onClick={() =>
-                    setRevisionModal({ open: false, proposalId: "", freelancerRevisions: 3, requested: "5" })
+                    setRevisionModal({
+                      open: false,
+                      proposalId: "",
+                      freelancerRevisions: 3,
+                      requested: "5",
+                    })
                   }
                 >
                   Cancel
@@ -733,24 +972,26 @@ const ClientProposalDetail = () => {
                   <ListChecks className="w-6 h-6 text-primary" />
                 </div>
                 {milestoneModal.mode === "setup"
-                    ? "Define Milestone Plan"
-                    : "Suggest Milestone Changes"}
+                  ? "Define Milestone Plan"
+                  : "Suggest Milestone Changes"}
               </DialogTitle>
               <DialogDescription className="font-medium text-muted-foreground/80 mt-2">
                 {milestoneModal.mode === "setup"
-                    ? "No milestones were provided. Define the payment plan and revision limits, then send it to the freelancer for approval."
-                    : "Suggest changes to the freelancer's milestones. If you submit changes, the freelancer must review and approve them before the contract can begin."}
+                  ? "No milestones were provided. Define the payment plan and revision limits, then send it to the freelancer for approval."
+                  : "Suggest changes to the freelancer's milestones. If you submit changes, the freelancer must review and approve them before the contract can begin."}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-4 px-2">
               {/* Validation Banner */}
-              <div className={cn(
-                "p-5 rounded-3xl border-2 flex items-center justify-between gap-4 transition-all",
-                milestoneTotalMatch 
-                  ? "bg-emerald-500/5 border-emerald-500/20" 
-                  : "bg-amber-500/5 border-amber-500/20"
-              )}>
+              <div
+                className={cn(
+                  "p-5 rounded-3xl border-2 flex items-center justify-between gap-4 transition-all",
+                  milestoneTotalMatch
+                    ? "bg-emerald-500/5 border-emerald-500/20"
+                    : "bg-amber-500/5 border-amber-500/20",
+                )}
+              >
                 <div className="flex items-center gap-3">
                   {milestoneTotalMatch ? (
                     <CheckCircle2 className="w-5 h-5 text-emerald-600" />
@@ -759,18 +1000,30 @@ const ClientProposalDetail = () => {
                   )}
                   <div>
                     <p className="text-sm font-black uppercase tracking-tight">
-                      {milestoneTotalMatch ? "Total Matches Bid" : "Amounts Must Match Bid"}
+                      {milestoneTotalMatch
+                        ? "Total Matches Bid"
+                        : "Amounts Must Match Bid"}
                     </p>
                     <p className="text-[10px] font-bold text-muted-foreground">
-                      Must equal exactly ${milestoneModal.bidAmount?.toLocaleString()}
+                      Must equal exactly $
+                      {milestoneModal.bidAmount?.toLocaleString()}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={cn("text-xl font-black", milestoneTotalMatch ? "text-emerald-600" : "text-amber-600")}>
+                  <p
+                    className={cn(
+                      "text-xl font-black",
+                      milestoneTotalMatch
+                        ? "text-emerald-600"
+                        : "text-amber-600",
+                    )}
+                  >
                     ${milestoneTotal.toLocaleString()}
                   </p>
-                  <p className="text-[10px] font-bold opacity-40">/ ${milestoneModal.bidAmount?.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold opacity-40">
+                    / ${milestoneModal.bidAmount?.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
@@ -803,60 +1056,93 @@ const ClientProposalDetail = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Title *</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          Title *
+                        </Label>
                         <Input
                           value={m.title}
-                          onChange={(e) => updateMilestone(idx, "title", e.target.value)}
+                          onChange={(e) =>
+                            updateMilestone(idx, "title", e.target.value)
+                          }
                           placeholder="e.g. Design Prototype"
                           className="h-12 rounded-2xl bg-background/60"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount ($) *</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          Amount ($) *
+                        </Label>
                         <div className="relative">
                           <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
                             type="number"
                             value={m.amount}
-                            onChange={(e) => updateMilestone(idx, "amount", e.target.value)}
+                            onChange={(e) =>
+                              updateMilestone(idx, "amount", e.target.value)
+                            }
                             className="h-12 pl-10 rounded-2xl bg-background/60"
                           />
                         </div>
                       </div>
                       <div className="sm:col-span-2 space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Deliverables</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          Deliverables
+                        </Label>
                         <Textarea
                           value={m.description}
-                          onChange={(e) => updateMilestone(idx, "description", e.target.value)}
+                          onChange={(e) =>
+                            updateMilestone(idx, "description", e.target.value)
+                          }
                           rows={2}
                           placeholder="What will be delivered in this phase?"
                           className="rounded-2xl bg-background/60 p-4 resize-none min-h-[80px]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Due Date</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          Due Date
+                        </Label>
                         <Input
                           type="date"
                           value={m.dueDate}
-                          onChange={(e) => updateMilestone(idx, "dueDate", e.target.value)}
+                          onChange={(e) =>
+                            updateMilestone(idx, "dueDate", e.target.value)
+                          }
                           className="h-12 rounded-2xl bg-background/60"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Revisions</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          Revisions
+                        </Label>
                         <Select
                           value={m.allowedRevisions}
-                          onValueChange={(val) => updateMilestone(idx, "allowedRevisions", val)}
+                          onValueChange={(val) =>
+                            updateMilestone(idx, "allowedRevisions", val)
+                          }
                         >
                           <SelectTrigger className="h-12 rounded-2xl bg-background/60">
                             <SelectValue placeholder="Standard (3)" />
                           </SelectTrigger>
                           <SelectContent className="rounded-2xl border-border/40">
-                            <SelectItem value="1" className="font-bold">1 Revision</SelectItem>
-                            <SelectItem value="2" className="font-bold">2 Revisions</SelectItem>
-                            <SelectItem value="3" className="font-bold">3 Revisions</SelectItem>
-                            <SelectItem value="5" className="font-bold">5 Revisions</SelectItem>
-                            <SelectItem value="-1" className="font-bold">Unlimited</SelectItem>
+                            <SelectItem value="1" className="font-bold">
+                              1 Revision
+                            </SelectItem>
+                            <SelectItem value="2" className="font-bold">
+                              2 Revisions
+                            </SelectItem>
+                            <SelectItem value="3" className="font-bold">
+                              3 Revisions
+                            </SelectItem>
+                            <SelectItem value="5" className="font-bold">
+                              5 Revisions
+                            </SelectItem>
+                            <SelectItem value="7" className="font-bold">
+                              7 Revisions
+                            </SelectItem>
+                            <SelectItem value="-1" className="font-bold">
+                              Unlimited
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -902,7 +1188,9 @@ const ClientProposalDetail = () => {
                   ) : (
                     <CheckCircle2 className="w-5 h-5" />
                   )}
-                  {milestoneModal.mode === "setup" ? "Send Proposal" : "Send Changes"}
+                  {milestoneModal.mode === "setup"
+                    ? "Send Proposal"
+                    : "Send Changes"}
                 </Button>
               </div>
             </div>

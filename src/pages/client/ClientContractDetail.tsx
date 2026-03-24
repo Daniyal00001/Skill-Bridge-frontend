@@ -63,6 +63,12 @@ interface Milestone {
   allowedRevisions: number;
   revisionsUsed: number;
   attachments: string[];
+  history?: {
+    type: 'SUBMISSION' | 'REVISION_REQUEST' | 'APPROVAL';
+    timestamp: string;
+    content: string;
+    attachments?: string[];
+  }[];
 }
 
 interface Contract {
@@ -129,6 +135,7 @@ export default function ClientContractDetail() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
 
   // Revision modal
   const [revisionModal, setRevisionModal] = useState<{
@@ -369,11 +376,13 @@ export default function ClientContractDetail() {
                   <Card
                     key={milestone.id}
                     className={cn(
-                      "rounded-2xl border-border/40 bg-card/60 transition-all duration-300",
+                      "rounded-2xl border-border/40 bg-card/60 transition-all duration-300 cursor-pointer hover:border-primary/20",
                       milestone.status === "APPROVED" && "opacity-75",
                       milestone.status === "SUBMITTED" &&
-                        "border-purple-400/40 shadow-purple-500/10 shadow-lg"
+                        "border-purple-400/40 shadow-purple-500/10 shadow-lg",
+                      expandedMilestoneId === milestone.id && "ring-2 ring-primary/20 bg-card"
                     )}
+                    onClick={() => setExpandedMilestoneId(expandedMilestoneId === milestone.id ? null : milestone.id)}
                   >
                     <CardContent className="p-6 space-y-4">
                       {/* Milestone header */}
@@ -499,6 +508,81 @@ export default function ClientContractDetail() {
                         </div>
                       )}
 
+                      {/* History Timeline */}
+                      {expandedMilestoneId === milestone.id && (
+                        <div className="pt-6 border-t border-border/40 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                          <div className="flex items-center gap-2 mb-4">
+                            <ListChecks className="w-4 h-4 text-primary" />
+                            <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Activity History</h4>
+                          </div>
+                          
+                          <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-border/60">
+                            {(!milestone.history || milestone.history.length === 0) ? (
+                              <div className="flex items-center gap-4 text-muted-foreground italic text-sm py-2">
+                                <div className="absolute left-0 w-6 h-6 rounded-full bg-muted border-4 border-background flex items-center justify-center -translate-x-[1px]" />
+                                No activity logged yet.
+                              </div>
+                            ) : (
+                              milestone.history.map((event, idx) => {
+                                const isSubmission = event.type === 'SUBMISSION';
+                                const isRevision = event.type === 'REVISION_REQUEST';
+                                const isApproval = event.type === 'APPROVAL';
+                                
+                                return (
+                                  <div key={idx} className="relative group">
+                                    <div className={cn(
+                                      "absolute left-[-32px] w-6 h-6 rounded-full border-4 border-background flex items-center justify-center transition-transform group-hover:scale-110",
+                                      isSubmission ? "bg-purple-500 text-white" :
+                                      isRevision ? "bg-orange-500 text-white" :
+                                      "bg-emerald-500 text-white"
+                                    )}>
+                                      {isSubmission ? <Package className="w-3 h-3" /> :
+                                       isRevision ? <RotateCcw className="w-3 h-3" /> :
+                                       <CheckCircle2 className="w-3 h-3" />}
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between">
+                                        <p className="text-sm font-black">
+                                          {isSubmission ? "Deliverables Submitted" :
+                                           isRevision ? "Revision Requested" :
+                                           "Milestone Approved"}
+                                        </p>
+                                        <span className="text-[10px] font-bold text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
+                                          {new Date(event.timestamp).toLocaleString()}
+                                        </span>
+                                      </div>
+                                      
+                                      <div className="p-4 rounded-xl bg-muted/30 border border-border/10 text-sm leading-relaxed">
+                                        {event.content}
+                                      </div>
+
+                                      {event.attachments && event.attachments.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                          {event.attachments.map((url, i) => (
+                                            <a 
+                                              key={i} 
+                                              href={url} 
+                                              target="_blank" 
+                                              rel="noreferrer"
+                                              className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10 text-[10px] font-bold text-primary hover:bg-primary/10 transition-colors"
+                                              onClick={(e) => e.stopPropagation()}
+                                            >
+                                              <FileText className="w-3 h-3" />
+                                              Attachment {i + 1}
+                                            </a>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Action buttons */}
                       <div className="flex flex-wrap gap-3 pt-2 border-t border-border/40">
                         {/* Fund button */}
@@ -506,7 +590,10 @@ export default function ClientContractDetail() {
                           <div className="flex flex-col gap-2">
                             <Button
                               className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black"
-                              onClick={() => handleFund(milestone.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFund(milestone.id);
+                              }}
                               disabled={isProcessing || contract.status === "OFFER_PENDING"}
                             >
                               {isProcessing ? (
@@ -530,7 +617,10 @@ export default function ClientContractDetail() {
                           <>
                             <Button
                               className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black"
-                              onClick={() => handleApprove(milestone.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleApprove(milestone.id);
+                              }}
                               disabled={isProcessing}
                             >
                               {isProcessing ? (
@@ -543,13 +633,14 @@ export default function ClientContractDetail() {
                             <Button
                               variant="outline"
                               className="gap-2 rounded-xl font-black border-orange-500/40 text-orange-600 hover:bg-orange-500/10"
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setRevisionModal({
                                   open: true,
                                   milestoneId: milestone.id,
                                   note: "",
-                                })
-                              }
+                                });
+                              }}
                               disabled={isProcessing || (milestone.allowedRevisions !== -1 && milestone.revisionsUsed >= milestone.allowedRevisions)}
                             >
                               <RotateCcw className="w-4 h-4" />

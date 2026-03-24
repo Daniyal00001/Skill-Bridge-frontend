@@ -61,6 +61,12 @@ interface Milestone {
   allowedRevisions: number;
   revisionsUsed: number;
   attachments: string[];
+  history?: {
+    type: 'SUBMISSION' | 'REVISION_REQUEST' | 'APPROVAL';
+    timestamp: string;
+    content: string;
+    attachments?: string[];
+  }[];
 }
 
 interface Contract {
@@ -127,6 +133,7 @@ export default function FreelancerContractDetail() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
 
   // Submit deliverables modal
   const [submitModal, setSubmitModal] = useState<{
@@ -407,10 +414,12 @@ export default function FreelancerContractDetail() {
               <Card
                 key={milestone.id}
                 className={cn(
-                  "rounded-2xl border-border/40 bg-card/60 transition-all duration-300",
+                  "rounded-2xl border-border/40 bg-card/60 transition-all duration-300 cursor-pointer hover:border-primary/20",
                   milestone.status === "APPROVED" && "opacity-70",
-                  canSubmit && "border-primary/30 shadow-primary/10 shadow-md"
+                  canSubmit && "border-primary/30 shadow-primary/10 shadow-md",
+                  expandedMilestoneId === milestone.id && "ring-2 ring-primary/20 bg-card"
                 )}
+                onClick={() => setExpandedMilestoneId(expandedMilestoneId === milestone.id ? null : milestone.id)}
               >
                 <CardContent className="p-6 space-y-4">
                   <div className="flex items-start justify-between gap-4">
@@ -483,6 +492,81 @@ export default function FreelancerContractDetail() {
                     </div>
                   )}
 
+                  {/* History Timeline */}
+                  {expandedMilestoneId === milestone.id && (
+                    <div className="pt-6 border-t border-border/40 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 mb-4">
+                        <ListChecks className="w-4 h-4 text-primary" />
+                        <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Activity History</h4>
+                      </div>
+                      
+                      <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-border/60">
+                        {(!milestone.history || milestone.history.length === 0) ? (
+                          <div className="flex items-center gap-4 text-muted-foreground italic text-sm py-2">
+                             <div className="absolute left-0 w-6 h-6 rounded-full bg-muted border-4 border-background flex items-center justify-center -translate-x-[1px]" />
+                             No history available yet.
+                          </div>
+                        ) : (
+                          milestone.history.map((event, idx) => {
+                            const isSubmission = event.type === 'SUBMISSION';
+                            const isRevision = event.type === 'REVISION_REQUEST';
+                            const isApproval = event.type === 'APPROVAL';
+                            
+                            return (
+                              <div key={idx} className="relative group">
+                                <div className={cn(
+                                  "absolute left-[-32px] w-6 h-6 rounded-full border-4 border-background flex items-center justify-center transition-transform group-hover:scale-110",
+                                  isSubmission ? "bg-purple-500 text-white" :
+                                  isRevision ? "bg-orange-500 text-white" :
+                                  "bg-emerald-500 text-white"
+                                )}>
+                                  {isSubmission ? <Package className="w-3 h-3" /> :
+                                   isRevision ? <RotateCcw className="w-3 h-3" /> :
+                                   <CheckCircle2 className="w-3 h-3" />}
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-sm font-black">
+                                      {isSubmission ? "Deliverables Submitted" :
+                                       isRevision ? "Revision Requested" :
+                                       "Milestone Approved"}
+                                    </p>
+                                    <span className="text-[10px] font-bold text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
+                                      {new Date(event.timestamp).toLocaleString()}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="p-4 rounded-xl bg-muted/30 border border-border/10 text-sm leading-relaxed">
+                                    {event.content}
+                                  </div>
+
+                                  {event.attachments && event.attachments.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {event.attachments.map((url, i) => (
+                                        <a 
+                                          key={i} 
+                                          href={url} 
+                                          target="_blank" 
+                                          rel="noreferrer"
+                                          className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10 text-[10px] font-bold text-primary hover:bg-primary/10 transition-colors"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <FileText className="w-3 h-3" />
+                                          Attachment {i + 1}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Status-appropriate action */}
                   <div className="flex flex-wrap gap-3 pt-2 border-t border-border/40">
                     {milestone.status === "PENDING" && (
@@ -495,7 +579,10 @@ export default function FreelancerContractDetail() {
                     {canStart && (
                       <Button
                         className="gap-2 bg-primary hover:bg-primary/90 text-white rounded-xl font-black"
-                        onClick={() => handleStart(milestone.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStart(milestone.id);
+                        }}
                         disabled={isProcessing}
                       >
                         {isProcessing ? (
@@ -510,14 +597,15 @@ export default function FreelancerContractDetail() {
                     {canSubmit && !canStart && (
                       <Button
                         className="gap-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-black"
-                        onClick={() =>
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSubmitModal({
                             open: true,
                             milestoneId: milestone.id,
                             deliverables: "",
                             files: [],
-                          })
-                        }
+                          });
+                        }}
                         disabled={isProcessing}
                       >
                         <UploadCloud className="w-4 h-4" />

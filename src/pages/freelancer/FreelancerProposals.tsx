@@ -83,29 +83,13 @@ export default function FreelancerProposals() {
       await api.delete(`/proposals/${proposalId}/withdraw`);
       setProposals((prev) =>
         prev.map((p) =>
-          p.id === proposalId ? { ...p, status: "WITHDRAWN" } : p
-        )
+          p.id === proposalId ? { ...p, status: "WITHDRAWN" } : p,
+        ),
       );
       toast.success("Proposal withdrawn successfully.");
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Failed to withdraw proposal",
-      );
-    }
-  };
-
-  const handleAcceptChanges = async (proposalId: string) => {
-    try {
-      await api.post(`/proposals/${proposalId}/accept-changes`);
-      setProposals((prev) =>
-        prev.map((p) =>
-          p.id === proposalId ? { ...p, negotiationStatus: "FREELANCER_ACCEPTED" } : p
-        )
-      );
-      toast.success("Milestone changes accepted! Waiting for client to hire you.");
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Failed to accept changes",
       );
     }
   };
@@ -301,7 +285,6 @@ export default function FreelancerProposals() {
                   isExpanded={!!expandedLetters[proposal.id]}
                   onToggleExpand={() => toggleExpand(proposal.id)}
                   onWithdraw={handleWithdraw}
-                  onAcceptChanges={handleAcceptChanges}
                 />
               ))
             ) : (
@@ -369,13 +352,11 @@ function ProposalCard({
   isExpanded,
   onToggleExpand,
   onWithdraw,
-  onAcceptChanges,
 }: {
   proposal: any;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onWithdraw: (id: string) => void;
-  onAcceptChanges: (id: string) => void;
 }) {
   const navigate = useNavigate();
   const statusConfig: Record<
@@ -399,7 +380,7 @@ function ProposalCard({
     },
     REJECTED: {
       label: "Rejected",
-      className: "bg-red-500/10 text-red-500 border-red-500/20",
+      className: "bg-red-500/10 text-red-600 border-red-500/20",
       icon: XCircle,
     },
     WITHDRAWN: {
@@ -423,7 +404,7 @@ function ProposalCard({
   const status = statusConfig[statusKey] || statusConfig["PENDING"];
 
   return (
-    <Card 
+    <Card
       className="group border-border/40 hover:border-primary/40 rounded-[2.5rem] transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-xl w-full cursor-pointer"
       onClick={() => navigate(`/freelancer/proposals/${proposal.id}`)}
     >
@@ -489,7 +470,10 @@ function ProposalCard({
               {(statusKey === "PENDING" || statusKey === "SHORTLISTED") && (
                 <DropdownMenuItem
                   className="gap-2 text-destructive"
-                  onClick={() => onWithdraw(proposal.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onWithdraw(proposal.id);
+                  }}
                 >
                   <Trash2 className="w-4 h-4" /> Withdraw
                 </DropdownMenuItem>
@@ -527,9 +511,9 @@ function ProposalCard({
                     {project.category.name}
                   </Badge>
                 )}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="h-7 rounded-lg font-black gap-1.5 text-primary hover:bg-primary/10 transition-all ml-auto md:ml-0"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -580,7 +564,7 @@ function ProposalCard({
             </h4>
             <div
               className={cn(
-                "text-sm text-foreground/80 leading-relaxed transition-all duration-300 w-full min-w-0 prose prose-sm dark:prose-invert max-w-none prose-p:mb-2 last:prose-p:mb-0",
+                "text-sm text-foreground/80 leading-relaxed transition-all duration-300 w-full min-w-0 prose prose-sm dark:prose-invert max-w-none break-words overflow-hidden prose-p:mb-2 last:prose-p:mb-0",
                 !isExpanded && "line-clamp-2",
               )}
               dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
@@ -651,134 +635,33 @@ function ProposalCard({
 
         {/* Status-specific sections */}
         <div className="pt-4 border-t border-border/50">
-          {(statusKey === "PENDING" || statusKey === "SHORTLISTED") && (
-            proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS" ? (
-              <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-5 space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white shrink-0">
-                    <ListChecks className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-purple-600 dark:text-purple-400">
-                      Client requested more revisions!
-                    </h4>
-                    <p className="text-sm text-foreground/80">
-                      The client wants additional revisions for this project. Review and accept to proceed, or withdraw.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-black text-muted-foreground uppercase">Your Offer</p>
-                        <div className="p-3 rounded-xl bg-background/30 border border-border/40">
-                          <p className="text-xs font-bold flex justify-between">
-                            Revisions: <span>{proposal.generalRevisionLimit === -1 ? "Unlimited" : proposal.generalRevisionLimit || 3}</span>
-                          </p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-black text-purple-500 uppercase">Client's Request</p>
-                        <div className="p-3 rounded-xl bg-purple-500/5 border border-purple-500/20">
-                          <p className="text-xs font-bold flex justify-between text-purple-700">
-                            Revisions:{" "}
-                            <span>
-                              {proposal.clientRequestedRevisions === -1
-                                ? "Unlimited"
-                                : proposal.clientRequestedRevisions ?? "—"}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAcceptChanges(proposal.id);
-                    }}
-                  >
-                    Accept Revision Request
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full px-6 border-destructive/30 hover:bg-destructive/10 text-destructive"
-                    onClick={() => onWithdraw(proposal.id)}
-                  >
-                    Reject & Withdraw
-                  </Button>
-                </div>
-              </div>
-            ) : proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
-             <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 space-y-4">
+          {(statusKey === "PENDING" || statusKey === "SHORTLISTED") &&
+            (proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS" ||
+            proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
                     <ListChecks className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-blue-600 dark:text-blue-400">
-                      Client proposed milestone changes!
+                      Client proposed changes!
                     </h4>
                     <p className="text-sm text-foreground/80">
-                      Please review the suggested milestones and accept them to proceed, or withdraw your proposal.
+                      The client has suggested changes to your proposal or milestones. Please review the details to accept or suggest further revisions.
                     </p>
-
-                    {/* Comparison Summary */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      {/* Original Side */}
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-black text-muted-foreground uppercase">Your Original Plan</p>
-                        <div className="p-3 rounded-xl bg-background/30 border border-border/40 space-y-2">
-                          <p className="text-xs font-bold flex justify-between">
-                            Revisions: <span>{proposal.generalRevisionLimit === -1 ? "Unlimited" : proposal.generalRevisionLimit || 3}</span>
-                          </p>
-                          <div className="space-y-1">
-                            {(!proposal.proposalMilestones || proposal.proposalMilestones.length === 0) ? (
-                              <p className="text-[10px] italic text-muted-foreground">No milestones defined</p>
-                            ) : (
-                              proposal.proposalMilestones.map((m: any, idx: number) => (
-                                <div key={idx} className="flex justify-between text-[10px]">
-                                  <span className="truncate max-w-[100px]">{m.title}</span>
-                                  <span className="font-bold">${m.amount}</span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Client Side */}
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-black text-blue-500 uppercase">Client's Request</p>
-                        <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-2">
-                          <p className="text-xs font-bold flex justify-between text-blue-700">
-                            Revisions: <span>{proposal.clientRequestedMilestones?.[0]?.allowedRevisions === -1 ? "Unlimited" : (proposal.clientRequestedMilestones?.[0]?.allowedRevisions || proposal.generalRevisionLimit || 3)}</span>
-                          </p>
-                          <div className="space-y-1">
-                            {proposal.clientRequestedMilestones?.map((m: any, idx: number) => (
-                              <div key={idx} className="flex justify-between text-[10px] text-blue-600">
-                                <span className="truncate max-w-[100px] font-bold">{m.title}</span>
-                                <span className="font-bold">${m.amount}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button
                     size="sm"
                     className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAcceptChanges(proposal.id);
-                    }}
+                    asChild
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    Accept Changes
+                    <Link to={`/freelancer/proposals/${proposal.id}`}>
+                      View & Respond to Changes
+                    </Link>
                   </Button>
                   <Button
                     size="sm"
@@ -794,7 +677,6 @@ function ProposalCard({
                 </div>
               </div>
             ) : proposal.negotiationStatus === "FREELANCER_ACCEPTED" ? (
-
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 shrink-0">
@@ -802,7 +684,9 @@ function ProposalCard({
                   </div>
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium">Changes Accepted</p>
-                    <p className="text-xs text-muted-foreground">Waiting for client to finalize the contract.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Waiting for client to finalize the contract.
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -868,8 +752,7 @@ function ProposalCard({
                   Withdraw Proposal
                 </Button>
               </div>
-            )
-          )}
+            ))}
 
           {statusKey === "ACCEPTED" && (
             <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-5 space-y-4">
@@ -900,7 +783,7 @@ function ProposalCard({
                     asChild
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <Link 
+                    <Link
                       to={`/freelancer/contracts/${contract.id}`}
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -916,7 +799,7 @@ function ProposalCard({
                   asChild
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Link 
+                  <Link
                     to="/freelancer/messages"
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -970,7 +853,8 @@ function ProposalCard({
                     You withdrew your proposal from this project
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Your SkillTokens have been refunded to your wallet. You are no longer under consideration for this role.
+                    Your SkillTokens have been refunded to your wallet. You are
+                    no longer under consideration for this role.
                   </p>
                 </div>
                 <div className="flex gap-2">
