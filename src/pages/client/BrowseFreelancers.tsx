@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/pagination";
 import { toast } from "sonner";
 import { InviteFreelancerModal } from "@/components/modals/InviteFreelancerModal";
+import { SkillAutocomplete } from "@/components/common/SkillAutocomplete";
 
 const BrowseFreelancersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -231,15 +232,14 @@ const BrowseFreelancersPage = () => {
                     ))}
                   </div>
                   <div className="relative">
-                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                    <Input
-                      placeholder="Add skill..."
-                      className="pl-8 h-9 text-xs bg-slate-50 border-slate-200"
+                    <SkillAutocomplete
                       value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && addSkill(skillInput)
-                      }
+                      onChange={setSkillInput}
+                      onSelect={(val) => {
+                        addSkill(val);
+                        setSkillInput("");
+                      }}
+                      placeholder="Search skills..."
                     />
                   </div>
                 </div>
