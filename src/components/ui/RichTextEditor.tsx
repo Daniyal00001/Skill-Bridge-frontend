@@ -8,6 +8,7 @@ interface RichTextEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  maxLength?: number;
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -15,6 +16,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
   placeholder,
   className,
+  maxLength,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +36,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const handleInput = () => {
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (maxLength && editorRef.current) {
+      const text = editorRef.current.textContent || "";
+      // Allow control keys: Backspace, Delete, Arrows, etc.
+      const isControlKey = [
+        "Backspace", "Delete", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+        "Home", "End", "PageUp", "PageDown", "Tab"
+      ].includes(e.key) || e.ctrlKey || e.metaKey;
+
+      if (text.length >= maxLength && !isControlKey) {
+        e.preventDefault();
+      }
     }
   };
 
@@ -105,6 +122,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         ref={editorRef}
         contentEditable
         onInput={handleInput}
+        onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         className="min-h-[250px] p-6 outline-none font-medium text-[15px] leading-relaxed prose prose-sm dark:prose-invert max-w-none"
         data-placeholder={placeholder}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -72,14 +72,14 @@ export default function FreelancerSubmitProposal() {
   ]);
   const [milestonesSectionOpen, setMilestonesSectionOpen] = useState(false);
 
-  const tempDiv =
-    typeof document !== "undefined" ? document.createElement("div") : null;
-  const getCoverLetterTextLength = (html: string) => {
-    if (!tempDiv) return 0;
-    tempDiv.innerHTML = html;
+  const coverLetterTextLength = useMemo(() => {
+    if (typeof document === "undefined") return 0;
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = coverLetter;
     return tempDiv.textContent?.length || 0;
-  };
-  const coverLetterTextLength = getCoverLetterTextLength(coverLetter);
+  }, [coverLetter]);
+
+
 
   const [tokenInfo, setTokenInfo] = useState<{
     tokenCost: number;
@@ -142,9 +142,15 @@ export default function FreelancerSubmitProposal() {
       toast.error("You have already applied to this project!");
       return;
     }
-    if (coverLetter.length < 50) {
+    if (coverLetterTextLength < 50) {
       toast.error("Cover letter too short!", {
         description: "Write at least 50 characters about your approach.",
+      });
+      return;
+    }
+    if (coverLetterTextLength > 5000) {
+      toast.error("Cover letter too long!", {
+        description: "Maximum length is 5000 characters.",
       });
       return;
     }
@@ -439,41 +445,34 @@ export default function FreelancerSubmitProposal() {
                           "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full",
                           coverLetterTextLength < 50
                             ? "bg-amber-500/10 text-amber-500"
+                            : coverLetterTextLength > 5000
+                            ? "bg-red-500/10 text-red-500"
                             : "bg-emerald-500/10 text-emerald-500",
                         )}
                       >
-                        {coverLetterTextLength} / 2000
+                        {coverLetterTextLength} / 5000
                       </span>
                     </div>
                     <RichTextEditor
                       value={coverLetter}
-                      onChange={(value) => {
-                        // For validation, we might want to check text length
-                        const tempDiv = document.createElement("div");
-                        tempDiv.innerHTML = value;
-                        const textLength = tempDiv.textContent?.length || 0;
-
-                        if (textLength <= 2000) {
-                          setCoverLetter(value);
-                        }
-                      }}
+                      onChange={setCoverLetter}
+                      maxLength={5000}
                       placeholder="Introduce yourself, explain why you're a great fit for this project, and outline your approach..."
+                      className="min-h-[300px]"
                     />
-                    {(() => {
-                      const tempDiv = document.createElement("div");
-                      tempDiv.innerHTML = coverLetter;
-                      const textLength = tempDiv.textContent?.length || 0;
-                      if (textLength < 50 && textLength > 0) {
-                        return (
-                          <p className="text-xs font-bold text-amber-500 px-2 flex items-center gap-2">
-                            <AlertCircle className="w-3 h-3" />
-                            Please write at least 50 characters to submit a
-                            competitive proposal.
-                          </p>
-                        );
-                      }
-                      return null;
-                    })()}
+                    {coverLetterTextLength < 50 && coverLetterTextLength > 0 && (
+                      <p className="text-xs font-bold text-amber-500 px-2 flex items-center gap-2">
+                        <AlertCircle className="w-3 h-3" />
+                        Please write at least 50 characters to submit a
+                        competitive proposal.
+                      </p>
+                    )}
+                    {coverLetterTextLength > 5000 && (
+                      <p className="text-xs font-bold text-red-500 px-2 flex items-center gap-2">
+                        <AlertCircle className="w-3 h-3" />
+                        Cover letter exceeds the 5000 character limit.
+                      </p>
+                    )}
                   </div>
 
                   <Separator className="bg-border/40" />
