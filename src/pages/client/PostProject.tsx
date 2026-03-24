@@ -631,7 +631,7 @@ const PostProjectPage = () => {
                       <input
                         type="file"
                         multiple
-                        accept=".jpg,.jpeg,.png,.pdf"
+                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt,.zip"
                         className="hidden"
                         id="file-upload"
                         onChange={(e) => {
@@ -640,6 +640,11 @@ const PostProjectPage = () => {
                             "image/jpeg",
                             "image/png",
                             "application/pdf",
+                            "application/msword",
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            "text/plain",
+                            "application/zip",
+                            "application/x-zip-compressed",
                           ];
                           const selected = Array.from(e.target.files);
                           const valid = selected.filter((f) =>
@@ -650,7 +655,7 @@ const PostProjectPage = () => {
                           );
                           if (invalid.length > 0)
                             toast.error(
-                              `${invalid.length} file(s) skipped — only JPG, PNG and PDF are allowed.`,
+                              `${invalid.length} file(s) skipped — only JPG, PNG, PDF, Word, TXT, and ZIP are allowed.`,
                             );
                           if (valid.length > 0)
                             updateFormData({
@@ -669,7 +674,7 @@ const PostProjectPage = () => {
                           Click to upload files
                         </span>
                         <span className="text-xs text-muted-foreground mt-1">
-                          PNG, JPG, PDF up to 10MB
+                          JPG, PNG, PDF, Word, TXT, ZIP up to 10MB
                         </span>
                       </label>
                       {formData.files.length > 0 && (

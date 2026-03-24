@@ -612,15 +612,33 @@ export default function FreelancerContractDetail() {
                   <input
                     type="file"
                     multiple
-                    accept=".jpg,.jpeg,.png,.pdf,.zip"
+                    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt,.zip"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={(e) => {
                       if (!e.target.files) return;
-                      const files = Array.from(e.target.files);
+                      const ALLOWED = [
+                        "image/jpeg",
+                        "image/png",
+                        "application/pdf",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "text/plain",
+                        "application/zip",
+                        "application/x-zip-compressed",
+                      ];
+                      const selected = Array.from(e.target.files);
+                      const valid = selected.filter((f) => ALLOWED.includes(f.type));
+                      const invalid = selected.filter((f) => !ALLOWED.includes(f.type));
+
+                      if (invalid.length > 0) {
+                        toast.error(`${invalid.length} file(s) skipped — only JPG, PNG, PDF, Word, TXT, and ZIP are allowed.`);
+                      }
+
                       setSubmitModal((p) => ({
                         ...p,
-                        files: [...p.files, ...files].slice(0, 5),
+                        files: [...p.files, ...valid].slice(0, 5),
                       }));
+                      e.target.value = "";
                     }}
                   />
                   <UploadCloud className="w-8 h-8 text-primary/60 mx-auto mb-2" />
@@ -628,7 +646,7 @@ export default function FreelancerContractDetail() {
                     Click to upload files
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PDF, ZIP, Images — Max 5 files
+                    JPG, PNG, PDF, Word, TXT, ZIP — Max 5 files
                   </p>
                 </div>
                 {submitModal.files.length > 0 && (

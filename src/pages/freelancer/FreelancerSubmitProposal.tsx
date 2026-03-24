@@ -696,7 +696,7 @@ export default function FreelancerSubmitProposal() {
                       <input
                         type="file"
                         multiple
-                        accept=".jpg,.jpeg,.png,.pdf"
+                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt,.zip"
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         onChange={(e) => {
                           if (!e.target.files) return;
@@ -704,6 +704,11 @@ export default function FreelancerSubmitProposal() {
                             "image/jpeg",
                             "image/png",
                             "application/pdf",
+                            "application/msword",
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            "text/plain",
+                            "application/zip",
+                            "application/x-zip-compressed",
                           ];
                           const selected = Array.from(e.target.files);
 
@@ -716,7 +721,7 @@ export default function FreelancerSubmitProposal() {
 
                           if (invalid.length > 0) {
                             toast.error(`${invalid.length} file(s) skipped`, {
-                              description: "Only JPG, PNG and PDF are allowed.",
+                              description: "Only JPG, PNG, PDF, Word, TXT, and ZIP are allowed.",
                             });
                           }
 
@@ -742,7 +747,7 @@ export default function FreelancerSubmitProposal() {
                             Click or drag to upload documents
                           </p>
                           <p className="text-xs text-muted-foreground font-medium mt-1">
-                            Support for PDF, JPG, PNG (Max 10MB per file)
+                            Support for PDF, JPG, PNG, Word, TXT, ZIP (Max 10MB per file)
                           </p>
                         </div>
                       </div>
