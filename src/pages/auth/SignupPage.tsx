@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,17 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   // ── Password Requirements Check ──────────────────────────────
   const passwordRequirements = useMemo(
@@ -62,7 +73,7 @@ export default function SignupPage() {
     [passwordRequirements],
   );
 
-  const { signup, verifyOtp } = useAuth();
+  const { signup, verifyOtp, resendOtp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -106,7 +117,7 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await signup({ name, email, password, role });
+      const remainingCooldown = await signup({ name, email, password, role });
 
       toast({
         title: "Code Sent!",
@@ -114,6 +125,7 @@ export default function SignupPage() {
       });
 
       setShowOTP(true);
+      setCountdown(remainingCooldown ?? 120);
     } catch (error) {
       let message = "Failed to create account. Please try again.";
       let title = "Signup failed";
@@ -164,6 +176,31 @@ export default function SignupPage() {
       }
       toast({
         title: "Verification Failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (countdown > 0) return;
+    setIsLoading(true);
+    try {
+      await resendOtp(email);
+      setCountdown(120);
+      toast({
+        title: "Code Resent",
+        description: "A new 6-digit code has been sent to your email.",
+      });
+    } catch (error) {
+      let message = "Failed to resend code. Please try again later.";
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || message;
+      }
+      toast({
+        title: "Resend Failed",
         description: message,
         variant: "destructive",
       });
@@ -565,6 +602,22 @@ export default function SignupPage() {
                   ) : (
                     "Verify & Create Account"
                   )}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 text-base font-bold rounded-xl border-2"
+                  disabled={countdown > 0 || isLoading}
+                  onClick={handleResendOtp}
+                >
+                  {countdown > 0
+                    ? `Resend code in ${Math.floor(countdown / 60)
+                        .toString()
+                        .padStart(2, "0")}:${(countdown % 60)
+                        .toString()
+                        .padStart(2, "0")}`
+                    : "Resend Code"}
                 </Button>
 
                 <button

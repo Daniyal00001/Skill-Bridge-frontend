@@ -37,8 +37,8 @@ export interface AuthResponse {
 // ── Signup ────────────────────────────────────────────────────
 export const signupAPI = async (
   payload: SignupPayload
-): Promise<{ success: boolean; message: string }> => {
-  const response = await api.post<{ success: boolean; message: string }>(
+): Promise<{ success: boolean; message: string; data?: { remainingCooldown?: number } }> => {
+  const response = await api.post<{ success: boolean; message: string; data?: { remainingCooldown?: number } }>(
     '/auth/signup',
     payload
   )
@@ -54,6 +54,17 @@ export const verifyOtpAPI = async (
     email,
     otp,
   })
+  return response.data
+}
+
+// ── Resend OTP ────────────────────────────────────────────────
+export const resendOtpAPI = async (
+  email: string
+): Promise<{ success: boolean; message: string }> => {
+  const response = await api.post<{ success: boolean; message: string }>(
+    '/auth/resend-otp',
+    { email }
+  )
   return response.data
 }
 

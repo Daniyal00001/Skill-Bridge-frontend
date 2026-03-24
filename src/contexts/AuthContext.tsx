@@ -9,6 +9,7 @@ import { api, setAccessToken, clearAccessToken } from "@/lib/api";
 import {
   signupAPI,
   verifyOtpAPI,
+  resendOtpAPI,
   loginAPI,
   logoutAPI,
   AuthUser,
@@ -21,8 +22,9 @@ interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signup: (payload: SignupPayload) => Promise<void>;
+  signup: (payload: SignupPayload) => Promise<number | undefined>;
   verifyOtp: (email: string, otp: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
   login: (payload: LoginPayload) => Promise<AuthUser>; // ← returns AuthUser now
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -54,8 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ── Signup ────────────────────────────────────────────────
-  const signup = async (payload: SignupPayload) => {
-    await signupAPI(payload);
+  const signup = async (payload: SignupPayload): Promise<number | undefined> => {
+    const response = await signupAPI(payload);
+    return response.data?.remainingCooldown;
   };
 
   // ── Verify OTP ─────────────────────────────────────────────
@@ -65,7 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(response.data.user);
   };
 
-  // ── Login ─────────────────────────────────────────────────
+  // ── Resend OTP ─────────────────────────────────────────────
+  const resendOtp = async (email: string) => {
+    await resendOtpAPI(email);
+  };
+
   // ── Login ─────────────────────────────────────────────────────
   const login = async (payload: LoginPayload) => {
     const response = await loginAPI(payload);
@@ -113,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         signup,
         verifyOtp,
+        resendOtp,
         login,
         logout,
         refreshUser,
