@@ -32,9 +32,8 @@ const BrowseFreelancersPage = () => {
   const [skillInput, setSkillInput] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState("all");
-  const [rateRange, setRateRange] = useState([0, 200]);
-  const [maxRateLimit, setMaxRateLimit] = useState(200);
-  const [availability, setAvailability] = useState("all");
+  const [minRate, setMinRate] = useState("");
+  const [maxRate, setMaxRate] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
 
@@ -72,13 +71,9 @@ const BrowseFreelancersPage = () => {
         // Schema-aligned filters
         if (experienceLevel !== "all")
           params.set("experienceLevel", experienceLevel);
-        if (availability !== "all") params.set("availability", availability);
-
-        // Only apply rate filter if intentionally changed from default [0, maxRateLimit]
-        if (rateRange[0] !== 0 || rateRange[1] !== maxRateLimit) {
-          params.set("minRate", rateRange[0].toString());
-          params.set("maxRate", rateRange[1].toString());
-        }
+        // Only apply rate filter if provided
+        if (minRate) params.set("minRate", minRate);
+        if (maxRate) params.set("maxRate", maxRate);
 
         params.set("sortBy", sortBy);
         params.set("sortOrder", sortOrder);
@@ -108,8 +103,8 @@ const BrowseFreelancersPage = () => {
       searchTerm,
       selectedSkills,
       experienceLevel,
-      availability,
-      rateRange,
+      minRate,
+      maxRate,
       sortBy,
       sortOrder,
     ],
@@ -144,8 +139,8 @@ const BrowseFreelancersPage = () => {
     setSearchTerm("");
     setSelectedSkills([]);
     setExperienceLevel("all");
-    setRateRange([0, 200]);
-    setAvailability("all");
+    setMinRate("");
+    setMaxRate("");
     setSortBy("createdAt");
     setSortOrder("desc");
     setSkillInput("");
@@ -276,57 +271,32 @@ const BrowseFreelancersPage = () => {
 
               {/* Rate Range */}
               <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Rate ($/hr)
-                  </label>
-                  <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="text-[11px] font-bold text-slate-400">
-                      $
-                    </span>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Rate ($/hr)
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                    <span className="text-[11px] font-bold text-slate-400">$</span>
                     <input
                       type="number"
-                      value={rateRange[1]}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        setRateRange([rateRange[0], val]);
-                        if (val > maxRateLimit) setMaxRateLimit(val);
-                      }}
-                      onBlur={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        if (val < rateRange[0]) setRateRange([val, val]);
-                        setMaxRateLimit(Math.max(200, val));
-                      }}
-                      className="w-10 bg-transparent border-none p-0 text-[11px] font-bold text-primary focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      placeholder="Min"
+                      value={minRate}
+                      onChange={(e) => setMinRate(e.target.value)}
+                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
+                  <span className="text-slate-300 font-medium">-</span>
+                  <div className="flex-1 flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                    <span className="text-[11px] font-bold text-slate-400">$</span>
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={maxRate}
+                      onChange={(e) => setMaxRate(e.target.value)}
+                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>
-                <Slider
-                  defaultValue={[0, 200]}
-                  max={maxRateLimit}
-                  step={5}
-                  value={rateRange}
-                  onValueChange={setRateRange}
-                  className="py-2"
-                />
-              </div>
-
-              {/* Availability - Schema Enum */}
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Availability
-                </label>
-                <Select value={availability} onValueChange={setAvailability}>
-                  <SelectTrigger className="h-10 text-sm bg-slate-50 border-slate-200">
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Any Status</SelectItem>
-                    <SelectItem value="AVAILABLE">Available</SelectItem>
-                    <SelectItem value="BUSY">Busy</SelectItem>
-                    <SelectItem value="UNAVAILABLE">Unavailable</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           </aside>

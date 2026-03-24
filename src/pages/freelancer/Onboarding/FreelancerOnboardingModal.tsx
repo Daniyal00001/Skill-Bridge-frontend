@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,18 +27,86 @@ import {
   Upload,
   CheckCircle2,
   Briefcase,
-  Heart,
   Sparkles,
   User,
   Globe,
-  Settings,
-  Layers,
+  Pencil,
 } from "lucide-react";
 import { useMetadata } from "@/hooks/useMetadata";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { SkillAutocomplete } from "@/components/common/SkillAutocomplete";
+
+// ---------------------------------------------------------------------------
+// Per-field completion weights (must sum to 100)
+// ---------------------------------------------------------------------------
+const WEIGHTS = {
+  nameTagline: 10,   // Full name + tagline
+  phone: 5,          // Phone number
+  location: 5,       // Country
+  hourlyRate: 10,    // Hourly rate
+  bio: 10,           // Bio (≥100 chars)
+  experienceLevel: 5,// Experience level
+  skills: 15,        // Skills (≥1)
+  languages: 5,      // Languages (≥1)
+  education: 5,      // Education (≥1 entry)
+  profileImage: 15,  // Profile image
+  portfolio: 10,     // Cert / gig / portfolio
+  links: 5,          // Any social link
+} as const;
+
+function computeLocalCompletion(
+  formData: any,
+  files: { profileImage: File | null },
+  existingProfileImage: string | null | undefined,
+  certifications: any[],
+  gigs: any[],
+): number {
+  let score = 0;
+  if (
+    formData.fullName?.trim().length >= 3 &&
+    formData.tagline?.trim().length >= 10
+  ) score += WEIGHTS.nameTagline;
+  if (formData.phoneNumber?.trim()) score += WEIGHTS.phone;
+  if (formData.location?.trim()) score += WEIGHTS.location;
+  if (Number(formData.hourlyRate) >= 5) score += WEIGHTS.hourlyRate;
+  if (formData.bio?.trim().length >= 100) score += WEIGHTS.bio;
+  if (formData.experienceLevel) score += WEIGHTS.experienceLevel;
+  if (formData.skills.length > 0) score += WEIGHTS.skills;
+  if (formData.languages.length > 0) score += WEIGHTS.languages;
+  if (formData.educations.some((e: any) => e.school?.trim() && e.degree?.trim()))
+    score += WEIGHTS.education;
+  if (files.profileImage || existingProfileImage) score += WEIGHTS.profileImage;
+  if (
+    certifications.length > 0 ||
+    gigs.length > 0 ||
+    formData.portfolio?.trim()
+  ) score += WEIGHTS.portfolio;
+  if (
+    formData.github?.trim() ||
+    formData.linkedin?.trim() ||
+    formData.portfolio?.trim() ||
+    formData.website?.trim()
+  ) score += WEIGHTS.links;
+  return Math.min(score, 100);
+}
+
+// Small helper pill shown next to section headers
+function WeightBadge({ pct, isComplete }: { pct: number; isComplete?: boolean }) {
+  if (isComplete) {
+    return (
+      <span className="ml-auto flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">
+        <CheckCircle2 className="w-3 h-3" /> {pct}%
+      </span>
+    );
+  }
+  return (
+    <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20">
+      +{pct}%
+    </span>
+  );
+}
 
 export function FreelancerOnboardingModal({
   isOpen,
@@ -69,9 +137,6 @@ export function FreelancerOnboardingModal({
 
   const [step, setStep] = useState(initialStep);
   const [isLoading, setIsLoading] = useState(false);
-  const [localCompletion, setLocalCompletion] = useState(
-    profile?.profileCompletion || 0,
-  );
   const { toast } = useToast();
   const { locations, languages: metadataLanguages } = useMetadata();
   const [categories, setCategories] = useState<any[]>([]);
@@ -186,41 +251,63 @@ export function FreelancerOnboardingModal({
     gigFiles: [null, null, null, null],
   });
 
+  // Live completion — recomputed every time formData / files / existing data changes
+  const localCompletion = useMemo(
+    () =>
+      computeLocalCompletion(
+        formData,
+        files,
+        profile?.user?.profileImage,
+        certifications,
+        gigs,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [formData, files.profileImage, certifications.length, gigs.length],
+  );
+
   const TABS = [
     {
       id: 1,
       label: "Personal",
       icon: User,
+      weight: WEIGHTS.nameTagline + WEIGHTS.phone + WEIGHTS.location,
       isComplete: !!(
-        formData.fullName &&
-        formData.location &&
-        formData.tagline
+        formData.fullName?.trim().length >= 3 &&
+        formData.tagline?.trim().length >= 10 &&
+        formData.location
       ),
     },
     {
       id: 2,
       label: "Professional",
       icon: Briefcase,
-      isComplete: !!(formData.hourlyRate && formData.bio),
+      weight: WEIGHTS.hourlyRate + WEIGHTS.bio + WEIGHTS.experienceLevel,
+      isComplete: !!(Number(formData.hourlyRate) >= 5 && formData.bio?.trim().length >= 100),
     },
     {
       id: 3,
       label: "Skills & Edu",
       icon: Sparkles,
+      weight: WEIGHTS.skills + WEIGHTS.languages + WEIGHTS.education,
       isComplete: formData.skills.length > 0,
     },
     {
       id: 4,
       label: "Media",
       icon: Upload,
+      weight: WEIGHTS.profileImage + WEIGHTS.portfolio,
       isComplete: !!(profile?.user?.profileImage || files.profileImage),
     },
     {
       id: 5,
       label: "Links",
       icon: Globe,
+      weight: WEIGHTS.links,
       isComplete: !!(
-        formData.portfolio || formData.preferredCategories.length > 0
+        formData.github?.trim() ||
+        formData.linkedin?.trim() ||
+        formData.portfolio?.trim() ||
+        formData.website?.trim()
       ),
     },
   ];
@@ -282,26 +369,22 @@ export function FreelancerOnboardingModal({
     setIsLoading(true);
     try {
       if (step === 1) {
-        const res = await freelancerService.updateOnboardingStep1({
+        await freelancerService.updateOnboardingStep1({
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber,
           location: formData.location,
           region: formData.region,
           tagline: formData.tagline,
         });
-        if (res.data?.profileCompletion)
-          setLocalCompletion(res.data.profileCompletion);
       } else if (step === 2) {
-        const res = await freelancerService.updateOnboardingStep2({
+        await freelancerService.updateOnboardingStep2({
           hourlyRate: Number(formData.hourlyRate),
           bio: formData.bio,
           availability: formData.availability,
           experienceLevel: formData.experienceLevel,
         });
-        if (res.data?.profileCompletion)
-          setLocalCompletion(res.data.profileCompletion);
       } else if (step === 3) {
-        const res = await freelancerService.updateOnboardingStep3({
+        await freelancerService.updateOnboardingStep3({
           skills: formData.skills,
           education: formData.educations.filter(
             (e: any) => e.school && e.degree,
@@ -309,9 +392,6 @@ export function FreelancerOnboardingModal({
           languages: formData.languages,
           preferredCategories: formData.preferredCategories,
         });
-        // Note: Step 3 might not return completion in some versions, but we should check
-        if (res.data?.profileCompletion)
-          setLocalCompletion(res.data.profileCompletion);
       } else if (step === 4) {
         if (!files.profileImage && !profile?.user?.profileImage) {
           toast({
@@ -345,19 +425,15 @@ export function FreelancerOnboardingModal({
           }
         });
 
-        const res = await freelancerService.uploadOnboardingFiles(formPayload);
-        if (res.data?.profileCompletion)
-          setLocalCompletion(res.data.profileCompletion);
+        await freelancerService.uploadOnboardingFiles(formPayload);
       } else if (step === 5) {
-        const res = await freelancerService.updateOnboardingStep5({
+        await freelancerService.updateOnboardingStep5({
           github: formData.github,
           linkedin: formData.linkedin,
           portfolio: formData.portfolio,
           website: formData.website,
           preferredCategories: formData.preferredCategories,
         });
-        if (res.data?.profileCompletion)
-          setLocalCompletion(res.data.profileCompletion);
         toast({
           title: "Profile Updated!",
           description: "Your changes have been saved.",
@@ -604,7 +680,7 @@ export function FreelancerOnboardingModal({
             <div className="space-y-4">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Full Name</Label>
+                  <Label className="flex w-full items-center">Full Name <WeightBadge pct={WEIGHTS.nameTagline} isComplete={formData.fullName?.trim().length >= 3 && formData.tagline?.trim().length >= 10} /></Label>
                   <Input
                     name="fullName"
                     value={formData.fullName}
@@ -623,7 +699,7 @@ export function FreelancerOnboardingModal({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Phone Number</Label>
+                <Label className="flex w-full items-center">Phone Number <WeightBadge pct={WEIGHTS.phone} isComplete={!!formData.phoneNumber?.trim()} /></Label>
                 <Input
                   name="phoneNumber"
                   value={formData.phoneNumber}
@@ -645,7 +721,7 @@ export function FreelancerOnboardingModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Country</Label>
+                  <Label className="flex w-full items-center">Country <WeightBadge pct={WEIGHTS.location} isComplete={!!formData.location?.trim()} /></Label>
                   <Select
                     onValueChange={(val) => {
                       const country = (locations || []).find(
@@ -687,7 +763,7 @@ export function FreelancerOnboardingModal({
           {step === 2 && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Hourly Rate ($)</Label>
+                <Label className="flex w-full items-center">Hourly Rate ($) <WeightBadge pct={WEIGHTS.hourlyRate} isComplete={Number(formData.hourlyRate) >= 5} /></Label>
                 <Input
                   type="number"
                   name="hourlyRate"
@@ -697,7 +773,7 @@ export function FreelancerOnboardingModal({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Professional Bio</Label>
+                <Label className="flex w-full items-center">Professional Bio <WeightBadge pct={WEIGHTS.bio} isComplete={formData.bio?.trim().length >= 100} /></Label>
                 <Textarea
                   name="bio"
                   value={formData.bio}
@@ -708,12 +784,12 @@ export function FreelancerOnboardingModal({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Experience Level</Label>
+                  <Label className="flex w-full items-center">Experience Level <WeightBadge pct={WEIGHTS.experienceLevel} isComplete={!!formData.experienceLevel} /></Label>
                   <Select
                     onValueChange={(val) =>
                       setFormData((p) => ({ ...p, experienceLevel: val }))
                     }
-                    defaultValue={formData.experienceLevel}
+                    value={formData.experienceLevel}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Level" />
@@ -731,7 +807,7 @@ export function FreelancerOnboardingModal({
                     onValueChange={(val) =>
                       setFormData((p) => ({ ...p, availability: val }))
                     }
-                    defaultValue={formData.availability}
+                    value={formData.availability}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Availability" />
@@ -752,11 +828,7 @@ export function FreelancerOnboardingModal({
                 <Label className="text-sm font-bold flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-primary" /> Your Skills &
                   Expertise
-                  {formData.skills.length < 10 && (
-                    <span className="text-[10px] text-muted-foreground font-medium ml-auto">
-                      You can add {10 - formData.skills.length} more
-                    </span>
-                  )}
+                  <WeightBadge pct={WEIGHTS.skills} isComplete={formData.skills.length > 0} />
                 </Label>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-h-[100px] p-4 border rounded-2xl bg-muted/5 shadow-inner overflow-y-auto max-h-[200px]">
@@ -843,7 +915,10 @@ export function FreelancerOnboardingModal({
 
               <div className="space-y-4 pt-4 border-t">
                 <div className="flex items-center justify-between pt-2">
-                  <Label className="text-lg font-bold">Education</Label>
+                  <Label className="text-lg font-bold flex items-center gap-2">
+                    Education
+                    <WeightBadge pct={WEIGHTS.education} isComplete={formData.educations.some((e: any) => e.school?.trim() && e.degree?.trim())} />
+                  </Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -878,7 +953,7 @@ export function FreelancerOnboardingModal({
                           onValueChange={(val) =>
                             updateEducation(idx, "level", val)
                           }
-                          defaultValue={edu.level}
+                          value={edu.level}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select Level" />
@@ -936,7 +1011,7 @@ export function FreelancerOnboardingModal({
 
               <div className="space-y-4 border-t pt-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">Languages</Label>
+                  <Label className="text-lg font-bold flex items-center gap-2">Languages <WeightBadge pct={WEIGHTS.languages} isComplete={formData.languages.length > 0} /></Label>
                   {formData.languages.length < 3 && (
                     <span className="text-xs text-muted-foreground font-medium">
                       You can add {3 - formData.languages.length} more
@@ -1049,33 +1124,72 @@ export function FreelancerOnboardingModal({
                 <div className="space-y-2">
                   <Label className="text-sm font-bold flex items-center gap-2">
                     <Upload className="w-4 h-4 text-primary" /> Profile Picture
+                    <WeightBadge pct={WEIGHTS.profileImage} isComplete={!!(files.profileImage || profile?.user?.profileImage)} />
                   </Label>
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 gap-2 hover:bg-muted/50 transition-colors cursor-pointer relative overflow-hidden group">
-                    {files.profileImage ? (
-                      <div className="flex items-center gap-2 text-green-500 font-bold text-sm">
-                        <CheckCircle2 className="w-4 h-4" />{" "}
-                        {files.profileImage.name}
+                  {/* If user already has a profile image (e.g. from Google/OAuth), show preview */}
+                  {profile?.user?.profileImage && !files.profileImage ? (
+                    <div className="flex flex-col items-center gap-3 p-4 border-2 border-green-200 bg-green-50 rounded-xl">
+                      <div className="relative">
+                        <img
+                          src={profile.user.profileImage}
+                          alt="Profile"
+                          className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
+                        />
+                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
+                          <CheckCircle2 className="w-3 h-3 text-white" />
+                        </div>
                       </div>
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-xs font-semibold">Click to upload</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          PNG, JPG up to 5MB
-                        </p>
-                      </div>
-                    )}
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={(e) =>
-                        setFiles((p) => ({
-                          ...p,
-                          profileImage: e.target.files?.[0] || null,
-                        }))
-                      }
-                    />
-                  </div>
+                      <p className="text-xs font-bold text-green-700">Already uploaded</p>
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-primary cursor-pointer hover:underline">
+                        <Pencil className="w-3 h-3" /> Change Photo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) =>
+                            setFiles((p) => ({
+                              ...p,
+                              profileImage: e.target.files?.[0] || null,
+                            }))
+                          }
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 gap-2 hover:bg-muted/50 transition-colors cursor-pointer relative overflow-hidden group">
+                      {files.profileImage ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <img
+                            src={URL.createObjectURL(files.profileImage)}
+                            alt="Preview"
+                            className="w-20 h-20 rounded-full object-cover border-4 border-primary/20 shadow-md"
+                          />
+                          <div className="flex items-center gap-2 text-green-600 font-bold text-xs">
+                            <CheckCircle2 className="w-4 h-4" />
+                            {files.profileImage.name}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <p className="text-xs font-semibold">Click to upload</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            PNG, JPG up to 5MB
+                          </p>
+                        </div>
+                      )}
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={(e) =>
+                          setFiles((p) => ({
+                            ...p,
+                            profileImage: e.target.files?.[0] || null,
+                          }))
+                        }
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-bold flex items-center gap-2">
@@ -1113,8 +1227,9 @@ export function FreelancerOnboardingModal({
 
               <div className="space-y-4 border-t pt-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-bold">
+                  <Label className="text-lg font-bold flex w-full items-center">
                     Certifications (Max 4 Total)
+                    <WeightBadge pct={WEIGHTS.portfolio} isComplete={certifications.length > 0 || gigs.length > 0 || !!formData.portfolio?.trim()} />
                   </Label>
                   {profile?.certificates?.length +
                     certifications.filter((c) => c.file).length <
@@ -1270,7 +1385,7 @@ export function FreelancerOnboardingModal({
           {step === 5 && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Portfolio Link</Label>
+                <Label className="flex w-full items-center">Portfolio Link (or any link) <WeightBadge pct={WEIGHTS.links} isComplete={!!(formData.github?.trim() || formData.linkedin?.trim() || formData.portfolio?.trim() || formData.website?.trim())} /></Label>
                 <Input
                   name="portfolio"
                   value={formData.portfolio}
@@ -1328,7 +1443,7 @@ export function FreelancerOnboardingModal({
               className="rounded-xl px-8 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {step === 5 ? "Save & Close" : "Save & Continue"}
+              {step === 5 ? "Save Changes" : "Save & Continue"}
             </Button>
           </div>
         </div>
