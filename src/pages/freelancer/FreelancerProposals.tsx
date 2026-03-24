@@ -39,6 +39,7 @@ import {
   Loader2,
   Zap,
   ListChecks,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -549,16 +550,13 @@ function ProposalCard({
               <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
               Your Cover Letter
             </h4>
-            <p
+            <div
               className={cn(
-                "text-sm text-foreground/80 font-medium leading-relaxed transition-all duration-300 w-full min-w-0",
-                !isExpanded
-                  ? "line-clamp-1 break-words"
-                  : "break-words whitespace-pre-wrap",
+                "text-sm text-foreground/80 leading-relaxed transition-all duration-300 w-full min-w-0 prose prose-sm dark:prose-invert max-w-none prose-p:mb-2 last:prose-p:mb-0",
+                !isExpanded && "line-clamp-2",
               )}
-            >
-              {proposal.coverLetter}
-            </p>
+              dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
+            />
             <button
               onClick={onToggleExpand}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
@@ -573,6 +571,49 @@ function ProposalCard({
                 </>
               )}
             </button>
+          </div>
+        )}
+
+        {/* Attachments */}
+        {proposal.attachments && proposal.attachments.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+              <FileText className="w-3 h-3" /> Attachments (
+              {proposal.attachments.length})
+            </h4>
+            <div className="flex flex-wrap gap-3">
+              {proposal.attachments.map((url: string, i: number) => {
+                const isImage = url.match(/\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i);
+                return (
+                  <a
+                    key={i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative flex flex-col items-center gap-2 p-2 rounded-xl bg-muted/30 border border-border/40 hover:bg-primary/5 hover:border-primary/20 transition-all overflow-hidden"
+                  >
+                    {isImage ? (
+                      <div className="w-20 h-14 rounded-lg overflow-hidden border border-border/20">
+                        <img
+                          src={url}
+                          alt="attachment"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-20 h-14 rounded-lg bg-background flex items-center justify-center border border-border/20">
+                        <FileText className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-primary/90 text-white p-1 rounded-md shadow-sm">
+                        <ExternalLink className="w-2 h-2" />
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
           </div>
         )}
 
