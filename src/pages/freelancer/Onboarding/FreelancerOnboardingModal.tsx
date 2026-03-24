@@ -53,7 +53,10 @@ export function FreelancerOnboardingModal({
 }) {
   // Determine the starting step based on what's missing
   let initialStep = 1;
-  if (profile?.fullName || profile?.user?.name && profile?.location && profile?.tagline)
+  if (
+    profile?.fullName ||
+    (profile?.user?.name && profile?.location && profile?.tagline)
+  )
     initialStep = 2;
   if (initialStep === 2 && profile?.hourlyRate && profile?.bio) initialStep = 3;
   if (initialStep === 3 && profile?.skills?.length > 0) initialStep = 4;
@@ -66,7 +69,9 @@ export function FreelancerOnboardingModal({
 
   const [step, setStep] = useState(initialStep);
   const [isLoading, setIsLoading] = useState(false);
-  const [localCompletion, setLocalCompletion] = useState(profile?.profileCompletion || 0);
+  const [localCompletion, setLocalCompletion] = useState(
+    profile?.profileCompletion || 0,
+  );
   const { toast } = useToast();
   const { locations, languages: metadataLanguages } = useMetadata();
   const [categories, setCategories] = useState<any[]>([]);
@@ -182,11 +187,42 @@ export function FreelancerOnboardingModal({
   });
 
   const TABS = [
-    { id: 1, label: "Personal", icon: User, isComplete: !!(formData.fullName && formData.location && formData.tagline) },
-    { id: 2, label: "Professional", icon: Briefcase, isComplete: !!(formData.hourlyRate && formData.bio) },
-    { id: 3, label: "Skills & Edu", icon: Sparkles, isComplete: formData.skills.length > 0 },
-    { id: 4, label: "Media", icon: Upload, isComplete: !!(profile?.user?.profileImage || files.profileImage) },
-    { id: 5, label: "Links", icon: Globe, isComplete: !!(formData.portfolio || formData.preferredCategories.length > 0) },
+    {
+      id: 1,
+      label: "Personal",
+      icon: User,
+      isComplete: !!(
+        formData.fullName &&
+        formData.location &&
+        formData.tagline
+      ),
+    },
+    {
+      id: 2,
+      label: "Professional",
+      icon: Briefcase,
+      isComplete: !!(formData.hourlyRate && formData.bio),
+    },
+    {
+      id: 3,
+      label: "Skills & Edu",
+      icon: Sparkles,
+      isComplete: formData.skills.length > 0,
+    },
+    {
+      id: 4,
+      label: "Media",
+      icon: Upload,
+      isComplete: !!(profile?.user?.profileImage || files.profileImage),
+    },
+    {
+      id: 5,
+      label: "Links",
+      icon: Globe,
+      isComplete: !!(
+        formData.portfolio || formData.preferredCategories.length > 0
+      ),
+    },
   ];
 
   const handleChange = (
@@ -253,7 +289,8 @@ export function FreelancerOnboardingModal({
           region: formData.region,
           tagline: formData.tagline,
         });
-        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
+        if (res.data?.profileCompletion)
+          setLocalCompletion(res.data.profileCompletion);
       } else if (step === 2) {
         const res = await freelancerService.updateOnboardingStep2({
           hourlyRate: Number(formData.hourlyRate),
@@ -261,7 +298,8 @@ export function FreelancerOnboardingModal({
           availability: formData.availability,
           experienceLevel: formData.experienceLevel,
         });
-        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
+        if (res.data?.profileCompletion)
+          setLocalCompletion(res.data.profileCompletion);
       } else if (step === 3) {
         const res = await freelancerService.updateOnboardingStep3({
           skills: formData.skills,
@@ -272,7 +310,8 @@ export function FreelancerOnboardingModal({
           preferredCategories: formData.preferredCategories,
         });
         // Note: Step 3 might not return completion in some versions, but we should check
-        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
+        if (res.data?.profileCompletion)
+          setLocalCompletion(res.data.profileCompletion);
       } else if (step === 4) {
         if (!files.profileImage && !profile?.user?.profileImage) {
           toast({
@@ -307,7 +346,8 @@ export function FreelancerOnboardingModal({
         });
 
         const res = await freelancerService.uploadOnboardingFiles(formPayload);
-        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
+        if (res.data?.profileCompletion)
+          setLocalCompletion(res.data.profileCompletion);
       } else if (step === 5) {
         const res = await freelancerService.updateOnboardingStep5({
           github: formData.github,
@@ -316,16 +356,17 @@ export function FreelancerOnboardingModal({
           website: formData.website,
           preferredCategories: formData.preferredCategories,
         });
-        if (res.data?.profileCompletion) setLocalCompletion(res.data.profileCompletion);
+        if (res.data?.profileCompletion)
+          setLocalCompletion(res.data.profileCompletion);
         toast({
           title: "Profile Updated!",
           description: "Your changes have been saved.",
         });
         // Don't close immediately if they want to keep editing tabs
-        // onComplete(); 
+        // onComplete();
         // return;
       }
-      
+
       if (step < 5) {
         setStep((prev) => prev + 1);
       }
@@ -504,7 +545,9 @@ export function FreelancerOnboardingModal({
         <DialogHeader className="p-6 pb-2 shrink-0">
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
-              <DialogTitle className="text-2xl font-black text-foreground">Complete Your Profile</DialogTitle>
+              <DialogTitle className="text-2xl font-black text-foreground">
+                Complete Your Profile
+              </DialogTitle>
               <DialogDescription className="text-xs font-medium">
                 Fill in your details to reach 100% and start bidding.
               </DialogDescription>
@@ -515,8 +558,8 @@ export function FreelancerOnboardingModal({
                 <span>{localCompletion}% Complete</span>
               </div>
               <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden border border-border/20">
-                <div 
-                  className="h-full bg-primary transition-all duration-1000" 
+                <div
+                  className="h-full bg-primary transition-all duration-1000"
                   style={{ width: `${localCompletion}%` }}
                 />
               </div>
@@ -533,12 +576,17 @@ export function FreelancerOnboardingModal({
                   onClick={() => setStep(t.id)}
                   className={cn(
                     "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap relative",
-                    isActive 
-                      ? "bg-background text-primary shadow-sm" 
-                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                    isActive
+                      ? "bg-background text-primary shadow-sm"
+                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
                   )}
                 >
-                  <t.icon className={cn("w-3.5 h-3.5", isActive ? "text-primary" : "text-muted-foreground")} />
+                  <t.icon
+                    className={cn(
+                      "w-3.5 h-3.5",
+                      isActive ? "text-primary" : "text-muted-foreground",
+                    )}
+                  />
                   {t.label}
                   {t.isComplete && !isActive && (
                     <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-0.5 border-2 border-background shadow-sm">
@@ -1266,7 +1314,7 @@ export function FreelancerOnboardingModal({
             )}
           </div>
           <div className="flex gap-3">
-             <Button
+            <Button
               variant="ghost"
               onClick={onClose}
               disabled={isLoading}
