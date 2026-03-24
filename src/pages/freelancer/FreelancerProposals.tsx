@@ -694,7 +694,10 @@ function ProposalCard({
                   <Button
                     size="sm"
                     className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6"
-                    onClick={() => onAcceptChanges(proposal.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAcceptChanges(proposal.id);
+                    }}
                   >
                     Accept Revision Request
                   </Button>
@@ -770,7 +773,10 @@ function ProposalCard({
                   <Button
                     size="sm"
                     className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6"
-                    onClick={() => onAcceptChanges(proposal.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAcceptChanges(proposal.id);
+                    }}
                   >
                     Accept Changes
                   </Button>
@@ -778,7 +784,10 @@ function ProposalCard({
                     size="sm"
                     variant="outline"
                     className="rounded-full px-6 border-destructive/30 hover:bg-destructive/10 text-destructive"
-                    onClick={() => onWithdraw(proposal.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onWithdraw(proposal.id);
+                    }}
                   >
                     Reject & Withdraw
                   </Button>
@@ -800,7 +809,10 @@ function ProposalCard({
                   variant="ghost"
                   size="sm"
                   className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-                  onClick={() => onWithdraw(proposal.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onWithdraw(proposal.id);
+                  }}
                 >
                   Withdraw Proposal
                 </Button>
@@ -848,7 +860,10 @@ function ProposalCard({
                   variant="ghost"
                   size="sm"
                   className="h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-                  onClick={() => onWithdraw(proposal.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onWithdraw(proposal.id);
+                  }}
                 >
                   Withdraw Proposal
                 </Button>
@@ -883,8 +898,12 @@ function ProposalCard({
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6"
                     asChild
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <Link to={`/freelancer/contracts/${contract.id}`}>
+                    <Link 
+                      to={`/freelancer/contracts/${contract.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       View Contract{" "}
                       <ExternalLink className="w-3.5 h-3.5 ml-2" />
                     </Link>
@@ -895,8 +914,12 @@ function ProposalCard({
                   variant="outline"
                   className="rounded-full px-6 border-green-500/30 hover:bg-green-500/10 text-green-600"
                   asChild
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <Link to="/freelancer/messages">
+                  <Link 
+                    to="/freelancer/messages"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <MessageSquare className="w-3.5 h-3.5 mr-2" /> Message
                     Client
                   </Link>

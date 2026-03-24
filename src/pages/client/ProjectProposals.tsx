@@ -1001,6 +1001,7 @@ const ProposalCard = ({
               size="sm"
               className="h-9 rounded-xl font-black text-[10px] uppercase tracking-widest gap-2 bg-primary/5 border-primary/20 text-primary hover:bg-primary/10 hover:border-primary/40 transition-all shadow-sm"
               asChild
+              onClick={(e) => e.stopPropagation()}
             >
               <Link to={`/client/projects/${projectId}/proposals/${proposal.id}`}>
                 Review Proposal <ExternalLink className="w-3 h-3" />
@@ -1345,7 +1346,10 @@ const ProposalCard = ({
                       variant="outline"
                       size="sm"
                       className="h-8 rounded-lg text-xs font-bold border-blue-500/30 text-blue-600 hover:bg-blue-500/5 gap-1.5"
-                      onClick={onNegotiate}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNegotiate();
+                      }}
                       disabled={isProcessing}
                     >
                       <ListChecks className="w-3 h-3" /> Add Milestones
