@@ -510,7 +510,7 @@ export default function FreelancerProjectDetails() {
                     <div className="flex items-end justify-between mb-4">
                       <div>
                         <p className="text-3xl font-black text-foreground">
-                          {project.proposalCount || 0}{" "}
+                          {Math.max(0, project.proposalCount || 0)}{" "}
                           <span className="text-sm text-muted-foreground font-bold">
                             / 50
                           </span>

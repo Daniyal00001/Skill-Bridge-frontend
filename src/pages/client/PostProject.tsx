@@ -1281,7 +1281,7 @@ const PostProjectPage = () => {
                       <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">
                         Basics
                       </h4>
-                      <h2 className="text-xl font-bold mb-1">
+                      <h2 className="text-xl font-bold mb-1 break-words">
                         {formData.title}
                       </h2>
                       {/* ✅ Show category name from DB object */}
@@ -1293,7 +1293,7 @@ const PostProjectPage = () => {
                           {selectedSubCategory.name}
                         </Badge>
                       )}
-                      <p className="text-xs text-muted-foreground italic mt-2">
+                      <p className="text-xs text-muted-foreground italic mt-2 break-words">
                         "{formData.shortDesc}"
                       </p>
                     </div>
@@ -1351,7 +1351,7 @@ const PostProjectPage = () => {
                           <span className="text-[10px] font-bold block mb-1">
                             VISION:
                           </span>
-                          <p className="text-xs line-clamp-2 text-foreground/80 leading-relaxed">
+                          <p className="text-xs line-clamp-2 text-foreground/80 leading-relaxed break-words">
                             {formData.fullDesc}
                           </p>
                         </div>
@@ -1359,7 +1359,7 @@ const PostProjectPage = () => {
                           <span className="text-[10px] font-bold block mb-1">
                             FUNCTIONAL NEEDS:
                           </span>
-                          <p className="text-xs line-clamp-2 text-foreground/80 leading-relaxed">
+                          <p className="text-xs line-clamp-2 text-foreground/80 leading-relaxed break-words">
                             {formData.functionalReq}
                           </p>
                         </div>

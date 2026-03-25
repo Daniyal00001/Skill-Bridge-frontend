@@ -660,17 +660,17 @@ const FreelancerProposalDetail = () => {
             {/* Help/Tips */}
             <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-[2rem] p-6">
               <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <AlertCircle className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Zap className="w-6 h-6 text-amber-500 fill-amber-500" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-black uppercase tracking-tight">
-                    Need Help?
+                  <h4 className="text-sm font-black uppercase tracking-tight text-amber-600 dark:text-amber-400">
+                    Pro Tip
                   </h4>
                   <p className="text-[10px] text-muted-foreground font-bold leading-relaxed">
-                    Negotiating milestones is a standard part of the hiring
-                    process. If you have questions, message the client directly
-                    from the Inbox.
+                    Clients value clear milestones and realistic deadlines.
+                    Detailed descriptions help build trust and increase your
+                    chances of getting hired!
                   </p>
                 </div>
               </div>

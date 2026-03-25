@@ -385,6 +385,24 @@ const ClientProposalDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content (Left) */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Withdrawn/Cancelled Status Banner */}
+            {(proposal.status === "WITHDRAWN" || proposal.status === "CANCELLED") && (
+              <div className="bg-amber-500/10 border-amber-500/20 p-6 rounded-[2.5rem] flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm border-2">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <AlertCircle className="w-6 h-6 text-amber-600" />
+                </div>
+                <div className="space-y-1 py-1">
+                  <h4 className="text-base font-black text-amber-900 dark:text-amber-400 uppercase tracking-tight">
+                    Proposal No Longer Available
+                  </h4>
+                  <p className="text-sm font-bold text-amber-800/80 dark:text-amber-400/80 leading-relaxed">
+                    Freelancer has withdrawn this proposal. You can no longer hire
+                    or negotiate for this bid.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Freelancer Header */}
             <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
               <CardContent className="p-8">
@@ -458,7 +476,9 @@ const ClientProposalDetail = () => {
                   </h3>
                 </div>
                 {proposal.status !== "ACCEPTED" &&
-                  proposal.status !== "REJECTED" && (
+                  proposal.status !== "REJECTED" &&
+                  proposal.status !== "WITHDRAWN" &&
+                  proposal.status !== "CANCELLED" && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -654,7 +674,9 @@ const ClientProposalDetail = () => {
                     </Button>
                   ) : (
                     <>
-                      {proposal.status !== "REJECTED" && (
+                      {proposal.status !== "REJECTED" &&
+                        proposal.status !== "WITHDRAWN" &&
+                        proposal.status !== "CANCELLED" && (
                         <>
                           <Button
                             className="w-full h-16 rounded-[1.5rem] font-black text-lg gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
@@ -720,7 +742,9 @@ const ClientProposalDetail = () => {
 
             {/* Negotiation Tools */}
             {proposal.status !== "ACCEPTED" &&
-              proposal.status !== "REJECTED" && (
+              proposal.status !== "REJECTED" &&
+              proposal.status !== "WITHDRAWN" &&
+              proposal.status !== "CANCELLED" && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 px-4">
                     <div className="w-1 h-4 bg-primary rounded-full" />
