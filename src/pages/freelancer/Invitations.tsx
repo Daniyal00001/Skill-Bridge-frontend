@@ -48,6 +48,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const InvitationsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("month");
   const [invites, setInvites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -92,9 +93,27 @@ const InvitationsPage = () => {
         invite.clientName?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
         statusFilter === "all" || invite.status?.toLowerCase() === statusFilter;
-      return matchesSearch && matchesStatus;
+
+      let matchesDate = true;
+      if (dateFilter !== "all") {
+        const inviteDate = new Date(invite.createdAt);
+        const now = new Date();
+        if (dateFilter === "today") {
+          matchesDate = inviteDate.toDateString() === now.toDateString();
+        } else if (dateFilter === "week") {
+          const weekAgo = new Date();
+          weekAgo.setDate(now.getDate() - 7);
+          matchesDate = inviteDate >= weekAgo;
+        } else if (dateFilter === "month") {
+          const monthAgo = new Date();
+          monthAgo.setDate(now.getDate() - 30);
+          matchesDate = inviteDate >= monthAgo;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesDate;
     });
-  }, [invites, searchTerm, statusFilter]);
+  }, [invites, searchTerm, statusFilter, dateFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -153,8 +172,8 @@ const InvitationsPage = () => {
           <div className="flex items-center gap-2 w-full md:w-auto ml-auto">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px] h-10 bg-background rounded-lg">
-                <SelectValue placeholder="Filter by status" />
+              <SelectTrigger className="w-[130px] h-10 rounded-lg bg-background">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
@@ -162,6 +181,18 @@ const InvitationsPage = () => {
                 <SelectItem value="accepted">Accepted</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={dateFilter} onValueChange={setDateFilter}>
+              <SelectTrigger className="w-[130px] h-10 rounded-lg bg-background">
+                <SelectValue placeholder="Timeframe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">Past 7 Days</SelectItem>
+                <SelectItem value="month">Past 30 Days</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -222,19 +253,16 @@ const InvitationsPage = () => {
                         {new Date(invite.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="py-4">{getStatusBadge(invite.status)}</TableCell>
-                      <TableCell className="text-right pr-6 py-4 space-x-2">
-                        {invite.status === "PENDING" && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="font-bold border-primary/20 text-primary hover:bg-primary/10"
-                              onClick={() => { setSelectedInvite(invite); setDetailsModalOpen(true); }}
-                            >
-                              <Eye className="w-4 h-4 mr-1.5" /> View Details
-                            </Button>
-                          </>
-                        )}
+                      <TableCell className="text-right pr-6 py-4 space-x-2 flex items-center justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="font-bold border-primary/20 text-primary hover:bg-primary/10"
+                          onClick={() => { setSelectedInvite(invite); setDetailsModalOpen(true); }}
+                        >
+                          <Eye className="w-4 h-4 mr-1.5" /> View Details
+                        </Button>
+
                         {invite.status === "ACCEPTED" && (
                           <Button
                             variant="outline"
@@ -370,12 +398,6 @@ const InvitationsPage = () => {
                     </div>
                   </div>
 
-                  <div className="p-6 rounded-3xl border bg-secondary/20 space-y-3">
-                    <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Project Category</h4>
-                    <p className="text-sm font-bold bg-background/50 inline-block px-3 py-1 rounded-full border border-border/40">
-                      Web Development & Design
-                    </p>
-                  </div>
                 </div>
               </div>
 
@@ -444,6 +466,14 @@ const InvitationsPage = () => {
                   Accepting this invitation will automatically formalize these exact terms into an active contract and cancel any other pending offers for this project.
                 </p>
               </div>
+
+              {/* Centered Project Category at Bottom */}
+              <div className="flex justify-center pt-4">
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/30 border border-border/40 shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Category:</span>
+                  <span className="text-[10px] font-bold">{selectedInvite.projectCategory}</span>
+                </div>
+              </div>
             </div>
 
             <DialogFooter className="p-8 pt-4 border-t bg-background/50 shrink-0 gap-4">
@@ -454,25 +484,27 @@ const InvitationsPage = () => {
               >
                 Close View
               </Button>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  className="font-black uppercase text-[11px] tracking-widest h-12 rounded-2xl px-8 bg-red-500/10 text-red-600 hover:bg-red-500/20 border-red-200 shadow-sm transition-all"
-                  onClick={() => handleAction(selectedInvite.id, 'reject')}
-                  disabled={!!actionLoading}
-                >
-                  {actionLoading === `reject-${selectedInvite.id}` ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
-                  Decline Invite
-                </Button>
-                <Button
-                  className="font-black uppercase text-[11px] tracking-widest h-12 rounded-2xl px-10 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-600/20 hover:shadow-emerald-600/40 active:scale-95 transition-all"
-                  onClick={() => handleAction(selectedInvite.id, 'accept')}
-                  disabled={!!actionLoading}
-                >
-                  {actionLoading === `accept-${selectedInvite.id}` ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
-                  Accept & Start
-                </Button>
-              </div>
+              {selectedInvite.status === "PENDING" && (
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    className="font-black uppercase text-[11px] tracking-widest h-12 rounded-2xl px-8 bg-red-500/10 text-red-600 hover:bg-red-500/20 border-red-200 shadow-sm transition-all"
+                    onClick={() => handleAction(selectedInvite.id, 'reject')}
+                    disabled={!!actionLoading}
+                  >
+                    {actionLoading === `reject-${selectedInvite.id}` ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
+                    Decline Invite
+                  </Button>
+                  <Button
+                    className="font-black uppercase text-[11px] tracking-widest h-12 rounded-2xl px-10 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-600/20 hover:shadow-emerald-600/40 active:scale-95 transition-all"
+                    onClick={() => handleAction(selectedInvite.id, 'accept')}
+                    disabled={!!actionLoading}
+                  >
+                    {actionLoading === `accept-${selectedInvite.id}` ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                    Accept & Start
+                  </Button>
+                </div>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

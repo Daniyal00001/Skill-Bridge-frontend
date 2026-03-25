@@ -49,6 +49,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const DirectInvitesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("month");
   const [invites, setInvites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
@@ -98,9 +99,27 @@ const DirectInvitesPage = () => {
       const matchesStatus =
         statusFilter === "all" ||
         invite.status?.toLowerCase() === statusFilter;
-      return matchesSearch && matchesStatus;
+
+      let matchesDate = true;
+      if (dateFilter !== "all") {
+        const inviteDate = new Date(invite.createdAt);
+        const now = new Date();
+        if (dateFilter === "today") {
+          matchesDate = inviteDate.toDateString() === now.toDateString();
+        } else if (dateFilter === "week") {
+          const weekAgo = new Date();
+          weekAgo.setDate(now.getDate() - 7);
+          matchesDate = inviteDate >= weekAgo;
+        } else if (dateFilter === "month") {
+          const monthAgo = new Date();
+          monthAgo.setDate(now.getDate() - 30);
+          matchesDate = inviteDate >= monthAgo;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesDate;
     });
-  }, [invites, searchTerm, statusFilter]);
+  }, [invites, searchTerm, statusFilter, dateFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -188,8 +207,8 @@ const DirectInvitesPage = () => {
           <div className="flex items-center gap-2 w-full md:w-auto ml-auto">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px] h-10 bg-background rounded-lg">
-                <SelectValue placeholder="Filter by status" />
+              <SelectTrigger className="w-[130px] h-10 rounded-lg">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
@@ -197,6 +216,18 @@ const DirectInvitesPage = () => {
                 <SelectItem value="accepted">Accepted</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={dateFilter} onValueChange={setDateFilter}>
+              <SelectTrigger className="w-[130px] h-10 rounded-lg">
+                <SelectValue placeholder="Timeframe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">Past 7 Days</SelectItem>
+                <SelectItem value="month">Past 30 Days</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -442,6 +473,14 @@ const DirectInvitesPage = () => {
                         {getStatusBadge(selectedInvite.status)}
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Centered Project Category at Bottom */}
+              <div className="flex justify-center pt-4">
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/30 border border-border/40 shadow-sm">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Category:</span>
+                  <span className="text-[10px] font-bold">{selectedInvite.projectCategory}</span>
                 </div>
               </div>
 

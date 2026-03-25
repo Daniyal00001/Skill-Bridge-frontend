@@ -35,7 +35,7 @@ export interface ClientDashboardData {
   lists: {
     openProjects: any[];
     recentProposals: any[];
-    pendingInvitations: any[];
+    recentInvitations: any[];
   };
 }
 

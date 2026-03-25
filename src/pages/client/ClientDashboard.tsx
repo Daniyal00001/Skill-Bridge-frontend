@@ -22,6 +22,7 @@ import {
   Users,
   Loader2,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { useQuery } from "@tanstack/react-query";
 import { getClientDashboardStats } from "@/services/dashboard.service";
@@ -63,7 +64,7 @@ export default function ClientDashboard() {
   }
 
   const { stats, lists } = data;
-  const { openProjects, recentProposals, pendingInvitations } = lists;
+  const { openProjects, recentProposals, recentInvitations } = lists;
 
   return (
     <DashboardLayout>
@@ -321,33 +322,48 @@ export default function ClientDashboard() {
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold mb-4">Invitations Sent</h2>
-                <Card className="border-border/40">
-                  <CardContent className="p-4 space-y-3">
-                    {pendingInvitations.length === 0 ? (
-                      <p className="text-muted-foreground text-sm">
-                        No pending invitations.
-                      </p>
+                <h2 className="text-xl font-semibold mb-4 text-center lg:text-left">
+                  Recent Invitations
+                </h2>
+                <Card className="border-border/40 shadow-sm bg-card/30 backdrop-blur-sm">
+                  <CardContent className="p-0">
+                    {recentInvitations.length === 0 ? (
+                      <div className="text-center py-10">
+                        <Mail className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
+                        <p className="text-muted-foreground text-sm">
+                          No invitations sent yet.
+                        </p>
+                      </div>
                     ) : (
-                      pendingInvitations.map((invitation) => (
+                      recentInvitations.map((invitation: any, idx: number) => (
                         <div
-                          key={invitation.id}
-                          className="flex items-center justify-between gap-2"
+                          key={invitation.id || idx}
+                          className="flex items-center justify-between px-5 py-4 border-b last:border-0 border-border/20 hover:bg-muted/30 transition-all group"
                         >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Avatar className="h-7 w-7 shrink-0">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar className="h-9 w-9 shrink-0 border-2 border-background shadow-sm group-hover:scale-105 transition-transform">
                               <AvatarImage src={invitation.avatar} />
-                              <AvatarFallback>
+                              <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
                                 {(invitation.freelancerName || "F").charAt(0)}
                               </AvatarFallback>
                             </Avatar>
-                            <p className="text-sm font-medium truncate">
-                              {invitation.freelancerName}
-                            </p>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">
+                                {invitation.freelancerName}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground truncate uppercase font-bold tracking-tight">
+                                {invitation.projectTitle}
+                              </p>
+                            </div>
                           </div>
                           <Badge
                             variant="outline"
-                            className="text-[10px] shrink-0 font-bold uppercase bg-amber-500/10 text-amber-600 border-amber-500/20"
+                            className={cn(
+                              "text-[9px] shrink-0 font-black uppercase tracking-widest px-2 py-0.5 border shadow-sm",
+                              PROPOSAL_COLORS[
+                                invitation.status?.toUpperCase()
+                              ] || "bg-muted text-muted-foreground",
+                            )}
                           >
                             {invitation.status}
                           </Badge>
@@ -367,9 +383,7 @@ export default function ClientDashboard() {
                     <div>
                       <h3 className="font-bold text-white">Pro Tip</h3>
                       <p className="text-sm text-white/90 mt-1 leading-relaxed">
-                        Use our AI Scoping Assistant to auto-generate project
-                        requirements, budget estimates, and required skills
-                        before posting.
+                        Find the perfect match faster with our AI-powered freelancer discovery assistant.
                       </p>
                     </div>
                   </div>
