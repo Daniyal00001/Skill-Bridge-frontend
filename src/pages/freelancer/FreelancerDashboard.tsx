@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ProjectCard } from "@/components/common/ProjectCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Briefcase,
   DollarSign,
@@ -14,9 +14,7 @@ import {
   ArrowRight,
   TrendingUp,
   Clock,
-  Sparkles,
   Zap,
-  Target,
   MessageSquare,
   Coins,
   BookOpen,
@@ -24,33 +22,179 @@ import {
   AlertCircle,
   Loader2,
   AlertTriangle,
+  FileText,
+  Wallet,
+  Users,
+  ChevronRight,
+  BarChart3,
+  CalendarDays,
+  ArrowUpRight,
+  ArrowDownRight,
+  Layers,
+  Award,
+  Activity,
+  Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { getFreelancerDashboardStats } from "@/services/dashboard.service";
 
-const PROPOSAL_COLORS: Record<string, string> = {
-  PENDING: "bg-amber-500/5 text-amber-600 border-amber-500/20",
-  SHORTLISTED: "bg-blue-500/5 text-blue-600 border-blue-500/20",
-  ACCEPTED: "bg-green-500/5 text-green-600 border-green-500/20",
-  REJECTED: "bg-red-500/5 text-red-500 border-red-500/20",
-  WITHDRAWN: "bg-zinc-500/5 text-zinc-500 border-zinc-500/20",
-  CANCELLED: "bg-zinc-500/5 text-zinc-500 border-zinc-500/20",
+// ─── Status color maps ────────────────────────────────────────────────────────
+
+const PROPOSAL_STATUS_MAP: Record<
+  string,
+  { label: string; className: string }
+> = {
+  PENDING: {
+    label: "Pending",
+    className: "bg-amber-50 text-amber-700 border border-amber-200",
+  },
+  SHORTLISTED: {
+    label: "Shortlisted",
+    className: "bg-blue-50 text-blue-700 border border-blue-200",
+  },
+  ACCEPTED: {
+    label: "Accepted",
+    className: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  },
+  REJECTED: {
+    label: "Rejected",
+    className: "bg-red-50 text-red-600 border border-red-200",
+  },
+  WITHDRAWN: {
+    label: "Withdrawn",
+    className: "bg-zinc-100 text-zinc-500 border border-zinc-200",
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    className: "bg-zinc-100 text-zinc-500 border border-zinc-200",
+  },
 };
 
-const MILESTONE_COLORS: Record<string, string> = {
-  PENDING: "text-zinc-500",
-  FUNDED: "text-blue-500",
-  IN_PROGRESS: "text-indigo-500",
-  SUBMITTED: "text-purple-500",
-  APPROVED: "text-green-500",
-  REVISION_REQUESTED: "text-orange-500",
-  REJECTED: "text-red-500",
+const MILESTONE_STATUS_MAP: Record<
+  string,
+  { label: string; dot: string; text: string }
+> = {
+  PENDING: { label: "Pending", dot: "bg-zinc-400", text: "text-zinc-500" },
+  FUNDED: { label: "Funded", dot: "bg-blue-500", text: "text-blue-600" },
+  IN_PROGRESS: {
+    label: "In Progress",
+    dot: "bg-indigo-500",
+    text: "text-indigo-600",
+  },
+  SUBMITTED: {
+    label: "Submitted",
+    dot: "bg-violet-500",
+    text: "text-violet-600",
+  },
+  APPROVED: {
+    label: "Approved",
+    dot: "bg-emerald-500",
+    text: "text-emerald-600",
+  },
+  REVISION_REQUESTED: {
+    label: "Revision Requested",
+    dot: "bg-orange-400",
+    text: "text-orange-600",
+  },
+  REJECTED: { label: "Rejected", dot: "bg-red-500", text: "text-red-600" },
 };
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function StatCard({
+  title,
+  value,
+  sub,
+  icon: Icon,
+  trend,
+  iconBg,
+  iconColor,
+}: {
+  title: string;
+  value: string | number;
+  sub: string;
+  icon: React.ElementType;
+  trend?: "up" | "down" | "neutral";
+  iconBg: string;
+  iconColor: string;
+}) {
+  return (
+    <Card className="border border-border/50 bg-card rounded-2xl hover:shadow-md transition-shadow duration-200">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between">
+          <div
+            className={cn(
+              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+              iconBg,
+            )}
+          >
+            <Icon className={cn("h-5 w-5", iconColor)} />
+          </div>
+          {trend && (
+            <span
+              className={cn(
+                "flex items-center gap-0.5 text-xs font-semibold",
+                trend === "up"
+                  ? "text-emerald-600"
+                  : trend === "down"
+                    ? "text-red-500"
+                    : "text-zinc-400",
+              )}
+            >
+              {trend === "up" ? (
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              ) : trend === "down" ? (
+                <ArrowDownRight className="h-3.5 w-3.5" />
+              ) : null}
+            </span>
+          )}
+        </div>
+        <div className="mt-4">
+          <p className="text-2xl font-bold tracking-tight text-foreground">
+            {value}
+          </p>
+          <p className="text-xs font-medium text-muted-foreground mt-0.5">
+            {title}
+          </p>
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1 opacity-70">
+          <Clock className="h-3 w-3" /> {sub}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SectionHeader({
+  title,
+  to,
+  label = "View all",
+}: {
+  title: string;
+  to: string;
+  label?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-base font-bold text-foreground tracking-tight">
+        {title}
+      </h2>
+      <Link
+        to={to}
+        className="text-xs font-semibold text-primary flex items-center gap-1 hover:underline"
+      >
+        {label} <ChevronRight className="h-3.5 w-3.5" />
+      </Link>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function FreelancerDashboard() {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['freelancerDashboard'],
+    queryKey: ["freelancerDashboard"],
     queryFn: getFreelancerDashboardStats,
   });
 
@@ -58,7 +202,7 @@ export default function FreelancerDashboard() {
     return (
       <DashboardLayout>
         <div className="flex h-[80vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-7 w-7 animate-spin text-primary" />
         </div>
       </DashboardLayout>
     );
@@ -67,9 +211,11 @@ export default function FreelancerDashboard() {
   if (error || !data) {
     return (
       <DashboardLayout>
-        <div className="flex h-[80vh] items-center justify-center flex-col gap-4">
-          <AlertTriangle className="h-10 w-10 text-red-500" />
-          <p className="text-lg font-medium">Failed to load dashboard data.</p>
+        <div className="flex h-[80vh] items-center justify-center flex-col gap-3">
+          <AlertTriangle className="h-8 w-8 text-red-500" />
+          <p className="text-sm font-medium text-muted-foreground">
+            Failed to load dashboard data.
+          </p>
         </div>
       </DashboardLayout>
     );
@@ -78,286 +224,548 @@ export default function FreelancerDashboard() {
   const { stats, lists } = data;
   const { activeProposals, recentTokenTxs, activeMilestones } = lists;
 
+  const profileItems = [
+    { label: "Skills added", done: stats.profileCompletion > 20, icon: Layers },
+    {
+      label: "Portfolio items",
+      done: stats.profileCompletion > 50,
+      icon: Briefcase,
+    },
+    {
+      label: "Education / Certificates",
+      done: stats.profileCompletion > 70,
+      icon: BookOpen,
+    },
+    {
+      label: "ID Verified",
+      done: stats.profileCompletion >= 100,
+      icon: Shield,
+    },
+  ];
+
   return (
     <DashboardLayout>
-      <div className="container max-w-7xl mx-auto space-y-10 p-4 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
-              Welcome back! 🚀
-            </h1>
-            <p className="text-muted-foreground text-lg font-medium">
-              You have <span className="text-primary font-black">{stats.activeProposals || 0}</span> pending
-              {stats.shortlistedProposals > 0 && (
-                <>
-                  {" "}·{" "}
-                  <span className="text-blue-500 font-black">{stats.shortlistedProposals}</span> shortlisted
-                </>
-              )}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-8">
+        {/* ── Header ─────────────────────────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
+              Freelancer Dashboard
             </p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Overview
+            </h1>
           </div>
-          <div className="flex gap-4">
-            <Button variant="outline" className="h-12 px-6 rounded-2xl font-bold border-2" asChild>
-              <Link to="/freelancer/proposals">My Proposals</Link>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-xl font-semibold h-9"
+              asChild
+            >
+              <Link to="/freelancer/contracts">Contracts</Link>
             </Button>
-            <Button className="h-12 px-6 rounded-2xl font-bold gap-2 shadow-lg shadow-primary/30" asChild>
-              <Link to="/freelancer/browse"><Search className="h-5 w-5" /> Browse Projects</Link>
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-xl font-semibold h-9"
+              asChild
+            >
+              <Link to="/freelancer/proposals">Proposals</Link>
+            </Button>
+            <Button
+              size="sm"
+              className="rounded-xl font-semibold h-9 gap-1.5"
+              asChild
+            >
+              <Link to="/freelancer/browse">
+                <Search className="h-4 w-4" /> Browse Projects
+              </Link>
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            {
-              title: "Active Proposals",
-              value: (stats.activeProposals || 0) + (stats.shortlistedProposals || 0),
-              icon: Briefcase,
-              color: "text-blue-500",
-              change: `${stats.shortlistedProposals || 0} shortlisted`,
-            },
-            {
-              title: "Total Earnings",
-              value: `$${(stats.totalEarnings || 0).toLocaleString()}`,
-              icon: DollarSign,
-              color: "text-emerald-500",
-              change: "Released payments",
-            },
-            {
-              title: "Jobs Completed",
-              value: stats.completedJobs || 0,
-              icon: CheckCircle,
-              color: "text-violet-500",
-              change: "Via contracts",
-            },
-            {
-              title: "Avg. Rating",
-              value: stats.averageRating?.toFixed(1) || "5.0",
-              icon: Star,
-              color: "text-amber-500",
-              change: "From blind reviews",
-            },
-          ].map((stat, i) => (
-            <Card key={i} className="border-border/40 bg-card/40 backdrop-blur-xl group hover:border-primary/20 transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-4">
-                    <div className={cn("h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center group-hover:scale-110 transition-transform", stat.color)}>
-                      <stat.icon className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{stat.title}</p>
-                      <h3 className="text-2xl font-black mt-1">{stat.value}</h3>
-                      <p className="text-[10px] font-bold text-muted-foreground mt-1 opacity-70 italic">{stat.change}</p>
-                    </div>
-                  </div>
+        {/* ── Availability + Invitations banner ──────────────────────────────── */}
+        {stats.pendingInvitationsCount > 0 && (
+          <Card className="border border-primary/20 bg-primary/5 rounded-2xl">
+            <CardContent className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Inbox className="h-4 w-4 text-primary" />
                 </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    You have{" "}
+                    <span className="text-primary">
+                      {stats.pendingInvitationsCount}
+                    </span>{" "}
+                    pending invitation
+                    {stats.pendingInvitationsCount > 1 ? "s" : ""}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Clients have invited you to their projects
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl font-semibold border-primary/30 text-primary hover:bg-primary/10 shrink-0"
+                asChild
+              >
+                <Link to="/freelancer/invitations">View Invitations</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ── KPI Stats Grid ─────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          <StatCard
+            title="Total Earnings"
+            value={`$${(stats.totalEarnings || 0).toLocaleString()}`}
+            sub="Lifetime released"
+            icon={DollarSign}
+            iconBg="bg-emerald-50"
+            iconColor="text-emerald-600"
+            trend="up"
+          />
+          <StatCard
+            title="Monthly Revenue"
+            value={`$${(stats.monthlyEarnings || 0).toLocaleString()}`}
+            sub="This calendar month"
+            icon={TrendingUp}
+            iconBg="bg-blue-50"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            title="Active Contracts"
+            value={stats.activeContractsCount || 0}
+            sub={`${stats.completedJobs || 0} completed`}
+            icon={Briefcase}
+            iconBg="bg-violet-50"
+            iconColor="text-violet-600"
+          />
+          <StatCard
+            title="Proposals Sent"
+            value={stats.proposalsThisMonth || 0}
+            sub={`${stats.activeProposals || 0} currently active`}
+            icon={FileText}
+            iconBg="bg-orange-50"
+            iconColor="text-orange-600"
+          />
+          <StatCard
+            title="Avg. Rating"
+            value={stats.averageRating?.toFixed(1) || "—"}
+            sub={`${stats.totalReviews || 0} reviews`}
+            icon={Star}
+            iconBg="bg-amber-50"
+            iconColor="text-amber-500"
+          />
+          <StatCard
+            title="Token Balance"
+            value={stats.skillTokenBalance || 0}
+            sub="SkillTokens available"
+            icon={Coins}
+            iconBg="bg-yellow-50"
+            iconColor="text-yellow-600"
+          />
+        </div>
+
+        {/* ── Main Content: 2-column layout ──────────────────────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left column (2/3) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Active Milestones */}
+            <Card className="border border-border/50 bg-card rounded-2xl overflow-hidden">
+              <CardHeader className="px-5 pt-5 pb-3 border-b border-border/30">
+                <SectionHeader
+                  title="Active Milestones"
+                  to="/freelancer/contracts"
+                />
+              </CardHeader>
+              <CardContent className="p-0">
+                {activeMilestones.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-2">
+                    <Activity className="h-8 w-8 text-muted-foreground/30" />
+                    <p className="text-sm text-muted-foreground">
+                      No active milestones right now.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border/30">
+                    {activeMilestones.map((m) => {
+                      const ms =
+                        MILESTONE_STATUS_MAP[m.status] ??
+                        MILESTONE_STATUS_MAP.PENDING;
+                      return (
+                        <div
+                          key={m.id}
+                          className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span
+                              className={cn(
+                                "h-2 w-2 rounded-full shrink-0",
+                                ms.dot,
+                              )}
+                            />
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold truncate text-foreground">
+                                {m.title}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span
+                                  className={cn(
+                                    "text-[11px] font-semibold",
+                                    ms.text,
+                                  )}
+                                >
+                                  {ms.label}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                  <CalendarDays className="h-3 w-3" />
+                                  Due{" "}
+                                  {new Date(m.dueDate).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    },
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-sm font-bold text-foreground">
+                              ${m.amount.toLocaleString()}
+                            </span>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
-          ))}
-        </div>
 
-        <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-yellow-500/5">
-          <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                <Coins className="h-6 w-6 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">SkillToken Balance</p>
-                <div className="flex items-end gap-2">
-                  <p className="text-3xl font-black text-amber-500">{stats.skillTokenBalance || 0}</p>
-                  <p className="text-sm font-bold text-muted-foreground mb-1">tokens</p>
-                </div>
-                <p className="text-xs text-muted-foreground">Each proposal costs tokens · Earn via activity</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline" size="sm" className="border-amber-500/30 text-amber-600 hover:bg-amber-500/10" asChild>
-                <Link to="/freelancer/tokens">View History</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="group overflow-hidden border-primary/20 bg-gradient-to-br from-card to-primary/5 hover:to-primary/10 transition-all duration-500 relative">
-            <CardContent className="p-8 space-y-6">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Target className="h-7 w-7 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black tracking-tight">Project Matching</h3>
-                <p className="text-muted-foreground font-medium leading-relaxed max-w-sm mt-1">
-                  Projects matching your skills, preferred categories & hourly rate. Check out your saved lists.
-                </p>
-              </div>
-              <Button className="h-12 px-8 rounded-xl font-bold gap-2" asChild>
-                <Link to="/freelancer/browse">View Matches <ArrowRight className="h-4 w-4" /></Link>
-              </Button>
-            </CardContent>
-            <Zap className="absolute -bottom-6 -right-6 h-40 w-40 text-primary/5 -rotate-12 group-hover:scale-110 transition-transform duration-700" />
-          </Card>
-
-          <Card className="group overflow-hidden border-purple-500/30 bg-gradient-to-br from-card to-purple-500/5 hover:to-purple-500/10 transition-all duration-500 relative">
-            <div className="absolute top-4 right-4">
-              <Badge className="bg-gradient-to-r from-primary to-purple-600 border-none font-black text-[10px] px-3 py-1">AI POWERED</Badge>
-            </div>
-            <CardContent className="p-8 space-y-6">
-              <div className="h-14 w-14 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Sparkles className="h-7 w-7 text-purple-500" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black tracking-tight">Proposal Optimizer</h3>
-                <p className="text-muted-foreground font-medium leading-relaxed max-w-sm mt-1">
-                  AI-refines your cover letters. Win rate up to <span className="text-foreground font-bold">45%</span> higher. Uses <span className="text-amber-500 font-bold">2 tokens</span> per proposal.
-                </p>
-              </div>
-              <Button variant="outline" className="h-12 px-8 rounded-xl font-bold border-2" asChild>
-                <Link to="/freelancer/proposals">Optimize Proposals</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2 space-y-8">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-black tracking-tight">Active Milestones</h2>
-                <Button variant="ghost" className="font-bold text-primary px-0 hover:bg-transparent" asChild>
-                  <Link to="/freelancer/contracts">View all <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                </Button>
-              </div>
-              <Card className="border-border/40 bg-card/60 rounded-2xl overflow-hidden">
-                <CardContent className="p-0">
-                  {activeMilestones.length === 0 && (
-                    <p className="text-center text-muted-foreground text-sm py-8">No active milestones right now.</p>
-                  )}
-                  {activeMilestones.map((m) => (
-                    <div key={m.id} className="flex items-center justify-between px-5 py-4 border-b last:border-0 border-border/20 hover:bg-muted/30 transition-colors">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={cn("h-2 w-2 rounded-full shrink-0", {
-                          "bg-zinc-400": m.status === "PENDING",
-                          "bg-blue-500": m.status === "FUNDED" || m.status === "IN_PROGRESS",
-                          "bg-purple-500": m.status === "SUBMITTED",
-                          "bg-green-500": m.status === "APPROVED",
-                          "bg-orange-500": m.status === "REVISION_REQUESTED",
-                          "bg-red-500": m.status === "REJECTED",
-                        })} />
-                        <div className="min-w-0">
-                          <p className="font-bold text-sm truncate">{m.title}</p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className={cn("text-[10px] font-black uppercase", MILESTONE_COLORS[m.status])}>
-                              {m.status.replace("_", " ")}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> Due {new Date(m.dueDate).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="font-black text-sm shrink-0">${m.amount}</p>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-xl font-black tracking-tight mb-4">Active Proposals</h2>
-              <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-2xl overflow-hidden">
-                <CardContent className="p-6 space-y-4">
-                  {activeProposals.length > 0 ? (
-                    activeProposals.map((proposal) => (
-                      <div key={proposal.id} className="flex items-start justify-between gap-4 pb-4 border-b last:border-0 last:pb-0 border-border/20">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-black truncate text-sm">{proposal.projectTitle || "Project"}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className={`text-[10px] font-black uppercase px-2 ${PROPOSAL_COLORS[proposal.status || "PENDING"]}`}>
-                              {(proposal.status || "PENDING").replace("_", " ")}
-                            </Badge>
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                              <Coins className="w-3 h-3 text-amber-500" />
-                              {proposal.tokenCost || 2} tokens
-                            </span>
-                          </div>
-                        </div>
-                        <p className="font-black text-sm shrink-0">${proposal.proposedPrice}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-6 space-y-3">
-                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto opacity-50">
-                        <MessageSquare className="h-6 w-6" />
-                      </div>
-                      <p className="text-muted-foreground text-sm font-medium">No active proposals</p>
-                    </div>
-                  )}
-                  <Button variant="outline" className="w-full h-12 rounded-xl font-black border-2" asChild>
-                    <Link to="/freelancer/proposals">Manage All Proposals</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div>
-              <h2 className="text-xl font-black tracking-tight mb-4">Token Activity</h2>
-              <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-2xl overflow-hidden">
-                <CardContent className="p-5 space-y-3">
-                  {recentTokenTxs.length === 0 && (
-                    <p className="text-center text-muted-foreground text-sm">No recent transactions</p>
-                  )}
-                  {recentTokenTxs.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold truncate">{tx.description}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{tx.reason.replace("_", " ")}</p>
-                      </div>
-                      <span className={cn("text-sm font-black shrink-0", tx.type === "CREDIT" ? "text-green-500" : "text-red-500")}>
-                        {tx.type === "CREDIT" ? "+" : "-"}{tx.amount}
-                      </span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-
-            <div>
-              <h2 className="text-xl font-black tracking-tight mb-4">Profile Health</h2>
-              <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-2xl overflow-hidden">
-                <CardContent className="p-8 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Completion</p>
-                      <h3 className="text-2xl font-black">{stats.profileCompletion}%</h3>
-                    </div>
-                    <div className="h-14 w-14 rounded-full border-4 border-primary/20 flex items-center justify-center">
-                      <TrendingUp className="h-6 w-6 text-primary" />
-                    </div>
+            {/* Active Proposals */}
+            <Card className="border border-border/50 bg-card rounded-2xl overflow-hidden">
+              <CardHeader className="px-5 pt-5 pb-3 border-b border-border/30">
+                <SectionHeader
+                  title="Active Proposals"
+                  to="/freelancer/proposals"
+                />
+              </CardHeader>
+              <CardContent className="p-0">
+                {activeProposals.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-2">
+                    <MessageSquare className="h-8 w-8 text-muted-foreground/30" />
+                    <p className="text-sm text-muted-foreground">
+                      No active proposals yet.
+                    </p>
+                    <Button
+                      size="sm"
+                      className="mt-2 rounded-xl h-8 text-xs"
+                      asChild
+                    >
+                      <Link to="/freelancer/browse">Browse Projects</Link>
+                    </Button>
                   </div>
-                  <Progress value={stats.profileCompletion} className="h-3 bg-muted/60" />
-                  <div className="space-y-2">
-                    {[
-                      { label: "Skills added", done: stats.profileCompletion > 20, icon: BookOpen },
-                      { label: "Portfolio items", done: stats.profileCompletion > 50, icon: Briefcase },
-                      { label: "Education / Cerifications", done: stats.profileCompletion > 70, icon: BookOpen },
-                      { label: "ID Verified", done: stats.profileCompletion >= 100, icon: Shield },
-                    ].map(({ label, done, icon: Icon }) => (
-                      <div key={label} className="flex items-center gap-2 text-xs">
-                        <Icon className={cn("h-3 w-3", done ? "text-green-500" : "text-muted-foreground")} />
-                        <span className={done ? "text-foreground font-medium" : "text-muted-foreground"}>{label}</span>
-                        {done ? <CheckCircle className="h-3 w-3 text-green-500 ml-auto" /> : <AlertCircle className="h-3 w-3 text-amber-500 ml-auto" />}
+                ) : (
+                  <div className="divide-y divide-border/30">
+                    {activeProposals.map((proposal) => {
+                      const ps =
+                        PROPOSAL_STATUS_MAP[proposal.status ?? "PENDING"];
+                      return (
+                        <div
+                          key={proposal.id}
+                          className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold truncate text-foreground">
+                                {proposal.projectTitle || "Untitled Project"}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+                                    ps.className,
+                                  )}
+                                >
+                                  {ps.label}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                  <Coins className="h-3 w-3 text-amber-500" />
+                                  {proposal.tokenCost || 2} tokens
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-sm font-bold text-foreground shrink-0 ml-4">
+                            ${proposal.proposedPrice?.toLocaleString()}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Token Activity */}
+            <Card className="border border-border/50 bg-card rounded-2xl overflow-hidden">
+              <CardHeader className="px-5 pt-5 pb-3 border-b border-border/30">
+                <SectionHeader
+                  title="Token Activity"
+                  to="/freelancer/tokens"
+                  label="Full history"
+                />
+              </CardHeader>
+              <CardContent className="p-0">
+                {recentTokenTxs.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 gap-2">
+                    <Wallet className="h-7 w-7 text-muted-foreground/30" />
+                    <p className="text-sm text-muted-foreground">
+                      No recent transactions.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border/30">
+                    {recentTokenTxs.map((tx) => (
+                      <div
+                        key={tx.id}
+                        className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={cn(
+                              "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
+                              tx.type === "CREDIT"
+                                ? "bg-emerald-50"
+                                : "bg-red-50",
+                            )}
+                          >
+                            {tx.type === "CREDIT" ? (
+                              <ArrowUpRight className="h-4 w-4 text-emerald-600" />
+                            ) : (
+                              <ArrowDownRight className="h-4 w-4 text-red-500" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold truncate text-foreground">
+                              {tx.description || "Transaction"}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground capitalize">
+                              {tx.reason.replace(/_/g, " ").toLowerCase()}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={cn(
+                            "text-sm font-bold shrink-0",
+                            tx.type === "CREDIT"
+                              ? "text-emerald-600"
+                              : "text-red-500",
+                          )}
+                        >
+                          {tx.type === "CREDIT" ? "+" : "−"}
+                          {tx.amount}
+                        </span>
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full h-12 rounded-xl font-black border-2" asChild>
-                    <Link to="/freelancer/profile">Complete Profile</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right column (1/3) */}
+          <div className="space-y-6">
+            {/* SkillToken balance card */}
+            <Card className="border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                    <Coins className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
+                      SkillTokens
+                    </p>
+                    <p className="text-2xl font-bold text-amber-700">
+                      {stats.skillTokenBalance || 0}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-amber-600/80 mb-3">
+                  Each proposal costs tokens. Earn more via activity.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full rounded-xl h-8 text-xs font-semibold border-amber-300 text-amber-700 hover:bg-amber-100"
+                  asChild
+                >
+                  <Link to="/freelancer/tokens">View Token History</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Profile Health */}
+            <Card className="border border-border/50 bg-card rounded-2xl">
+              <CardHeader className="px-5 pt-5 pb-0">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Profile Health
+                    </p>
+                    <p className="text-2xl font-bold text-foreground mt-0.5">
+                      {stats.profileCompletion}%
+                    </p>
+                  </div>
+                  <div
+                    className={cn(
+                      "h-12 w-12 rounded-full border-4 flex items-center justify-center",
+                      stats.profileCompletion >= 100
+                        ? "border-emerald-300"
+                        : "border-primary/20",
+                    )}
+                  >
+                    <Award
+                      className={cn(
+                        "h-5 w-5",
+                        stats.profileCompletion >= 100
+                          ? "text-emerald-500"
+                          : "text-primary",
+                      )}
+                    />
+                  </div>
+                </div>
+                <Progress
+                  value={stats.profileCompletion}
+                  className="h-2 bg-muted/60 mb-5"
+                />
+              </CardHeader>
+              <CardContent className="px-5 pb-5 space-y-2.5">
+                {profileItems.map(({ label, done, icon: Icon }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-2.5 text-xs"
+                  >
+                    <div
+                      className={cn(
+                        "h-6 w-6 rounded-lg flex items-center justify-center shrink-0",
+                        done ? "bg-emerald-50" : "bg-muted",
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "h-3.5 w-3.5",
+                          done ? "text-emerald-600" : "text-muted-foreground",
+                        )}
+                      />
+                    </div>
+                    <span
+                      className={cn(
+                        "flex-1 font-medium",
+                        done ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    >
+                      {label}
+                    </span>
+                    {done ? (
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full rounded-xl h-9 font-semibold mt-2"
+                  asChild
+                >
+                  <Link to="/freelancer/profile">Complete Profile</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <Card className="border border-border/50 bg-card rounded-2xl">
+              <CardHeader className="px-5 pt-5 pb-3 border-b border-border/30">
+                <CardTitle className="text-sm font-bold">Quick Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 space-y-3">
+                {[
+                  {
+                    label: "Completed Jobs",
+                    value: stats.completedJobs || 0,
+                    icon: CheckCircle,
+                    color: "text-emerald-600",
+                    bg: "bg-emerald-50",
+                  },
+                  {
+                    label: "Pending Invitations",
+                    value: stats.pendingInvitationsCount || 0,
+                    icon: Zap,
+                    color: "text-orange-600",
+                    bg: "bg-orange-50",
+                  },
+                  {
+                    label: "Total Reviews",
+                    value: stats.totalReviews || 0,
+                    icon: Star,
+                    color: "text-amber-600",
+                    bg: "bg-amber-50",
+                  },
+                  {
+                    label: "Active Contracts",
+                    value: stats.activeContractsCount || 0,
+                    icon: Briefcase,
+                    color: "text-blue-600",
+                    bg: "bg-blue-50",
+                  },
+                  {
+                    label: "Proposals This Month",
+                    value: stats.proposalsThisMonth || 0,
+                    icon: BarChart3,
+                    color: "text-violet-600",
+                    bg: "bg-violet-50",
+                  },
+                ].map(({ label, value, icon: Icon, color, bg }) => (
+                  <div
+                    key={label}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={cn(
+                          "h-7 w-7 rounded-lg flex items-center justify-center shrink-0",
+                          bg,
+                        )}
+                      >
+                        <Icon className={cn("h-3.5 w-3.5", color)} />
+                      </div>
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {label}
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold text-foreground">
+                      {value}
+                    </span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
