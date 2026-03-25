@@ -43,11 +43,16 @@ export interface FreelancerDashboardData {
   stats: {
     activeProposals: number;
     shortlistedProposals: number;
+    proposalsThisMonth: number;
+    activeContractsCount: number;
     completedJobs: number;
+    pendingInvitationsCount: number;
     totalEarnings: number;
+    monthlyEarnings: number;
     skillTokenBalance: number;
     profileCompletion: number;
     averageRating: number;
+    totalReviews: number;
   };
   lists: {
     activeMilestones: any[];

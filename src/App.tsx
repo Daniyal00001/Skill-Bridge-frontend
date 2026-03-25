@@ -41,6 +41,7 @@ import AIAssistantPage from "./pages/client/AIAssistant";
 import ClientSettingsPage from "./pages/client/ClientSettings";
 import ClientDraftsPage from "./pages/client/ClientDrafts";
 import MyProposalsPage from "./pages/client/MyProposals";
+import DirectInvitesPage from "./pages/client/DirectInvites";
 import ClientProfilePage from "./pages/client/ClientProfile";
 import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
@@ -54,8 +55,9 @@ import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
 import FreelancerBrowseProjects from "./pages/freelancer/FreelancerBrowseProjects";
 import { default as FreelancerProposalsPage } from "./pages/freelancer/FreelancerProposals";
 import { default as FreelancerProjectsPage } from "./pages/freelancer/FreelancerProjects";
-import { default as FreelancerMessagesPage } from "./pages/freelancer/FreelancerMessages";
+import FreelancerMessagesPage from "./pages/freelancer/FreelancerMessages";
 import FreelancerProjectDetails from "./pages/freelancer/FreelancerProjectDetails";
+import InvitationsPage from "./pages/freelancer/Invitations";
 import FreelancerProfile from "./pages/freelancer/FreelancerProfile";
 import FreelancerSettings from "./pages/freelancer/FreelancerSettings";
 import FreelancerTokens from "./pages/freelancer/FreelancerTokens";
@@ -165,6 +167,10 @@ const App = () => (
                     path="/client/proposals"
                     element={<MyProposalsPage />}
                   />
+                  <Route
+                    path="/client/invites"
+                    element={<DirectInvitesPage />}
+                  />
                   <Route path="/client/contracts" element={<ClientContracts />} />
                   <Route
                     path="/client/contracts/:contractId"
@@ -195,6 +201,10 @@ const App = () => (
                   <Route
                     path="/freelancer/proposals"
                     element={<FreelancerProposalsPage />}
+                  />
+                  <Route
+                    path="/freelancer/invitations"
+                    element={<InvitationsPage />}
                   />
                   <Route
                     path="/freelancer/proposals/:proposalId"

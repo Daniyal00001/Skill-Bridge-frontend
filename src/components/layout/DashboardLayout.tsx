@@ -37,6 +37,7 @@ import {
   Sun,
   Moon,
   Sparkles,
+  Inbox,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { mockNotifications } from "@/lib/mockData";
@@ -123,6 +124,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 label: "AI Assistant",
                 href: "/client/ai-assistant",
               },
+              { icon: Inbox, label: "Direct Invites", href: "/client/invites" },
             ],
           },
           {
@@ -180,15 +182,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 href: "/freelancer/proposals",
               },
               {
+                icon: Inbox,
+                label: "Invitations",
+                href: "/freelancer/invitations",
+              },
+              {
                 icon: Briefcase,
                 label: "My Contracts",
                 href: "/freelancer/contracts",
               },
-              /* {
-                icon: Briefcase,
-                label: "Active Projects",
-                href: "/freelancer/projects",
-              }, */
             ],
           },
           {
