@@ -491,61 +491,39 @@ const ClientProposalDetail = () => {
                   )}
               </div>
 
-              {milestones.length > 0 ? (
-                <div className="space-y-3">
-                  {milestones.map((m: any, i: number) => (
-                    <div
-                      key={i}
-                      className="p-6 rounded-3xl bg-muted/20 border border-border/40 flex flex-col gap-6 group hover:bg-muted/30 transition-all"
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-6">
-                          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary text-sm shrink-0 border border-primary/20">
-                            {i + 1}
-                          </div>
-                          <div className="space-y-1 min-w-0">
-                            <p className="font-black text-lg break-words">
-                              {m.title}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] font-black uppercase tracking-tighter border-primary/20 bg-primary/5 text-primary rounded-md"
-                              >
-                                {m.allowedRevisions === -1
-                                  ? "Unlimited"
-                                  : m.allowedRevisions}{" "}
-                                Revisions
-                              </Badge>
-                              <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40">
-                                Milestone {i + 1}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-1">
-                            Release Amount
-                          </p>
-                          <p className="text-3xl font-black text-primary">
-                            ${Number(m.amount).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      {m.description && (
-                        <div className="space-y-3">
-                          <Separator className="bg-border/10" />
-                          <div className="flex gap-4">
-                            <div className="w-1 h-full bg-primary/20 rounded-full shrink-0" />
-                            <p className="text-sm text-muted-foreground font-medium leading-relaxed italic opacity-80">
-                              {m.description}
-                            </p>
-                          </div>
-                        </div>
-                      )}
+              {/* Milestone Plan Sections */}
+              {proposal.negotiationStatus === "CLIENT_PROPOSED" ? (
+                <div className="space-y-10">
+                  {/* Freelancer's Original Plan */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 px-2">
+                      <div className="w-1 h-3 bg-muted-foreground/30 rounded-full" />
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">
+                        Freelancer's Original Plan
+                      </p>
                     </div>
-                  ))}
+                    <MilestoneList
+                      items={proposal.proposalMilestones || []}
+                      variant="original"
+                    />
+                  </div>
+
+                  {/* Client's Proposed Changes */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 px-2">
+                      <div className="w-1 h-3 bg-primary rounded-full" />
+                      <p className="text-[10px] font-black text-primary uppercase tracking-widest pl-1">
+                        Your Proposed Changes
+                      </p>
+                    </div>
+                    <MilestoneList
+                      items={proposal.clientRequestedMilestones || []}
+                      variant="requested"
+                    />
+                  </div>
                 </div>
+              ) : milestones.length > 0 ? (
+                <MilestoneList items={milestones} />
               ) : (
                 <Card className="border-dashed border-2 border-border/40 bg-muted/5 rounded-[2.5rem] p-12 text-center">
                   <div className="w-16 h-16 rounded-3xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
@@ -817,17 +795,19 @@ const ClientProposalDetail = () => {
                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">
                       Freelancer's Original
                     </p>
-                    <div className="bg-muted/30 p-4 rounded-2xl border border-border/20">
-                      {(proposal.proposalMilestones || []).length > 0 ? (
-                        <p className="text-lg font-black">
-                          {proposal.proposalMilestones?.length || 0} Milestones
-                        </p>
-                      ) : (
-                        <p className="text-lg font-black">
-                          {proposal.generalRevisionLimit === -1
-                            ? "Unlimited"
-                            : proposal.generalRevisionLimit || 3}{" "}
-                          Revisions
+                    <div className="bg-muted/30 p-4 rounded-2xl border border-border/20 space-y-1">
+                      <p className="text-lg font-black leading-tight">
+                        {(proposal.proposalMilestones || []).length > 0
+                          ? `${proposal.proposalMilestones?.length || 0} Milestones`
+                          : `${
+                              proposal.generalRevisionLimit === -1
+                                ? "Unlimited"
+                                : proposal.generalRevisionLimit || 3
+                            } Revisions`}
+                      </p>
+                      {(proposal.proposalMilestones || []).length > 0 && (
+                        <p className="text-xs font-bold text-muted-foreground">
+                          Total: ${proposal.bidAmount?.toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -836,18 +816,25 @@ const ClientProposalDetail = () => {
                     <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest pl-1">
                       Your Request
                     </p>
-                    <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20">
-                      {(proposal.clientRequestedMilestones || []).length > 0 ? (
-                        <p className="text-lg font-black text-amber-600">
-                          {proposal.clientRequestedMilestones?.length || 0}{" "}
-                          Milestones
-                        </p>
-                      ) : (
-                        <p className="text-lg font-black text-amber-600">
-                          {proposal.clientRequestedRevisions === -1
-                            ? "Unlimited"
-                            : proposal.clientRequestedRevisions}{" "}
-                          Revisions
+                    <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 space-y-1">
+                      <p className="text-lg font-black text-amber-600 leading-tight">
+                        {(proposal.clientRequestedMilestones || []).length > 0
+                          ? `${proposal.clientRequestedMilestones?.length || 0} Milestones`
+                          : `${
+                              proposal.clientRequestedRevisions === -1
+                                ? "Unlimited"
+                                : proposal.clientRequestedRevisions
+                            } Revisions`}
+                      </p>
+                      {(proposal.clientRequestedMilestones || []).length > 0 && (
+                        <p className="text-xs font-black text-amber-700/70">
+                          Total: $
+                          {(proposal.clientRequestedMilestones || [])
+                            .reduce(
+                              (s: number, m: any) => s + Number(m.amount || 0),
+                              0,
+                            )
+                            .toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -1222,6 +1209,112 @@ const ClientProposalDetail = () => {
         </Dialog>
       </div>
     </DashboardLayout>
+  );
+};
+
+// ── Milestone List Sub-component ──────────────────────────────────────────
+
+const MilestoneList = ({
+  items,
+  variant = "default",
+}: {
+  items: any[];
+  variant?: "default" | "original" | "requested";
+}) => {
+  return (
+    <div className="space-y-3">
+      {items.map((m: any, i: number) => (
+        <div
+          key={i}
+          className={cn(
+            "p-6 rounded-3xl border transition-all",
+            variant === "requested"
+              ? "bg-primary/5 border-primary/20 hover:bg-primary/10"
+              : variant === "original"
+                ? "bg-muted/10 border-border/20 opacity-80 grayscale-[0.5] hover:opacity-100 hover:grayscale-0"
+                : "bg-muted/20 border-border/40 hover:bg-muted/30",
+          )}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
+              <div
+                className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 border",
+                  variant === "requested"
+                    ? "bg-primary text-white border-primary/20"
+                    : "bg-primary/10 text-primary border-primary/20",
+                )}
+              >
+                {i + 1}
+              </div>
+              <div className="space-y-1 min-w-0">
+                <p
+                  className={cn(
+                    "font-black text-lg break-words",
+                    variant === "requested" ? "text-primary" : "text-foreground",
+                  )}
+                >
+                  {m.title}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-[10px] font-black uppercase tracking-tighter rounded-md",
+                      variant === "requested"
+                        ? "border-primary/20 bg-primary/10 text-primary"
+                        : "border-primary/20 bg-primary/5 text-primary",
+                    )}
+                  >
+                    {m.allowedRevisions === -1
+                      ? "Unlimited"
+                      : m.allowedRevisions}{" "}
+                    Revisions
+                  </Badge>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40">
+                    Milestone {i + 1}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-1">
+                Release Amount
+              </p>
+              <p
+                className={cn(
+                  "text-3xl font-black",
+                  variant === "requested" ? "text-primary" : "text-foreground/90",
+                )}
+              >
+                ${Number(m.amount).toLocaleString()}
+              </p>
+            </div>
+          </div>
+          {m.description && (
+            <div className="space-y-3 mt-4">
+              <Separator
+                className={cn(
+                  "bg-border/10",
+                  variant === "requested" && "bg-primary/10",
+                )}
+              />
+              <div className="flex gap-4">
+                <div
+                  className={cn(
+                    "w-1 h-full bg-primary/20 rounded-full shrink-0",
+                    variant === "requested" && "bg-primary/40",
+                  )}
+                />
+                <p className="text-sm text-muted-foreground font-medium leading-relaxed italic opacity-80">
+                  {m.description}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
   );
 };
 

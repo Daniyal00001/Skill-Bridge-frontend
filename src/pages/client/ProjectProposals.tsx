@@ -733,11 +733,7 @@ const ProposalCard = ({
                   e.stopPropagation();
                   onHire();
                 }}
-                disabled={
-                  isProcessing ||
-                  proposal.negotiationStatus === "CLIENT_PROPOSED" ||
-                  proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS"
-                }
+                disabled={isProcessing}
               >
                 {isProcessing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -746,13 +742,9 @@ const ProposalCard = ({
                 )}
                 {isProcessing
                   ? "Processing..."
-                  : proposal.negotiationStatus === "CLIENT_PROPOSED"
-                    ? "Waiting for Freelancer..."
-                    : proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS"
-                      ? "Waiting for Freelancer..."
-                      : proposal.negotiationStatus === "FREELANCER_ACCEPTED"
-                        ? "Accept & Hire Freelancer"
-                        : "Hire Freelancer"}
+                  : proposal.negotiationStatus === "FREELANCER_ACCEPTED"
+                    ? "Accept & Hire Freelancer"
+                    : "Hire Freelancer"}
               </Button>
 
               {status === "PENDING" && (
