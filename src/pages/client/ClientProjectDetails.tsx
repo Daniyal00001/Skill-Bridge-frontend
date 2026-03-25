@@ -204,16 +204,6 @@ const ClientProjectDetailsPage = () => {
               <CardHeader className="p-8 pb-4">
                 <div className="flex justify-between items-start mb-6">
                   {getStatusBadge(project.status)}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 font-bold h-9"
-                    asChild
-                  >
-                    <Link to={`/client/post-project?editId=${project.id}`}>
-                      <Edit className="w-4 h-4" /> Edit Project
-                    </Link>
-                  </Button>
                 </div>
                 <h1 className="text-3xl font-black tracking-tight leading-tight break-words">
                   {project.title}
@@ -614,15 +604,6 @@ const ClientProjectDetailsPage = () => {
                     >
                       <Link to={`/client/projects/${project.id}/proposals`}>
                         <Users className="w-5 h-5" /> View All Proposals
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full h-14 rounded-2xl font-black bg-background/50"
-                      asChild
-                    >
-                      <Link to={`/client/post-project?editId=${project.id}`}>
-                        Edit Project Details
                       </Link>
                     </Button>
                   </>

@@ -35,7 +35,6 @@ interface ContractSummary {
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   ACTIVE: { label: "Active", color: "bg-emerald-500/10 text-emerald-700 border-emerald-400/30", dot: "bg-emerald-500" },
-  OFFER_PENDING: { label: "Offer Pending", color: "bg-amber-500/10 text-amber-700 border-amber-400/30", dot: "bg-amber-500" },
   COMPLETED: { label: "Completed", color: "bg-blue-500/10 text-blue-700 border-blue-400/30", dot: "bg-blue-500" },
   CANCELLED: { label: "Cancelled", color: "bg-red-500/10 text-red-700 border-red-400/30", dot: "bg-red-500" },
 };
@@ -93,7 +92,6 @@ const FreelancerContractsPage = () => {
       const matchSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
       if (!matchSearch) return false;
       if (activeTab === "active") return c.status === "ACTIVE";
-      if (activeTab === "pending") return c.status === "OFFER_PENDING";
       if (activeTab === "completed") return c.status === "COMPLETED";
       return true;
     });
@@ -137,7 +135,6 @@ const FreelancerContractsPage = () => {
             <TabsList className="bg-transparent gap-1 h-11">
               {[
                 { value: "active", label: "Active" },
-                { value: "pending", label: "Offer Pending" },
                 { value: "completed", label: "Completed" },
                 { value: "all", label: "All" },
               ].map((t) => (

@@ -353,12 +353,26 @@ export default function ClientContractDetail() {
 
         {/* Milestones Section */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black flex items-center gap-2">
-              <ListChecks className="w-5 h-5 text-primary" /> Milestones
-              <span className="text-sm font-medium text-muted-foreground ml-1">({contract.milestones.length})</span>
-            </h2>
-            <p className="text-xs text-muted-foreground font-medium">Click any milestone to view full history</p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-primary/5 border border-primary/20 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors" />
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Activity className="w-5 h-5 text-primary animate-pulse" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black flex items-center gap-2">
+                  <ListChecks className="w-5 h-5" /> Milestones
+                  <span className="text-sm font-medium text-muted-foreground">({contract.milestones.length})</span>
+                </h2>
+                <p className="text-xs text-muted-foreground font-medium">Complete project roadmap & escrow status</p>
+              </div>
+            </div>
+            <div className="relative z-10 flex items-center gap-2 px-4 py-2 bg-background/80 backdrop-blur-sm rounded-xl border border-primary/20 shadow-sm animate-bounce-subtle">
+              <Eye className="w-3.5 h-3.5 text-primary" />
+              <p className="text-[11px] font-black uppercase tracking-wider text-primary">
+                Click any milestone to view full history
+              </p>
+            </div>
           </div>
 
           {contract.milestones.length === 0 ? (
@@ -380,17 +394,18 @@ export default function ClientContractDetail() {
                   <Card
                     key={milestone.id}
                     className={cn(
-                      "rounded-2xl border-border/40 bg-card/60 transition-all duration-300",
+                      "rounded-2xl border-border/40 bg-card/60 transition-all duration-300 group/mcard",
+                      "hover:border-primary/40 hover:shadow-xl hover:-translate-y-0.5 cursor-pointer",
                       milestone.status === "APPROVED" && "opacity-80",
                       milestone.status === "SUBMITTED" && "border-purple-400/50 shadow-purple-500/10 shadow-lg",
                       milestone.status === "REVISION_REQUESTED" && "border-orange-400/40",
-                      isExpanded && "ring-2 ring-primary/20 bg-card shadow-lg"
+                      isExpanded && "ring-2 ring-primary/20 bg-card shadow-lg translate-y-0 border-primary/30"
                     )}
+                    onClick={() => setExpandedMilestoneId(isExpanded ? null : milestone.id)}
                   >
-                    {/* Milestone Header — always visible, clickable */}
+                    {/* Milestone Header — always visible */}
                     <div
-                      className="p-6 cursor-pointer"
-                      onClick={() => setExpandedMilestoneId(isExpanded ? null : milestone.id)}
+                      className="p-6"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -445,8 +460,11 @@ export default function ClientContractDetail() {
                           <Badge variant="outline" className={cn("text-[10px] font-bold flex items-center gap-1", cfg.color)}>
                             {cfg.icon} {cfg.label}
                           </Badge>
-                          <div className="text-muted-foreground mt-1">
-                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          <div className="text-muted-foreground mt-1 flex items-center gap-1.5 transition-all">
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover/mcard:opacity-100 transition-opacity">
+                              {isExpanded ? "Close" : "Details"}
+                            </span>
+                            {isExpanded ? <ChevronUp className="w-4 h-4 text-primary" /> : <ChevronDown className="w-4 h-4 group-hover/mcard:text-primary group-hover/mcard:translate-y-0.5 transition-all" />}
                           </div>
                         </div>
                       </div>

@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 
 interface ProjectCardProps {
-  project: Project;
+  project: any;
   viewAs: "client" | "freelancer";
 }
 
@@ -25,7 +25,7 @@ export function ProjectCard({ project, viewAs }: ProjectCardProps) {
     cancelled: "bg-destructive/20 text-destructive",
   };
 
-  const complexityColors: Record<Project["complexity"], string> = {
+  const complexityColors: Record<string, string> = {
     simple: "bg-success/20 text-success",
     moderate: "bg-warning/20 text-warning",
     complex: "bg-destructive/20 text-destructive",
@@ -43,8 +43,8 @@ export function ProjectCard({ project, viewAs }: ProjectCardProps) {
           <h3 className="font-semibold text-lg line-clamp-1">
             {project.title}
           </h3>
-          <Badge className={statusColors[project.status]} variant="secondary">
-            {project.status.replace("_", " ")}
+          <Badge className={statusColors[project.status?.toLowerCase()] || "bg-muted"} variant="secondary">
+            {(project.status || "OPEN").replace(/_/g, " ")}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
@@ -57,41 +57,44 @@ export function ProjectCard({ project, viewAs }: ProjectCardProps) {
           <div className="flex items-center gap-2 text-sm">
             <DollarSign className="w-4 h-4 text-muted-foreground" />
             <span className="font-medium">
-              ${project.budget.min.toLocaleString()} - $
-              {project.budget.max.toLocaleString()}
+              {typeof project.budget === 'number' 
+                ? `$${project.budget.toLocaleString()}`
+                : project.budget?.min !== undefined 
+                  ? `$${project.budget.min.toLocaleString()} - $${project.budget.max.toLocaleString()}`
+                  : "N/A"}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Badge
-              className={complexityColors[project.complexity]}
+              className={complexityColors[project.complexity?.toLowerCase()] || "bg-muted"}
               variant="secondary"
             >
-              {project.complexity}
+              {project.complexity || project.size || "Standard"}
             </Badge>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="w-4 h-4" />
-            <span>{project.proposalCount} proposals</span>
+            <span>{project.proposalCount || 0} proposals</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
             <span>
-              {formatDistanceToNow(new Date(project.createdAt), {
+              {project.createdAt ? formatDistanceToNow(new Date(project.createdAt), {
                 addSuffix: true,
-              })}
+              }) : "Recently"}
             </span>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          {project.skills.slice(0, 3).map((skill) => (
-            <Badge key={skill} variant="skill" className="text-xs">
+          {(project.skills || []).slice(0, 3).map((skill: string) => (
+            <Badge key={skill} variant="outline" className="text-xs">
               {skill}
             </Badge>
           ))}
-          {project.skills.length > 3 && (
-            <Badge variant="muted" className="text-xs">
-              +{project.skills.length - 3}
+          {(project.skills || []).length > 3 && (
+            <Badge variant="outline" className="text-xs text-muted-foreground">
+              +{(project.skills || []).length - 3}
             </Badge>
           )}
         </div>

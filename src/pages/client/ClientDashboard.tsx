@@ -6,34 +6,68 @@ import { ProjectCard } from "@/components/common/ProjectCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   FolderOpen,
   DollarSign,
   FileText,
   CheckCircle,
-  PlusCircle,
   ArrowRight,
-  TrendingUp,
   Search,
   Sparkles,
   Bot,
+  Mail,
+  Star,
+  AlertTriangle,
+  Users,
+  Loader2,
 } from "lucide-react";
-import {
-  clientDashboardStats,
-  mockFreelancers,
-  mockProjects,
-} from "@/lib/mockData";
+
+import { useQuery } from "@tanstack/react-query";
+import { getClientDashboardStats } from "@/services/dashboard.service";
+
+const PROPOSAL_COLORS: Record<string, string> = {
+  PENDING: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  SHORTLISTED: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  ACCEPTED: "bg-green-500/10 text-green-600 border-green-500/20",
+  REJECTED: "bg-red-500/10 text-red-500 border-red-500/20",
+  WITHDRAWN: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
+  CANCELLED: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
+};
 
 export default function ClientDashboard() {
-  const recentProjects = mockProjects
-    .filter((p) => p.status === "open")
-    .slice(0, 2);
-  const recommendedFreelancers = mockFreelancers.slice(0, 3);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["clientDashboard"],
+    queryFn: getClientDashboardStats,
+  });
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex h-[80vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <DashboardLayout>
+        <div className="flex h-[80vh] items-center justify-center flex-col gap-4">
+          <AlertTriangle className="h-10 w-10 text-red-500" />
+          <p className="text-lg font-medium">Failed to load dashboard data.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const { stats, lists } = data;
+  const { openProjects, recentProposals, pendingInvitations } = lists;
 
   return (
     <DashboardLayout>
       <div className="relative overflow-hidden -m-6 p-6 min-h-full">
-        {/* Premium Background Decoration */}
         <div
           className="absolute top-0 left-0 w-[800px] h-[800px] pointer-events-none -z-10"
           style={{
@@ -42,196 +76,305 @@ export default function ClientDashboard() {
             clipPath: "polygon(0 0, 100% 0, 0 100%)",
           }}
         />
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-accent/[0.08] via-transparent to-transparent pointer-events-none -z-10" />
 
         <div className="space-y-8 relative z-10">
-          {/* Welcome Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
                 Welcome back! 👋
               </h1>
               <p className="text-muted-foreground mt-1 text-lg">
-                Here's what's happening with your projects
+                Here's what's happening with your projects today
               </p>
             </div>
+            <Button asChild>
+              <Link to="/client/post-project">+ Post a Project</Link>
+            </Button>
           </div>
 
-          {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard
               title="Active Projects"
-              value={clientDashboardStats.activeProjects}
-              change="+2 this month"
+              value={stats.activeProjects}
+              change="In progress or under hiring"
               changeType="positive"
               icon={FolderOpen}
             />
             <StatsCard
-              title="Total Spent"
-              value={`$${clientDashboardStats.totalSpent.toLocaleString()}`}
-              change="On budget"
+              title="Committed Budget"
+              value={`$${stats.committedBudget.toLocaleString()}`}
+              change="Across in-progress work"
               changeType="neutral"
               icon={DollarSign}
             />
             <StatsCard
               title="Pending Proposals"
-              value={clientDashboardStats.pendingProposals}
-              change="5 new today"
+              value={stats.pendingProposals}
+              change={`${stats.shortlistedProposals} shortlisted`}
               changeType="positive"
               icon={FileText}
             />
             <StatsCard
               title="Completed Projects"
-              value={clientDashboardStats.completedProjects}
-              change="98% success rate"
+              value={stats.completedProjects}
+              change="Total hires history"
               changeType="positive"
               icon={CheckCircle}
             />
           </div>
 
-          {/* Find Talent Section */}
+          {stats.disputedProjects > 0 && (
+            <Card className="border-rose-500/30 bg-rose-500/5">
+              <CardContent className="p-4 flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-rose-500 shrink-0" />
+                <p className="text-sm font-medium">
+                  You have{" "}
+                  <span className="font-bold text-rose-600">
+                    {stats.disputedProjects} disputed project
+                    {stats.disputedProjects > 1 ? "s" : ""}
+                  </span>{" "}
+                  requiring your attention.
+                </p>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="ml-auto"
+                  asChild
+                >
+                  <Link to="/client/disputes">View Disputes</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid md:grid-cols-2 gap-6">
             <Card className="group overflow-hidden border-primary/20 bg-gradient-to-br from-card to-primary/5 hover:to-primary/10 transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-4">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Search className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">Browse Freelancers</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Search and filter from our curated talent pool
-                      </p>
-                    </div>
-                    <Button variant="default" asChild>
-                      <Link to="/client/browse">Browse Talent</Link>
-                    </Button>
-                  </div>
+              <CardContent className="p-6 space-y-4">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Search className="h-6 w-6 text-primary" />
                 </div>
+                <div>
+                  <h3 className="text-xl font-bold">Browse Freelancers</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Search from our verified talent pool by skill, experience
+                    level & availability
+                  </p>
+                </div>
+                <Button variant="default" asChild>
+                  <Link to="/client/browse">Browse Talent</Link>
+                </Button>
               </CardContent>
             </Card>
 
-            <Card className="group overflow-hidden border-primary/30 bg-gradient-to-br from-card to-purple-500/5 hover:to-purple-500/10 transition-all duration-300 relative border-l-4 border-l-purple-500">
+            <Card className="group overflow-hidden border-purple-500/30 bg-gradient-to-br from-card to-purple-500/5 hover:to-purple-500/10 transition-all duration-300 relative border-l-4 border-l-purple-500">
               <div className="absolute top-2 right-2">
                 <Badge className="bg-gradient-to-r from-primary to-purple-600 border-none shadow-sm">
-                  Recommended
+                  AI Powered
                 </Badge>
               </div>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-4">
-                    <div className="h-12 w-12 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Sparkles className="h-6 w-6 text-purple-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">AI Talent Finder</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Let AI find the perfect match for your requirements
-                      </p>
-                    </div>
-                    <Button
-                      className="bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 border-none shadow-md"
-                      asChild
-                    >
-                      <Link to="/client/ai-assistant">Chat with AI</Link>
-                    </Button>
-                  </div>
+              <CardContent className="p-6 space-y-4">
+                <div className="h-12 w-12 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Sparkles className="h-6 w-6 text-purple-500" />
                 </div>
+                <div>
+                  <h3 className="text-xl font-bold">AI Scoping Assistant</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Describe your project — AI suggests category, budget range,
+                    required skills & size
+                  </p>
+                </div>
+                <Button
+                  className="bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 border-none"
+                  asChild
+                >
+                  <Link to="/client/ai-assistant">Scope with AI</Link>
+                </Button>
               </CardContent>
             </Card>
           </div>
 
-          {/* Two Column Layout */}
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Recent Projects */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Open Projects</h2>
-                <Button variant="ghost" asChild>
-                  <Link to="/client/projects">
-                    View all <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+            <div className="lg:col-span-2 space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">Open Projects</h2>
+                  <Button variant="ghost" asChild>
+                    <Link to="/client/projects">
+                      View all <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {openProjects.length > 0 ? (
+                    openProjects.map((project: any) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        viewAs="client"
+                      />
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm col-span-2">
+                      No open projects. Post one to get proposals!
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                {recentProjects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    viewAs="client"
-                  />
-                ))}
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">Recent Proposals</h2>
+                  <Button variant="ghost" asChild>
+                    <Link to="/client/proposals">
+                      View all <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+                <Card className="border-border/40">
+                  <CardContent className="p-0">
+                    {recentProposals.map((proposal, idx) => (
+                      <div
+                        key={proposal.id ?? idx}
+                        className="flex items-center justify-between px-5 py-4 border-b last:border-0 border-border/30 hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Avatar className="h-8 w-8 shrink-0">
+                            <AvatarImage src={proposal.avatar || ""} />
+                            <AvatarFallback>
+                              {(proposal.freelancerName || "F").charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {proposal.freelancerName || "Freelancer"}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {proposal.projectTitle || "Project"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-sm font-semibold">
+                            ${proposal.proposedPrice || "—"}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] font-bold uppercase tracking-wide px-2 ${PROPOSAL_COLORS[proposal.status] || "bg-muted"}`}
+                          >
+                            {(proposal.status || "PENDING").replace("_", " ")}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {recentProposals.length === 0 && (
+                      <p className="text-center text-muted-foreground text-sm py-8">
+                        No proposals yet. Post a project to start receiving
+                        bids.
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Quick Actions</h2>
-              <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-4 space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start hover:bg-primary/5 hover:text-primary transition-colors"
-                    asChild
-                  >
-                    <Link to="/client/projects">
-                      <FolderOpen className="mr-3 h-4 w-4" />
-                      Manage Projects
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start hover:bg-primary/5 hover:text-primary transition-colors"
-                    asChild
-                  >
-                    <Link to="/client/messages">
-                      <FileText className="mr-3 h-4 w-4" />
-                      View Messages
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+                <Card className="border-border/40 bg-card/50">
+                  <CardContent className="p-4 space-y-2">
+                    {[
+                      {
+                        label: "Manage Projects",
+                        icon: FolderOpen,
+                        href: "/client/projects",
+                      },
+                      {
+                        label: "View Messages",
+                        icon: Mail,
+                        href: "/client/messages",
+                      },
+                      {
+                        label: "Contracts",
+                        icon: FileText,
+                        href: "/client/contracts",
+                      },
+                      {
+                        label: "Reviews & Ratings",
+                        icon: Star,
+                        href: "/client/reviews",
+                      },
+                    ].map(({ label, icon: Icon, href }) => (
+                      <Button
+                        key={label}
+                        variant="outline"
+                        className="w-full justify-start hover:bg-primary/5 hover:text-primary transition-colors"
+                        asChild
+                      >
+                        <Link to={href}>
+                          <Icon className="mr-3 h-4 w-4" />
+                          {label}
+                        </Link>
+                      </Button>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
 
-              {/* AI Tip */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Invitations Sent</h2>
+                <Card className="border-border/40">
+                  <CardContent className="p-4 space-y-3">
+                    {pendingInvitations.length === 0 ? (
+                      <p className="text-muted-foreground text-sm">
+                        No pending invitations.
+                      </p>
+                    ) : (
+                      pendingInvitations.map((invitation) => (
+                        <div
+                          key={invitation.id}
+                          className="flex items-center justify-between gap-2"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Avatar className="h-7 w-7 shrink-0">
+                              <AvatarImage src={invitation.avatar} />
+                              <AvatarFallback>
+                                {(invitation.freelancerName || "F").charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-sm font-medium truncate">
+                              {invitation.freelancerName}
+                            </p>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] shrink-0 font-bold uppercase bg-amber-500/10 text-amber-600 border-amber-500/20"
+                          >
+                            {invitation.status}
+                          </Badge>
+                        </div>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
               <Card variant="gradient" className="shadow-lg border-none">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-xl bg-white/20 backdrop-blur-md">
+                    <div className="p-2 rounded-xl bg-white/20 backdrop-blur-md shrink-0">
                       <Bot className="h-5 w-5 text-white" />
                     </div>
                     <div>
                       <h3 className="font-bold text-white">Pro Tip</h3>
                       <p className="text-sm text-white/90 mt-1 leading-relaxed">
-                        Use our AI Scoping Assistant to get accurate budget
-                        estimates for your next project.
+                        Use our AI Scoping Assistant to auto-generate project
+                        requirements, budget estimates, and required skills
+                        before posting.
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
-
-          {/* AI Recommended Freelancers */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight">
-                  Freelancers I’ve Worked With
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Based on your project history and requirements
-                </p>
-              </div>
-              <Button variant="outline" className="rounded-full px-6">
-                Browse All
-              </Button>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendedFreelancers.map((freelancer) => (
-                <FreelancerCard key={freelancer.id} freelancer={freelancer} />
-              ))}
             </div>
           </div>
         </div>
