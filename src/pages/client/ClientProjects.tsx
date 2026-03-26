@@ -769,45 +769,45 @@ const ClientProjectsPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+        <div className="flex flex-col lg:flex-row gap-1.5 items-stretch lg:items-center justify-start">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full lg:w-auto"
           >
-            <TabsList className="bg-muted/50 p-0.5 h-10 rounded-xl border border-border/40 w-full lg:w-auto overflow-x-auto custom-scrollbar">
+            <TabsList className="bg-muted/50 p-0.5 h-9 rounded-xl border border-border/40 w-full lg:w-auto overflow-x-auto custom-scrollbar no-scrollbar">
               {[
                 { id: "active", label: "Active", icon: PlayCircle },
                 { id: "hiring", label: "Hiring", icon: Users },
                 { id: "completed", label: "Completed", icon: CheckCircle2 },
                 { id: "drafts", label: "Drafts", icon: AlertTriangle },
-                { id: "all", label: "View All", icon: Layout },
+                { id: "all", label: "All", icon: Layout },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className="h-full rounded-lg gap-1.5 px-3 md:px-4 font-black text-[11px] uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
+                  className="h-full rounded-lg gap-1 px-2 md:px-3 font-black text-[10px] uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
                 >
-                  <tab.icon className="w-3.5 h-3.5" /> {tab.label}
+                  <tab.icon className="w-3 h-3" /> {tab.label}
                 </TabsTrigger>
               ))}
             </TabsList>
           </Tabs>
 
-          <div className="flex flex-col sm:flex-row gap-2 items-center w-full lg:w-auto lg:min-w-[340px]">
-            <div className="relative w-full">
+          <div className="flex flex-col sm:flex-row gap-2 items-center w-full lg:w-auto lg:min-w-[300px]">
+            <div className="relative w-full lg:w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
               <Input
                 placeholder="Search..."
-                className="pl-9 h-10 bg-card/60 rounded-xl border-border/40 w-full text-[11px] font-bold"
+                className="pl-8 h-9 bg-card/60 rounded-xl border-border/40 w-full text-[10px] font-bold"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="w-full sm:w-[130px] h-10 bg-card/60 rounded-xl border-border/40 font-black shrink-0 text-[10px] uppercase tracking-wider">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+              <SelectTrigger className="w-full sm:w-[110px] h-9 bg-card/60 rounded-xl border-border/40 font-black shrink-0 text-[10px] uppercase tracking-wider">
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-muted-foreground" />
                   <SelectValue placeholder="Date" />
                 </div>
               </SelectTrigger>
