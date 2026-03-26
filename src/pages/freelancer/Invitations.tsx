@@ -510,6 +510,39 @@ const InvitationsPage = () => {
                       </p>
                     </div>
                   )}
+
+                  {/* Project Overview */}
+                  <div className="bg-card border rounded-2xl p-5 shadow-sm space-y-4 mt-6">
+                    <h4 className="text-sm font-black tracking-tight flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-primary" />
+                      Project Overview
+                    </h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      {selectedInvite.projectDescription || "No detailed description provided for this project."}
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-2 border-t">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/30 border text-[10px] font-bold">
+                        <span className="text-muted-foreground uppercase tracking-widest text-[8px]">Experience:</span>
+                        <span>{selectedInvite.projectExperienceLevel}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/30 border text-[10px] font-bold">
+                        <span className="text-muted-foreground uppercase tracking-widest text-[8px]">Duration:</span>
+                        <span>{selectedInvite.projectDuration}</span>
+                      </div>
+                    </div>
+                    {selectedInvite.projectSkills && selectedInvite.projectSkills.length > 0 && (
+                      <div className="pt-2">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">Required Skills</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedInvite.projectSkills.map((skill: string, i: number) => (
+                            <Badge key={i} variant="secondary" className="text-[9px] px-2 py-0 font-bold bg-primary/5 text-primary border-primary/20">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>{" "}
                 <div className="space-y-4">
                   <div className="p-4 rounded-2xl border bg-gradient-to-br from-primary/10 to-transparent space-y-3 shadow-sm">
