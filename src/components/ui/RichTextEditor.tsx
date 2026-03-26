@@ -43,10 +43,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (maxLength && editorRef.current) {
       const text = editorRef.current.textContent || "";
       // Allow control keys: Backspace, Delete, Arrows, etc.
-      const isControlKey = [
-        "Backspace", "Delete", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
-        "Home", "End", "PageUp", "PageDown", "Tab"
-      ].includes(e.key) || e.ctrlKey || e.metaKey;
+      const isControlKey =
+        [
+          "Backspace",
+          "Delete",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown",
+          "Home",
+          "End",
+          "PageUp",
+          "PageDown",
+          "Tab",
+        ].includes(e.key) ||
+        e.ctrlKey ||
+        e.metaKey;
 
       if (text.length >= maxLength && !isControlKey) {
         e.preventDefault();
@@ -61,7 +73,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className={cn("flex flex-col border border-border/40 rounded-[2rem] overflow-hidden bg-background/50 focus-within:border-primary/30 transition-colors", className)}>
+    <div
+      className={cn(
+        "flex flex-col border border-border/40 rounded-[2rem] overflow-hidden bg-background/50 focus-within:border-primary/30 transition-colors",
+        className,
+      )}
+    >
       {/* Toolbar */}
       <div className="flex items-center gap-1 p-2 border-b border-border/40 bg-muted/20">
         <Button
@@ -69,7 +86,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           variant="ghost"
           size="icon"
           className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-          onClick={() => handleCommand("bold")}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleCommand("bold");
+          }}
           title="Bold"
         >
           <Bold className="w-4 h-4" />
@@ -79,7 +99,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           variant="ghost"
           size="icon"
           className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-          onClick={() => handleCommand("italic")}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleCommand("italic");
+          }}
           title="Italic"
         >
           <Italic className="w-4 h-4" />
@@ -89,7 +112,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           variant="ghost"
           size="icon"
           className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-          onClick={() => handleCommand("underline")}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleCommand("underline");
+          }}
           title="Underline"
         >
           <Underline className="w-4 h-4" />
@@ -100,7 +126,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           variant="ghost"
           size="icon"
           className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-          onClick={() => handleCommand("insertUnorderedList")}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleCommand("insertUnorderedList");
+          }}
           title="Bullet List"
         >
           <List className="w-4 h-4" />
@@ -110,7 +139,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           variant="ghost"
           size="icon"
           className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-          onClick={() => handleCommand("insertOrderedList")}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleCommand("insertOrderedList");
+          }}
           title="Numbered List"
         >
           <ListOrdered className="w-4 h-4" />

@@ -457,9 +457,9 @@ const ClientProposalDetail = () => {
                 </h3>
               </div>
               <Card className="border-border/40 bg-card/40 backdrop-blur-sm rounded-[1.5rem] overflow-hidden">
-                <CardContent className="p-6">
+                <CardContent className="p-6 max-h-[400px] overflow-y-auto custom-scrollbar">
                   <div
-                    className="prose prose-base dark:prose-invert max-w-none break-words overflow-hidden prose-p:leading-relaxed prose-p:text-foreground/90 prose-p:mb-4 last:prose-p:mb-0 prose-headings:font-black prose-strong:font-black"
+                    className="prose prose-base dark:prose-invert max-w-none break-words prose-p:leading-relaxed prose-p:text-foreground/90 prose-p:mb-4 last:prose-p:mb-0 prose-headings:font-black prose-strong:font-black"
                     dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
                   />
                 </CardContent>
