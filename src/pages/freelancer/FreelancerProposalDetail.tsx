@@ -196,8 +196,8 @@ const FreelancerProposalDetail = () => {
             {!proposal.negotiationStatus &&
               (proposal.status === "PENDING" ||
                 proposal.status === "SHORTLISTED") && (
-                <div className="bg-primary/5 border border-primary/10 rounded-[2.5rem] p-8 flex gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0">
+                <div className="bg-primary/5 border border-primary/10 rounded-3xl p-6 flex gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0">
                     <div className="relative">
                       <Clock className="w-7 h-7 text-primary/60" />
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse" />
@@ -220,8 +220,8 @@ const FreelancerProposalDetail = () => {
 
             {(proposal.negotiationStatus === "CLIENT_PROPOSED" ||
               proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS") && (
-              <Card className="border-primary/20 bg-primary/5 rounded-[2.5rem] overflow-hidden border-2">
-                <CardContent className="p-8 space-y-6">
+              <Card className="border-primary/20 bg-primary/5 rounded-3xl overflow-hidden border-2">
+                <CardContent className="p-6 space-y-5">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                       <ListChecks className="w-6 h-6" />
@@ -426,8 +426,8 @@ const FreelancerProposalDetail = () => {
                   Your Proposal
                 </h3>
               </div>
-              <Card className="border-border/40 bg-card/40 backdrop-blur-sm rounded-[2.5rem] overflow-hidden">
-                <CardContent className="p-10 space-y-10">
+              <Card className="border-border/40 bg-card/40 backdrop-blur-sm rounded-3xl overflow-hidden">
+                <CardContent className="p-6 space-y-6">
                   {/* Cover Letter */}
                   <div className="space-y-6">
                     <div className="flex items-center gap-2">
@@ -573,13 +573,13 @@ const FreelancerProposalDetail = () => {
           {/* Sidebar (Right) */}
           <div className="space-y-6 lg:sticky lg:top-8 self-start">
             {/* Bid Summary Card */}
-            <Card className="border-primary/20 bg-primary/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-primary/5 border-2">
-              <CardContent className="p-8 space-y-8">
+            <Card className="border-primary/20 bg-primary/5 rounded-3xl overflow-hidden shadow-2xl shadow-primary/5 border-2">
+              <CardContent className="p-6 space-y-6">
                 <div className="space-y-1 text-center">
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                     Your Bid Amount
                   </p>
-                  <p className="text-5xl font-black">
+                  <p className="text-4xl font-black">
                     ${proposal.bidAmount?.toLocaleString()}
                   </p>
                   <p className="text-xs font-bold text-muted-foreground mt-2 italic opacity-60">

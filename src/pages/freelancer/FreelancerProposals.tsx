@@ -405,10 +405,10 @@ function ProposalCard({
 
   return (
     <Card
-      className="group border-border/40 hover:border-primary/40 rounded-[2.5rem] transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-xl w-full cursor-pointer"
+      className="group border-border/40 hover:border-primary/40 rounded-3xl transition-all duration-300 overflow-hidden bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-xl w-full cursor-pointer"
       onClick={() => navigate(`/freelancer/proposals/${proposal.id}`)}
     >
-      <CardContent className="p-8 space-y-8 max-w-full overflow-hidden">
+      <CardContent className="p-5 space-y-5 max-w-full overflow-hidden">
         {/* Top Row */}
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -488,7 +488,7 @@ function ProposalCard({
             <div className="space-y-2 max-w-full">
               <Link
                 to={`/freelancer/projects/${project?.id}`}
-                className="text-2xl font-black hover:text-primary transition-colors inline-block break-words whitespace-pre-wrap max-w-full line-clamp-3"
+                className="text-lg font-bold hover:text-primary transition-colors inline-block break-words whitespace-pre-wrap max-w-full line-clamp-3"
                 onClick={(e) => e.stopPropagation()}
               >
                 {project?.title || "Project"}
@@ -528,12 +528,12 @@ function ProposalCard({
         </div>
 
         {/* Bid Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-xl bg-primary/5 border border-border/50">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 rounded-xl bg-primary/5 border border-border/50">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-tight">
               Your Bid
             </p>
-            <p className="text-lg font-bold">
+            <p className="text-base font-bold">
               ${proposal.bidAmount?.toLocaleString()}
             </p>
           </div>
@@ -557,7 +557,7 @@ function ProposalCard({
 
         {/* Cover Letter */}
         {proposal.coverLetter && (
-          <div className="space-y-3 bg-primary/5 p-6 rounded-3xl border border-border/30 max-w-full overflow-hidden">
+          <div className="space-y-2 bg-primary/5 p-4 rounded-2xl border border-border/30 max-w-full overflow-hidden">
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
               Your Cover Letter
