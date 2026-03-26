@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,7 @@ import {
   TrendingUp,
   Star,
   Zap,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -313,9 +314,35 @@ export default function FreelancerContractDetail() {
                 Client: {contract.clientName}
               </p>
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words">
-              {contract.projectTitle}
-            </h1>
+            <div className="flex items-center gap-3 mt-1 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight leading-tight break-words">
+                {contract.projectTitle}
+              </h1>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-xl font-bold text-xs bg-card hover:bg-muted shrink-0 text-muted-foreground hover:text-foreground border-border/60 transition-colors hidden md:flex"
+                asChild
+              >
+                <Link to={`/freelancer/projects/${contract.projectId}`}>
+                  <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                  View Project
+                </Link>
+              </Button>
+            </div>
+            
+            {/* Mobile View Project Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 h-8 w-full rounded-xl font-bold text-xs bg-card hover:bg-muted flex md:hidden text-muted-foreground hover:text-foreground border-border/60"
+              asChild
+            >
+              <Link to={`/freelancer/projects/${contract.projectId}`}>
+                <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                View Project Details
+              </Link>
+            </Button>
           </div>
           <Badge
             className={cn(
