@@ -38,13 +38,13 @@ export const ProjectCardList = ({
   );
 
   return (
-    <Card className="bg-white border border-blue-100 hover:border-blue-300 hover:shadow-md hover:shadow-blue-100/50 transition-all duration-300 rounded-2xl p-5 group">
+    <Card className="bg-card border border-border hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 rounded-2xl p-5 group">
       <div className="flex flex-col md:flex-row md:items-center gap-5">
         {/* ── Left: Info ──────────────────────────────── */}
         <div className="flex-1 space-y-2.5">
           {/* Badges row */}
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge className="bg-blue-50 text-blue-600 border-blue-100 text-[10px] font-semibold py-0.5 px-2 rounded-md">
+            <Badge className="bg-primary/10 text-primary border-primary/10 text-[10px] font-semibold py-0.5 px-2 rounded-md">
               {project.category?.name}
             </Badge>
 
@@ -53,27 +53,27 @@ export const ProjectCardList = ({
                 className={cn(
                   "text-[10px] font-bold",
                   project.matchPercentage >= 70
-                    ? "text-emerald-600"
-                    : "text-amber-600",
+                    ? "text-emerald-500"
+                    : "text-amber-500",
                 )}
               >
                 {project.matchPercentage}% Match
               </span>
             )}
 
-            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+            <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {formatDistanceToNow(new Date(project.createdAt), {
                 addSuffix: true,
               })}
             </span>
 
-            <span className="text-[10px] text-slate-400 flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-blue-400" />
+            <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-primary/70" />
               {project.locationObj?.name || project.locationPref || "Global"}
             </span>
 
-            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+            <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
               <Users className="w-3 h-3" />
               {project.proposalCount} proposals
             </span>
@@ -84,7 +84,7 @@ export const ProjectCardList = ({
             to={`/freelancer/projects/${project.id}`}
             onClick={() => onView(project.id, project.category?.slug)}
           >
-            <h3 className="text-sm font-bold text-slate-800 group-hover:text-blue-500 transition-colors">
+            <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
               {project.title}
             </h3>
           </Link>
@@ -92,16 +92,16 @@ export const ProjectCardList = ({
           {/* Skills */}
           <div className="flex flex-wrap gap-2">
             {skillNames.slice(0, 6).map((name: string) => (
-              <span key={name} className="text-[10px] text-slate-400">
+              <span key={name} className="text-[10px] text-muted-foreground/60">
                 #{name.toLowerCase()}
               </span>
             ))}
           </div>
 
           {/* Client row */}
-          <div className="flex items-center gap-3 text-[10px] text-slate-400">
+          <div className="flex items-center gap-3 text-[10px] text-muted-foreground/60">
             {project.client?.isVerified && (
-              <span className="flex items-center gap-0.5 text-blue-500 font-semibold">
+              <span className="flex items-center gap-0.5 text-primary font-semibold">
                 <BadgeCheck className="w-3 h-3" />
                 Verified Client
               </span>
@@ -121,13 +121,13 @@ export const ProjectCardList = ({
         {/* ── Right: Budget + Actions ──────────────────── */}
         <div className="flex items-center gap-6 shrink-0 border-t md:border-t-0 pt-4 md:pt-0">
           <div className="text-right">
-            <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider mb-0.5">
+            <span className="text-[9px] uppercase font-bold text-muted-foreground/60 block tracking-wider mb-0.5">
               {project.budgetType === "hourly" ? "Hourly Rate" : "Fixed Price"}
             </span>
-            <div className="text-lg font-bold text-slate-800">
+            <div className="text-lg font-bold text-foreground">
               ${project.budget?.toLocaleString()}
               {project.budgetType === "hourly" && (
-                <span className="text-xs font-normal text-slate-400">/hr</span>
+                <span className="text-xs font-normal text-muted-foreground/60">/hr</span>
               )}
             </div>
           </div>
@@ -139,8 +139,8 @@ export const ProjectCardList = ({
               className={cn(
                 "h-9 w-9 rounded-xl border flex items-center justify-center transition-all",
                 isSaved
-                  ? "bg-blue-50 border-blue-200 text-blue-500"
-                  : "bg-white border-slate-200 text-slate-400 hover:border-blue-200 hover:text-blue-400",
+                  ? "bg-primary/10 border-primary/20 text-primary"
+                  : "bg-card border-border text-muted-foreground hover:border-primary/20 hover:text-primary",
               )}
             >
               {isSaved ? (
@@ -154,7 +154,7 @@ export const ProjectCardList = ({
             <Link to={`/freelancer/projects/${project.id}`}>
               <Button
                 variant="outline"
-                className="h-9 px-4 rounded-xl text-xs font-bold border-blue-200 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all"
+                className="h-9 px-4 rounded-xl text-xs font-bold border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
                 onClick={() => onView(project.id, project.category?.slug)}
               >
                 View Brief

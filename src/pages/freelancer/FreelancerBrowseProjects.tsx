@@ -127,7 +127,7 @@ export default function FreelancerBrowseProjects() {
     <DashboardLayout>
       {/* Background gradients */}
       <div
-        className="pointer-events-none fixed top-0 right-0 z-0"
+        className="pointer-events-none fixed top-0 right-0 z-0 opacity-40 dark:opacity-20"
         style={{
           width: 560,
           height: 560,
@@ -142,7 +142,7 @@ export default function FreelancerBrowseProjects() {
         {/* ── Header ───────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-slate-800">
+            <h1 className="text-4xl font-black tracking-tight text-foreground">
               Project Marketplace
             </h1>
             <p className="text-muted-foreground font-medium mt-1">
@@ -158,10 +158,10 @@ export default function FreelancerBrowseProjects() {
               value={sort}
               onValueChange={(v) => setSort(v as SortOption)}
             >
-              <SelectTrigger className="h-9 bg-white border-blue-100 rounded-xl px-3 w-[165px] text-xs font-medium focus:ring-blue-200">
+              <SelectTrigger className="h-9 bg-card border-border rounded-xl px-3 w-[165px] text-xs font-medium focus:ring-primary/20 text-foreground">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-blue-100">
+              <SelectContent className="rounded-xl border-border">
                 {SORT_OPTIONS.map((opt) => (
                   <SelectItem
                     key={opt.value}
@@ -175,15 +175,15 @@ export default function FreelancerBrowseProjects() {
             </Select>
 
             {/* Grid / List toggle */}
-            <div className="flex p-1 bg-blue-50 rounded-xl border border-blue-100">
+            <div className="flex p-1 bg-muted rounded-xl border border-border">
               <Button
                 variant="ghost"
                 size="icon"
                 className={cn(
                   "h-7 w-7 rounded-lg transition-all",
                   view === "grid"
-                    ? "bg-white shadow-sm text-blue-500"
-                    : "text-slate-400 hover:text-slate-600",
+                    ? "bg-card shadow-sm text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
                 onClick={() => setView("grid")}
               >
@@ -195,8 +195,8 @@ export default function FreelancerBrowseProjects() {
                 className={cn(
                   "h-7 w-7 rounded-lg transition-all",
                   view === "list"
-                    ? "bg-white shadow-sm text-blue-500"
-                    : "text-slate-400 hover:text-slate-600",
+                    ? "bg-card shadow-sm text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
                 onClick={() => setView("list")}
               >
@@ -211,14 +211,14 @@ export default function FreelancerBrowseProjects() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-9 w-9 rounded-xl border-blue-100 bg-white"
+                    className="h-9 w-9 rounded-xl border-border bg-card"
                   >
-                    <Filter className="w-3.5 h-3.5 text-blue-400" />
+                    <Filter className="w-3.5 h-3.5 text-primary" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent
                   side="left"
-                  className="w-[300px] border-r border-blue-100 bg-white"
+                  className="w-[300px] border-r border-border bg-card"
                 >
                   <div className="pt-6">
                     <FilterBar
@@ -351,21 +351,21 @@ export default function FreelancerBrowseProjects() {
 
             {/* ── Empty state ───────────────────────────── */}
             {projects.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-32 bg-blue-50/40 rounded-2xl border border-dashed border-blue-100 text-center">
-                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                  <Search className="w-5 h-5 text-blue-300" />
+              <div className="flex flex-col items-center justify-center py-32 bg-muted/20 rounded-2xl border border-dashed border-border text-center">
+                <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Search className="w-5 h-5 text-muted-foreground/30" />
                 </div>
-                <h3 className="text-base font-bold text-slate-700">
+                <h3 className="text-base font-bold text-foreground">
                   No results found
                 </h3>
-                <p className="text-sm text-slate-400 mt-1 max-w-xs mx-auto">
+                <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
                   Adjust your filters or search keywords to find what you're
                   looking for.
                 </p>
                 <Button
                   variant="outline"
                   onClick={resetFilters}
-                  className="mt-5 rounded-lg text-xs font-bold border-blue-200 text-blue-500 hover:bg-blue-50"
+                  className="mt-5 rounded-lg text-xs font-bold border-border text-primary hover:bg-muted"
                 >
                   Clear filters
                 </Button>
@@ -380,8 +380,8 @@ export default function FreelancerBrowseProjects() {
             {/* Loading more spinner */}
             {loadingMore && (
               <div className="flex justify-center py-6">
-                <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold">
-                  <div className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
+                  <div className="w-4 h-4 border-2 border-primary/30 border-t-transparent rounded-full animate-spin" />
                   Loading more...
                 </div>
               </div>
@@ -389,7 +389,7 @@ export default function FreelancerBrowseProjects() {
 
             {/* End of results */}
             {!hasMore && projects.length > 0 && (
-              <div className="text-center py-8 text-xs text-slate-400 font-semibold">
+              <div className="text-center py-8 text-xs text-muted-foreground font-semibold">
                 You've seen all {total} projects
               </div>
             )}
@@ -414,12 +414,12 @@ const Section = ({
 }) => (
   <div className="space-y-3">
     <div className="flex items-center gap-2">
-      <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+      <div className="w-7 h-7 bg-muted rounded-lg flex items-center justify-center">
         {icon}
       </div>
       <div>
-        <h2 className="text-sm font-bold text-slate-700">{title}</h2>
-        {subtitle && <p className="text-[10px] text-slate-400">{subtitle}</p>}
+        <h2 className="text-sm font-bold text-foreground">{title}</h2>
+        {subtitle && <p className="text-[10px] text-muted-foreground">{subtitle}</p>}
       </div>
     </div>
     {children}

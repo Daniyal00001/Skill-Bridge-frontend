@@ -53,10 +53,10 @@ export const ProjectCardGrid = ({
   );
 
   return (
-    <Card className="h-full min-h-[340px] bg-white border border-blue-100 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/60 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col group relative">
+    <Card className="h-full min-h-[340px] bg-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 rounded-2xl overflow-hidden flex flex-col group relative">
       <CardHeader className="p-5 pb-0">
         <div className="flex items-start justify-between mb-3 pr-16">
-          <Badge className="bg-blue-50 text-blue-600 border-blue-100 text-[10px] font-semibold py-0.5 px-2.5 rounded-lg">
+          <Badge className="bg-primary/10 text-primary border-primary/10 text-[10px] font-semibold py-0.5 px-2.5 rounded-lg">
             {project.category?.name || "Uncategorized"}
           </Badge>
 
@@ -66,10 +66,10 @@ export const ProjectCardGrid = ({
               className={cn(
                 "text-[10px] font-bold px-2 py-0.5 rounded-lg border",
                 project.matchPercentage >= 70
-                  ? "text-emerald-600 bg-emerald-50 border-emerald-100"
+                  ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
                   : project.matchPercentage >= 40
-                    ? "text-amber-600 bg-amber-50 border-amber-100"
-                    : "text-slate-500 bg-slate-50 border-slate-100",
+                    ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
+                    : "text-muted-foreground bg-muted border-border",
               )}
             >
               {project.matchPercentage}% Match
@@ -82,7 +82,7 @@ export const ProjectCardGrid = ({
           to={`/freelancer/projects/${project.id}`}
           onClick={() => onView(project.id, project.category?.slug)}
         >
-          <h3 className="text-sm font-bold leading-snug line-clamp-2 text-slate-800 hover:text-blue-500 transition-colors break-words">
+          <h3 className="text-sm font-bold leading-snug line-clamp-2 text-foreground hover:text-primary transition-colors break-words">
             {project.title}
           </h3>
         </Link>
@@ -90,7 +90,7 @@ export const ProjectCardGrid = ({
 
       <CardContent className="p-5 pt-3 flex-1 flex flex-col gap-3">
         {/* Description */}
-        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed break-words overflow-hidden">
+        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed break-words overflow-hidden">
           {project.description}
         </p>
 
@@ -99,22 +99,22 @@ export const ProjectCardGrid = ({
           {skillNames.slice(0, 4).map((name: string) => (
             <span
               key={name}
-              className="text-[10px] font-medium bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md text-slate-500"
+              className="text-[10px] font-medium bg-muted border border-border px-2 py-0.5 rounded-md text-muted-foreground"
             >
               {name}
             </span>
           ))}
           {skillNames.length > 4 && (
-            <span className="text-[10px] text-slate-400 px-1">
+            <span className="text-[10px] text-muted-foreground/60 px-1">
               +{skillNames.length - 4}
             </span>
           )}
         </div>
 
         {/* Client info row */}
-        <div className="flex items-center gap-2 text-[10px] text-slate-400">
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           {project.client?.isVerified && (
-            <span className="flex items-center gap-0.5 text-blue-500 font-semibold">
+            <span className="flex items-center gap-0.5 text-primary font-semibold">
               <BadgeCheck className="w-3 h-3" />
               Verified
             </span>
@@ -136,15 +136,15 @@ export const ProjectCardGrid = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 mt-auto border-t border-blue-50">
+        <div className="flex items-center justify-between pt-3 mt-auto border-t border-border">
           <div>
-            <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider mb-0.5">
+            <span className="text-[9px] uppercase font-bold text-muted-foreground/60 block tracking-wider mb-0.5">
               Budget
             </span>
-            <div className="text-base font-bold text-slate-800">
+            <div className="text-base font-bold text-foreground">
               ${project.budget?.toLocaleString()}
               {project.budgetType === "hourly" && (
-                <span className="text-xs font-normal text-slate-400 ml-0.5">
+                <span className="text-xs font-normal text-muted-foreground/60 ml-0.5">
                   /hr
                 </span>
               )}
@@ -153,13 +153,13 @@ export const ProjectCardGrid = ({
 
           <div className="flex flex-col items-end gap-1.5">
             {/* Proposals + location */}
-            <div className="flex items-center gap-2 text-[10px] text-slate-400">
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Users className="w-3 h-3" />
                 {project.proposalCount}
               </span>
               <span className="flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-blue-400" />
+                <MapPin className="w-3 h-3 text-primary/70" />
                 {project.locationObj?.name || project.locationPref || "Global"}
               </span>
             </div>
@@ -172,8 +172,8 @@ export const ProjectCardGrid = ({
                 className={cn(
                   "h-8 w-8 rounded-xl border flex items-center justify-center transition-all",
                   isSaved
-                    ? "bg-blue-50 border-blue-200 text-blue-500"
-                    : "bg-white border-slate-200 text-slate-400 hover:border-blue-200 hover:text-blue-400",
+                    ? "bg-primary/10 border-primary/20 text-primary"
+                    : "bg-card border-border text-muted-foreground hover:border-primary/20 hover:text-primary",
                 )}
               >
                 {isSaved ? (
@@ -187,7 +187,7 @@ export const ProjectCardGrid = ({
               <Link to={`/freelancer/projects/${project.id}`}>
                 <Button
                   size="icon"
-                  className="h-8 w-8 rounded-xl bg-blue-500 hover:bg-blue-600 text-white shadow-sm shadow-blue-200 group-hover:translate-x-0.5 transition-all"
+                  className="h-8 w-8 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shadow-primary/20 group-hover:translate-x-0.5 transition-all"
                   onClick={() => onView(project.id, project.category?.slug)}
                 >
                   <ArrowRight className="w-3.5 h-3.5" />

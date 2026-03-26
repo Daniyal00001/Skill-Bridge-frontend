@@ -88,7 +88,7 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button variant="outline" size="xl" className="text-black font-bold" asChild>
+              <Button variant="outline" size="xl" className="font-bold" asChild>
                 <Link to="/signup?role=freelancer">Find Work</Link>
               </Button>
             </div>

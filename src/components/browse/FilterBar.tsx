@@ -76,21 +76,21 @@ export const FilterBar = ({
   return (
     <div
       className={cn(
-        "flex bg-white border border-blue-100 rounded-2xl relative overflow-hidden",
+        "flex bg-card border border-border rounded-2xl relative overflow-hidden",
         compact
           ? "flex-col gap-5 p-5"
           : "flex-wrap items-center gap-2.5 px-5 py-3",
-        "shadow-sm shadow-blue-50",
+        "shadow-sm shadow-primary/5",
       )}
     >
       {/* ── Search ─────────────────────────────────────── */}
       <div className="relative min-w-[180px] flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-blue-300" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
         <Input
           placeholder="Search skills or title..."
           value={filters.search}
           onChange={(e) => onFilterChange("search", e.target.value)}
-          className="pl-8 h-8 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300 placeholder:text-slate-400"
+          className="pl-8 h-8 text-xs bg-muted/50 border-border rounded-lg focus-visible:ring-1 focus-visible:ring-primary/20 placeholder:text-muted-foreground/50"
         />
       </div>
 
@@ -105,10 +105,10 @@ export const FilterBar = ({
           if (slug) onCategoryTrack(slug);
         }}
       >
-        <SelectTrigger className="h-8 w-auto min-w-[130px] text-xs bg-blue-50/50 border-blue-100 rounded-lg focus:ring-1 focus:ring-blue-300">
+        <SelectTrigger className="h-8 w-auto min-w-[130px] text-xs bg-muted/50 border-border rounded-lg focus:ring-1 focus:ring-primary/20 text-foreground">
           <SelectValue placeholder="Category" />
         </SelectTrigger>
-        <SelectContent className="rounded-xl border-blue-100">
+        <SelectContent className="rounded-xl border-border">
           <SelectItem value="All" className="text-xs">
             All Categories
           </SelectItem>
@@ -124,12 +124,12 @@ export const FilterBar = ({
 
       {/* ── Budget ─────────────────────────────────────── */}
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
+        <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide whitespace-nowrap">
           Budget
         </span>
         <div className="flex items-center gap-1">
           <div className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">
               $
             </span>
             <Input
@@ -140,12 +140,12 @@ export const FilterBar = ({
                 setLocalMin(e.target.value);
                 onFilterChange("budgetMin", e.target.value);
               }}
-              className="pl-5 h-8 w-20 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300 transition-all"
+              className="pl-5 h-8 w-20 text-xs bg-muted/50 border-border rounded-lg focus-visible:ring-1 focus-visible:ring-primary/20 transition-all"
             />
           </div>
-          <span className="text-slate-300 text-xs">—</span>
+          <span className="text-muted-foreground/30 text-xs">—</span>
           <div className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">
               $
             </span>
             <Input
@@ -156,7 +156,7 @@ export const FilterBar = ({
                 setLocalMax(e.target.value);
                 onFilterChange("budgetMax", e.target.value);
               }}
-              className="pl-5 h-8 w-20 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300 transition-all"
+              className="pl-5 h-8 w-20 text-xs bg-muted/50 border-border rounded-lg focus-visible:ring-1 focus-visible:ring-primary/20 transition-all"
             />
           </div>
         </div>
@@ -166,7 +166,7 @@ export const FilterBar = ({
 
       {/* ── Experience chips ───────────────────────────── */}
       <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
+        <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide whitespace-nowrap">
           Exp
         </span>
         {EXP_LEVELS.map((level) => (
@@ -188,7 +188,7 @@ export const FilterBar = ({
 
       {/* ── Size chips ─────────────────────────────────── */}
       <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
+        <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide whitespace-nowrap">
           Size
         </span>
         {PROJECT_SIZES.map((size) => (
@@ -221,7 +221,7 @@ export const FilterBar = ({
       {hasActiveFilters && (
         <button
           onClick={onReset}
-          className="ml-auto text-[10px] font-semibold text-blue-400 hover:text-blue-600 transition-colors whitespace-nowrap px-1 underline underline-offset-2"
+          className="ml-auto text-[10px] font-semibold text-primary/60 hover:text-primary transition-colors whitespace-nowrap px-1 underline underline-offset-2"
         >
           Reset all
         </button>
@@ -233,7 +233,7 @@ export const FilterBar = ({
 // ── Small reusable helpers ─────────────────────────────────────
 
 const Divider = ({ compact }: { compact: boolean }) =>
-  compact ? null : <div className="w-px h-6 bg-blue-100 hidden sm:block" />;
+  compact ? null : <div className="w-px h-6 bg-border hidden sm:block" />;
 
 const ChipButton = ({
   label,
@@ -251,8 +251,8 @@ const ChipButton = ({
     className={cn(
       "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all border",
       active
-        ? "bg-blue-500 text-white border-blue-500"
-        : "bg-blue-50/60 border-blue-100 text-slate-500 hover:border-blue-300 hover:text-blue-600",
+        ? "bg-primary text-primary-foreground border-primary"
+        : "bg-muted/50 border-border text-muted-foreground hover:border-primary/30 hover:text-primary",
     )}
   >
     {icon}
