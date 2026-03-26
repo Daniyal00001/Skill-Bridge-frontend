@@ -57,7 +57,7 @@ export function FreelancerCard({
     availabilityColors[freelancer.availability] || "bg-slate-300";
 
   return (
-    <Card className="w-full max-w-full hover:shadow-md transition-shadow duration-200 border border-slate-200 bg-white overflow-hidden">
+    <Card className="w-full max-w-full hover:shadow-sm transition-all duration-200 border border-border bg-card overflow-hidden">
       <CardContent className="p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
           {/* Avatar and Info */}
@@ -68,27 +68,27 @@ export function FreelancerCard({
                   src={freelancer.profileImage || freelancer.avatar}
                   alt={freelancer.name}
                 />
-                <AvatarFallback className="bg-slate-100 text-slate-600 font-semibold">
+                <AvatarFallback className="bg-muted text-muted-foreground font-semibold">
                   {freelancer.name
-                    .split(" ")
+                    ?.split(" ")
                     .map((n) => n[0])
-                    .join("")}
+                    .join("") || "U"}
                 </AvatarFallback>
               </Avatar>
               <span
                 className={cn(
-                  "absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2 border-white",
+                  "absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2 border-card",
                   statusColor,
                 )}
               />
             </div>
             {/* On mobile, name and rate are next to avatar in this flex container. On desktop, they are in the next flex-1 div. */}
             <div className="flex-1 sm:hidden min-w-0">
-              <h3 className="text-base font-bold text-slate-900 truncate flex items-center gap-1.5">
+              <h3 className="text-base font-bold text-foreground truncate flex items-center gap-1.5">
                 {freelancer.name}
                 <CheckCircle className="w-4 h-4 text-primary shrink-0" />
               </h3>
-              <p className="text-xs font-medium text-slate-500 truncate">
+              <p className="text-xs font-medium text-muted-foreground truncate">
                 {freelancer.title}
               </p>
             </div>
@@ -97,7 +97,7 @@ export function FreelancerCard({
           <div className="flex-1 min-w-0">
             <div className="hidden sm:flex items-center justify-between mb-1">
               <div className="flex items-center gap-1.5 min-w-0">
-                <h3 className="text-base font-bold text-slate-900 truncate">
+                <h3 className="text-base font-bold text-foreground truncate">
                   {freelancer.name}
                 </h3>
                 <CheckCircle className="w-4 h-4 text-primary shrink-0" />
@@ -105,36 +105,36 @@ export function FreelancerCard({
               <div className="flex items-center gap-1 shrink-0">
                 {freelancer.hourlyRate ? (
                   <>
-                    <span className="text-lg font-bold text-slate-900">
+                    <span className="text-lg font-bold text-foreground">
                       ${freelancer.hourlyRate}
                     </span>
-                    <span className="text-xs text-slate-500">/hr</span>
+                    <span className="text-xs text-muted-foreground">/hr</span>
                   </>
                 ) : (
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wider">
                     Rate TBD
                   </span>
                 )}
               </div>
             </div>
 
-            <p className="hidden sm:block text-sm font-medium text-slate-600 mb-2 truncate">
+            <p className="hidden sm:block text-sm font-medium text-muted-foreground mb-2 truncate">
               {freelancer.title}
             </p>
 
-            <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs text-slate-500 font-medium">
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs text-muted-foreground font-medium">
               <div className="flex items-center gap-1 sm:hidden shrink-0">
                 {freelancer.hourlyRate ? (
-                  <span className="text-sm font-bold text-slate-900">
+                  <span className="text-sm font-bold text-foreground">
                     ${freelancer.hourlyRate}/hr
                   </span>
                 ) : (
-                  <span className="text-xs font-bold text-slate-400">Rate TBD</span>
+                  <span className="text-xs font-bold text-muted-foreground/50">Rate TBD</span>
                 )}
               </div>
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                <span className="text-slate-800">
+                <span className="text-foreground">
                   {freelancer.rating?.toFixed(1) || "5.0"}
                 </span>
                 <span>({freelancer.reviewCount || 0})</span>
@@ -147,7 +147,7 @@ export function FreelancerCard({
           </div>
         </div>
 
-        <p className="text-sm text-slate-600 mt-4 line-clamp-2 leading-relaxed break-words">
+        <p className="text-sm text-muted-foreground mt-4 line-clamp-2 leading-relaxed break-words">
           {freelancer.bio}
         </p>
 
@@ -156,7 +156,7 @@ export function FreelancerCard({
             <Badge
               key={skill}
               variant="secondary"
-              className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-none px-2 py-0.5 text-[11px] font-medium"
+              className="bg-muted text-muted-foreground hover:bg-muted/80 border-none px-2 py-0.5 text-[11px] font-medium"
             >
               {skill}
             </Badge>
@@ -164,14 +164,14 @@ export function FreelancerCard({
           {freelancer.skills.length > 4 && (
             <Badge
               variant="outline"
-              className="text-[10px] text-slate-500 border-slate-200"
+              className="text-[10px] text-muted-foreground border-border"
             >
               +{freelancer.skills.length - 4}
             </Badge>
           )}
         </div>
 
-        <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
+        <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/50">
           <div className="flex gap-2">
             <TooltipProvider>
               <Tooltip>
@@ -179,7 +179,7 @@ export function FreelancerCard({
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-9 w-9 border-slate-200 text-slate-600 hover:text-primary hover:border-primary/30"
+                    className="h-9 w-9 border-border text-muted-foreground hover:text-primary hover:border-primary/30"
                     onClick={() => onMessage?.(freelancer)}
                   >
                     <MessageSquare className="w-4 h-4" />
@@ -195,7 +195,7 @@ export function FreelancerCard({
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-9 w-9 border-slate-200 text-slate-600 hover:text-primary hover:border-primary/30"
+                    className="h-9 w-9 border-border text-muted-foreground hover:text-primary hover:border-primary/30"
                     onClick={() => onInvite?.(freelancer)}
                   >
                     <UserPlus className="w-4 h-4" />

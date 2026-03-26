@@ -171,10 +171,10 @@ const BrowseFreelancersPage = () => {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <header className="mb-8">
-          <h1 className="text-4xl font-black tracking-tight">
+          <h1 className="text-4xl font-black tracking-tight text-foreground">
             Browse Freelancers
           </h1>
-          <p className="text-slate-500 font-medium">
+          <p className="text-muted-foreground font-medium">
             Find the right talent for your projects from our vetted community.
           </p>
         </header>
@@ -182,16 +182,16 @@ const BrowseFreelancersPage = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Simplified Sidebar Filters */}
           <aside className="w-full lg:w-64 shrink-0 space-y-6 min-w-0 max-w-full">
-            <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-6">
+            <div className="bg-card border border-border rounded-xl p-5 space-y-6 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="flex items-center gap-2 font-bold text-sm text-slate-900">
+                <h3 className="flex items-center gap-2 font-bold text-sm text-foreground">
                   <Filter className="w-4 h-4" /> Filters
                 </h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={resetFilters}
-                  className="h-6 text-[11px] font-bold text-slate-500 hover:text-primary"
+                  className="h-6 text-[11px] font-bold text-muted-foreground hover:text-primary transition-colors"
                 >
                   Clear
                 </Button>
@@ -199,14 +199,14 @@ const BrowseFreelancersPage = () => {
 
               {/* Search */}
               <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
                   Search
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Keywords..."
-                    className="pl-9 h-10 text-sm bg-slate-50 border-slate-200"
+                    className="pl-9 h-10 text-sm bg-muted/30 border-border focus-visible:ring-primary/20"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -215,7 +215,7 @@ const BrowseFreelancersPage = () => {
 
               {/* Skills */}
               <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
                   Skills
                 </label>
                 <div className="space-y-2">
@@ -224,11 +224,11 @@ const BrowseFreelancersPage = () => {
                       <Badge
                         key={skill}
                         variant="secondary"
-                        className="bg-slate-100 text-slate-600 border-none px-2 py-0.5 text-[10px] flex items-center gap-1"
+                        className="bg-muted text-muted-foreground border-none px-2 py-0.5 text-[10px] flex items-center gap-1.5"
                       >
                         {skill}
                         <X
-                          className="w-3 h-3 cursor-pointer"
+                          className="w-3 h-3 cursor-pointer hover:text-foreground transition-colors"
                           onClick={() => removeSkill(skill)}
                         />
                       </Badge>
@@ -248,18 +248,18 @@ const BrowseFreelancersPage = () => {
                 </div>
               </div>
 
-              <Separator className="bg-slate-100" />
+              <Separator className="bg-border/50" />
 
               {/* Experience Level - Schema Enum */}
               <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
                   Experience
                 </label>
                 <Select
                   value={experienceLevel}
                   onValueChange={setExperienceLevel}
                 >
-                  <SelectTrigger className="h-10 text-sm bg-slate-50 border-slate-200">
+                  <SelectTrigger className="h-10 text-sm bg-muted/30 border-border">
                     <SelectValue placeholder="All Levels" />
                   </SelectTrigger>
                   <SelectContent>
@@ -274,12 +274,12 @@ const BrowseFreelancersPage = () => {
 
               {/* Rate Range */}
               <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
                   Rate ($/hr)
                 </label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="text-[11px] font-bold text-slate-400">
+                  <div className="flex-1 flex items-center gap-1 bg-muted/30 border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                    <span className="text-[11px] font-bold text-muted-foreground/50">
                       $
                     </span>
                     <input
@@ -287,12 +287,12 @@ const BrowseFreelancersPage = () => {
                       placeholder="Min"
                       value={minRate}
                       onChange={(e) => setMinRate(e.target.value)}
-                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
-                  <span className="text-slate-300 font-medium">-</span>
-                  <div className="flex-1 flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="text-[11px] font-bold text-slate-400">
+                  <span className="text-muted-foreground/30 font-medium">-</span>
+                  <div className="flex-1 flex items-center gap-1 bg-muted/30 border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                    <span className="text-[11px] font-bold text-muted-foreground/50">
                       $
                     </span>
                     <input
@@ -300,7 +300,7 @@ const BrowseFreelancersPage = () => {
                       placeholder="Max"
                       value={maxRate}
                       onChange={(e) => setMaxRate(e.target.value)}
-                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>
@@ -311,15 +311,15 @@ const BrowseFreelancersPage = () => {
           {/* Main Feed */}
           <main className="flex-1 space-y-6 min-w-0">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-500">
+              <span className="text-sm font-medium text-muted-foreground">
                 Found{" "}
-                <span className="text-slate-900 font-bold">
+                <span className="text-foreground font-bold">
                   {pagination.total}
                 </span>{" "}
                 freelancers
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   Sort:
                 </span>
                 <Select
@@ -330,7 +330,7 @@ const BrowseFreelancersPage = () => {
                     setSortOrder(order);
                   }}
                 >
-                  <SelectTrigger className="h-8 border-none bg-transparent hover:bg-slate-100 text-xs font-bold w-[140px] px-2">
+                  <SelectTrigger className="h-8 border-none bg-transparent hover:bg-accent text-xs font-bold w-[140px] px-2 text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -345,9 +345,9 @@ const BrowseFreelancersPage = () => {
             </div>
 
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-20 bg-white border border-slate-200 rounded-xl">
-                <Loader2 className="w-8 h-8 animate-spin text-slate-300 mb-4" />
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+              <div className="flex flex-col items-center justify-center py-20 bg-card border border-border rounded-xl">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground/30 mb-4" />
+                <p className="text-sm font-bold text-muted-foreground/50 uppercase tracking-widest">
                   Searching Professionals...
                 </p>
               </div>
@@ -364,8 +364,8 @@ const BrowseFreelancersPage = () => {
                   ))}
 
                   {freelancers.length === 0 && (
-                    <div className="text-center py-20 bg-white border border-slate-200 rounded-xl">
-                      <p className="text-slate-500 font-medium">
+                    <div className="text-center py-20 bg-card border border-border rounded-xl">
+                      <p className="text-muted-foreground font-medium">
                         No results found for your search.
                       </p>
                       <Button

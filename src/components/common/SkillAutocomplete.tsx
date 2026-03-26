@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const validateSkillNameFrontEnd = (name: string): { valid: boolean; message?: string } => {
   const trimmed = name.trim();
@@ -115,7 +116,7 @@ export function SkillAutocomplete({
           onFocus={() => {
             if (value.trim().length > 0) setIsOpen(true);
           }}
-          className="w-full"
+          className={cn("w-full bg-muted/30 border-border focus-visible:ring-primary/20", className)}
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
