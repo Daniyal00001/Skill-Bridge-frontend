@@ -41,7 +41,15 @@ export default function FreelancerMessages() {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-10rem)] flex gap-8 animate-fade-in">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6 flex flex-col h-[calc(100vh-6rem)]">
+        <header>
+          <h1 className="text-4xl font-black tracking-tight">Messages</h1>
+          <p className="text-muted-foreground font-medium mt-1">
+            Chat with clients and manage your project discussions.
+          </p>
+        </header>
+
+        <div className="flex-1 flex gap-8 min-h-0">
         {/* Sidebar List */}
         <div className="w-96 flex flex-col gap-6">
           <div className="space-y-4">
@@ -154,6 +162,7 @@ export default function FreelancerMessages() {
           />
         </div>
       </div>
+    </div>
     </DashboardLayout>
   );
 }

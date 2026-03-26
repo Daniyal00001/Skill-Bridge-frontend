@@ -249,12 +249,12 @@ export default function FreelancerDashboard() {
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
-              Freelancer Dashboard
-            </p>
-            <h1 className="text-4xl font-black tracking-tight text-foreground">
+            <h1 className="text-4xl font-black tracking-tight">
               Overview
             </h1>
+            <p className="text-muted-foreground font-medium mt-1">
+              Track your performance and manage active projects.
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button

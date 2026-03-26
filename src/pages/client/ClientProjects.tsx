@@ -706,7 +706,7 @@ const ClientProjectsPage = () => {
             >
               Unified Management Hub
             </Badge>
-            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-black tracking-tight">
               My Projects
             </h1>
             <p className="text-muted-foreground text-base max-w-xl">

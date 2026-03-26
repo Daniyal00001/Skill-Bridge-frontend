@@ -145,7 +145,7 @@ export default function FreelancerBrowseProjects() {
             <h1 className="text-4xl font-black tracking-tight text-slate-800">
               Project Marketplace
             </h1>
-            <p className="text-sm text-slate-400 mt-0.5">
+            <p className="text-muted-foreground font-medium mt-1">
               {loading
                 ? "Finding best matches..."
                 : `${total.toLocaleString()} opportunities ranked for you`}

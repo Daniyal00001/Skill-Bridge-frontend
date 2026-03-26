@@ -435,7 +435,9 @@ export default function AdminDashboard() {
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[11px] text-muted-foreground">
-                            {skill.category}
+                            {typeof skill.category === "object"
+                              ? skill.category.name
+                              : skill.category}
                           </span>
                           <span className="text-[11px] text-muted-foreground">
                             ·

@@ -168,7 +168,7 @@ const BrowseFreelancersPage = () => {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <header className="mb-8">
-          <h1 className="text-4xl font-black text-slate-900 mb-2">
+          <h1 className="text-4xl font-black tracking-tight">
             Browse Freelancers
           </h1>
           <p className="text-slate-500 font-medium">

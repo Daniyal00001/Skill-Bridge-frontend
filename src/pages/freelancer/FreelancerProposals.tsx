@@ -166,7 +166,7 @@ export default function FreelancerProposals() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-foreground">
+            <h1 className="text-4xl font-black tracking-tight">
               My Proposals
             </h1>
             <p className="text-muted-foreground font-medium tracking-wide mt-1">
