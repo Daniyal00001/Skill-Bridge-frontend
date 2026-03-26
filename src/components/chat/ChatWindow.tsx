@@ -503,9 +503,11 @@ export function ChatWindow({
               }
               disabled={isUploading}
               rows={1}
+              maxLength={2050} // slight buffer for UX
               className={cn(
                 "w-full resize-none rounded-2xl border border-border/50 bg-muted/40 px-4 py-2.5",
-                "text-sm leading-relaxed outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50",
+                "text-sm leading-relaxed outline-none focus:ring-2 focus:ring-primary/20",
+                input.length > 2000 ? "border-destructive/50 focus:border-destructive/50" : "focus:border-primary/50",
                 "max-h-32 overflow-y-auto transition-all placeholder:text-muted-foreground/60",
               )}
               style={{ minHeight: "40px" }}
@@ -530,19 +532,29 @@ export function ChatWindow({
               size="icon"
               className={cn(
                 "h-10 w-10 rounded-xl transition-all",
-                input.trim() ? "opacity-100 scale-100" : "opacity-60 scale-95",
+                input.trim() && input.length <= 2000 ? "opacity-100 scale-100" : "opacity-60 scale-95",
               )}
               onClick={handleSend}
-              disabled={!input.trim()}
+              disabled={!input.trim() || input.length > 2000}
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
         <div className="flex items-center justify-between mt-1 px-1">
-          <p className="text-[10px] text-muted-foreground/50 ml-12">
-            Drag & drop files • Press Enter to send
-          </p>
+          <div className="flex items-center gap-4 ml-12">
+            <p className="text-[10px] text-muted-foreground/50">
+              Drag & drop files • Press Enter to send
+            </p>
+            {input.length > 0 && (
+              <p className={cn(
+                "text-[10px] transition-colors",
+                input.length > 2000 ? "text-destructive font-black" : "text-muted-foreground/40"
+              )}>
+                {input.length}/2000
+              </p>
+            )}
+          </div>
           {currentUserRole === "CLIENT" &&
             room.otherUser?.role === "FREELANCER" && (
               <p className="text-[10px] text-primary/70 font-bold italic animate-pulse">
