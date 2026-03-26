@@ -462,10 +462,14 @@ const DirectInvitesPage = () => {
                       </DialogTitle>
                       {getStatusBadge(selectedInvite.status)}
                     </div>
-                    <DialogDescription className="text-xs text-muted-foreground mt-0.5 truncate">
-                      <span className="font-medium text-foreground/70">
+                    <DialogDescription className="text-xs text-foreground/80 mt-1 truncate">
+                      <Link 
+                        to={`/client/projects/${selectedInvite.projectId}`}
+                        onClick={() => setDetailsModalOpen(false)}
+                        className="font-bold text-primary hover:underline hover:text-primary/80 transition-colors"
+                      >
                         {selectedInvite.projectTitle}
-                      </span>
+                      </Link>
                       <span className="mx-1.5 opacity-40">·</span>
                       Ref:{" "}
                       <span className="font-mono">
@@ -481,7 +485,7 @@ const DirectInvitesPage = () => {
                 </div>
 
                 {/* Budget pill — always visible at top */}
-                <div className="shrink-0 text-right">
+                <div className="shrink-0 text-right pr-8">
                   <p className="text-2xl font-black tabular-nums tracking-tighter leading-none text-foreground">
                     ${selectedInvite.budget?.toLocaleString()}
                   </p>
@@ -502,17 +506,17 @@ const DirectInvitesPage = () => {
                     <span className="absolute -top-3 left-4 text-4xl text-primary/15 font-serif leading-none select-none">
                       "
                     </span>
-                    <p className="text-[11px] leading-relaxed text-muted-foreground italic pl-1 pr-2">
+                    <p className="text-[11px] leading-relaxed text-foreground/80 font-medium italic pl-1 pr-2">
                       {selectedInvite.message}
                     </p>
-                    <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 mt-2 pt-2 border-t border-border/30">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/80 mt-2 pt-2 border-t border-border/30">
                       Message from you
                     </p>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 p-3 rounded-xl border border-dashed border-border/40 text-muted-foreground/40">
+                  <div className="flex items-center gap-2 p-3 rounded-xl border border-dashed border-border/80 text-foreground/60 bg-muted/20">
                     <Inbox className="w-4 h-4 shrink-0" />
-                    <span className="text-[10px] font-semibold">
+                    <span className="text-[10px] font-bold">
                       No message included
                     </span>
                   </div>
@@ -527,7 +531,7 @@ const DirectInvitesPage = () => {
                     </h4>
                   </div>
                   <div className="p-4 space-y-3">
-                    <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-wrap line-clamp-4">
+                    <p className="text-[11.5px] text-foreground/90 font-medium leading-relaxed whitespace-pre-wrap line-clamp-4">
                       {selectedInvite.projectDescription ||
                         "No detailed description provided for this project."}
                     </p>
@@ -618,11 +622,11 @@ const DirectInvitesPage = () => {
               </div>
 
               {/* RIGHT COLUMN — milestones (scrollable) */}
-              <div className="col-span-2 overflow-y-auto p-5 space-y-3 custom-scrollbar bg-muted/5">
+              <div className="col-span-2 overflow-y-auto p-5 space-y-3 custom-scrollbar bg-card/60">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5">
                     <Milestone className="w-4 h-4 text-primary" />
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-foreground/80">
                       Milestones
                     </h4>
                   </div>
@@ -652,13 +656,13 @@ const DirectInvitesPage = () => {
                               </p>
                             </div>
                             {m.description && (
-                              <p className="text-[10px] text-muted-foreground/70 mt-0.5 leading-snug line-clamp-2">
+                              <p className="text-[10px] text-foreground/80 font-medium mt-0.5 leading-snug line-clamp-2">
                                 {m.description}
                               </p>
                             )}
                             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                               {m.dueDate && (
-                                <span className="text-[9px] font-semibold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
+                                <span className="text-[9px] font-bold text-foreground/70 bg-muted/80 px-1.5 py-0.5 rounded-md">
                                   Due {new Date(m.dueDate).toLocaleDateString()}
                                 </span>
                               )}
@@ -673,11 +677,11 @@ const DirectInvitesPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-10 text-center gap-2 opacity-40">
-                    <Milestone className="w-8 h-8 text-muted-foreground" />
+                  <div className="flex flex-col items-center justify-center py-10 text-center gap-2 opacity-60">
+                    <Milestone className="w-8 h-8 text-foreground/50" />
                     <div>
                       <p className="text-xs font-bold">Single Phase Project</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                      <p className="text-[10px] text-foreground/80 font-medium mt-0.5">
                         Full budget on delivery
                       </p>
                     </div>
@@ -688,7 +692,7 @@ const DirectInvitesPage = () => {
 
             {/* ── Footer ── */}
             <DialogFooter className="flex-none px-5 py-3 border-t border-border/40 bg-muted/10 flex items-center justify-between gap-3">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-foreground/70">
                 Direct Invitation · {selectedInvite.status}
               </p>
               <div className="flex items-center gap-2">

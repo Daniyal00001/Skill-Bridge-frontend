@@ -412,318 +412,322 @@ const InvitationsPage = () => {
       {/* Details Modal */}
       {selectedInvite && (
         <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>
-          <DialogContent className="max-w-4xl border-none bg-card/95 backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden max-h-[96vh] flex flex-col p-0 border border-white/10 text-foreground">
-            <DialogHeader className="p-5 pb-3 border-b shrink-0 bg-secondary/20 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-5 opacity-10 pointer-events-none">
-                <FileText className="w-16 h-16 rotate-12" />
+          <DialogContent className="max-w-5xl w-full bg-background border border-border/50 rounded-2xl shadow-2xl overflow-hidden p-0 flex flex-col max-h-[88vh] text-foreground">
+            {/* ── Header ── */}
+            <DialogHeader className="flex-none px-6 pt-5 pb-4 border-b border-border/40 bg-muted/10">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <FileText className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <DialogTitle className="text-base font-bold tracking-tight leading-none">
+                        Project Terms Details
+                      </DialogTitle>
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-[8px] font-black uppercase tracking-widest px-1.5 py-0">
+                        Direct Invitation
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-[8px] font-bold border-border/40 text-muted-foreground uppercase tracking-wider py-0"
+                      >
+                        Ref: {selectedInvite.id.slice(-6).toUpperCase()}
+                      </Badge>
+                    </div>
+                    <DialogDescription className="text-xs text-foreground/80 mt-1">
+                      From{" "}
+                      <span className="font-bold text-foreground">
+                        {selectedInvite.clientName}
+                      </span>
+                      <span className="mx-1.5 opacity-40">·</span>
+                      <Link
+                        to={`/freelancer/projects/${selectedInvite.projectId}`}
+                        onClick={() => setDetailsModalOpen(false)}
+                        className="text-primary hover:underline font-bold"
+                      >
+                        {selectedInvite.projectTitle}
+                      </Link>
+                      <span className="mx-1.5 opacity-40">·</span>
+                      <span className="font-medium">
+                        {new Date(selectedInvite.createdAt).toLocaleDateString(
+                          undefined,
+                          { dateStyle: "medium" },
+                        )}
+                      </span>
+                    </DialogDescription>
+                  </div>
+                </div>
+
+                {/* Budget — always visible */}
+                <div className="shrink-0 text-right pr-8">
+                  <p className="text-2xl font-black tabular-nums tracking-tighter leading-none">
+                    ${selectedInvite.budget?.toLocaleString()}
+                  </p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">
+                    Total Budget
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-primary/20 text-primary border-primary/30 font-black uppercase tracking-widest text-[8px] px-1.5 py-0">
-                  Direct Invitation
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="font-bold border-muted-foreground/20 text-muted-foreground uppercase tracking-tighter text-[8px] py-0"
-                >
-                  Ref: {selectedInvite.id.slice(-6).toUpperCase()}
-                </Badge>
-              </div>
-              <DialogTitle className="text-xl font-black tracking-tight mb-0">
-                Project Terms Details
-              </DialogTitle>
-              <DialogDescription className="text-[10px] font-bold text-muted-foreground/80 leading-tight">
-                Formal proposal from{" "}
-                <span className="text-foreground">
-                  {selectedInvite.clientName}
-                </span>{" "}
-                for "{selectedInvite.projectTitle}".
-              </DialogDescription>
             </DialogHeader>
 
-            <div className="p-4 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
-              {/* Top Row: Important Stats & Message */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Attachments Section - High Prominence */}
-                  {selectedInvite.attachments &&
-                    selectedInvite.attachments.length > 0 && (
-                      <div className="bg-primary/[0.02] border border-primary/10 rounded-2xl p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-1.5">
-                            <Paperclip className="w-3.5 h-3.5" /> Attached
-                            Project Files
-                          </h4>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {selectedInvite.attachments.map(
-                            (url: string, idx: number) => (
-                              <a
-                                key={idx}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2.5 p-3 rounded-xl border bg-background hover:bg-primary/5 hover:border-primary/30 transition-all group shadow-sm"
-                              >
-                                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                                  <FileText className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                    Asset {idx + 1}
-                                  </p>
-                                  <p className="text-[10px] font-bold truncate">
-                                    View Document
-                                  </p>
-                                </div>
-                              </a>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                  {selectedInvite.message ? (
-                    <div className="bg-card border rounded-2xl p-4 shadow-sm border-muted/40 italic text-muted-foreground relative">
-                      <div className="absolute top-3 left-3 text-3xl text-primary/10 font-serif leading-none italic pointer-events-none">
-                        “
-                      </div>
-                      <p className="text-xs font-medium leading-relaxed pl-4 pr-1">
-                        {selectedInvite.message}
-                      </p>
-                      <div className="mt-2 pt-2 border-t flex items-center gap-2">
-                        <Avatar className="w-5 h-5">
-                          <AvatarImage src={selectedInvite.clientAvatar} />
-                          <AvatarFallback>
-                            {selectedInvite.clientName.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-[8px] uppercase font-black tracking-widest text-muted-foreground">
-                          {selectedInvite.clientName}
-                        </span>
-                      </div>
+            {/* ── Two-column body ── */}
+            <div className="flex-1 min-h-0 grid grid-cols-5 divide-x divide-border/40 overflow-hidden">
+              {/* LEFT — context & details (scrollable) */}
+              <div className="col-span-3 overflow-y-auto p-5 space-y-3 custom-scrollbar">
+                {/* Message */}
+                {selectedInvite.message ? (
+                  <div className="relative bg-muted/20 border border-border/40 rounded-xl p-4">
+                    <span className="absolute -top-3 left-4 text-4xl text-primary/10 font-serif leading-none select-none pointer-events-none">
+                      "
+                    </span>
+                    <p className="text-[11px] leading-relaxed text-foreground/90 font-medium italic pl-1">
+                      {selectedInvite.message}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2.5 pt-2 border-t border-border/30">
+                      <Avatar className="w-4 h-4">
+                        <AvatarImage src={selectedInvite.clientAvatar} />
+                        <AvatarFallback className="text-[7px]">
+                          {selectedInvite.clientName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-[8px] font-black uppercase tracking-widest text-foreground/70">
+                        {selectedInvite.clientName}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="p-6 bg-muted/10 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center gap-2 opacity-50 text-center py-10">
-                      <Inbox className="w-8 h-8 text-muted-foreground/30" />
-                      <p className="text-xs font-bold text-muted-foreground tracking-tight">
-                        No message provided with invitation
-                      </p>
-                    </div>
-                  )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 rounded-xl border border-dashed border-border/80 text-foreground/60 bg-muted/20">
+                    <Inbox className="w-4 h-4 shrink-0" />
+                    <span className="text-[10px] font-bold">
+                      No message provided with invitation
+                    </span>
+                  </div>
+                )}
 
-                  {/* Project Overview */}
-                  <div className="bg-card border rounded-2xl p-5 shadow-sm space-y-4 mt-6">
-                    <h4 className="text-sm font-black tracking-tight flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-primary" />
+                {/* Project Overview */}
+                <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-border/40 bg-muted/20 flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5 text-primary" />
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Project Overview
                     </h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                      {selectedInvite.projectDescription || "No detailed description provided for this project."}
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <p className="text-[11.5px] text-foreground/90 font-medium leading-relaxed whitespace-pre-wrap line-clamp-4">
+                      {selectedInvite.projectDescription ||
+                        "No detailed description provided for this project."}
                     </p>
-                    <div className="flex flex-wrap gap-2 pt-2 border-t">
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/30 border text-[10px] font-bold">
-                        <span className="text-muted-foreground uppercase tracking-widest text-[8px]">Experience:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 border border-border/30 text-[9px] font-bold">
+                        <span className="text-muted-foreground">Level:</span>
                         <span>{selectedInvite.projectExperienceLevel}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/30 border text-[10px] font-bold">
-                        <span className="text-muted-foreground uppercase tracking-widest text-[8px]">Duration:</span>
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 border border-border/30 text-[9px] font-bold">
+                        <span className="text-muted-foreground">Duration:</span>
                         <span>{selectedInvite.projectDuration}</span>
                       </div>
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 border border-border/30 text-[9px] font-bold">
+                        <span className="text-muted-foreground">Category:</span>
+                        <span>
+                          {typeof selectedInvite.projectCategory === "object"
+                            ? selectedInvite.projectCategory.name
+                            : selectedInvite.projectCategory}
+                        </span>
+                      </div>
+                      {(!selectedInvite.milestones ||
+                        selectedInvite.milestones.length === 0) && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/40 border border-border/30 text-[9px] font-bold">
+                          <RotateCcw className="w-2.5 h-2.5 text-primary" />
+                          <span className="text-muted-foreground">
+                            Revisions:
+                          </span>
+                          <span>{selectedInvite.revisionsAllowed}</span>
+                        </div>
+                      )}
                     </div>
-                    {selectedInvite.projectSkills && selectedInvite.projectSkills.length > 0 && (
-                      <div className="pt-2">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">Required Skills</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {selectedInvite.projectSkills.map((skill: string, i: number) => (
-                            <Badge key={i} variant="secondary" className="text-[9px] px-2 py-0 font-bold bg-primary/5 text-primary border-primary/20">
+                    {selectedInvite.projectSkills?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {selectedInvite.projectSkills.map(
+                          (skill: string, i: number) => (
+                            <Badge
+                              key={i}
+                              variant="secondary"
+                              className="text-[9px] px-2 py-0 font-semibold bg-primary/5 text-primary border-primary/15"
+                            >
                               {skill}
                             </Badge>
-                          ))}
-                        </div>
+                          ),
+                        )}
                       </div>
                     )}
                   </div>
-                </div>{" "}
-                <div className="space-y-4">
-                  <div className="p-4 rounded-2xl border bg-gradient-to-br from-primary/10 to-transparent space-y-3 shadow-sm">
-                    <div className="space-y-0.5">
-                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-primary">
-                        Total Budget
-                      </p>
-                      <p className="text-3xl font-black text-foreground tabular-nums tracking-tighter">
-                        ${selectedInvite.budget?.toLocaleString()}
-                      </p>
+                </div>
+
+                {/* Attachments */}
+                {selectedInvite.attachments?.length > 0 && (
+                  <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+                    <div className="px-4 py-2.5 border-b border-border/40 bg-muted/20 flex items-center gap-2">
+                      <Paperclip className="w-3.5 h-3.5 text-primary" />
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        Attachments ({selectedInvite.attachments.length})
+                      </h4>
                     </div>
-                    <div className="pt-2 border-t border-primary/10 grid grid-cols-1 gap-2">
-                      {(!selectedInvite.milestones ||
-                        selectedInvite.milestones.length === 0) && (
-                        <div className="space-y-0.5">
-                          <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">
-                            General Revisions
-                          </p>
-                          <p className="text-sm font-bold flex items-center gap-1.5">
-                            <RotateCcw className="w-3.5 h-3.5 text-primary" />{" "}
-                            {selectedInvite.revisionsAllowed} Available
-                          </p>
-                        </div>
+                    <div className="p-3 grid grid-cols-2 gap-2">
+                      {selectedInvite.attachments.map(
+                        (url: string, idx: number) => (
+                          <a
+                            key={idx}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 p-2.5 rounded-lg border border-border/40 bg-background hover:bg-primary/5 hover:border-primary/30 transition-all group"
+                          >
+                            <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                              <FileText className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/50">
+                                File {idx + 1}
+                              </p>
+                              <p className="text-[10px] font-semibold truncate group-hover:text-primary transition-colors">
+                                View Document
+                              </p>
+                            </div>
+                          </a>
+                        ),
                       )}
-                      <div className="space-y-0.5">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">
-                          Proposal Date
-                        </p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-80">
-                          {new Date(
-                            selectedInvite.createdAt,
-                          ).toLocaleDateString(undefined, {
-                            dateStyle: "medium",
-                          })}
-                        </p>
-                      </div>
                     </div>
                   </div>
+                )}
+
+                {/* Important notice */}
+                <div className="flex items-start gap-2.5 bg-amber-500/8 border border-amber-500/20 rounded-xl p-3">
+                  <Badge className="bg-amber-500 text-white font-black uppercase px-1.5 py-0 text-[8px] border-none shrink-0 mt-0.5">
+                    Note
+                  </Badge>
+                  <p className="text-[10px] font-semibold text-amber-800 dark:text-amber-400 leading-snug">
+                    Accepting this invitation will automatically formalize these
+                    exact terms into an active contract.
+                  </p>
                 </div>
               </div>
 
-              {/* Milestones Section */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between border-b border-border/40 pb-2">
-                  <h4 className="text-base font-black tracking-tight flex items-center gap-2 italic">
-                    <Milestone className="w-5 h-5 text-primary" />
-                    Milestone Breakdown
-                  </h4>
-                  <Badge className="bg-primary px-2 py-0.5 font-black shadow-md shadow-primary/20 text-[9px] uppercase tracking-wider">
-                    {selectedInvite.milestones?.length || 0} Phases
+              {/* RIGHT — milestones (scrollable) */}
+              <div className="col-span-2 overflow-y-auto p-5 space-y-3 custom-scrollbar bg-card/60">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <Milestone className="w-4 h-4 text-primary" />
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-foreground/80">
+                      Milestones
+                    </h4>
+                  </div>
+                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[9px] font-bold px-2 py-0">
+                    {selectedInvite.milestones?.length || 0} phases
                   </Badge>
                 </div>
 
-                <div className="space-y-4">
-                  {selectedInvite.milestones &&
-                  selectedInvite.milestones.length > 0 ? (
-                    selectedInvite.milestones.map((m: any, idx: number) => (
+                {selectedInvite.milestones?.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedInvite.milestones.map((m: any, idx: number) => (
                       <div
                         key={idx}
-                        className="group p-5 bg-card/40 border border-muted-foreground/10 rounded-[1.5rem] hover:border-primary/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:shadow-md"
+                        className="group p-3.5 bg-card border border-border/50 rounded-xl hover:border-primary/30 hover:shadow-sm transition-all"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0 font-black text-xs text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                        <div className="flex items-start gap-2.5">
+                          <div className="w-6 h-6 rounded-lg bg-secondary flex items-center justify-center shrink-0 font-black text-[10px] text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all mt-0.5">
                             {idx + 1}
                           </div>
-                          <div>
-                            <p className="font-bold text-sm mb-0 group-hover:text-primary transition-colors">
-                              {m.title}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground/70 font-medium mb-1.5 leading-tight">
-                              {m.description || "No description provided."}
-                            </p>
-                            <div className="flex items-center gap-3 flex-wrap">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-bold text-[11px] leading-tight group-hover:text-primary transition-colors">
+                                {m.title}
+                              </p>
+                              <p className="text-sm font-black tabular-nums tracking-tight text-foreground shrink-0">
+                                ${Number(m.amount).toLocaleString()}
+                              </p>
+                            </div>
+                            {m.description && (
+                              <p className="text-[10px] text-foreground/80 font-medium mt-0.5 leading-snug line-clamp-2">
+                                {m.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                               {m.dueDate && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[9px] font-bold px-1.5 py-0 rounded-md bg-muted text-muted-foreground border-transparent"
-                                >
-                                  {new Date(m.dueDate).toLocaleDateString()}
-                                </Badge>
+                                <span className="text-[9px] font-bold text-foreground/70 bg-muted/80 px-1.5 py-0.5 rounded-md">
+                                  Due {new Date(m.dueDate).toLocaleDateString()}
+                                </span>
                               )}
-                              <span className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1 opacity-80">
-                                <RotateCcw className="w-2.5 h-2.5" />{" "}
-                                {m.revisionsAllowed}
+                              <span className="text-[9px] font-bold text-primary/70 flex items-center gap-0.5">
+                                <RotateCcw className="w-2 h-2" />
+                                {m.revisionsAllowed} rev.
                               </span>
                             </div>
                           </div>
                         </div>
-                        <div className="sm:text-right shrink-0">
-                          <p className="text-xl font-black tabular-nums tracking-tighter text-foreground group-hover:scale-105 transition-transform">
-                            ${Number(m.amount).toLocaleString()}
-                          </p>
-                          <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">
-                            Amount
-                          </p>
-                        </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-12 text-center border-2 border-dashed rounded-[2rem] bg-secondary/10 space-y-3">
-                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto opacity-30">
-                        <Milestone className="w-8 h-8" />
-                      </div>
-                      <div className="space-y-1">
-                        <h5 className="font-black text-lg">
-                          Single Phase Project
-                        </h5>
-                        <p className="text-sm text-muted-foreground font-medium max-w-sm mx-auto">
-                          This invitation is for a single-delivery project
-                          without structured milestones.
-                        </p>
-                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10 text-center gap-2 opacity-60">
+                    <Milestone className="w-8 h-8 text-foreground/50" />
+                    <div>
+                      <p className="text-xs font-bold">Single Phase Project</p>
+                      <p className="text-[10px] text-foreground/80 font-medium mt-0.5 max-w-[160px] mx-auto leading-snug">
+                        Single-delivery project without structured milestones.
+                      </p>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl text-[11px] font-semibold text-amber-800 space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-amber-500 text-white font-black uppercase px-1.5 py-0 text-[8px] border-none">
-                    Important
-                  </Badge>
-                </div>
-                <p className="leading-snug">
-                  Accepting this invitation will automatically formalize these
-                  exact terms into an active contract.
-                </p>
-              </div>
-
-              {/* Centered Project Category at Bottom */}
-              <div className="flex justify-center pt-2">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/20 border border-border/40 shadow-sm">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    Category:
-                  </span>
-                  <span className="text-[9px] font-bold">
-                    {typeof selectedInvite.projectCategory === "object"
-                      ? selectedInvite.projectCategory.name
-                      : selectedInvite.projectCategory}
-                  </span>
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            <DialogFooter className="p-4 pt-2 border-t bg-background/50 shrink-0 gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setDetailsModalOpen(false)}
-                className="font-black uppercase text-[10px] tracking-widest h-10 rounded-xl px-6 hover:bg-muted transition-all"
-              >
-                Close View
-              </Button>
-              {selectedInvite.status === "PENDING" && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    className="font-black uppercase text-[10px] tracking-widest h-10 rounded-xl px-5 bg-red-500/10 text-red-600 hover:bg-red-500/20 border-red-200 shadow-sm transition-all"
-                    onClick={() => handleAction(selectedInvite.id, "reject")}
-                    disabled={!!actionLoading}
-                  >
-                    {actionLoading === `reject-${selectedInvite.id}` ? (
-                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                    ) : (
-                      <XCircle className="w-3.5 h-3.5 mr-1.5" />
-                    )}
-                    Decline
-                  </Button>
-                  <Button
-                    className="font-black uppercase text-[10px] tracking-widest h-10 rounded-xl px-8 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 active:scale-95 transition-all"
-                    onClick={() => handleAction(selectedInvite.id, "accept")}
-                    disabled={!!actionLoading}
-                  >
-                    {actionLoading === `accept-${selectedInvite.id}` ? (
-                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                    ) : (
-                      <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
-                    )}
-                    Accept
-                  </Button>
-                </div>
-              )}
+            {/* ── Footer ── */}
+            <DialogFooter className="flex-none px-5 py-3 border-t border-border/40 bg-muted/10 flex items-center justify-between gap-3">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-foreground/70">
+                Direct Invitation · {selectedInvite.status}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDetailsModalOpen(false)}
+                  className="h-8 px-4 text-[10px] font-bold uppercase tracking-wider rounded-lg"
+                >
+                  Close
+                </Button>
+                {selectedInvite.status === "PENDING" && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-4 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-red-500/8 text-red-600 hover:bg-red-500/15 border-red-200/50 shadow-none"
+                      onClick={() => handleAction(selectedInvite.id, "reject")}
+                      disabled={!!actionLoading}
+                    >
+                      {actionLoading === `reject-${selectedInvite.id}` ? (
+                        <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                      ) : (
+                        <XCircle className="w-3 h-3 mr-1.5" />
+                      )}
+                      Decline
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-8 px-5 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20 active:scale-95 transition-all"
+                      onClick={() => handleAction(selectedInvite.id, "accept")}
+                      disabled={!!actionLoading}
+                    >
+                      {actionLoading === `accept-${selectedInvite.id}` ? (
+                        <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-3 h-3 mr-1.5" />
+                      )}
+                      Accept Invitation
+                    </Button>
+                  </>
+                )}
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
