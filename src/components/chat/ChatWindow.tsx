@@ -295,7 +295,9 @@ export function ChatWindow({
                             <p className="text-[13px] font-medium text-muted-foreground whitespace-pre-wrap leading-relaxed">
                               {msg.content
                                 .replace(/\*\*/g, "")
-                                .replace(/📄 /g, "")}
+                                .replace(/📄 /g, "")
+                                .replace(/\[View Invitation Details\]\s*\((.*?)\)/g, "")
+                                .trim()}
                             </p>
                           </div>
                           <div className="flex justify-center pt-1">
