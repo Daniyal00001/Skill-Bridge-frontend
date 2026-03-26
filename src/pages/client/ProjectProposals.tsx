@@ -146,7 +146,7 @@ const ProjectProposalsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in max-w-5xl">
+      <div className="container mx-auto p-4 md:p-6 space-y-6 animate-fade-in max-w-5xl">
         {/* Back */}
         <Button
           variant="ghost"
@@ -160,7 +160,7 @@ const ProjectProposalsPage = () => {
 
         {/* Project Header */}
         {project && (
-          <div className="bg-card border border-border/40 rounded-2xl p-8 shadow-sm space-y-6">
+          <div className="bg-card border border-border/40 rounded-2xl p-6 shadow-sm space-y-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-3 flex-wrap">
@@ -199,7 +199,7 @@ const ProjectProposalsPage = () => {
               </div>
 
               <div className="flex items-center gap-3 shrink-0 flex-wrap">
-                <div className="text-center p-4 rounded-2xl bg-muted/30 border border-border/40 min-w-[70px]">
+                <div className="text-center p-3 rounded-xl bg-muted/30 border border-border/40 min-w-[70px]">
                   <p className="text-2xl font-black text-primary">
                     {proposals.length}
                   </p>
@@ -207,7 +207,7 @@ const ProjectProposalsPage = () => {
                     Total
                   </p>
                 </div>
-                <div className="text-center p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 min-w-[70px]">
+                <div className="text-center p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 min-w-[70px]">
                   <p className="text-2xl font-black text-amber-600">
                     {pendingCount}
                   </p>
@@ -216,7 +216,7 @@ const ProjectProposalsPage = () => {
                   </p>
                 </div>
                 {shortlistedCount > 0 && (
-                  <div className="text-center p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 min-w-[70px]">
+                  <div className="text-center p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 min-w-[70px]">
                     <p className="text-2xl font-black text-blue-600">
                       {shortlistedCount}
                     </p>
@@ -226,7 +226,7 @@ const ProjectProposalsPage = () => {
                   </div>
                 )}
                 {acceptedCount > 0 && (
-                  <div className="text-center p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 min-w-[70px]">
+                  <div className="text-center p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 min-w-[70px]">
                     <p className="text-2xl font-black text-emerald-600">
                       {acceptedCount}
                     </p>
@@ -242,19 +242,19 @@ const ProjectProposalsPage = () => {
 
         {/* Hired banner */}
         {acceptedCount > 0 && (
-          <div className="flex items-center gap-4 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
-            <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
             <div>
-              <p className="font-black text-emerald-700 dark:text-emerald-400">
+              <p className="font-black text-emerald-700 dark:text-emerald-400 text-sm">
                 Freelancer hired!
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Contract has been created with milestones defined.
               </p>
             </div>
             <Button
               size="sm"
-              className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+              className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-9 px-4"
               onClick={async () => {
                 try {
                   const res = await api.get(`/contracts/project/${projectId}`);
@@ -418,11 +418,11 @@ const ProposalCard = ({
           "hover:border-primary/30 hover:shadow-lg hover:bg-muted/30",
       )}
     >
-      <CardContent className="p-6 space-y-6">
+      <CardContent className="p-4 space-y-4">
         {status === "WITHDRAWN" && (
-          <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500 mb-2">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-            <p className="text-sm font-bold text-amber-700 leading-tight">
+          <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500 mb-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <p className="text-xs font-bold text-amber-700 leading-tight">
               Freelancer has withdrawn this proposal. You can no longer hire or
               negotiate for this bid.
             </p>
@@ -569,12 +569,12 @@ const ProposalCard = ({
         )}
 
         {/* Bid Details */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-muted/30 border border-border/40">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-xl bg-muted/30 border border-border/40">
           <div className="space-y-1">
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
               Bid Amount
             </p>
-            <p className="text-xl font-black text-foreground">
+            <p className="text-lg font-black text-foreground">
               ${proposal.bidAmount?.toLocaleString()}
             </p>
             {budgetDiff !== null && (
@@ -690,7 +690,7 @@ const ProposalCard = ({
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
               Cover Letter
             </p>
-            <div className="bg-muted/30 p-5 rounded-2xl border border-border/40 relative group/cover">
+            <div className="bg-muted/30 p-4 rounded-xl border border-border/40 relative group/cover">
               <div
                 className={cn(
                   "text-sm text-foreground/80 leading-relaxed transition-all duration-300 prose prose-sm dark:prose-invert max-w-none prose-p:mb-4 last:prose-p:mb-0 whitespace-pre-wrap",
@@ -726,9 +726,9 @@ const ProposalCard = ({
         {(status === "PENDING" || status === "SHORTLISTED") && (
           <div className="space-y-3 pt-2 border-t border-border/40">
             {/* Primary hire row */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
-                className="flex-1 h-12 rounded-xl font-black text-base gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+                className="flex-1 h-10 rounded-lg font-black text-sm gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
                 onClick={(e) => {
                   e.stopPropagation();
                   onHire();
@@ -736,9 +736,9 @@ const ProposalCard = ({
                 disabled={isProcessing}
               >
                 {isProcessing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <CheckCircle2 className="w-5 h-5" />
+                  <CheckCircle2 className="w-4 h-4" />
                 )}
                 {isProcessing
                   ? "Processing..."
@@ -750,39 +750,39 @@ const ProposalCard = ({
               {status === "PENDING" && (
                 <Button
                   variant="outline"
-                  className="sm:w-auto h-12 rounded-xl font-black border-2 border-primary/40 text-primary hover:bg-primary/5 gap-2"
+                  className="sm:w-auto h-10 rounded-lg font-black text-xs border-2 border-primary/40 text-primary hover:bg-primary/5 gap-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     onShortlist(proposal.id);
                   }}
                   disabled={isProcessing}
                 >
-                  <Star className="w-4 h-4" /> Shortlist
+                  <Star className="w-3.5 h-3.5" /> Shortlist
                 </Button>
               )}
 
               <Button
                 variant="outline"
-                className="sm:w-auto h-12 rounded-xl font-black border-2 border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/50 gap-2"
+                className="sm:w-auto h-10 rounded-lg font-black text-xs border-2 border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/50 gap-2"
                 onClick={(e) => {
                   e.stopPropagation();
                   onReject(proposal.id);
                 }}
                 disabled={isProcessing}
               >
-                <XCircle className="w-4 h-4" /> Reject
+                <XCircle className="w-3.5 h-3.5" /> Reject
               </Button>
 
               <Button
                 variant="ghost"
-                className="sm:w-auto h-12 rounded-xl font-bold gap-2 text-primary hover:bg-primary/10"
+                className="sm:w-auto h-10 rounded-lg font-bold text-xs gap-2 text-primary hover:bg-primary/10"
                 asChild
               >
                 <Link
                   to="/client/messages"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <MessageSquare className="w-4 h-4" /> Message
+                  <MessageSquare className="w-3.5 h-3.5" /> Message
                 </Link>
               </Button>
             </div>

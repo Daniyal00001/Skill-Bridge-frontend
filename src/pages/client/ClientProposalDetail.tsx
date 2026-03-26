@@ -352,7 +352,7 @@ const ClientProposalDetail = () => {
 
   return (
     <DashboardLayout>
-      <div className="container max-w-6xl mx-auto space-y-8 p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="container max-w-6xl mx-auto space-y-6 p-4 md:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Navigation & Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -387,7 +387,7 @@ const ClientProposalDetail = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Withdrawn/Cancelled Status Banner */}
             {(proposal.status === "WITHDRAWN" || proposal.status === "CANCELLED") && (
-              <div className="bg-amber-500/10 border-amber-500/20 p-6 rounded-[2.5rem] flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm border-2">
+              <div className="bg-amber-500/10 border-amber-500/20 p-4 rounded-[1.5rem] flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm border-2">
                 <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center shrink-0">
                   <AlertCircle className="w-6 h-6 text-amber-600" />
                 </div>
@@ -404,8 +404,8 @@ const ClientProposalDetail = () => {
             )}
 
             {/* Freelancer Header */}
-            <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-              <CardContent className="p-8">
+            <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-[1.5rem] overflow-hidden">
+              <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-8">
                   <Avatar className="h-24 w-24 ring-8 ring-primary/5">
                     <AvatarImage src={freelancer?.profileImage} />
@@ -416,15 +416,15 @@ const ClientProposalDetail = () => {
                   <div className="flex-1 space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <h2 className="text-2xl font-black tracking-tight">
+                        <h2 className="text-xl font-black tracking-tight">
                           {freelancer?.name}
                         </h2>
-                        <p className="text-muted-foreground font-black text-sm uppercase tracking-widest opacity-60">
+                        <p className="text-muted-foreground font-black text-[10px] uppercase tracking-widest opacity-60">
                           {freelancer?.title || "Professional Developer"}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 text-xl font-black text-amber-500 bg-amber-500/10 px-4 py-2 rounded-2xl">
-                        <Star className="w-5 h-5 fill-amber-500" />
+                      <div className="flex items-center gap-1 text-lg font-black text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-xl">
+                        <Star className="w-4 h-4 fill-amber-500" />
                         {freelancer?.rating?.toFixed(1) || "5.0"}
                       </div>
                     </div>
@@ -456,10 +456,10 @@ const ClientProposalDetail = () => {
                   Cover Letter
                 </h3>
               </div>
-              <Card className="border-border/40 bg-card/40 backdrop-blur-sm rounded-[2.5rem] overflow-hidden">
-                <CardContent className="p-10">
+              <Card className="border-border/40 bg-card/40 backdrop-blur-sm rounded-[1.5rem] overflow-hidden">
+                <CardContent className="p-6">
                   <div
-                    className="prose prose-lg dark:prose-invert max-w-none break-words overflow-hidden prose-p:leading-relaxed prose-p:text-foreground/90 prose-p:mb-6 last:prose-p:mb-0 prose-headings:font-black prose-strong:font-black"
+                    className="prose prose-base dark:prose-invert max-w-none break-words overflow-hidden prose-p:leading-relaxed prose-p:text-foreground/90 prose-p:mb-4 last:prose-p:mb-0 prose-headings:font-black prose-strong:font-black"
                     dangerouslySetInnerHTML={{ __html: proposal.coverLetter }}
                   />
                 </CardContent>
@@ -525,9 +525,9 @@ const ClientProposalDetail = () => {
               ) : milestones.length > 0 ? (
                 <MilestoneList items={milestones} />
               ) : (
-                <Card className="border-dashed border-2 border-border/40 bg-muted/5 rounded-[2.5rem] p-12 text-center">
-                  <div className="w-16 h-16 rounded-3xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
-                    <ListChecks className="w-8 h-8 text-primary/40" />
+                <Card className="border-dashed border-2 border-border/40 bg-muted/5 rounded-[1.5rem] p-8 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+                    <ListChecks className="w-6 h-6 text-primary/40" />
                   </div>
                   <h4 className="text-lg font-black opacity-80 mb-2">
                     No Milestone Plan Defined
@@ -539,10 +539,10 @@ const ClientProposalDetail = () => {
                   </p>
                   <Button
                     variant="outline"
-                    className="h-14 rounded-2xl font-black gap-2 border-2 border-primary/20 text-primary hover:bg-primary/5 px-8"
+                    className="h-12 rounded-xl font-black gap-2 border-2 border-primary/20 text-primary hover:bg-primary/5 px-8"
                     onClick={openNegotiationModal}
                   >
-                    <Plus className="w-5 h-5" /> Setup Milestone Strategy
+                    <Plus className="w-4 h-4" /> Setup Milestone Strategy
                   </Button>
                 </Card>
               )}
@@ -602,14 +602,14 @@ const ClientProposalDetail = () => {
           {/* Sidebar Actions (Right) */}
           <div className="space-y-6 lg:sticky lg:top-8 self-start">
             {/* Action Card */}
-            <Card className="border-primary/20 bg-primary/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-primary/5 border-2">
-              <CardContent className="p-8 space-y-8 text-center md:text-left">
+            <Card className="border-primary/20 bg-primary/5 rounded-[1.5rem] overflow-hidden shadow-2xl shadow-primary/5 border-2">
+              <CardContent className="p-6 space-y-6 text-center md:text-left">
                 <div className="space-y-6">
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
                       Your Investment
                     </p>
-                    <p className="text-5xl font-black text-center">
+                    <p className="text-4xl font-black text-center">
                       ${proposal.bidAmount?.toLocaleString()}
                     </p>
                     <p className="text-center text-xs font-bold text-muted-foreground mt-2 italic opacity-60">
@@ -643,12 +643,12 @@ const ClientProposalDetail = () => {
                 <div className="space-y-3">
                   {proposal.status === "ACCEPTED" && proposal.contract?.id ? (
                     <Button
-                      className="w-full h-16 rounded-[1.5rem] font-black text-lg gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
+                      className="w-full h-12 rounded-xl font-black text-base gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
                       onClick={() =>
                         navigate(`/client/contracts/${proposal.contract.id}`)
                       }
                     >
-                      <Shield className="w-6 h-6" /> View Contract
+                      <Shield className="w-5 h-5" /> View Contract
                     </Button>
                   ) : (
                     <>
@@ -657,7 +657,7 @@ const ClientProposalDetail = () => {
                         proposal.status !== "CANCELLED" && (
                         <>
                           <Button
-                            className="w-full h-16 rounded-[1.5rem] font-black text-lg gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
+                            className="w-full h-12 rounded-xl font-black text-base gap-3 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
                             onClick={() => handleStatusUpdate("ACCEPTED")}
                             disabled={
                               !!processingAction ||
@@ -665,9 +665,9 @@ const ClientProposalDetail = () => {
                             }
                           >
                             {processingAction === "ACCEPTED" ? (
-                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
-                              <CheckCircle2 className="w-5 h-5" />
+                              <CheckCircle2 className="w-4 h-4" />
                             )}
                             {proposal.status === "ACCEPTED"
                               ? "Hired ✓"
@@ -680,7 +680,7 @@ const ClientProposalDetail = () => {
                           <div className="grid grid-cols-2 gap-3">
                             <Button
                               variant="outline"
-                              className="h-14 rounded-2xl font-black gap-2 border-2 border-primary/20 text-primary hover:bg-primary/5"
+                              className="h-10 rounded-lg font-black text-xs gap-2 border-2 border-primary/20 text-primary hover:bg-primary/5"
                               onClick={() => handleStatusUpdate("SHORTLISTED")}
                               disabled={
                                 !!processingAction ||
@@ -689,7 +689,7 @@ const ClientProposalDetail = () => {
                             >
                               <Star
                                 className={cn(
-                                  "w-4 h-4",
+                                  "w-3.5 h-3.5",
                                   proposal.status === "SHORTLISTED" &&
                                     "fill-primary",
                                 )}
@@ -700,14 +700,14 @@ const ClientProposalDetail = () => {
                             </Button>
                             <Button
                               variant="outline"
-                              className="h-14 rounded-2xl font-black gap-2 border-2 text-muted-foreground hover:text-red-500 hover:border-red-500/30"
+                              className="h-10 rounded-lg font-black text-xs gap-2 border-2 text-muted-foreground hover:text-red-500 hover:border-red-500/30"
                               onClick={() => handleStatusUpdate("REJECTED")}
                               disabled={
                                 !!processingAction ||
                                 proposal.status === "REJECTED"
                               }
                             >
-                              <XCircle className="w-4 h-4" /> Reject
+                              <XCircle className="w-3.5 h-3.5" /> Reject
                             </Button>
                           </div>
                         </>
@@ -733,12 +733,12 @@ const ClientProposalDetail = () => {
                   <div className="grid grid-cols-1 gap-3">
                     <Button
                       variant="outline"
-                      className="h-14 rounded-2xl font-bold border-2 border-primary/20 text-primary hover:bg-primary/5 flex items-center justify-between px-6 group"
+                      className="h-12 rounded-xl font-bold border-2 border-primary/20 text-primary hover:bg-primary/5 flex items-center justify-between px-6 group"
                       onClick={openNegotiationModal}
                       disabled={!!processingAction}
                     >
                       <div className="flex items-center gap-3">
-                        <ListChecks className="w-5 h-5" />
+                        <ListChecks className="w-4 h-4" />
                         {milestones.length === 0
                           ? "Setup Milestone Plan"
                           : "Negotiate Milestones"}
@@ -749,12 +749,12 @@ const ClientProposalDetail = () => {
                     <div className="space-y-2">
                       <Button
                         variant="outline"
-                        className="w-full h-14 rounded-2xl font-bold border-2 border-border/40 text-muted-foreground hover:text-primary hover:border-primary/20 flex items-center justify-between px-6 group"
+                        className="w-full h-12 rounded-xl font-bold border-2 border-border/40 text-muted-foreground hover:text-primary hover:border-primary/20 flex items-center justify-between px-6 group"
                         onClick={openRevisionModal}
                         disabled={!!processingAction || milestones.length > 0}
                       >
                         <div className="flex items-center gap-3">
-                          <Shield className="w-5 h-5" />
+                          <Shield className="w-4 h-4" />
                           Request More Revisions
                         </div>
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -817,7 +817,7 @@ const ClientProposalDetail = () => {
                       Your Request
                     </p>
                     <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 space-y-1">
-                      <p className="text-lg font-black text-amber-600 leading-tight">
+                      <p className="text-base font-black text-amber-600 leading-tight">
                         {(proposal.clientRequestedMilestones || []).length > 0
                           ? `${proposal.clientRequestedMilestones?.length || 0} Milestones`
                           : `${
@@ -909,7 +909,7 @@ const ClientProposalDetail = () => {
                     setRevisionModal((p) => ({ ...p, requested: v }))
                   }
                 >
-                  <SelectTrigger className="h-12 rounded-2xl bg-background/60 border-border/40">
+                  <SelectTrigger className="h-10 rounded-xl bg-background/60 border-border/40">
                     <SelectValue placeholder="Select revisions" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
@@ -932,7 +932,7 @@ const ClientProposalDetail = () => {
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="outline"
-                  className="flex-1 h-12 rounded-2xl font-black border-2 border-border/40"
+                  className="flex-1 h-10 rounded-xl font-black border-2 border-border/40 text-xs"
                   onClick={() =>
                     setRevisionModal({
                       open: false,
@@ -945,7 +945,7 @@ const ClientProposalDetail = () => {
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black gap-2 shadow-xl shadow-primary/20"
+                  className="flex-1 h-10 rounded-xl bg-primary hover:bg-primary/90 text-white font-black gap-2 shadow-xl shadow-primary/20 text-xs"
                   onClick={handleSubmitRevisionRequest}
                   disabled={!!processingAction}
                 >
@@ -997,7 +997,7 @@ const ClientProposalDetail = () => {
               {/* Validation Banner */}
               <div
                 className={cn(
-                  "p-5 rounded-3xl border-2 flex items-center justify-between gap-4 transition-all",
+                  "p-4 rounded-2xl border-2 flex items-center justify-between gap-4 transition-all",
                   milestoneTotalMatch
                     ? "bg-emerald-500/5 border-emerald-500/20"
                     : "bg-amber-500/5 border-amber-500/20",
@@ -1024,7 +1024,7 @@ const ClientProposalDetail = () => {
                 <div className="text-right">
                   <p
                     className={cn(
-                      "text-xl font-black",
+                      "text-lg font-black",
                       milestoneTotalMatch
                         ? "text-emerald-600"
                         : "text-amber-600",
@@ -1043,7 +1043,7 @@ const ClientProposalDetail = () => {
                 {milestoneModal.milestones.map((m, idx) => (
                   <div
                     key={idx}
-                    className="p-6 rounded-[2rem] border border-border/40 bg-muted/20 space-y-5 group relative animate-in zoom-in-95 duration-200"
+                    className="p-4 rounded-[1.5rem] border border-border/40 bg-muted/20 space-y-4 group relative animate-in zoom-in-95 duration-200"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -1076,7 +1076,7 @@ const ClientProposalDetail = () => {
                             updateMilestone(idx, "title", e.target.value)
                           }
                           placeholder="e.g. Design Prototype"
-                          className="h-12 rounded-2xl bg-background/60"
+                          className="h-10 rounded-xl bg-background/60"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1091,7 +1091,7 @@ const ClientProposalDetail = () => {
                             onChange={(e) =>
                               updateMilestone(idx, "amount", e.target.value)
                             }
-                            className="h-12 pl-10 rounded-2xl bg-background/60"
+                            className="h-10 pl-10 rounded-xl bg-background/60"
                           />
                         </div>
                       </div>
@@ -1106,7 +1106,7 @@ const ClientProposalDetail = () => {
                           }
                           rows={2}
                           placeholder="What will be delivered in this phase?"
-                          className="rounded-2xl bg-background/60 p-4 resize-none min-h-[80px]"
+                          className="rounded-xl bg-background/60 p-3 resize-none min-h-[60px] text-sm"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1119,7 +1119,7 @@ const ClientProposalDetail = () => {
                           onChange={(e) =>
                             updateMilestone(idx, "dueDate", e.target.value)
                           }
-                          className="h-12 rounded-2xl bg-background/60"
+                          className="h-10 rounded-xl bg-background/60"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1132,7 +1132,7 @@ const ClientProposalDetail = () => {
                             updateMilestone(idx, "allowedRevisions", val)
                           }
                         >
-                          <SelectTrigger className="h-12 rounded-2xl bg-background/60">
+                          <SelectTrigger className="h-10 rounded-xl bg-background/60">
                             <SelectValue placeholder="Standard (3)" />
                           </SelectTrigger>
                           <SelectContent className="rounded-2xl border-border/40">
@@ -1165,7 +1165,7 @@ const ClientProposalDetail = () => {
               <Button
                 variant="outline"
                 onClick={addMilestone}
-                className="w-full h-14 rounded-2xl border-2 border-dashed border-primary/20 text-primary font-black flex items-center justify-center gap-2 hover:bg-primary/5 transition-all"
+                className="w-full h-12 rounded-xl border-2 border-dashed border-primary/20 text-primary font-black flex items-center justify-center gap-2 hover:bg-primary/5 transition-all"
               >
                 <PlusCircle className="w-5 h-5" /> Add New Phase
               </Button>
@@ -1175,7 +1175,7 @@ const ClientProposalDetail = () => {
               <div className="flex gap-4 pt-2">
                 <Button
                   variant="outline"
-                  className="flex-1 h-14 rounded-2xl font-black border-2 border-border/40"
+                  className="flex-1 h-12 rounded-xl font-black border-2 border-border/40 text-sm"
                   onClick={() =>
                     setMilestoneModal({
                       open: false,
@@ -1190,14 +1190,14 @@ const ClientProposalDetail = () => {
                   Discard Changes
                 </Button>
                 <Button
-                  className="flex-1 h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black gap-2 shadow-xl shadow-primary/20"
+                  className="flex-1 h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-black gap-2 shadow-xl shadow-primary/20 text-sm"
                   onClick={confirmNegotiation}
                   disabled={!!processingAction || !milestoneTotalMatch}
                 >
                   {processingAction === "NEGOTIATE" ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <CheckCircle2 className="w-5 h-5" />
+                    <CheckCircle2 className="w-4 h-4" />
                   )}
                   {milestoneModal.mode === "setup"
                     ? "Send Proposal"
@@ -1227,7 +1227,7 @@ const MilestoneList = ({
         <div
           key={i}
           className={cn(
-            "p-6 rounded-3xl border transition-all",
+            "p-4 rounded-[1.5rem] border transition-all",
             variant === "requested"
               ? "bg-primary/5 border-primary/20 hover:bg-primary/10"
               : variant === "original"
@@ -1236,10 +1236,10 @@ const MilestoneList = ({
           )}
         >
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <div
                 className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 border",
+                  "w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 border",
                   variant === "requested"
                     ? "bg-primary text-white border-primary/20"
                     : "bg-primary/10 text-primary border-primary/20",
@@ -1250,7 +1250,7 @@ const MilestoneList = ({
               <div className="space-y-1 min-w-0">
                 <p
                   className={cn(
-                    "font-black text-lg break-words",
+                    "font-black text-base break-words",
                     variant === "requested" ? "text-primary" : "text-foreground",
                   )}
                 >
@@ -1260,7 +1260,7 @@ const MilestoneList = ({
                   <Badge
                     variant="outline"
                     className={cn(
-                      "text-[10px] font-black uppercase tracking-tighter rounded-md",
+                      "text-[9px] font-black uppercase tracking-tighter rounded-md",
                       variant === "requested"
                         ? "border-primary/20 bg-primary/10 text-primary"
                         : "border-primary/20 bg-primary/5 text-primary",
@@ -1271,19 +1271,19 @@ const MilestoneList = ({
                       : m.allowedRevisions}{" "}
                     Revisions
                   </Badge>
-                  <span className="text-[10px] font-black text-muted-foreground uppercase opacity-40">
+                  <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40">
                     Milestone {i + 1}
                   </span>
                 </div>
               </div>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-1">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-1">
                 Release Amount
               </p>
               <p
                 className={cn(
-                  "text-3xl font-black",
+                  "text-xl font-black",
                   variant === "requested" ? "text-primary" : "text-foreground/90",
                 )}
               >
@@ -1292,21 +1292,21 @@ const MilestoneList = ({
             </div>
           </div>
           {m.description && (
-            <div className="space-y-3 mt-4">
+            <div className="space-y-2 mt-3">
               <Separator
                 className={cn(
                   "bg-border/10",
                   variant === "requested" && "bg-primary/10",
                 )}
               />
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 <div
                   className={cn(
-                    "w-1 h-full bg-primary/20 rounded-full shrink-0",
+                    "w-0.5 h-full bg-primary/20 rounded-full shrink-0",
                     variant === "requested" && "bg-primary/40",
                   )}
                 />
-                <p className="text-sm text-muted-foreground font-medium leading-relaxed italic opacity-80">
+                <p className="text-xs text-muted-foreground font-medium leading-relaxed italic opacity-80">
                   {m.description}
                 </p>
               </div>

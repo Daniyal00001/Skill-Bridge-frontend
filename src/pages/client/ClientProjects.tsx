@@ -195,11 +195,19 @@ const ClientProjectsPage = () => {
     })();
 
     return projects.filter((p) => {
-      const matchesSearch = p.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesDate = !cutoff || new Date(p.createdAt) >= cutoff;
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch =
+        (p.title?.toLowerCase().includes(searchLower) ||
+          p.description?.toLowerCase().includes(searchLower) ||
+          p.contract?.freelancer?.name?.toLowerCase().includes(searchLower)) ??
+        false;
+
+      const pDate = p.createdAt ? new Date(p.createdAt) : null;
+      const matchesDate =
+        !cutoff || (pDate && pDate.getTime() >= cutoff.getTime());
+
       if (!matchesSearch || !matchesDate) return false;
+
       if (activeTab === "active")
         return ["IN_PROGRESS", "UNDER_REVIEW"].includes(p.status);
       if (activeTab === "hiring") return p.status === "OPEN";
@@ -240,8 +248,8 @@ const ClientProjectsPage = () => {
 
       return (
         <Card className="border-border/40 bg-card/60 backdrop-blur-md overflow-hidden hover:shadow-2xl transition-all duration-500 group col-span-full">
-          <CardHeader className="p-8 pb-4 flex flex-row items-start justify-between">
-            <div className="space-y-4">
+          <CardHeader className="p-6 pb-2 flex flex-row items-start justify-between">
+            <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="text-2xl font-black tracking-tight break-words">
                   <Link
@@ -305,10 +313,10 @@ const ClientProjectsPage = () => {
             </DropdownMenu>
           </CardHeader>
 
-          <CardContent className="p-8 pt-4 space-y-8">
+          <CardContent className="p-6 pt-2 space-y-6">
             {/* Hired Developer Row */}
-            <div className="flex items-center justify-between p-5 rounded-[1.5rem] bg-primary/5 border border-primary/10">
-              <div className="flex items-center gap-5">
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
+              <div className="flex items-center gap-4">
                 <div className="relative">
                   <Avatar className="h-14 w-14 ring-4 ring-primary/10">
                     <AvatarImage src={hiredDeveloper.profileImage} />
@@ -416,7 +424,7 @@ const ClientProjectsPage = () => {
 
             {/* Pending Review Section */}
             {pendingReview && contract && (
-              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-2 border-amber-500/30 space-y-6">
+              <div className="p-6 rounded-[1.5rem] bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-2 border-amber-500/30 space-y-4">
                 <div>
                   <div className="flex items-center gap-2 text-amber-600 font-black text-xs uppercase tracking-widest mb-2">
                     <Clock className="w-3.5 h-3.5" /> Pending Review
@@ -438,17 +446,17 @@ const ClientProjectsPage = () => {
                 )}
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button
-                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-black h-14 rounded-2xl flex-1 text-lg gap-3"
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-black h-12 rounded-xl flex-1 text-base gap-3"
                     onClick={() =>
                       handleApprove(project.id, pendingReview.id, contract.id)
                     }
                   >
-                    <CheckCircle2 className="w-6 h-6" />
+                    <CheckCircle2 className="w-5 h-5" />
                     Approve & Release ${pendingReview.amount?.toLocaleString()}
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-2 border-amber-500/50 text-amber-600 font-black h-14 rounded-2xl px-10 text-lg"
+                    className="border-2 border-amber-500/50 text-amber-600 font-black h-12 rounded-xl px-8 text-base"
                     onClick={() =>
                       handleRequestChanges(contract.id, pendingReview.id)
                     }
@@ -460,7 +468,7 @@ const ClientProjectsPage = () => {
             )}
           </CardContent>
 
-          <CardFooter className="p-8 pt-0 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border/40 bg-muted/10">
+          <CardFooter className="p-6 pt-0 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border/40 bg-muted/10">
             <div className="flex items-center gap-8">
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
@@ -497,7 +505,7 @@ const ClientProjectsPage = () => {
     // Compact card for hiring/completed/all tabs
     return (
       <Card className="group overflow-hidden border-border/40 bg-card/50 hover:shadow-2xl hover:border-primary/20 transition-all duration-500 flex flex-col">
-        <CardHeader className="p-5 pb-0">
+        <CardHeader className="p-4 pb-0">
           <div className="flex justify-between items-start">
             <div className="flex flex-wrap gap-2">
               <Badge
@@ -552,12 +560,12 @@ const ClientProjectsPage = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <CardTitle className="text-xl mt-4 break-words hover:text-primary transition-colors">
+          <CardTitle className="text-xl mt-4 break-all hover:text-primary transition-colors">
             <Link to={`/client/projects/${project.id}`}>{project.title}</Link>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="p-5 space-y-6 flex-1">
+        <CardContent className="p-4 space-y-4 flex-1">
           <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed break-words">
             {project.description}
           </p>
@@ -651,7 +659,7 @@ const ClientProjectsPage = () => {
           </div>
         </CardContent>
 
-        <CardFooter className="p-5 pt-0 grid grid-cols-2 gap-3">
+        <CardFooter className="p-4 pt-0 grid grid-cols-2 gap-3">
           <Button variant="outline" className="h-10 font-bold" asChild>
             <Link to={`/client/projects/${project.id}`}>Overview</Link>
           </Button>
@@ -686,7 +694,7 @@ const ClientProjectsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-4 md:p-8 space-y-10 animate-fade-in mb-20">
+      <div className="container mx-auto p-4 md:p-6 space-y-8 animate-fade-in mb-20">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -696,10 +704,10 @@ const ClientProjectsPage = () => {
             >
               Unified Management Hub
             </Badge>
-            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
               My Projects
             </h1>
-            <p className="text-muted-foreground text-lg max-w-xl">
+            <p className="text-muted-foreground text-base max-w-xl">
               Consolidated view of all your projects, from discovery to
               delivery.
             </p>
@@ -707,10 +715,10 @@ const ClientProjectsPage = () => {
           <Button
             asChild
             size="lg"
-            className="gap-2 shadow-2xl shadow-primary/40 font-black h-14 px-8 rounded-2xl"
+            className="gap-2 shadow-2xl shadow-primary/40 font-black h-12 px-6 rounded-xl"
           >
             <Link to="/client/post-project">
-              <Plus className="h-6 w-6" /> Post New Project
+              <Plus className="h-5 w-5" /> Post New Project
             </Link>
           </Button>
         </div>
@@ -761,13 +769,13 @@ const ClientProjectsPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col lg:flex-row gap-6 items-center">
+        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full lg:w-auto"
           >
-            <TabsList className="bg-muted/50 p-1.5 h-14 rounded-2xl border border-border/40">
+            <TabsList className="bg-muted/50 p-0.5 h-10 rounded-xl border border-border/40 w-full lg:w-auto overflow-x-auto custom-scrollbar">
               {[
                 { id: "active", label: "Active", icon: PlayCircle },
                 { id: "hiring", label: "Hiring", icon: Users },
@@ -778,29 +786,29 @@ const ClientProjectsPage = () => {
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className="h-full rounded-xl gap-2 px-6 font-black data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="h-full rounded-lg gap-1.5 px-3 md:px-4 font-black text-[11px] uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
                 >
-                  <tab.icon className="w-4 h-4" /> {tab.label}
+                  <tab.icon className="w-3.5 h-3.5" /> {tab.label}
                 </TabsTrigger>
               ))}
             </TabsList>
           </Tabs>
 
-          <div className="flex flex-1 w-full gap-4 items-center ml-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="flex flex-col sm:flex-row gap-2 items-center w-full lg:w-auto lg:min-w-[340px]">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
               <Input
-                placeholder="Search projects..."
-                className="pl-12 h-14 bg-card/60 rounded-2xl border-border/40"
+                placeholder="Search..."
+                className="pl-9 h-10 bg-card/60 rounded-xl border-border/40 w-full text-[11px] font-bold"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="w-[200px] h-14 bg-card/60 rounded-2xl border-border/40 font-bold">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <SelectValue placeholder="Date Range" />
+              <SelectTrigger className="w-full sm:w-[130px] h-10 bg-card/60 rounded-xl border-border/40 font-black shrink-0 text-[10px] uppercase tracking-wider">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                  <SelectValue placeholder="Date" />
                 </div>
               </SelectTrigger>
               <SelectContent className="rounded-xl">
