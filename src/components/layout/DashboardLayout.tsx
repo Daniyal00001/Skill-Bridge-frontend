@@ -43,6 +43,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { mockNotifications } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import { getSocket } from "@/lib/socket";
 import logo from "@/assets/logo/logo.png";
 
 interface DashboardLayoutProps {
@@ -69,6 +70,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
+  const [unreadChatCount, setUnreadChatCount] = useState<number>(0);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
   useEffect(() => {
@@ -83,6 +85,32 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       };
       fetchBalance();
       // Polling or refresh interval could be added here if needed
+    }
+
+    const fetchUnreadChat = async () => {
+      try {
+        const res = await api.get("/chat/unread-count");
+        setUnreadChatCount(res.data.count);
+      } catch (err) {
+        // silent
+      }
+    };
+
+    if (user) {
+      fetchUnreadChat();
+      const interval = setInterval(fetchUnreadChat, 30000); // Poll every 30s
+
+      const socket = getSocket();
+      const handleUpdate = ({ count }: { count: number }) => {
+        setUnreadChatCount(count);
+      };
+
+      socket.on("unread_count_update", handleUpdate);
+
+      return () => {
+        clearInterval(interval);
+        socket.off("unread_count_update", handleUpdate);
+      };
     }
   }, [user]);
 
@@ -135,7 +163,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 icon: MessageSquare,
                 label: "Messages",
                 href: "/client/messages",
-                badge: 2,
+                badge: unreadChatCount > 0 ? unreadChatCount : undefined,
               },
               { icon: Briefcase, label: "My Contracts", href: "/client/contracts" },
               { icon: Star, label: "Reviews", href: "/client/reviews" },
@@ -200,7 +228,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 icon: MessageSquare,
                 label: "Messages",
                 href: "/freelancer/messages",
-                badge: 3,
+                badge: unreadChatCount > 0 ? unreadChatCount : undefined,
               },
             ],
           },
