@@ -294,7 +294,7 @@ export default function FreelancerContractDetail() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 py-6">
+      <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 py-4">
         {/* Header */}
         <div className="flex items-start gap-4">
           <Button
@@ -313,7 +313,7 @@ export default function FreelancerContractDetail() {
                 Client: {contract.clientName}
               </p>
             </div>
-            <h1 className="text-3xl font-black tracking-tight mt-1 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words">
               {contract.projectTitle}
             </h1>
           </div>
@@ -338,7 +338,7 @@ export default function FreelancerContractDetail() {
         {/* Offer Approval Banner */}
         {contract.status === "OFFER_PENDING" && (
           <Card className="rounded-2xl border-primary/30 bg-primary/5 border-2 overflow-hidden">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                   <AlertCircle className="w-7 h-7 text-primary" />
@@ -422,13 +422,13 @@ export default function FreelancerContractDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Earnings breakdown */}
           <Card className="rounded-2xl border-border/40 bg-card/60">
-            <CardHeader className="pb-2 px-6 pt-5">
+            <CardHeader className="pb-2 px-5 pt-4">
               <CardTitle className="text-sm font-black flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-primary" /> Your Earnings
                 Breakdown
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-6 pb-6 space-y-3">
+            <CardContent className="px-5 pb-5 space-y-3">
               <div className="grid grid-cols-3 gap-3">
                 {[
                   {
@@ -501,12 +501,12 @@ export default function FreelancerContractDetail() {
 
           {/* Progress */}
           <Card className="rounded-2xl border-border/40 bg-card/60">
-            <CardHeader className="pb-2 px-6 pt-5">
+            <CardHeader className="pb-2 px-5 pt-4">
               <CardTitle className="text-sm font-black flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" /> Project Progress
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-6 pb-6 space-y-3">
+            <CardContent className="px-5 pb-5 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-bold text-muted-foreground">
                   Milestones Completed
@@ -563,7 +563,7 @@ export default function FreelancerContractDetail() {
         </div>
 
         {/* Milestones */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-black flex items-center gap-2">
               <ListChecks className="w-5 h-5 text-primary" /> Milestones
@@ -614,7 +614,7 @@ export default function FreelancerContractDetail() {
               >
                 {/* Milestone Header */}
                 <div
-                  className="p-6 cursor-pointer"
+                  className="p-4 cursor-pointer"
                   onClick={() =>
                     setExpandedMilestoneId(isExpanded ? null : milestone.id)
                   }
@@ -623,7 +623,7 @@ export default function FreelancerContractDetail() {
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div
                         className={cn(
-                          "w-11 h-11 rounded-xl flex items-center justify-center font-black text-base shrink-0 mt-0.5",
+                          "w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 mt-0.5",
                           milestone.status === "APPROVED"
                             ? "bg-emerald-500/20 text-emerald-600"
                             : milestone.status === "REVISION_REQUESTED"
@@ -634,7 +634,7 @@ export default function FreelancerContractDetail() {
                         )}
                       >
                         {milestone.status === "APPROVED" ? (
-                          <CheckCircle2 className="w-5 h-5" />
+                          <CheckCircle2 className="w-4 h-4" />
                         ) : (
                           index + 1
                         )}
@@ -686,11 +686,21 @@ export default function FreelancerContractDetail() {
                               ? "∞"
                               : milestone.allowedRevisions}
                           </span>
+                          <div className="flex items-center gap-1 text-primary/60 group-hover:text-primary transition-colors ml-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                              {isExpanded ? "Close" : "Details"}
+                            </span>
+                            {isExpanded ? (
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                     <div className="text-right shrink-0 flex flex-col items-end gap-2">
-                      <p className="text-2xl font-black">
+                      <p className="text-xl font-black">
                         ${milestone.amount.toLocaleString()}
                       </p>
                       <Badge
@@ -702,20 +712,13 @@ export default function FreelancerContractDetail() {
                       >
                         {cfg.icon} {cfg.label}
                       </Badge>
-                      <div className="text-muted-foreground mt-1">
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4" />
-                        )}
-                      </div>
                     </div>
                   </div>
 
                   {/* Revision Note (REVISION_REQUESTED) */}
                   {milestone.status === "REVISION_REQUESTED" &&
                     milestone.revisionNote && (
-                      <div className="mt-4 p-4 rounded-xl bg-orange-500/10 border border-orange-400/25 space-y-1.5">
+                      <div className="mt-3 p-3 rounded-xl bg-orange-500/10 border border-orange-400/25 space-y-1.5">
                         <p className="text-xs font-black text-orange-700 flex items-center gap-1.5">
                           <RotateCcw className="w-3.5 h-3.5" /> Client Revision
                           Request
@@ -735,7 +738,7 @@ export default function FreelancerContractDetail() {
                     milestone.status === "APPROVED") && (
                     <div
                       className={cn(
-                        "mt-4 p-4 rounded-xl border space-y-2",
+                        "mt-3 p-3 rounded-xl border space-y-2",
                         milestone.status === "SUBMITTED"
                           ? "bg-purple-500/10 border-purple-400/25"
                           : "bg-emerald-500/5 border-emerald-400/20",
@@ -790,7 +793,7 @@ export default function FreelancerContractDetail() {
 
                   {/* Action Buttons */}
                   <div
-                    className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border/30"
+                    className="flex flex-wrap gap-2.5 mt-3 pt-3 border-t border-border/30"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {milestone.status === "PENDING" && (

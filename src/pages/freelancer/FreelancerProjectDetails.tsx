@@ -122,9 +122,9 @@ export default function FreelancerProjectDetails() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-[1400px] w-full mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-8 min-w-0">
+      <div className="max-w-[1400px] w-full mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-6 min-w-0">
         {/* Breadcrumb */}
-        <div className="mb-8">
+        <div className="mb-4">
           <Button
             variant="ghost"
             size="sm"
@@ -138,11 +138,11 @@ export default function FreelancerProjectDetails() {
           </Button>
         </div>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-10">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8">
           {/* ── LEFT: Project Info ── */}
-          <div className="lg:col-span-8 space-y-8">
+          <div className="lg:col-span-8 space-y-6">
             {/* Header */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 <Badge className="bg-primary/10 text-primary border-primary/20 font-black uppercase tracking-widest text-[10px] py-1.5 px-3">
                   {project.category?.name}
@@ -158,7 +158,7 @@ export default function FreelancerProjectDetails() {
                   </Badge>
                 )}
               </div>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.1] break-words">
+              <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-[1.1] break-words">
                 {project.title}
               </h1>
               <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-muted-foreground">
@@ -188,11 +188,11 @@ export default function FreelancerProjectDetails() {
 
             {/* Client Info Card */}
             {client && (
-              <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] overflow-hidden shadow-2xl p-8 border-l-4 border-l-primary/40">
+              <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2rem] overflow-hidden shadow-2xl p-6 border-l-4 border-l-primary/40">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                   <div className="flex items-center gap-6">
                     <div className="relative">
-                      <Avatar className="h-20 w-20 border-4 border-background shadow-2xl">
+                      <Avatar className="h-16 w-16 border-4 border-background shadow-2xl">
                         <AvatarImage src={client.profileImage} />
                         <AvatarFallback className="bg-primary/20 text-primary text-xl font-black">
                           {client.name?.[0]}
@@ -236,7 +236,7 @@ export default function FreelancerProjectDetails() {
             )}
 
             {/* Description */}
-            <div className="space-y-10 py-4">
+            <div className="space-y-6 py-2">
               <section className="space-y-4">
                 <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
                   <div className="w-1 h-6 bg-primary rounded-full" /> About This
@@ -258,7 +258,7 @@ export default function FreelancerProjectDetails() {
                     <div className="w-1 h-6 bg-primary rounded-full" /> What We
                     Need
                   </h3>
-                  <div className="bg-muted/30 p-8 rounded-[2rem] border border-border/40 font-medium text-lg leading-loose text-foreground/80 whitespace-pre-line break-words">
+                  <div className="bg-muted/30 p-6 rounded-[1.5rem] border border-border/40 font-medium text-lg leading-loose text-foreground/80 whitespace-pre-line break-words">
                     {project.requirements}
                   </div>
                 </section>
@@ -336,11 +336,11 @@ export default function FreelancerProjectDetails() {
             </div>
 
             {/* Project Details Grid */}
-            <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] p-8 shadow-xl overflow-hidden relative">
+            <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2rem] p-6 shadow-xl overflow-hidden relative">
               <div className="absolute top-0 right-0 py-2 px-10 bg-primary/10 border-b border-l border-primary/20 rounded-bl-[2rem] text-[10px] font-black uppercase tracking-widest text-primary">
                 Quick specs
               </div>
-              <h3 className="text-2xl font-black tracking-tight mb-8">
+              <h3 className="text-xl font-black tracking-tight mb-6">
                 Project Details
               </h3>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-8">
@@ -404,7 +404,7 @@ export default function FreelancerProjectDetails() {
 
             {/* Required Skills */}
             {project.skills && project.skills.length > 0 && (
-              <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] p-8 shadow-xl border-t-4 border-t-emerald-500/40">
+              <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2rem] p-6 shadow-xl border-t-4 border-t-emerald-500/40">
                 <div className="mb-6">
                   <h3 className="text-2xl font-black tracking-tight">
                     Required Skills
@@ -429,13 +429,13 @@ export default function FreelancerProjectDetails() {
           </div>
 
           {/* ── RIGHT: Proposal Sidebar ── */}
-          <aside className="lg:col-span-4 space-y-8">
-            <div className="sticky top-10 space-y-8">
+          <aside className="lg:col-span-4 space-y-6">
+            <div className="sticky top-10 space-y-6">
               {/* Competition Card */}
 
               {/* Already applied banner */}
               {myProposal ? (
-                <Card className="bg-emerald-500/10 border-emerald-500/30 rounded-[2.5rem] p-8 shadow-xl">
+                <Card className="bg-emerald-500/10 border-emerald-500/30 rounded-[2rem] p-6 shadow-xl">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <CheckCircle2 className="w-6 h-6 text-emerald-500" />
@@ -471,7 +471,7 @@ export default function FreelancerProjectDetails() {
                   </div>
                 </Card>
               ) : project.status !== "OPEN" ? (
-                <Card className="bg-muted/30 border-border/40 rounded-[2.5rem] p-8 text-center space-y-3">
+                <Card className="bg-muted/30 border-border/40 rounded-[2rem] p-6 text-center space-y-3">
                   <AlertCircle className="w-10 h-10 text-muted-foreground/40 mx-auto" />
                   <p className="font-black text-muted-foreground">
                     This project is no longer accepting proposals.
@@ -548,7 +548,7 @@ export default function FreelancerProjectDetails() {
                   </Card>
 
                   {/* Submit Proposal CTA */}
-                  <Card className="bg-primary/5 border-primary/20 backdrop-blur-2xl rounded-[2.5rem] shadow-xl overflow-hidden border-t-8 border-t-primary p-8 text-center space-y-6">
+                  <Card className="bg-primary/5 border-primary/20 backdrop-blur-2xl rounded-[2rem] shadow-xl overflow-hidden border-t-8 border-t-primary p-6 text-center space-y-4">
                     <h3 className="text-2xl font-black tracking-tight">
                       Ready to start working?
                     </h3>

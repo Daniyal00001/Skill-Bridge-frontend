@@ -184,7 +184,7 @@ const ClientProjectDetailsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-in max-w-7xl">
+      <div className="container mx-auto p-4 md:p-6 space-y-6 animate-fade-in max-w-7xl">
         {/* Back */}
         <Button
           variant="ghost"
@@ -201,14 +201,14 @@ const ClientProjectDetailsPage = () => {
           <div className="lg:col-span-8 space-y-8">
             {/* Project Header Card */}
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
-              <CardHeader className="p-8 pb-4">
+              <CardHeader className="p-6 pb-2">
                 <div className="flex justify-between items-start mb-6">
                   {getStatusBadge(project.status)}
                 </div>
                 <h1 className="text-3xl font-black tracking-tight leading-tight break-words">
                   {project.title}
                 </h1>
-                <div className="flex flex-wrap items-center gap-4 mt-6">
+                <div className="flex flex-wrap items-center gap-4 mt-4">
                   {project.category && (
                     <Badge
                       variant="outline"
@@ -255,7 +255,7 @@ const ClientProjectDetailsPage = () => {
                   )}
                 </div>
                 {project.status === "IN_PROGRESS" && (
-                  <div className="mt-8 space-y-3">
+                  <div className="mt-4 space-y-2">
                     <div className="flex justify-between items-center text-xs font-black uppercase tracking-wider text-muted-foreground">
                       <span>Execution Progress</span>
                       <span className="text-primary">{progress}%</span>
@@ -282,7 +282,7 @@ const ClientProjectDetailsPage = () => {
                   {/* Overview Tab */}
                   <TabsContent
                     value="overview"
-                    className="p-8 space-y-8 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
+                    className="p-6 space-y-6 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
                   >
                     <div className="space-y-4">
                       <h4 className="text-lg font-bold">Project Description</h4>
@@ -329,7 +329,7 @@ const ClientProjectDetailsPage = () => {
                           <h4 className="text-lg font-bold">Project Assets</h4>
                           <div className="h-px flex-1 bg-gradient-to-r from-border/60 to-transparent" />
                         </div>
-                        <div className="p-6 rounded-[2rem] border border-primary/10 bg-primary/5 backdrop-blur-sm shadow-sm transition-all hover:border-primary/20">
+                        <div className="p-4 rounded-[1.5rem] border border-primary/10 bg-primary/5 backdrop-blur-sm shadow-sm transition-all hover:border-primary/20">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {project.attachments.map(
                               (url: string, i: number) => {
@@ -341,7 +341,7 @@ const ClientProjectDetailsPage = () => {
                                     href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-4 p-4 rounded-2xl border border-white/40 bg-white/40 hover:bg-white/80 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10 transition-all group lg:hover:-translate-y-1 hover:shadow-lg"
+                                    className="flex items-center gap-4 p-3 rounded-xl border border-white/40 bg-white/40 hover:bg-white/80 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10 transition-all group lg:hover:-translate-y-1 hover:shadow-lg"
                                   >
                                     <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/10 shadow-inner text-primary group-hover:scale-110 transition-transform">
                                       <FileIcon className="w-5 h-5" />
@@ -368,7 +368,7 @@ const ClientProjectDetailsPage = () => {
                   {/* Requirements Tab */}
                   <TabsContent
                     value="requirements"
-                    className="p-8 space-y-8 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
+                    className="p-6 space-y-6 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
@@ -420,7 +420,7 @@ const ClientProjectDetailsPage = () => {
                             ].map((item, i) => (
                               <div
                                 key={i}
-                                className="flex flex-col items-center justify-center p-6 rounded-[2rem] border border-border/40 bg-card/60 backdrop-blur-sm text-center space-y-3 hover:border-primary/20 transition-all group"
+                                className="flex flex-col items-center justify-center p-4 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm text-center space-y-2 hover:border-primary/20 transition-all group"
                               >
                                 <div
                                   className={cn(
@@ -454,7 +454,7 @@ const ClientProjectDetailsPage = () => {
 
             {/* Pending Review Alert */}
             {pendingReview && (
-              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-2 border-amber-500/30 space-y-6">
+              <div className="p-6 rounded-[1.5rem] bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-2 border-amber-500/30 space-y-4">
                 <div className="flex items-center gap-2 text-amber-600 font-black text-xs uppercase tracking-widest">
                   <Clock className="w-3.5 h-3.5" /> Work Submitted — Pending
                   Your Review
@@ -494,7 +494,7 @@ const ClientProjectDetailsPage = () => {
             {/* Proposals Preview (only for OPEN projects) */}
             {project.status === "OPEN" && proposalsPreview.length > 0 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
-                <CardHeader className="p-8 flex flex-row items-center justify-between">
+                <CardHeader className="p-6 flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
                     <CardTitle className="text-xl font-black">
                       Top Proposals
@@ -513,7 +513,7 @@ const ClientProjectDetailsPage = () => {
                     </Link>
                   </Button>
                 </CardHeader>
-                <CardContent className="p-8 pt-0 space-y-4">
+                <CardContent className="p-6 pt-0 space-y-4">
                   {proposalsPreview.map((proposal: any, i: number) => (
                     <div
                       key={i}
@@ -560,7 +560,7 @@ const ClientProjectDetailsPage = () => {
             {/* Stats Card */}
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl overflow-hidden">
               <div className="h-2 bg-gradient-to-r from-primary to-blue-600" />
-              <CardContent className="p-8 space-y-8">
+              <CardContent className="p-6 space-y-6">
                 <div className="space-y-1">
                   <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
                     Budget
@@ -595,11 +595,11 @@ const ClientProjectDetailsPage = () => {
 
             {/* Actions Card */}
             <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm shadow-2xl shadow-primary/10">
-              <CardContent className="p-8 space-y-4">
+              <CardContent className="p-6 space-y-4">
                 {project.status === "OPEN" ? (
                   <>
                     <Button
-                      className="w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-lg shadow-primary/30"
+                      className="w-full h-12 rounded-xl font-black text-base gap-3 shadow-lg shadow-primary/30"
                       asChild
                     >
                       <Link to={`/client/projects/${project.id}/proposals`}>
@@ -610,7 +610,7 @@ const ClientProjectDetailsPage = () => {
                 ) : project.status === "IN_PROGRESS" ? (
                   <>
                     <Button
-                      className="w-full h-14 rounded-2xl font-black text-lg gap-3"
+                      className="w-full h-12 rounded-xl font-black text-base gap-3"
                       asChild
                     >
                       <Link to="/client/messages">
@@ -620,7 +620,7 @@ const ClientProjectDetailsPage = () => {
                     {contract && (
                       <Button
                         variant="outline"
-                        className="w-full h-14 rounded-2xl font-black bg-background/50"
+                        className="w-full h-12 rounded-xl font-black bg-background/50"
                         asChild
                       >
                         <Link to={`/client/contracts/${contract.id}`}>
@@ -631,7 +631,7 @@ const ClientProjectDetailsPage = () => {
                   </>
                 ) : project.status === "COMPLETED" ? (
                   <Button
-                    className="w-full h-14 rounded-2xl font-black"
+                    className="w-full h-12 rounded-xl font-black"
                     asChild
                   >
                     <Link to={`/client/contracts/${contract?.id}`}>

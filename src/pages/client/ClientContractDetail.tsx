@@ -187,7 +187,7 @@ export default function ClientContractDetail() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 py-6">
+      <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 py-4">
         {/* Header */}
         <div className="flex items-start gap-4">
           <Button variant="ghost" className="w-10 h-10 p-0 rounded-xl mt-1 shrink-0"
@@ -200,7 +200,7 @@ export default function ClientContractDetail() {
               <span className="text-muted-foreground/30 text-xs">•</span>
               <p className="text-xs text-muted-foreground">ID: {contract.id.slice(0, 8)}...</p>
             </div>
-            <h1 className="text-3xl font-black tracking-tight mt-1 leading-tight">{contract.projectTitle}</h1>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words">{contract.projectTitle}</h1>
           </div>
           <Badge className={cn(
             "font-bold px-4 py-1.5 text-sm shrink-0 border",
@@ -253,7 +253,7 @@ export default function ClientContractDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Freelancer Info */}
           <Card className="rounded-2xl border-border/40 bg-card/60">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4">Working With</p>
               <div className="flex items-center gap-4">
                 <Avatar className="h-14 w-14 ring-4 ring-border/30">
@@ -277,7 +277,7 @@ export default function ClientContractDetail() {
 
           {/* Progress */}
           <Card className="rounded-2xl border-border/40 bg-card/60">
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Overall Progress</p>
                 <span className="text-sm font-black text-primary">{approvedCount}/{contract.milestones.length} milestones</span>
@@ -302,20 +302,20 @@ export default function ClientContractDetail() {
 
         {/* Escrow Finance Dashboard */}
         <Card className="rounded-2xl border-border/40 bg-gradient-to-br from-card/80 to-card/40 overflow-hidden">
-          <CardHeader className="pb-2 px-6 pt-5">
+          <CardHeader className="pb-2 px-5 pt-4">
             <CardTitle className="text-base font-black flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-primary" /> Escrow &amp; Payment Overview
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-6 pb-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <CardContent className="px-5 pb-5 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               {[
                 { label: "Total Contract Value", value: contract.totalMilestoneAmount, icon: <DollarSign className="w-4 h-4" />, color: "text-foreground", bg: "bg-muted/40 border-border/20", desc: "Agreed upon value" },
                 { label: "Released to Freelancer", value: contract.releasedAmount, icon: <CheckCircle2 className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-500/5 border-emerald-500/10", desc: "Paid out" },
                 { label: "Held in Escrow", value: contract.escrowAmount, icon: <Shield className="w-4 h-4" />, color: "text-blue-600", bg: "bg-blue-500/5 border-blue-500/10", desc: "Locked & protected" },
                 { label: "Yet to Fund", value: contract.pendingAmount, icon: <Lock className="w-4 h-4" />, color: "text-slate-500", bg: "bg-slate-500/5 border-slate-500/10", desc: "Needs funding" },
               ].map((p, i) => (
-                <div key={i} className={cn("p-4 rounded-xl border space-y-1", p.bg)}>
+                <div key={i} className={cn("p-3 rounded-xl border space-y-0.5", p.bg)}>
                   <div className="flex items-center gap-2">
                     <span className={p.color}>{p.icon}</span>
                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{p.label}</p>
@@ -353,7 +353,7 @@ export default function ClientContractDetail() {
 
         {/* Milestones Section */}
         <div className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-primary/5 border border-primary/20 shadow-sm relative overflow-hidden group">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/20 shadow-sm relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors" />
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -381,7 +381,7 @@ export default function ClientContractDetail() {
               <p className="font-black text-lg">No milestones defined yet</p>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {contract.milestones.map((milestone, index) => {
                 const cfg = statusConfig[milestone.status];
                 const isProcessing = processingId === milestone.id;
@@ -405,19 +405,19 @@ export default function ClientContractDetail() {
                   >
                     {/* Milestone Header — always visible */}
                     <div
-                      className="p-6"
+                      className="p-4"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-start gap-4 flex-1 min-w-0">
                           {/* Order indicator */}
                           <div className={cn(
-                            "w-11 h-11 rounded-xl flex items-center justify-center font-black text-base shrink-0 mt-0.5",
+                            "w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 mt-0.5",
                             milestone.status === "APPROVED" ? "bg-emerald-500/20 text-emerald-600" :
                             milestone.status === "SUBMITTED" ? "bg-purple-500/20 text-purple-600" :
                             milestone.status === "REVISION_REQUESTED" ? "bg-orange-500/20 text-orange-600" :
                             "bg-muted/60 text-muted-foreground"
                           )}>
-                            {milestone.status === "APPROVED" ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
+                            {milestone.status === "APPROVED" ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -436,7 +436,7 @@ export default function ClientContractDetail() {
                             {milestone.description && (
                               <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{milestone.description}</p>
                             )}
-                            <div className="flex items-center gap-3 mt-2 flex-wrap">
+                            <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                               {milestone.dueDate && (
                                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <Calendar className="w-3 h-3" />
@@ -452,27 +452,27 @@ export default function ClientContractDetail() {
                                 Revisions: {milestone.revisionsUsed}/{milestone.allowedRevisions === -1 ? "∞" : milestone.allowedRevisions}
                                 {milestone.allowedRevisions !== -1 && milestone.revisionsUsed >= milestone.allowedRevisions && " (Limit reached)"}
                               </span>
+                              <div className="flex items-center gap-1 text-primary/60 group-hover/mcard:text-primary transition-colors ml-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest">
+                                  {isExpanded ? "Close" : "Details"}
+                                </span>
+                                {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 group-hover/mcard:translate-y-0.5 transition-transform" />}
+                              </div>
                             </div>
                           </div>
                         </div>
                         <div className="text-right shrink-0 flex flex-col items-end gap-2">
-                          <p className="text-2xl font-black">${milestone.amount.toLocaleString()}</p>
+                          <p className="text-xl font-black">${milestone.amount.toLocaleString()}</p>
                           <Badge variant="outline" className={cn("text-[10px] font-bold flex items-center gap-1", cfg.color)}>
                             {cfg.icon} {cfg.label}
                           </Badge>
-                          <div className="text-muted-foreground mt-1 flex items-center gap-1.5 transition-all">
-                            <span className="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover/mcard:opacity-100 transition-opacity">
-                              {isExpanded ? "Close" : "Details"}
-                            </span>
-                            {isExpanded ? <ChevronUp className="w-4 h-4 text-primary" /> : <ChevronDown className="w-4 h-4 group-hover/mcard:text-primary group-hover/mcard:translate-y-0.5 transition-all" />}
-                          </div>
                         </div>
                       </div>
 
                       {/* Current Deliverables Preview (SUBMITTED or APPROVED state) */}
                       {(milestone.status === "SUBMITTED" || milestone.status === "APPROVED") && (
                         <div className={cn(
-                          "mt-4 p-4 rounded-xl border space-y-2",
+                          "mt-3 p-3 rounded-xl border space-y-1.5",
                           milestone.status === "SUBMITTED" ? "bg-purple-500/10 border-purple-400/25" : "bg-emerald-500/5 border-emerald-400/20"
                         )}>
                           <div className="flex items-center justify-between">
@@ -510,7 +510,7 @@ export default function ClientContractDetail() {
 
                       {/* Current Revision Note (REVISION_REQUESTED state) */}
                       {milestone.status === "REVISION_REQUESTED" && milestone.revisionNote && (
-                        <div className="mt-4 p-4 rounded-xl bg-orange-500/10 border border-orange-400/25">
+                        <div className="mt-3 p-3 rounded-xl bg-orange-500/10 border border-orange-400/25">
                           <p className="text-xs font-black text-orange-700 mb-1 flex items-center gap-1">
                             <RotateCcw className="w-3.5 h-3.5" /> Your Latest Revision Request
                           </p>
@@ -519,7 +519,7 @@ export default function ClientContractDetail() {
                       )}
 
                       {/* Action Buttons */}
-                      <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border/30" onClick={e => e.stopPropagation()}>
+                      <div className="flex flex-wrap gap-2.5 mt-3 pt-3 border-t border-border/30" onClick={e => e.stopPropagation()}>
                         {milestone.status === "PENDING" && (
                           <div className="space-y-1">
                             <Button
@@ -580,7 +580,7 @@ export default function ClientContractDetail() {
 
                     {/* Expanded: Full History Timeline */}
                     {isExpanded && (
-                      <div className="px-6 pb-6 border-t border-border/30 pt-5 animate-in slide-in-from-top-2 duration-300 space-y-4">
+                      <div className="px-4 pb-4 border-t border-border/30 pt-4 animate-in slide-in-from-top-2 duration-300 space-y-3">
                         <div className="flex items-center gap-2">
                           <Activity className="w-4 h-4 text-primary" />
                           <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">

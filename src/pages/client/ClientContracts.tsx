@@ -104,8 +104,7 @@ const ClientContractsPage = () => {
       const matchSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.freelancer.name.toLowerCase().includes(searchTerm.toLowerCase());
       if (!matchSearch) return false;
-      if (activeTab === "active") return c.status === "ACTIVE";
-      if (activeTab === "pending") return c.status === "OFFER_PENDING";
+      if (activeTab === "active") return c.status === "ACTIVE" || c.status === "OFFER_PENDING";
       if (activeTab === "completed") return c.status === "COMPLETED";
       return true;
     });
@@ -166,15 +165,14 @@ const ClientContractsPage = () => {
             <TabsList className="bg-transparent gap-1 h-11">
               {[
                 { value: "active", label: "Active" },
-                { value: "pending", label: "Offer Pending" },
                 { value: "completed", label: "Completed" },
                 { value: "all", label: "All" },
               ].map((t) => (
                 <TabsTrigger key={t.value} value={t.value} className="rounded-xl font-black px-5 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm">
                   {t.label}
-                  {t.value === "active" && contracts.filter(c => c.status === "ACTIVE").length > 0 && (
+                  {t.value === "active" && contracts.filter(c => c.status === "ACTIVE" || c.status === "OFFER_PENDING").length > 0 && (
                     <span className="ml-1.5 bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
-                      {contracts.filter(c => c.status === "ACTIVE").length}
+                      {contracts.filter(c => c.status === "ACTIVE" || c.status === "OFFER_PENDING").length}
                     </span>
                   )}
                 </TabsTrigger>
