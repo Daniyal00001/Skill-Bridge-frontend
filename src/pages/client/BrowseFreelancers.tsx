@@ -168,7 +168,7 @@ const BrowseFreelancersPage = () => {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-4xl font-black text-slate-900 mb-2">
             Browse Freelancers
           </h1>
           <p className="text-slate-500 font-medium">
@@ -276,7 +276,9 @@ const BrowseFreelancersPage = () => {
                 </label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="text-[11px] font-bold text-slate-400">$</span>
+                    <span className="text-[11px] font-bold text-slate-400">
+                      $
+                    </span>
                     <input
                       type="number"
                       placeholder="Min"
@@ -287,7 +289,9 @@ const BrowseFreelancersPage = () => {
                   </div>
                   <span className="text-slate-300 font-medium">-</span>
                   <div className="flex-1 flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="text-[11px] font-bold text-slate-400">$</span>
+                    <span className="text-[11px] font-bold text-slate-400">
+                      $
+                    </span>
                     <input
                       type="number"
                       placeholder="Max"

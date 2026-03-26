@@ -171,7 +171,7 @@ const MyProposalsPage = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Proposals</h1>
+            <h1 className="text-4xl font-black tracking-tight">My Proposals</h1>
             <p className="text-muted-foreground mt-1">
               Track and manage all proposals received for your projects.
             </p>
@@ -294,19 +294,22 @@ const MyProposalsPage = () => {
                       </TableCell>
                       <TableCell>{getStatusBadge(proposal.status)}</TableCell>
                       <TableCell className="text-right pr-6 space-x-2">
-                        {proposal.status === "ACCEPTED" && proposal.contract?.id && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            asChild
-                            className="bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-200"
-                          >
-                            <Link to={`/client/contracts/${proposal.contract.id}`}>
-                              View Contract{" "}
-                              <FileText className="ml-1 h-3 w-3" />
-                            </Link>
-                          </Button>
-                        )}
+                        {proposal.status === "ACCEPTED" &&
+                          proposal.contract?.id && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                              className="bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-200"
+                            >
+                              <Link
+                                to={`/client/contracts/${proposal.contract.id}`}
+                              >
+                                View Contract{" "}
+                                <FileText className="ml-1 h-3 w-3" />
+                              </Link>
+                            </Button>
+                          )}
                         <Button
                           variant="ghost"
                           size="sm"

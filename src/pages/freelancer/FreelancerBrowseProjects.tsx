@@ -142,7 +142,7 @@ export default function FreelancerBrowseProjects() {
         {/* ── Header ───────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+            <h1 className="text-4xl font-black tracking-tight text-slate-800">
               Project Marketplace
             </h1>
             <p className="text-sm text-slate-400 mt-0.5">
@@ -318,7 +318,6 @@ export default function FreelancerBrowseProjects() {
                     </ScrollRow>
                   </Section>
                 )}
-
               </div>
             )}
 

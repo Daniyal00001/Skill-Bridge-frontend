@@ -541,7 +541,8 @@ const ProposalCard = ({
                 </p>
                 {(proposal.clientRequestedMilestones || []).length > 0 ? (
                   <p className="text-[10px] text-primary">
-                    Milestones: {proposal.clientRequestedMilestones?.length || 0}
+                    Milestones:{" "}
+                    {proposal.clientRequestedMilestones?.length || 0}
                   </p>
                 ) : (
                   <p className="text-[10px] text-primary">
@@ -553,8 +554,8 @@ const ProposalCard = ({
                 )}
               </div>
             </div>
-            {(proposal.negotiationStatus === "CLIENT_PROPOSED" ||
-              proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS") ? (
+            {proposal.negotiationStatus === "CLIENT_PROPOSED" ||
+            proposal.negotiationStatus === "CLIENT_PROPOSED_REVISIONS" ? (
               <p className="text-[10px] italic text-muted-foreground pt-1 border-t border-border/20">
                 Waiting for the freelancer to review and accept these changes.
               </p>

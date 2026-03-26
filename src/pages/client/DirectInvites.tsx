@@ -40,11 +40,18 @@ import {
   Eye,
   Paperclip,
   RotateCcw,
-  Milestone
+  Milestone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const DirectInvitesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,7 +60,7 @@ const DirectInvitesPage = () => {
   const [invites, setInvites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-  
+
   const [selectedInvite, setSelectedInvite] = useState<any | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
@@ -90,15 +97,10 @@ const DirectInvitesPage = () => {
   const filteredInvites = useMemo(() => {
     return invites.filter((invite) => {
       const matchesSearch =
-        invite.projectTitle
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        invite.freelancerName
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
+        invite.projectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invite.freelancerName?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
-        statusFilter === "all" ||
-        invite.status?.toLowerCase() === statusFilter;
+        statusFilter === "all" || invite.status?.toLowerCase() === statusFilter;
 
       let matchesDate = true;
       if (dateFilter !== "all") {
@@ -163,9 +165,12 @@ const DirectInvitesPage = () => {
 
   const stats = {
     total: invites.length,
-    pending: invites.filter((i) => i.status?.toUpperCase() === "PENDING").length,
-    accepted: invites.filter((i) => i.status?.toUpperCase() === "ACCEPTED").length,
-    rejected: invites.filter((i) => i.status?.toUpperCase() === "REJECTED").length,
+    pending: invites.filter((i) => i.status?.toUpperCase() === "PENDING")
+      .length,
+    accepted: invites.filter((i) => i.status?.toUpperCase() === "ACCEPTED")
+      .length,
+    rejected: invites.filter((i) => i.status?.toUpperCase() === "REJECTED")
+      .length,
   };
 
   return (
@@ -174,7 +179,9 @@ const DirectInvitesPage = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Direct Invites</h1>
+            <h1 className="text-4xl font-black tracking-tight">
+              Direct Invites
+            </h1>
             <p className="text-muted-foreground mt-1">
               Track and manage all direct invitations sent to freelancers.
             </p>
@@ -237,7 +244,9 @@ const DirectInvitesPage = () => {
         {loading ? (
           <div className="flex items-center justify-center py-20 gap-3 bg-card rounded-2xl border">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <p className="text-muted-foreground font-medium">Loading invites...</p>
+            <p className="text-muted-foreground font-medium">
+              Loading invites...
+            </p>
           </div>
         ) : (
           <Card className="rounded-2xl shadow-sm border overflow-hidden">
@@ -261,7 +270,10 @@ const DirectInvitesPage = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredInvites.map((invite) => (
-                    <TableRow key={invite.id} className="group hover:bg-muted/50 transition-colors">
+                    <TableRow
+                      key={invite.id}
+                      className="group hover:bg-muted/50 transition-colors"
+                    >
                       <TableCell className="pl-6 py-4">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10 border shadow-sm">
@@ -295,23 +307,33 @@ const DirectInvitesPage = () => {
                       <TableCell className="py-4">
                         <div className="flex items-center gap-1.5 font-semibold text-sm">
                           <DollarSign className="h-4 w-4 text-primary bg-primary/10 rounded-full p-0.5" />
-                          <span>{invite.budget?.toLocaleString() || "N/A"}</span>
+                          <span>
+                            {invite.budget?.toLocaleString() || "N/A"}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="py-4 text-sm font-medium text-muted-foreground">
-                        {new Date(invite.createdAt).toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {new Date(invite.createdAt).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          },
+                        )}
                       </TableCell>
-                      <TableCell className="py-4">{getStatusBadge(invite.status)}</TableCell>
+                      <TableCell className="py-4">
+                        {getStatusBadge(invite.status)}
+                      </TableCell>
                       <TableCell className="text-right pr-6 py-4 space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
                           className="font-bold border-primary/20 text-primary hover:bg-primary/10"
-                          onClick={() => { setSelectedInvite(invite); setDetailsModalOpen(true); }}
+                          onClick={() => {
+                            setSelectedInvite(invite);
+                            setDetailsModalOpen(true);
+                          }}
                         >
                           <Eye className="w-4 h-4 mr-1.5" /> Details
                         </Button>
@@ -339,7 +361,8 @@ const DirectInvitesPage = () => {
                             className="bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 border-emerald-200 font-bold"
                           >
                             <Link to={`/client/contracts/`}>
-                              Go to Contracts <FileText className="ml-1.5 h-3.5 w-3.5" />
+                              Go to Contracts{" "}
+                              <FileText className="ml-1.5 h-3.5 w-3.5" />
                             </Link>
                           </Button>
                         )}
@@ -354,7 +377,9 @@ const DirectInvitesPage = () => {
                   <div className="h-16 w-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Inbox className="h-8 w-8 text-muted-foreground/50" />
                   </div>
-                  <h3 className="text-lg font-bold mb-1">No Direct Invites Found</h3>
+                  <h3 className="text-lg font-bold mb-1">
+                    No Direct Invites Found
+                  </h3>
                   <p className="text-muted-foreground max-w-sm mx-auto">
                     {invites.length === 0
                       ? "You haven't sent any direct invitations. Browse freelancers to send your first invite directly to their inbox."
@@ -384,13 +409,22 @@ const DirectInvitesPage = () => {
                 <Badge className="bg-primary/20 text-primary border-primary/30 font-black uppercase tracking-widest text-[10px] px-3">
                   Direct Invitation Sent
                 </Badge>
-                <Badge variant="outline" className="font-bold border-muted-foreground/20 text-muted-foreground uppercase tracking-tighter text-[10px]">
+                <Badge
+                  variant="outline"
+                  className="font-bold border-muted-foreground/20 text-muted-foreground uppercase tracking-tighter text-[10px]"
+                >
                   Ref: {selectedInvite.id.slice(-6).toUpperCase()}
                 </Badge>
               </div>
-              <DialogTitle className="text-3xl font-black tracking-tight mb-1">Invitation Review</DialogTitle>
+              <DialogTitle className="text-3xl font-black tracking-tight mb-1">
+                Invitation Review
+              </DialogTitle>
               <DialogDescription className="text-sm font-medium text-muted-foreground/80">
-                Proposed terms for <span className="text-foreground font-bold">{selectedInvite.freelancerName}</span> regarding your project "{selectedInvite.projectTitle}".
+                Proposed terms for{" "}
+                <span className="text-foreground font-bold">
+                  {selectedInvite.freelancerName}
+                </span>{" "}
+                regarding your project "{selectedInvite.projectTitle}".
               </DialogDescription>
             </DialogHeader>
 
@@ -399,50 +433,66 @@ const DirectInvitesPage = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
                   {/* Attachments Section - High Prominence */}
-                  {selectedInvite.attachments && selectedInvite.attachments.length > 0 && (
-                    <div className="bg-primary/[0.03] border border-primary/10 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                          <Paperclip className="w-4 h-4" /> Your Attached Files
-                        </h4>
-                        <span className="text-[10px] font-bold text-muted-foreground">{selectedInvite.attachments.length} total files</span>
+                  {selectedInvite.attachments &&
+                    selectedInvite.attachments.length > 0 && (
+                      <div className="bg-primary/[0.03] border border-primary/10 rounded-3xl p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                            <Paperclip className="w-4 h-4" /> Your Attached
+                            Files
+                          </h4>
+                          <span className="text-[10px] font-bold text-muted-foreground">
+                            {selectedInvite.attachments.length} total files
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {selectedInvite.attachments.map(
+                            (url: string, idx: number) => (
+                              <a
+                                key={idx}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-3 p-4 rounded-2xl border bg-background hover:bg-primary/5 hover:border-primary/40 transition-all group shadow-sm"
+                              >
+                                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                                  <FileText className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                                    Asset {idx + 1}
+                                  </p>
+                                  <p className="text-xs font-bold truncate">
+                                    View Document
+                                  </p>
+                                </div>
+                              </a>
+                            ),
+                          )}
+                        </div>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {selectedInvite.attachments.map((url: string, idx: number) => (
-                          <a 
-                            key={idx} 
-                            href={url} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="flex items-center gap-3 p-4 rounded-2xl border bg-background hover:bg-primary/5 hover:border-primary/40 transition-all group shadow-sm"
-                          >
-                            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                              <FileText className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Asset {idx + 1}</p>
-                              <p className="text-xs font-bold truncate">View Document</p>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   {selectedInvite.message ? (
                     <div className="bg-card border rounded-3xl p-6 shadow-sm border-muted/40 italic text-muted-foreground relative">
-                      <div className="absolute top-4 left-4 text-4xl text-primary/10 font-serif leading-none italic pointer-events-none">“</div>
+                      <div className="absolute top-4 left-4 text-4xl text-primary/10 font-serif leading-none italic pointer-events-none">
+                        “
+                      </div>
                       <p className="text-sm font-medium leading-relaxed pl-4 pr-2">
                         {selectedInvite.message}
                       </p>
                       <div className="mt-4 pt-4 border-t flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Sent by you</span>
+                        <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">
+                          Sent by you
+                        </span>
                       </div>
                     </div>
                   ) : (
                     <div className="p-6 bg-muted/10 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center gap-2 opacity-50 text-center py-10">
                       <Inbox className="w-8 h-8 text-muted-foreground/30" />
-                      <p className="text-xs font-bold text-muted-foreground tracking-tight">No message included in this invite</p>
+                      <p className="text-xs font-bold text-muted-foreground tracking-tight">
+                        No message included in this invite
+                      </p>
                     </div>
                   )}
                 </div>
@@ -450,27 +500,47 @@ const DirectInvitesPage = () => {
                 <div className="space-y-6">
                   <div className="p-6 rounded-3xl border bg-gradient-to-br from-primary/10 to-transparent space-y-4 shadow-sm">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Total Budget</p>
-                      <p className="text-4xl font-black text-foreground tabular-nums">${selectedInvite.budget?.toLocaleString()}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+                        Total Budget
+                      </p>
+                      <p className="text-4xl font-black text-foreground tabular-nums">
+                        ${selectedInvite.budget?.toLocaleString()}
+                      </p>
                     </div>
                     <div className="pt-4 border-t border-primary/10 grid grid-cols-1 gap-4">
-                        {(!selectedInvite.milestones || selectedInvite.milestones.length === 0) && (
-                          <div className="space-y-1">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Global Revisions</p>
-                              <p className="text-lg font-bold flex items-center gap-2"><RotateCcw className="w-4 h-4 text-primary" /> {selectedInvite.revisionsAllowed} Limit</p>
-                          </div>
-                        )}
+                      {(!selectedInvite.milestones ||
+                        selectedInvite.milestones.length === 0) && (
                         <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Creation Date</p>
-                            <p className="text-xs font-bold text-muted-foreground">{new Date(selectedInvite.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                            Global Revisions
+                          </p>
+                          <p className="text-lg font-bold flex items-center gap-2">
+                            <RotateCcw className="w-4 h-4 text-primary" />{" "}
+                            {selectedInvite.revisionsAllowed} Limit
+                          </p>
                         </div>
+                      )}
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                          Creation Date
+                        </p>
+                        <p className="text-xs font-bold text-muted-foreground">
+                          {new Date(
+                            selectedInvite.createdAt,
+                          ).toLocaleDateString(undefined, {
+                            dateStyle: "long",
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
                   <div className="p-6 rounded-3xl border bg-secondary/20 space-y-3">
-                    <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Current Status</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+                      Current Status
+                    </h4>
                     <div className="inline-block px-1 scale-110 origin-left">
-                        {getStatusBadge(selectedInvite.status)}
+                      {getStatusBadge(selectedInvite.status)}
                     </div>
                   </div>
                 </div>
@@ -479,8 +549,12 @@ const DirectInvitesPage = () => {
               {/* Centered Project Category at Bottom */}
               <div className="flex justify-center pt-4">
                 <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/30 border border-border/40 shadow-sm">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Category:</span>
-                  <span className="text-[10px] font-bold">{selectedInvite.projectCategory}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                    Category:
+                  </span>
+                  <span className="text-[10px] font-bold">
+                    {selectedInvite.projectCategory}
+                  </span>
                 </div>
               </div>
 
@@ -495,26 +569,40 @@ const DirectInvitesPage = () => {
                     {selectedInvite.milestones?.length || 0} Phases
                   </Badge>
                 </div>
-                
+
                 <div className="space-y-4">
-                  {selectedInvite.milestones && selectedInvite.milestones.length > 0 ? (
+                  {selectedInvite.milestones &&
+                  selectedInvite.milestones.length > 0 ? (
                     selectedInvite.milestones.map((m: any, idx: number) => (
-                      <div key={idx} className="group p-5 bg-card/40 border border-muted-foreground/10 rounded-[1.5rem] hover:border-primary/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:shadow-md">
+                      <div
+                        key={idx}
+                        className="group p-5 bg-card/40 border border-muted-foreground/10 rounded-[1.5rem] hover:border-primary/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:shadow-md"
+                      >
                         <div className="flex items-start gap-4">
                           <div className="w-10 h-10 rounded-2xl bg-secondary flex items-center justify-center shrink-0 font-black text-secondary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                             {idx + 1}
                           </div>
                           <div>
-                            <p className="font-bold text-base mb-0.5 group-hover:text-primary transition-colors">{m.title}</p>
-                            <p className="text-sm text-muted-foreground/70 font-medium mb-2">{m.description || "No description provided for this phase."}</p>
+                            <p className="font-bold text-base mb-0.5 group-hover:text-primary transition-colors">
+                              {m.title}
+                            </p>
+                            <p className="text-sm text-muted-foreground/70 font-medium mb-2">
+                              {m.description ||
+                                "No description provided for this phase."}
+                            </p>
                             <div className="flex items-center gap-4 flex-wrap">
                               {m.dueDate && (
-                                <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-muted text-muted-foreground border-transparent">
-                                  Due: {new Date(m.dueDate).toLocaleDateString()}
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-muted text-muted-foreground border-transparent"
+                                >
+                                  Due:{" "}
+                                  {new Date(m.dueDate).toLocaleDateString()}
                                 </Badge>
                               )}
                               <span className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5 opacity-80">
-                                <RotateCcw className="w-3 h-3"/> {m.revisionsAllowed} Revisions
+                                <RotateCcw className="w-3 h-3" />{" "}
+                                {m.revisionsAllowed} Revisions
                               </span>
                             </div>
                           </div>
@@ -523,19 +611,26 @@ const DirectInvitesPage = () => {
                           <p className="text-2xl font-black tabular-nums tracking-tighter text-foreground group-hover:scale-105 transition-transform">
                             ${Number(m.amount).toLocaleString()}
                           </p>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Amount</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                            Amount
+                          </p>
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="p-12 text-center border-2 border-dashed rounded-[2rem] bg-secondary/10 space-y-3">
-                         <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto opacity-30">
-                            <Milestone className="w-8 h-8" />
-                         </div>
-                         <div className="space-y-1">
-                            <h5 className="font-black text-lg">Single Phase Project</h5>
-                            <p className="text-sm text-muted-foreground font-medium max-w-sm mx-auto">This invitation was sent with a single delivery phase for the full project budget.</p>
-                         </div>
+                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto opacity-30">
+                        <Milestone className="w-8 h-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <h5 className="font-black text-lg">
+                          Single Phase Project
+                        </h5>
+                        <p className="text-sm text-muted-foreground font-medium max-w-sm mx-auto">
+                          This invitation was sent with a single delivery phase
+                          for the full project budget.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -557,7 +652,11 @@ const DirectInvitesPage = () => {
                   onClick={() => handleCancelInvite(selectedInvite.id)}
                   disabled={cancellingId === selectedInvite.id}
                 >
-                  {cancellingId === selectedInvite.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
+                  {cancellingId === selectedInvite.id ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <XCircle className="w-4 h-4 mr-2" />
+                  )}
                   Cancel Invitation
                 </Button>
               )}

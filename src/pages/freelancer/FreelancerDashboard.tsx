@@ -252,7 +252,7 @@ export default function FreelancerDashboard() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
               Freelancer Dashboard
             </p>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl font-black tracking-tight text-foreground">
               Overview
             </h1>
           </div>

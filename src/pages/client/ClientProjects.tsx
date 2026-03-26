@@ -410,7 +410,9 @@ const ClientProjectsPage = () => {
                         )}
                       </div>
                       <div>
-                        <p className="font-black text-sm break-words">{milestone.title}</p>
+                        <p className="font-black text-sm break-words">
+                          {milestone.title}
+                        </p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
                           {milestone.status} · $
                           {milestone.amount?.toLocaleString()}
@@ -704,7 +706,7 @@ const ClientProjectsPage = () => {
             >
               Unified Management Hub
             </Badge>
-            <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
               My Projects
             </h1>
             <p className="text-muted-foreground text-base max-w-xl">

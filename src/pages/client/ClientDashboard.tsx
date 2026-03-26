@@ -81,7 +81,7 @@ export default function ClientDashboard() {
         <div className="space-y-8 relative z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-4xl font-black tracking-tight">
                 Welcome back! 👋
               </h1>
               <p className="text-muted-foreground mt-1 text-lg">
@@ -383,7 +383,8 @@ export default function ClientDashboard() {
                     <div>
                       <h3 className="font-bold text-white">Pro Tip</h3>
                       <p className="text-sm text-white/90 mt-1 leading-relaxed">
-                        Find the perfect match faster with our AI-powered freelancer discovery assistant.
+                        Find the perfect match faster with our AI-powered
+                        freelancer discovery assistant.
                       </p>
                     </div>
                   </div>

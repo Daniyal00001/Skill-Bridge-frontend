@@ -317,7 +317,7 @@ const PostProjectPage = () => {
             >
               SkillBridge Project Builder
             </Badge>
-            <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Post a New Project
             </h1>
             <p className="text-muted-foreground text-lg max-w-lg">
