@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/dialog";
 
 const InvitationsPage = () => {
+  const { invitationId } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("month");
@@ -79,6 +80,17 @@ const InvitationsPage = () => {
   useEffect(() => {
     fetchInvites();
   }, []);
+
+  // Handle auto-opening via URL param
+  useEffect(() => {
+    if (invitationId && invites.length > 0) {
+      const invite = invites.find((i) => i.id === invitationId);
+      if (invite) {
+        setSelectedInvite(invite);
+        setDetailsModalOpen(true);
+      }
+    }
+  }, [invitationId, invites]);
 
   const handleAction = async (id: string, action: "accept" | "reject") => {
     try {
@@ -126,11 +138,17 @@ const InvitationsPage = () => {
   }, [invites, searchTerm, statusFilter, dateFilter]);
 
   const getStatusBadge = (status: string) => {
-    const baseClass = "text-[9px] px-1.5 py-0 font-bold border rounded-md uppercase tracking-tight";
+    const baseClass =
+      "text-[9px] px-1.5 py-0 font-bold border rounded-md uppercase tracking-tight";
     switch (status?.toUpperCase()) {
       case "ACCEPTED":
         return (
-          <Badge className={cn("bg-emerald-500/15 text-emerald-700 border-emerald-200", baseClass)}>
+          <Badge
+            className={cn(
+              "bg-emerald-500/15 text-emerald-700 border-emerald-200",
+              baseClass,
+            )}
+          >
             Accepted
           </Badge>
         );
@@ -138,7 +156,10 @@ const InvitationsPage = () => {
         return (
           <Badge
             variant="destructive"
-            className={cn("bg-red-500/15 text-red-700 border-red-200", baseClass)}
+            className={cn(
+              "bg-red-500/15 text-red-700 border-red-200",
+              baseClass,
+            )}
           >
             Rejected
           </Badge>
@@ -147,7 +168,10 @@ const InvitationsPage = () => {
         return (
           <Badge
             variant="secondary"
-            className={cn("bg-zinc-500/15 text-zinc-700 border-zinc-200", baseClass)}
+            className={cn(
+              "bg-zinc-500/15 text-zinc-700 border-zinc-200",
+              baseClass,
+            )}
           >
             Cancelled
           </Badge>
@@ -156,13 +180,20 @@ const InvitationsPage = () => {
         return (
           <Badge
             variant="secondary"
-            className={cn("bg-amber-500/15 text-amber-700 border-amber-200", baseClass)}
+            className={cn(
+              "bg-amber-500/15 text-amber-700 border-amber-200",
+              baseClass,
+            )}
           >
             Pending
           </Badge>
         );
       default:
-        return <Badge className={baseClass} variant="outline">{status}</Badge>;
+        return (
+          <Badge className={baseClass} variant="outline">
+            {status}
+          </Badge>
+        );
     }
   };
 
@@ -258,12 +289,24 @@ const InvitationsPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-b">
-                    <TableHead className="pl-6 h-10 text-[10px] uppercase font-black tracking-wider">Client</TableHead>
-                    <TableHead className="text-[10px] uppercase font-black tracking-wider">Project</TableHead>
-                    <TableHead className="text-[10px] uppercase font-black tracking-wider">Proposed Budget</TableHead>
-                    <TableHead className="text-[10px] uppercase font-black tracking-wider">Received On</TableHead>
-                    <TableHead className="text-[10px] uppercase font-black tracking-wider">Status</TableHead>
-                    <TableHead className="text-right pr-6 text-[10px] uppercase font-black tracking-wider">Action</TableHead>
+                    <TableHead className="pl-6 h-10 text-[10px] uppercase font-black tracking-wider">
+                      Client
+                    </TableHead>
+                    <TableHead className="text-[10px] uppercase font-black tracking-wider">
+                      Project
+                    </TableHead>
+                    <TableHead className="text-[10px] uppercase font-black tracking-wider">
+                      Proposed Budget
+                    </TableHead>
+                    <TableHead className="text-[10px] uppercase font-black tracking-wider">
+                      Received On
+                    </TableHead>
+                    <TableHead className="text-[10px] uppercase font-black tracking-wider">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-right pr-6 text-[10px] uppercase font-black tracking-wider">
+                      Action
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -291,7 +334,7 @@ const InvitationsPage = () => {
                         className="py-3 font-medium text-xs max-w-[180px]"
                         title={invite.projectTitle}
                       >
-                        <Link 
+                        <Link
                           to={`/freelancer/projects/${invite.projectId}`}
                           className="hover:text-primary transition-colors cursor-pointer block truncate"
                         >
@@ -334,7 +377,8 @@ const InvitationsPage = () => {
                               className="bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 border-emerald-200 font-black uppercase text-[9px] tracking-tight h-7 px-3 rounded-lg w-fit"
                             >
                               <Link to={`/freelancer/contracts/`}>
-                                <FileText className="mr-1 h-3 w-3" /> View Contract
+                                <FileText className="mr-1 h-3 w-3" /> View
+                                Contract
                               </Link>
                             </Button>
                           )}
@@ -406,8 +450,8 @@ const InvitationsPage = () => {
                       <div className="bg-primary/[0.02] border border-primary/10 rounded-2xl p-4 space-y-3">
                         <div className="flex items-center justify-between">
                           <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-1.5">
-                            <Paperclip className="w-3.5 h-3.5" /> Attached Project
-                            Files
+                            <Paperclip className="w-3.5 h-3.5" /> Attached
+                            Project Files
                           </h4>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -466,7 +510,8 @@ const InvitationsPage = () => {
                       </p>
                     </div>
                   )}
-                </div>                <div className="space-y-4">
+                </div>{" "}
+                <div className="space-y-4">
                   <div className="p-4 rounded-2xl border bg-gradient-to-br from-primary/10 to-transparent space-y-3 shadow-sm">
                     <div className="space-y-0.5">
                       <p className="text-[8px] font-black uppercase tracking-[0.2em] text-primary">
@@ -535,8 +580,7 @@ const InvitationsPage = () => {
                               {m.title}
                             </p>
                             <p className="text-[11px] text-muted-foreground/70 font-medium mb-1.5 leading-tight">
-                              {m.description ||
-                                "No description provided."}
+                              {m.description || "No description provided."}
                             </p>
                             <div className="flex items-center gap-3 flex-wrap">
                               {m.dueDate && (

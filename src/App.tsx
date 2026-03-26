@@ -168,7 +168,7 @@ const App = () => (
                     element={<MyProposalsPage />}
                   />
                   <Route
-                    path="/client/invites"
+                    path="/client/invites/:invitationId?"
                     element={<DirectInvitesPage />}
                   />
                   <Route path="/client/contracts" element={<ClientContracts />} />
@@ -203,7 +203,7 @@ const App = () => (
                     element={<FreelancerProposalsPage />}
                   />
                   <Route
-                    path="/freelancer/invitations"
+                    path="/freelancer/invitations/:invitationId?"
                     element={<InvitationsPage />}
                   />
                   <Route

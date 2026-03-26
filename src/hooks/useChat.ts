@@ -179,10 +179,22 @@ export function useChat(activeRoomId?: string) {
           if (prev.some((m) => m.id === msg.id)) return prev
           return [...prev, msg]
         })
+        // Automatically mark as seen if we are in this room
+        if (msg.senderId !== user?.id) {
+          markSeen()
+        }
       }
-      // Update rooms list last message
-      setRooms((prev) =>
-        prev.map((r) =>
+
+      // Update rooms list or fetch if it's a new room
+      setRooms((prev) => {
+        const roomExists = prev.some((r) => r.id === msg.chatRoomId)
+        if (!roomExists) {
+          // New room discovery: Trigger full refresh to get room data correctly
+          loadRooms()
+          return prev
+        }
+
+        return prev.map((r) =>
           r.id === msg.chatRoomId
             ? {
                 ...r,
@@ -194,7 +206,7 @@ export function useChat(activeRoomId?: string) {
               }
             : r
         )
-      )
+      })
     }
 
     const handleTypingStart = ({ userId, userName, roomId }: TypingUser) => {
@@ -276,8 +288,12 @@ export function useChat(activeRoomId?: string) {
       setHasMore(false)
       loadMessages(activeRoomId)
       markSeen()
+      
+      // Explicitly join the room via socket in case it was just created
+      const socket = socketRef.current
+      socket.emit('join_room', { roomId: activeRoomId })
     }
-  }, [activeRoomId])
+  }, [activeRoomId, loadMessages, markSeen])
 
   // ── Update online status in rooms ─────────────────────────────────────────
   useEffect(() => {
