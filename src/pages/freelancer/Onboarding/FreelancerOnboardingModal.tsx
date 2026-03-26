@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { freelancerService } from "@/lib/freelancer.service";
 import { api } from "@/lib/api";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Loader2,
   Plus,
@@ -137,7 +137,6 @@ export function FreelancerOnboardingModal({
 
   const [step, setStep] = useState(initialStep);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const { locations, languages: metadataLanguages } = useMetadata();
   const [categories, setCategories] = useState<any[]>([]);
 
@@ -323,45 +322,24 @@ export function FreelancerOnboardingModal({
     if (step === 1) {
       const phoneNumber = parsePhoneNumberFromString(formData.phoneNumber);
       if (!formData.fullName || formData.fullName.length < 3) {
-        toast({
-          title: "Validation Error",
-          description: "Full name must be at least 3 characters.",
-          variant: "destructive",
-        });
+        toast.error("Full name must be at least 3 characters.");
         return;
       }
       if (!formData.tagline || formData.tagline.length < 10) {
-        toast({
-          title: "Validation Error",
-          description: "Tagline must be at least 10 characters.",
-          variant: "destructive",
-        });
+        toast.error("Tagline must be at least 10 characters.");
         return;
       }
       if (!formData.phoneNumber || !phoneNumber || !phoneNumber.isValid()) {
-        toast({
-          title: "Validation Error",
-          description:
-            "Please enter a valid international phone number (e.g., +92...).",
-          variant: "destructive",
-        });
+        toast.error("Please enter a valid international phone number.");
         return;
       }
       if (!formData.location) {
-        toast({
-          title: "Validation Error",
-          description: "Please select your country.",
-          variant: "destructive",
-        });
+        toast.error("Please select your country.");
         return;
       }
     } else if (step === 3) {
       if (formData.skills.length === 0) {
-        toast({
-          title: "Validation Error",
-          description: "Please add at least one skill.",
-          variant: "destructive",
-        });
+        toast.error("Please add at least one skill.");
         return;
       }
     }
@@ -394,11 +372,7 @@ export function FreelancerOnboardingModal({
         });
       } else if (step === 4) {
         if (!files.profileImage && !profile?.user?.profileImage) {
-          toast({
-            title: "Validation Error",
-            description: "Please upload a profile picture.",
-            variant: "destructive",
-          });
+          toast.error("Please upload a profile picture.");
           setIsLoading(false);
           return;
         }
@@ -434,8 +408,7 @@ export function FreelancerOnboardingModal({
           website: formData.website,
           preferredCategories: formData.preferredCategories,
         });
-        toast({
-          title: "Profile Updated!",
+        toast.success("Profile Updated!", {
           description: "Your changes have been saved.",
         });
         // Don't close immediately if they want to keep editing tabs
@@ -451,7 +424,7 @@ export function FreelancerOnboardingModal({
       const message =
         error.response?.data?.message ||
         "Failed to save details. Please try again.";
-      toast({ title: "Error", description: message, variant: "destructive" });
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -460,11 +433,7 @@ export function FreelancerOnboardingModal({
   const addSkill = async (name: string) => {
     if (!name.trim()) return;
     if (formData.skills.length >= 10) {
-      toast({
-        title: "Limit Reached",
-        description: "You can add a maximum of 10 skills.",
-        variant: "destructive",
-      });
+      toast.error("You can add a maximum of 10 skills.");
       return;
     }
     if (
@@ -549,10 +518,7 @@ export function FreelancerOnboardingModal({
             location: matchedLocation.name,
             region: matchedLocation.region || "",
           }));
-          toast({
-            title: "Location Detected",
-            description: `We've set your country to ${matchedLocation.name}`,
-          });
+          toast.success(`Location detected as ${matchedLocation.name}`);
         }
       }
     }
@@ -561,11 +527,7 @@ export function FreelancerOnboardingModal({
   const addLanguage = async (name: string) => {
     if (!name) return;
     if (formData.languages.length >= 3) {
-      toast({
-        title: "Limit Reached",
-        description: "You can add a maximum of 3 languages.",
-        variant: "destructive",
-      });
+      toast.error("You can add a maximum of 3 languages.");
       return;
     }
     if (
@@ -1073,12 +1035,7 @@ export function FreelancerOnboardingModal({
                             !isSelected &&
                             formData.preferredCategories.length >= 4
                           ) {
-                            toast({
-                              title: "Limit Reached",
-                              description:
-                                "You can select a maximum of 4 preferred categories.",
-                              variant: "destructive",
-                            });
+                            toast.error("You can select a maximum of 4 preferred categories.");
                             return;
                           }
                           setFormData((prev) => ({
@@ -1173,7 +1130,7 @@ export function FreelancerOnboardingModal({
                         <div className="text-center">
                           <p className="text-xs font-semibold">Click to upload</p>
                           <p className="text-[10px] text-muted-foreground">
-                            PNG, JPG up to 5MB
+                            PNG, JPG up to 10MB
                           </p>
                         </div>
                       )}
@@ -1181,12 +1138,17 @@ export function FreelancerOnboardingModal({
                         type="file"
                         accept="image/*"
                         className="absolute inset-0 opacity-0 cursor-pointer"
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          if (file && file.size > 10 * 1024 * 1024) {
+                            toast.error("Profile image exceeds 10MB limit.");
+                            return;
+                          }
                           setFiles((p) => ({
                             ...p,
-                            profileImage: e.target.files?.[0] || null,
-                          }))
-                        }
+                            profileImage: file,
+                          }));
+                        }}
                       />
                     </div>
                   )}
@@ -1214,12 +1176,17 @@ export function FreelancerOnboardingModal({
                     <Input
                       type="file"
                       className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        if (file && file.size > 10 * 1024 * 1024) {
+                          toast.error("ID document exceeds 10MB limit.");
+                          return;
+                        }
                         setFiles((p) => ({
                           ...p,
-                          idDocument: e.target.files?.[0] || null,
-                        }))
-                      }
+                          idDocument: file,
+                        }));
+                      }}
                     />
                   </div>
                 </div>
@@ -1290,8 +1257,13 @@ export function FreelancerOnboardingModal({
                               accept="image/*,application/pdf"
                               className="absolute inset-0 opacity-0 cursor-pointer"
                               onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                if (file && file.size > 10 * 1024 * 1024) {
+                                  toast.error("Certificate file exceeds 10MB limit.");
+                                  return;
+                                }
                                 const newFiles = [...files.certFiles];
-                                newFiles[i] = e.target.files?.[0] || null;
+                                newFiles[i] = file;
                                 setFiles((p) => ({
                                   ...p,
                                   certFiles: newFiles,
@@ -1367,8 +1339,13 @@ export function FreelancerOnboardingModal({
                               type="file"
                               className="absolute inset-0 opacity-0 cursor-pointer"
                               onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                if (file && file.size > 10 * 1024 * 1024) {
+                                  toast.error("Portfolio file exceeds 10MB limit.");
+                                  return;
+                                }
                                 const newFiles = [...files.gigFiles];
-                                newFiles[i] = e.target.files?.[0] || null;
+                                newFiles[i] = file;
                                 setFiles((p) => ({ ...p, gigFiles: newFiles }));
                               }}
                             />

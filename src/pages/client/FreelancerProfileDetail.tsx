@@ -50,12 +50,20 @@ const FreelancerProfileDetail = () => {
     fetchProfile();
   }, [id]);
 
+  const [isMessaging, setIsMessaging] = useState(false);
+
   const handleMessage = async () => {
+    if (isMessaging) return;
+    setIsMessaging(true);
     try {
-      await api.post(`/freelancers/${id}/message`);
+      const res = await api.post(`/freelancers/${id}/message`);
+      const chatRoomId = res.data.data.id;
       toast.success("Chat initiated successfully");
+      // Redirect to client messages page with the room active
+      window.location.href = `/client/messages?room=${chatRoomId}`;
     } catch (err) {
       toast.error("Could not start chat");
+      setIsMessaging(false);
     }
   };
 
@@ -162,8 +170,14 @@ const FreelancerProfileDetail = () => {
                   variant="outline"
                   className="h-11 rounded-lg font-bold border-slate-200 hover:bg-slate-50"
                   onClick={handleMessage}
+                  disabled={isMessaging}
                 >
-                  <MessageSquare className="w-4 h-4 mr-2" /> Message
+                  {isMessaging ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                  )}
+                  {isMessaging ? "Starting Chat..." : "Message"}
                 </Button>
                 <Button
                   className="h-11 rounded-lg px-8 font-bold shadow-sm"

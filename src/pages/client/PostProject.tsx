@@ -647,6 +647,14 @@ const PostProjectPage = () => {
                             "application/x-zip-compressed",
                           ];
                           const selected = Array.from(e.target.files);
+                          
+                          // Check for 10MB limit
+                          const oversized = selected.filter(f => f.size > 10 * 1024 * 1024);
+                          if (oversized.length > 0) {
+                            toast.error("Some files exceed the 10MB limit.");
+                            return;
+                          }
+
                           const valid = selected.filter((f) =>
                             ALLOWED.includes(f.type),
                           );

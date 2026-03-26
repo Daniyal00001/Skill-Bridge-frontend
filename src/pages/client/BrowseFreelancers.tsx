@@ -149,8 +149,11 @@ const BrowseFreelancersPage = () => {
 
   const handleMessage = async (freelancer: Freelancer) => {
     try {
-      await api.post(`/freelancers/${freelancer.id}/message`);
+      const res = await api.post(`/freelancers/${freelancer.id}/message`);
+      const chatRoomId = res.data.data.id;
       toast.success(`Chat started with ${freelancer.name}`);
+      // Redirect to messages page with the room active
+      window.location.href = `/client/messages?room=${chatRoomId}`;
     } catch (err) {
       toast.error("Could not start chat");
     }

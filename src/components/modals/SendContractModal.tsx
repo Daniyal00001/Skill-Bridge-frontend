@@ -8,10 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2, Send, Plus, Trash2, Milestone, UploadCloud, Paperclip, X } from "lucide-react";
+import { Loader2, Send, UploadCloud, Paperclip, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MilestoneEditor, MilestoneInput } from "@/components/contracts/MilestoneEditor";
 
@@ -31,31 +28,30 @@ interface Project {
   budget: number | null;
 }
 
-// Moved MilestoneInput to MilestoneEditor.tsx
-
-interface InviteFreelancerModalProps {
+interface SendContractModalProps {
   freelancerId: string;
   freelancerName: string;
+  projectId?: string; // Pre-selected project ID from chat room
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-export function InviteFreelancerModal({
+export function SendContractModal({
   freelancerId,
   freelancerName,
+  projectId,
   isOpen,
   onClose,
   onSuccess,
-}: InviteFreelancerModalProps) {
+}: SendContractModalProps) {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchingProjects, setFetchingProjects] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // New fields for direct invite terms
   const [milestones, setMilestones] = useState<MilestoneInput[]>([]);
   const [revisionsAllowed, setRevisionsAllowed] = useState<number>(3);
   const [files, setFiles] = useState<File[]>([]);
@@ -70,30 +66,33 @@ export function InviteFreelancerModal({
           const res = await api.get("/projects/client/my?status=OPEN");
           const projectsData = res.data?.projects || [];
           setProjects(projectsData);
-          if (projectsData.length > 0) {
+          
+          // If we have a projectId from props, use it. Otherwise use the first one available.
+          if (projectId) {
+            setSelectedProjectId(projectId);
+          } else if (projectsData.length > 0 && !selectedProjectId) {
             setSelectedProjectId(projectsData[0].id);
           }
         } catch (err) {
           console.error("Failed to fetch projects", err);
-          toast.error("Could not load your projects");
         } finally {
           setFetchingProjects(false);
         }
       };
       fetchMyProjects();
       
-      // Reset form
+      // Reset form (except projectId)
       setMessage("");
       setMilestones([]);
       setRevisionsAllowed(3);
       setFiles([]);
     }
-  }, [isOpen]);
+  }, [isOpen, projectId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      
+
       // Check for 10MB limit
       const oversized = newFiles.filter(f => f.size > 10 * 1024 * 1024);
       if (oversized.length > 0) {
@@ -118,7 +117,7 @@ export function InviteFreelancerModal({
     0
   );
 
-  const handleInvite = async () => {
+  const handleSendContract = async () => {
     if (!selectedProjectId) {
       toast.error("Please select a project");
       return;
@@ -126,24 +125,10 @@ export function InviteFreelancerModal({
 
     const projectBudget = selectedProject?.budget || 0;
 
-    // Validate if milestones sum up to project budget
     if (milestones.length > 0) {
       if (Math.abs(totalMilestoneBudget - projectBudget) > 0.01) {
         toast.error(`Total milestone amount ($${totalMilestoneBudget}) must equal project budget ($${projectBudget})`);
         return;
-      }
-
-      // Validate milestone fields
-      for (let i = 0; i < milestones.length; i++) {
-        const m = milestones[i];
-        if (!m.title.trim()) {
-          toast.error(`Milestone ${i + 1} is missing a title`);
-          return;
-        }
-        if (!m.amount || parseFloat(m.amount) <= 0) {
-          toast.error(`Milestone ${i + 1} requires a valid amount`);
-          return;
-        }
       }
     }
 
@@ -154,7 +139,6 @@ export function InviteFreelancerModal({
       formData.append("message", message);
       formData.append("milestones", JSON.stringify(milestones));
       formData.append("revisionsAllowed", (milestones.length > 0 ? 0 : revisionsAllowed).toString());
-      // Always send project budget if no milestones, or totalMilestoneBudget if milestones (they should match)
       formData.append("budget", (milestones.length > 0 ? totalMilestoneBudget : projectBudget).toString());
       
       files.forEach((file) => {
@@ -165,13 +149,11 @@ export function InviteFreelancerModal({
         headers: { "Content-Type": "multipart/form-data" },
       });
       
-      toast.success(`Invitation sent to ${freelancerName}!`);
+      toast.success(`Contract invitation sent to ${freelancerName}!`);
       onSuccess?.();
       onClose();
     } catch (err: any) {
-      const errorMsg =
-        err.response?.data?.message || "Failed to send invitation";
-      toast.error(errorMsg);
+      toast.error(err.response?.data?.message || "Failed to send contract");
     } finally {
       setLoading(false);
     }
@@ -182,12 +164,11 @@ export function InviteFreelancerModal({
       <DialogContent className="max-w-3xl border-none bg-card/95 backdrop-blur-xl rounded-[2rem] shadow-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="space-y-2 p-6 pb-4 border-b border-border/40 shrink-0">
           <DialogTitle className="text-2xl font-black tracking-tight">
-            Invite{" "}
+            Send Contract to{" "}
             <span className="text-primary italic">{freelancerName}</span>
           </DialogTitle>
           <DialogDescription className="text-sm font-medium text-muted-foreground">
-            Define the project terms, milestones, and budget for this direct
-            invitation.
+            Formalize your agreement by defining milestones and revisions.
           </DialogDescription>
         </DialogHeader>
 
@@ -195,7 +176,7 @@ export function InviteFreelancerModal({
           {/* Project Selection */}
           <div className="space-y-3">
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-              Active Project {selectedProject?.budget && <span className="text-primary ml-1">(Budget: ${selectedProject.budget})</span>}
+              Target Project {selectedProject?.budget && <span className="text-primary ml-1">(Budget: ${selectedProject.budget})</span>}
             </label>
             {fetchingProjects ? (
               <div className="h-12 flex items-center justify-center bg-accent/20 rounded-xl">
@@ -205,6 +186,7 @@ export function InviteFreelancerModal({
               <Select
                 value={selectedProjectId}
                 onValueChange={setSelectedProjectId}
+                disabled={!!projectId} // Lock if coming from a specific project chat
               >
                 <SelectTrigger className="h-12 bg-background border-border/40 rounded-xl font-bold text-sm">
                   <SelectValue placeholder="Select a project" />
@@ -224,7 +206,7 @@ export function InviteFreelancerModal({
             ) : (
               <div className="p-4 bg-destructive/5 rounded-xl border border-destructive/10 text-center">
                 <p className="text-xs font-bold text-destructive italic">
-                  No open projects found. Please post a project first.
+                  No open projects found.
                 </p>
               </div>
             )}
@@ -232,10 +214,10 @@ export function InviteFreelancerModal({
 
           <div className="space-y-3">
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-              Invitation Message
+              Personal Message (Optional)
             </label>
             <Textarea
-              placeholder="Hi! I saw your profile and I think you'd be a great fit for this project..."
+              placeholder="Add any specific details or notes about this contract..."
               className="min-h-[100px] bg-background border-border/40 rounded-xl p-4 text-sm font-medium resize-none focus-visible:ring-primary/20"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -274,9 +256,6 @@ export function InviteFreelancerModal({
               multiple
               accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
             />
-            <p className="text-[10px] text-muted-foreground italic">
-              Share project briefs, design assets, or technical specs. Max 5 files.
-            </p>
           </div>
 
           {/* Milestones & Revisions */}
@@ -298,7 +277,7 @@ export function InviteFreelancerModal({
             Cancel
           </Button>
           <Button
-            onClick={handleInvite}
+            onClick={handleSendContract}
             disabled={loading || projects.length === 0 || (milestones.length > 0 && Math.abs(totalMilestoneBudget - (selectedProject?.budget || 0)) > 0.01)}
             className="rounded-xl h-12 px-8 font-black shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all flex items-center gap-2"
           >
@@ -307,7 +286,7 @@ export function InviteFreelancerModal({
             ) : (
               <Send className="w-4 h-4" />
             )}
-            Send Direct Invite
+            Send Contract
           </Button>
         </DialogFooter>
       </DialogContent>

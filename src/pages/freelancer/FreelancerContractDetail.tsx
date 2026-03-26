@@ -1097,6 +1097,14 @@ export default function FreelancerContractDetail() {
                         "application/x-zip-compressed",
                       ];
                       const selected = Array.from(e.target.files);
+                      
+                      // Check for 500MB limit
+                      const oversized = selected.filter(f => f.size > 500 * 1024 * 1024);
+                      if (oversized.length > 0) {
+                        toast.error("Some files are too large. Maximum 500MB per file allowed.");
+                        return;
+                      }
+
                       const valid = selected.filter((f) =>
                         ALLOWED.includes(f.type),
                       );
