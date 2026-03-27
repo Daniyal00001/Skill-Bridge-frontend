@@ -254,6 +254,40 @@ export function ClientProfileModal({
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Overview / Bio</label>
                   <Textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Tell freelancers about yourself..." rows={4} />
                 </div>
+
+                {/* Spoken Languages (Moved here) */}
+                <div className="space-y-3 pt-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                    Your Spoken Languages <span className="text-muted-foreground/50 normal-case">(max 3)</span>
+                  </label>
+                  
+                  {/* Dropdown to add */}
+                  <Select onValueChange={(val) => toggleLanguage(val)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Add a language..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languages.map((l) => (
+                        <SelectItem key={l.id} value={l.name}>{l.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Badges of selected languages */}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {(formData.spokenLanguages || []).map((lang: string) => (
+                      <Badge key={lang} className="gap-1.5 pl-3 pr-1.5 py-1.5 bg-primary/10 text-primary border-primary/20 font-semibold rounded-lg">
+                        {lang}
+                        <button type="button" onClick={() => toggleLanguage(lang)} className="hover:text-red-500 transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </Badge>
+                    ))}
+                    {(formData.spokenLanguages || []).length === 0 && (
+                      <span className="text-xs text-muted-foreground italic">No languages selected yet</span>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -300,7 +334,7 @@ export function ClientProfileModal({
                   </Select>
                 </div>
 
-                {/* Preferred Freelancer Language */}
+                {/* Preferred Freelancer Language (keeping this as is) */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Freelancer Language</label>
                   <Select value={formData.language} onValueChange={(val) => handleSelectChange("language", val)}>
@@ -315,38 +349,7 @@ export function ClientProfileModal({
                   </Select>
                 </div>
 
-                {/* Client's Spoken Languages (multi-select, max 3) */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Your Spoken Languages <span className="text-muted-foreground/50 normal-case">(max 3)</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2 p-3 border rounded-xl bg-muted/10 min-h-[48px]">
-                    {(formData.spokenLanguages || []).map((lang: string) => (
-                      <Badge key={lang} className="gap-1.5 pl-3 pr-1.5 py-1 bg-primary/10 text-primary border-primary/20 font-semibold">
-                        {lang}
-                        <button type="button" onClick={() => toggleLanguage(lang)} className="hover:text-red-500 transition-colors">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 mt-1">
-                    {languages.slice(0, 12).map((l) => (
-                      <button
-                        key={l.id}
-                        type="button"
-                        onClick={() => toggleLanguage(l.name)}
-                        className={`text-xs py-1.5 px-2 rounded-lg border transition-all font-medium ${
-                          (formData.spokenLanguages || []).includes(l.name)
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-muted-foreground border-border hover:border-primary/50"
-                        }`}
-                      >
-                        {l.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                {/* Deleted spokenLanguages section from here */}
 
                 {/* Location Preference (regions from DB) */}
                 <div className="space-y-2">

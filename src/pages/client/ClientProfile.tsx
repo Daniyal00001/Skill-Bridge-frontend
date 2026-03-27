@@ -298,7 +298,7 @@ export default function ClientProfilePage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b pb-2">
                   <h3 className="text-sm font-black uppercase tracking-widest text-foreground">My Languages</h3>
-                  <Button variant="ghost" size="icon" onClick={() => handleOpenModal("project")} className="h-8 w-8 text-muted-foreground hover:text-primary">
+                  <Button variant="ghost" size="icon" onClick={() => handleOpenModal("about")} className="h-8 w-8 text-muted-foreground hover:text-primary">
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>
