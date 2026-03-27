@@ -13,10 +13,8 @@ import {
   Languages,
   Globe2,
   ShieldCheck,
-  Briefcase,
   DollarSign,
   Award,
-  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clientService } from "@/lib/client.service";
@@ -65,9 +63,13 @@ export default function ClientProfilePage() {
     setIsModalOpen(true);
   };
 
+  // ── Derived client object ────────────────────────────────────
+  const isEmailVerified =
+    profile?.user?.isEmailVerified || !!profile?.user?.googleId || false;
+  const isPhoneVerified = !!profile?.user?.phoneNumber;
+
   const client = {
-    name:
-      profile?.fullName || profile?.user?.name || user?.name || "Name not set",
+    name: profile?.fullName || profile?.user?.name || user?.name || "Name not set",
     location: profile?.location || "Location not set",
     region: profile?.region || "",
     avatar: profile?.user?.profileImage || user?.profileImage || "",
@@ -75,20 +77,18 @@ export default function ClientProfilePage() {
     email: profile?.user?.email || user?.email,
     phoneNumber: profile?.user?.phoneNumber || "",
     verification: {
-      email:
-        profile?.user?.isEmailVerified || !!profile?.user?.googleId || false,
+      email: isEmailVerified,
       payment: profile?.user?.isPaymentVerified ?? false,
-      phone: !!profile?.user?.phoneNumber,
+      phone: isPhoneVerified,
       id: profile?.user?.isIdVerified ?? false,
     },
-    projectPreferences: {
-      hourlyRate: profile?.budgetRange || "Not set",
-      paymentType: profile?.hiringPreference || "Not set",
-      experienceNeeded: profile?.preferredExpLevel || "Not set",
-
-      language: profile?.language || "Any",
-      locationPref: profile?.locationPref || "Any location",
-      hiringMethod: profile?.hiringMethod || "Bidding",
+    preferences: {
+      hourlyBudgetMin: profile?.hourlyBudgetMin ?? null,
+      hourlyBudgetMax: profile?.hourlyBudgetMax ?? null,
+      experienceNeeded: profile?.preferredExpLevel || null,
+      language: profile?.language || null,
+      preferredRegion: profile?.preferredRegion || null,
+      spokenLanguages: profile?.spokenLanguages || [],
     },
     metrics: {
       hireRate: profile?.metrics?.hireRate || 0,
@@ -106,6 +106,13 @@ export default function ClientProfilePage() {
     },
   };
 
+  const expLabel: Record<string, string> = {
+    ENTRY: "Entry Level",
+    MID: "Mid Level",
+    SENIOR: "Senior Level",
+    EXPERT: "Expert",
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
@@ -115,18 +122,14 @@ export default function ClientProfilePage() {
           animate="visible"
           className="space-y-12"
         >
-          {/* HEADER SECTION */}
+          {/* ── HEADER ──────────────────────────────────────── */}
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8 border-b pb-10 border-border/50">
             <div className="relative group">
               <Avatar className="h-40 w-40 ring-4 ring-primary/10 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
                 <AvatarImage src={client.avatar} />
                 <AvatarFallback className="text-4xl font-black">
                   {client.name !== "Name not set"
-                    ? client.name
-                        .split(" ")
-                        .map((n: string) => n[0])
-                        .join("")
-                        .substring(0, 2)
+                    ? client.name.split(" ").map((n: string) => n[0]).join("").substring(0, 2)
                     : "CL"}
                 </AvatarFallback>
               </Avatar>
@@ -151,6 +154,7 @@ export default function ClientProfilePage() {
                 </div>
               </div>
 
+              {/* Location + Email + Verified Badge */}
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-sm font-medium text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary" />
@@ -165,16 +169,14 @@ export default function ClientProfilePage() {
                       <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg shrink-0">
                         <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                         <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tight">
-                          {" "}
-                          Email Verified
+                          Verified
                         </span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500/10 border border-red-500/20 rounded-lg shrink-0">
                         <AlertCircle className="w-3 h-3 text-red-500" />
                         <span className="text-[9px] font-black text-red-600 uppercase tracking-tight">
-                          {" "}
-                          Email Not Verified
+                          Not Verified
                         </span>
                       </div>
                     )}
@@ -182,49 +184,39 @@ export default function ClientProfilePage() {
                 )}
               </div>
 
-              {/* STATS ROW */}
+              {/* Stats Row */}
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-10 pt-4 pb-2">
                 <div className="flex flex-col items-center md:items-start gap-1">
                   <span className="text-2xl font-black text-foreground tracking-tighter">
                     {client.metrics.hireRate}%
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    Hire Rate
-                  </span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Hire Rate</span>
                 </div>
                 <div className="w-px h-8 bg-border/40 hidden sm:block" />
                 <div className="flex flex-col items-center md:items-start gap-1">
                   <span className="text-2xl font-black text-foreground tracking-tighter">
                     {client.metrics.totalProjects}
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    Projects Posted
-                  </span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Projects Posted</span>
                 </div>
                 <div className="w-px h-8 bg-border/40 hidden sm:block" />
                 <div className="flex flex-col items-center md:items-start gap-1">
                   <span className="text-2xl font-black text-foreground tracking-tighter">
                     ${client.metrics.totalSpent.toLocaleString()}
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    Total Spent
-                  </span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Total Spent</span>
                 </div>
                 <div className="w-px h-8 bg-border/40 hidden sm:block" />
                 <div className="flex flex-col items-center md:items-start gap-1">
                   {client.verification.payment ? (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">
-                        Payment Verified
-                      </span>
+                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">Payment Verified</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg">
                       <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                      <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter">
-                        Payment Not Verified
-                      </span>
+                      <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter">Payment Not Verified</span>
                     </div>
                   )}
                 </div>
@@ -245,18 +237,11 @@ export default function ClientProfilePage() {
           </div>
 
           <div className="flex flex-col gap-12">
-            {/* 1. OVERVIEW (PROFILE) */}
+            {/* ── 1. PROFILE OVERVIEW ─────────────────────────── */}
             <div className="space-y-4 max-w-full overflow-hidden">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">
-                  Profile Overview
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleOpenModal("about")}
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
-                >
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Profile Overview</h3>
+                <Button variant="ghost" size="icon" onClick={() => handleOpenModal("about")} className="h-8 w-8 text-muted-foreground hover:text-primary">
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
@@ -265,69 +250,73 @@ export default function ClientProfilePage() {
               </p>
             </div>
 
-            {/* 2. TRUST AND VERIFICATION */}
+            {/* ── 2. TRUST & VERIFICATION ─────────────────────── */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">
-                  Trust & Verification
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleOpenModal("verification")}
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
-                >
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Trust & Verification</h3>
+                <Button variant="ghost" size="icon" onClick={() => handleOpenModal("verification")} className="h-8 w-8 text-muted-foreground hover:text-primary">
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  {
-                    label: "Email Verified",
-                    verified: client.verification.email,
-                  },
-                  {
-                    label: "Phone Verified",
-                    verified: client.verification.phone,
-                  },
+                  { label: "Email Verified", verified: client.verification.email },
+                  { label: "Phone Verified", verified: client.verification.phone },
                 ].map(({ label, verified }) => (
                   <div
                     key={label}
                     className="flex items-center justify-between p-4 bg-muted/20 border rounded-xl"
                   >
-                    <span
-                      className={cn(
-                        "text-sm font-semibold",
-                        verified ? "text-foreground" : "text-muted-foreground",
-                      )}
-                    >
+                    <span className={cn("text-sm font-semibold", verified ? "text-foreground" : "text-muted-foreground")}>
                       {label}
                     </span>
-                    {verified ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    ) : (
-                      <span className="text-xs font-bold text-muted-foreground/50">
-                        Unverified
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {verified ? (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                      ) : (
+                        <>
+                          <span className="text-xs font-bold text-muted-foreground/50">Unverified</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs font-bold"
+                            onClick={() => handleOpenModal("verification")}
+                          >
+                            Verify Now
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 3. PROJECT PREFERENCES */}
+            {/* ── 3. CLIENT'S SPOKEN LANGUAGES ────────────────── */}
+            {client.preferences.spokenLanguages.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b pb-2">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-foreground">My Languages</h3>
+                  <Button variant="ghost" size="icon" onClick={() => handleOpenModal("project")} className="h-8 w-8 text-muted-foreground hover:text-primary">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {client.preferences.spokenLanguages.map((lang: string) => (
+                    <Badge key={lang} className="px-3 py-1.5 text-sm font-semibold bg-primary/5 text-primary border-primary/20">
+                      {lang}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── 4. PREFERRED FREELANCER ─────────────────────── */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">
-                  Preferred Freelancer
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleOpenModal("project")}
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
-                >
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Preferred Freelancer</h3>
+                <Button variant="ghost" size="icon" onClick={() => handleOpenModal("project")} className="h-8 w-8 text-muted-foreground hover:text-primary">
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
@@ -337,38 +326,36 @@ export default function ClientProfilePage() {
                   {
                     icon: DollarSign,
                     label: "Hourly Rate",
-                    value: client.projectPreferences.budget,
+                    value:
+                      client.preferences.hourlyBudgetMin !== null &&
+                      client.preferences.hourlyBudgetMax !== null
+                        ? `$${client.preferences.hourlyBudgetMin} – $${client.preferences.hourlyBudgetMax}/hr`
+                        : "Not set",
                   },
-
                   {
                     icon: Award,
                     label: "Experience Level",
-                    value: client.projectPreferences.experienceNeeded,
+                    value: client.preferences.experienceNeeded
+                      ? expLabel[client.preferences.experienceNeeded] || client.preferences.experienceNeeded
+                      : "Not set",
                   },
-
                   {
                     icon: Languages,
                     label: "Preferred Language",
-                    value: client.projectPreferences.language,
+                    value: client.preferences.language || "Any",
                   },
-
                   {
                     icon: Globe2,
                     label: "Location Preference",
-                    value: client.projectPreferences.locationPref,
+                    value: client.preferences.preferredRegion || "Any location",
                   },
                 ].map(({ icon: Icon, label, value }) => (
-                  <div
-                    key={label}
-                    className="flex gap-4 items-start p-4 bg-muted/10 border rounded-xl shadow-sm"
-                  >
+                  <div key={label} className="flex gap-4 items-start p-4 bg-muted/10 border rounded-xl shadow-sm">
                     <div className="mt-1 p-2 bg-primary/10 rounded-xl text-primary shrink-0">
                       <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-muted-foreground tracking-wider uppercase">
-                        {label}
-                      </p>
+                      <p className="text-xs font-bold text-muted-foreground tracking-wider uppercase">{label}</p>
                       <p className="text-base font-semibold mt-1">{value}</p>
                     </div>
                   </div>
