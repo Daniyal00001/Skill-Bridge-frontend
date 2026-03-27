@@ -66,7 +66,7 @@ export default function ClientProfilePage() {
   // ── Derived client object ────────────────────────────────────
   const isEmailVerified =
     profile?.user?.isEmailVerified || !!profile?.user?.googleId || false;
-  const isPhoneVerified = !!profile?.user?.phoneNumber;
+  const isPhoneVerified = profile?.user?.isPhoneVerified ?? false;
 
   const client = {
     name: profile?.fullName || profile?.user?.name || user?.name || "Name not set",

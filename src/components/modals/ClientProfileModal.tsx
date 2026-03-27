@@ -61,6 +61,18 @@ export function ClientProfileModal({
     new Set(locations.map((l) => l.region).filter(Boolean))
   ).sort() as string[];
 
+  // 📝 Phone OTP Cooldown Timer
+  const [phoneTimer, setPhoneTimer] = useState(0);
+  useEffect(() => {
+    let interval: any;
+    if (phoneTimer > 0) {
+      interval = setInterval(() => {
+        setPhoneTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [phoneTimer]);
+
   useEffect(() => {
     if (isOpen) {
       setActiveTab(defaultSection);
@@ -169,11 +181,19 @@ export function ClientProfileModal({
   // ── Phone OTP flow ────────────────────────────────────────────
   const handleRequestPhone = async () => {
     if (!newPhone) return toast.error("Please enter a phone number");
+    
+    // International standard regex
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(newPhone)) {
+      return toast.error("Invalid format. Use international standard (e.g., +923001234567)");
+    }
+
     setPhoneLoading(true);
     try {
       await clientService.requestPhoneOtp(newPhone);
-      toast.success("OTP sent to WhatsApp");
+      toast.success("OTP sent successfully!");
       setPhoneStep("otp");
+      setPhoneTimer(300); // 5 minute countdown
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to send OTP");
     } finally {
@@ -188,7 +208,8 @@ export function ClientProfileModal({
       await clientService.verifyPhoneOtp(phoneOtp);
       toast.success("Phone number verified!");
       setPhoneStep("idle");
-      onSuccess();
+      onSuccess(); // Refresh profile
+      onClose();   // Auto-close modal on success
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Invalid or expired OTP");
     } finally {
@@ -377,29 +398,65 @@ export function ClientProfileModal({
                 <div className="p-5 border rounded-2xl space-y-4 bg-muted/10">
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-black uppercase tracking-wider">Verify Phone via WhatsApp</span>
+                    <span className="text-sm font-black uppercase tracking-wider">Verify Phone via SMS</span>
                   </div>
 
                   {phoneStep === "idle" ? (
-                    <div className="flex gap-2">
-                      <Input
-                        value={newPhone}
-                        onChange={(e) => setNewPhone(e.target.value)}
-                        placeholder="+92 300 1234567"
-                      />
-                      <Button type="button" onClick={handleRequestPhone} disabled={phoneLoading} className="shrink-0">
-                        {phoneLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send OTP"}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-xs text-muted-foreground">OTP sent to WhatsApp: <strong>{newPhone}</strong></p>
+                    <div className="space-y-4">
                       <div className="flex gap-2">
                         <Input
+                          value={newPhone}
+                          onChange={(e) => setNewPhone(e.target.value.replace(/[^0-9+]/g, ""))} // Numbers and + only
+                          placeholder="+92 300 1234567"
+                          inputMode="tel"
+                        />
+                        <Button 
+                          type="button" 
+                          onClick={handleRequestPhone} 
+                          disabled={phoneLoading || phoneTimer > 0} 
+                          className="shrink-0"
+                        >
+                          {phoneLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : phoneTimer > 0 ? (
+                            `${Math.floor(phoneTimer / 60)}:${(phoneTimer % 60).toString().padStart(2, "0")}`
+                          ) : (
+                            "Send SMS"
+                          )}
+                        </Button>
+                      </div>
+
+                      {phoneTimer > 0 && (
+                        <div className="flex justify-center">
+                          <Button 
+                            type="button" 
+                            variant="link" 
+                            onClick={() => setPhoneStep("otp")}
+                            className="text-[10px] font-black uppercase tracking-widest text-primary h-auto p-0"
+                          >
+                            Already have an OTP? Enter it here
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                  <div className="space-y-3">
+                    <p className="text-xs text-muted-foreground flex justify-between items-center">
+                      <span>OTP sent to SIM: <strong>{newPhone}</strong></span>
+                      {phoneTimer > 0 && (
+                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          Resend in {Math.floor(phoneTimer / 60)}:{(phoneTimer % 60).toString().padStart(2, "0")}
+                        </span>
+                      )}
+                    </p>
+                    <div className="flex gap-2">
+                        <Input
                           value={phoneOtp}
-                          onChange={(e) => setPhoneOtp(e.target.value)}
+                          onChange={(e) => setPhoneOtp(e.target.value.replace(/[^0-9]/g, ""))} // Numbers only
                           placeholder="Enter 6-digit OTP"
                           maxLength={6}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                         />
                         <Button type="button" onClick={handleVerifyPhone} disabled={phoneLoading} className="shrink-0">
                           {phoneLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify"}
@@ -410,7 +467,9 @@ export function ClientProfileModal({
                       </div>
                     </div>
                   )}
-                  <p className="text-xs text-muted-foreground">⚠️ WhatsApp OTP is logged to the backend console for testing. A real provider (Twilio/Meta) can be plugged in later.</p>
+                  <p className="text-xs text-muted-foreground text-emerald-600 font-bold bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
+                    Real-time SMS verification is active via Twilio. Please include your country code (e.g., +92).
+                  </p>
                 </div>
               </div>
             )}

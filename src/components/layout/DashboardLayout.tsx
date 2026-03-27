@@ -98,7 +98,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
     if (user) {
       fetchUnreadChat();
-      const interval = setInterval(fetchUnreadChat, 30000); // Poll every 30s
 
       const socket = getSocket();
       const handleUpdate = ({ count }: { count: number }) => {
@@ -108,7 +107,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       socket.on("unread_count_update", handleUpdate);
 
       return () => {
-        clearInterval(interval);
         socket.off("unread_count_update", handleUpdate);
       };
     }
