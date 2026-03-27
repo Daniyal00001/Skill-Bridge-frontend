@@ -31,6 +31,8 @@ export interface ClientDashboardData {
     committedBudget: number;
     pendingProposals: number;
     shortlistedProposals: number;
+    hireRate: number;
+    totalProjects: number;
   };
   lists: {
     openProjects: any[];

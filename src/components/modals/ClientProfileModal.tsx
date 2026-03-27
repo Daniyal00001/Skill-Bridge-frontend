@@ -43,6 +43,9 @@ export function ClientProfileModal({
         budgetRange: initialData?.budgetRange || "",
         preferredExpLevel: initialData?.preferredExpLevel || "",
         commMethod: initialData?.commMethod || "",
+        language: initialData?.language || "",
+        locationPref: initialData?.locationPref || "",
+        hiringMethod: initialData?.hiringMethod || "",
       });
     }
   }, [isOpen, initialData, defaultSection]);
@@ -122,20 +125,7 @@ export function ClientProfileModal({
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Phone Number</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        name="phoneNumber"
-                        className="pl-9"
-                        value={formData.phoneNumber}
-                        onChange={(e) => handlePhoneChange(e.target.value)}
-                        placeholder="+1-202-555-0123"
-                      />
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Country</label>
                     <Select
@@ -239,7 +229,7 @@ export function ClientProfileModal({
                       onValueChange={(val) => handleSelectChange("commMethod", val)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select communication method..." />
+                        <SelectValue placeholder="Select method..." />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Platform Chat">Platform Chat</SelectItem>
@@ -248,6 +238,56 @@ export function ClientProfileModal({
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Preferred Language</label>
+                    <Select
+                      value={formData.language}
+                      onValueChange={(val) => handleSelectChange("language", val)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Urdu">Urdu</SelectItem>
+                        <SelectItem value="Spanish">Spanish</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Hiring Method</label>
+                    <Select
+                      value={formData.hiringMethod}
+                      onValueChange={(val) => handleSelectChange("hiringMethod", val)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select method..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Bidding">Bidding</SelectItem>
+                        <SelectItem value="Direct Hire">Direct Hire</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Location Preference</label>
+                  <Select
+                    value={formData.locationPref}
+                    onValueChange={(val) => handleSelectChange("locationPref", val)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location preference..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Any location">Any location</SelectItem>
+                      <SelectItem value="Same Region">Same Region</SelectItem>
+                      <SelectItem value="Same Country">Same Country</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   These preferences help us recommend the right freelancers for your projects.
