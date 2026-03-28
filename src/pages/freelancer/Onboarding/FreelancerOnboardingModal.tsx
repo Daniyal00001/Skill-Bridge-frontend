@@ -51,7 +51,8 @@ const WEIGHTS = {
   skills: 15,        // Skills (≥1)
   languages: 5,      // Languages (≥1)
   education: 5,      // Education (≥1 entry)
-  profileImage: 15,  // Profile image
+  profileImage: 10,  // Profile image (Reduced from 15)
+  budget: 5,         // Preferred Budget Range (NEW)
   portfolio: 10,     // Cert / gig / portfolio
   links: 5,          // Any social link
 } as const;
@@ -173,6 +174,8 @@ export function FreelancerOnboardingModal({
     linkedin: profile?.linkedin || "",
     portfolio: profile?.portfolio || "",
     website: profile?.website || "",
+    preferredBudgetMin: profile?.preferredBudgetMin?.toString() || "",
+    preferredBudgetMax: profile?.preferredBudgetMax?.toString() || "",
     preferredCategories: profile?.preferredCategories || [],
   });
 
@@ -198,6 +201,8 @@ export function FreelancerOnboardingModal({
             bio: formData.bio,
             availability: formData.availability,
             experienceLevel: formData.experienceLevel,
+            preferredBudgetMin: formData.preferredBudgetMin ? Number(formData.preferredBudgetMin) : undefined,
+            preferredBudgetMax: formData.preferredBudgetMax ? Number(formData.preferredBudgetMax) : undefined,
           });
         } catch (e) {
           console.error("Auto-save Step 2 failed", e);
@@ -280,8 +285,13 @@ export function FreelancerOnboardingModal({
       id: 2,
       label: "Professional",
       icon: Briefcase,
-      weight: WEIGHTS.hourlyRate + WEIGHTS.bio + WEIGHTS.experienceLevel,
-      isComplete: !!(Number(formData.hourlyRate) >= 5 && formData.bio?.trim().length >= 100),
+      weight: WEIGHTS.hourlyRate + WEIGHTS.bio + WEIGHTS.experienceLevel + WEIGHTS.budget,
+      isComplete: !!(
+        Number(formData.hourlyRate) >= 5 &&
+        formData.bio?.trim().length >= 100 &&
+        Number(formData.preferredBudgetMin) > 0 &&
+        Number(formData.preferredBudgetMax) > 0
+      ),
     },
     {
       id: 3,
@@ -360,6 +370,8 @@ export function FreelancerOnboardingModal({
           bio: formData.bio,
           availability: formData.availability,
           experienceLevel: formData.experienceLevel,
+          preferredBudgetMin: formData.preferredBudgetMin ? Number(formData.preferredBudgetMin) : undefined,
+          preferredBudgetMax: formData.preferredBudgetMax ? Number(formData.preferredBudgetMax) : undefined,
         });
       } else if (step === 3) {
         await freelancerService.updateOnboardingStep3({
@@ -780,6 +792,39 @@ export function FreelancerOnboardingModal({
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-bold flex items-center gap-2">
+                    Preferred Project Budget Range ($)
+                    <WeightBadge pct={WEIGHTS.budget} isComplete={Number(formData.preferredBudgetMin) > 0 && Number(formData.preferredBudgetMax) > 0} />
+                  </Label>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Minimum Budget</Label>
+                    <Input
+                      type="number"
+                      name="preferredBudgetMin"
+                      value={formData.preferredBudgetMin}
+                      onChange={handleChange}
+                      placeholder="e.g. 500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Maximum Budget</Label>
+                    <Input
+                      type="number"
+                      name="preferredBudgetMax"
+                      value={formData.preferredBudgetMax}
+                      onChange={handleChange}
+                      placeholder="e.g. 5000"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground italic">
+                  This helps us recommend projects that fit your expectations.
+                </p>
               </div>
             </div>
           )}

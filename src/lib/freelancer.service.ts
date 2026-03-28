@@ -27,6 +27,8 @@ export const freelancerService = {
     bio: string;
     availability: string;
     experienceLevel: string;
+    preferredBudgetMin?: number;
+    preferredBudgetMax?: number;
   }) => {
     const response = await api.post("/freelancers/onboarding/step-2", data);
     return response.data;
