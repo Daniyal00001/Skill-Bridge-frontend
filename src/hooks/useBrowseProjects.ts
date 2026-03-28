@@ -40,7 +40,6 @@ export interface ScoredProject {
   client: {
     id: string;
     fullName: string;
-    company?: string;
     isVerified: boolean;
     averageRating?: number;
     totalHires?: number;
