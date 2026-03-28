@@ -127,7 +127,7 @@ export function useBrowseProjects() {
     setLoading(true);
     cursorRef.current = undefined;
     try {
-      const res = await api.get(`/browse/projects?${buildParams()}`);
+      const res = await api.get(`/browse-projects/projects?${buildParams()}`);
       const projects = res.data.projects as ScoredProject[];
       setProjects(projects);
       setSections(res.data.sections);
@@ -159,7 +159,7 @@ export function useBrowseProjects() {
     setLoadingMore(true);
     try {
       const res = await api.get(
-        `/browse/projects?${buildParams(cursorRef.current)}`
+        `/browse-projects/projects?${buildParams(cursorRef.current)}`
       );
       // APPEND to existing list — not replace
       const newProjects = res.data.projects as ScoredProject[];
@@ -225,7 +225,7 @@ export function useBrowseProjects() {
       });
 
       try {
-        await api.post(`/browse/projects/${projectId}/save`);
+        await api.post(`/browse-projects/projects/${projectId}/save`);
       } catch {
         // Revert optimistic update on failure
         setSavedIds((prev) => {
@@ -242,7 +242,7 @@ export function useBrowseProjects() {
   const trackView = useCallback(
     (projectId: string) => {
       api
-        .post(`/browse/projects/${projectId}/view`)
+        .post(`/browse-projects/projects/${projectId}/view`)
         .catch(() => {}); // silently ignore errors
     },
     []
