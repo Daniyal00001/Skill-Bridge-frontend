@@ -73,7 +73,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [unreadChatCount, setUnreadChatCount] = useState<number>(0);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState<number>(0);
+  const [unreadNotificationCount, setUnreadNotificationCount] =
+    useState<number>(0);
 
   useEffect(() => {
     if (user?.role === "FREELANCER") {
@@ -109,15 +110,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       fetchNotifications();
 
       const socket = getSocket();
-      
+
       const handleUnreadChatUpdate = ({ count }: { count: number }) => {
         setUnreadChatCount(count);
       };
 
       const handleNewNotification = (notification: any) => {
-        setNotifications(prev => [notification, ...prev].slice(0, 10));
-        setUnreadNotificationCount(prev => prev + 1);
-        
+        setNotifications((prev) => [notification, ...prev].slice(0, 10));
+        setUnreadNotificationCount((prev) => prev + 1);
+
         // Show a nice toast
         toast(notification.title, {
           description: notification.body,
@@ -189,7 +190,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 href: "/client/messages",
                 badge: unreadChatCount > 0 ? unreadChatCount : undefined,
               },
-              { icon: Briefcase, label: "My Contracts", href: "/client/contracts" },
+              {
+                icon: Briefcase,
+                label: "My Contracts",
+                href: "/client/contracts",
+              },
               { icon: Star, label: "Reviews", href: "/client/reviews" },
             ],
           },
@@ -571,20 +576,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <div className="flex items-center justify-between px-4 py-2 border-b">
-                  <span className="font-bold text-sm text-foreground/80">Notifications</span>
+                  <span className="font-bold text-sm text-foreground/80">
+                    Notifications
+                  </span>
                   {unreadNotificationCount > 0 && (
-                     <button 
-                        className="text-[10px] text-primary hover:underline font-bold"
-                        onClick={async () => {
-                          try {
-                            await api.patch('/notifications/read-all');
-                            setUnreadNotificationCount(0);
-                            setNotifications(prev => prev.map(n => ({...n, isRead: true})));
-                          } catch(err){}
-                        }}
-                     >
-                        Mark all as read
-                     </button>
+                    <button
+                      className="text-[10px] text-primary hover:underline font-bold"
+                      onClick={async () => {
+                        try {
+                          await api.patch("/notifications/mark-all-read");
+                          setUnreadNotificationCount(0);
+                          setNotifications((prev) =>
+                            prev.map((n) => ({ ...n, isRead: true })),
+                          );
+                          toast.success("All notifications marked as read");
+                        } catch (err) {
+                          toast.error("Failed to mark all as read");
+                        }
+                      }}
+                    >
+                      Mark all as read
+                    </button>
                   )}
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">
@@ -598,23 +610,49 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={n.id}
                         className={cn(
                           "flex flex-col items-start gap-1 py-3 cursor-pointer border-b last:border-0",
-                          !n.isRead && "bg-primary/5 shadow-inner border-l-2 border-l-primary"
+                          !n.isRead &&
+                            "bg-primary/5 shadow-inner border-l-2 border-l-primary",
                         )}
-                        onClick={() => {
+                        onClick={async () => {
                           if (!n.isRead) {
-                            api.patch(`/notifications/${n.id}/read`);
-                            setUnreadNotificationCount(prev => Math.max(0, prev - 1));
-                            setNotifications(prev => prev.map(item => item.id === n.id ? {...item, isRead: true} : item));
+                            try {
+                              await api.patch(
+                                `/notifications/${n.id}/mark-read`,
+                              );
+                              setUnreadNotificationCount((prev) =>
+                                Math.max(0, prev - 1),
+                              );
+                              setNotifications((prev) =>
+                                prev.map((item) =>
+                                  item.id === n.id
+                                    ? { ...item, isRead: true }
+                                    : item,
+                                ),
+                              );
+                            } catch (err) {
+                              toast.error(
+                                "Failed to mark notification as read",
+                              );
+                            }
                           }
                           if (n.link) navigate(n.link);
                         }}
                       >
                         <div className="flex w-full justify-between items-start gap-2">
-                          <span className={cn("font-bold text-[13px] leading-tight", !n.isRead ? "text-foreground" : "text-muted-foreground")}>
+                          <span
+                            className={cn(
+                              "font-bold text-[13px] leading-tight",
+                              !n.isRead
+                                ? "text-foreground"
+                                : "text-muted-foreground",
+                            )}
+                          >
                             {n.title}
                           </span>
                           <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">
-                            {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(n.createdAt), {
+                              addSuffix: true,
+                            })}
                           </span>
                         </div>
                         <span className="text-xs text-muted-foreground line-clamp-2">
