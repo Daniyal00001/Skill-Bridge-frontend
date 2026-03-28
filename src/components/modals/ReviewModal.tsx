@@ -53,7 +53,7 @@ export function ReviewModal({
       toast.success(
         res.data.reviewStatus === "BOTH_REVEALED"
           ? "Both reviews submitted! Check each other's feedback."
-          : "Review submitted! Waiting for the other party."
+          : "Review submitted! Waiting for the other party.",
       );
       onSuccess?.();
       onClose();
@@ -77,8 +77,7 @@ export function ReviewModal({
             <span className="font-semibold">
               {revieweeRole === "CLIENT" ? "client" : "freelancer"}
             </span>{" "}
-            for{" "}
-            <span className="font-semibold italic">"{projectTitle}"</span>.
+            for <span className="font-semibold italic">"{projectTitle}"</span>.
             Your review is hidden until both parties submit — or 7 days pass.
           </DialogDescription>
         </DialogHeader>
@@ -94,48 +93,50 @@ export function ReviewModal({
                 <button
                   key={star}
                   type="button"
-                  className="transition-transform hover:scale-110 focus:outline-none"
+                  className="focus:outline-none"
                   onMouseEnter={() => setHovered(star)}
                   onMouseLeave={() => setHovered(0)}
                   onClick={() => setRating(star)}
                 >
                   <Star
                     className={cn(
-                      "w-10 h-10 transition-colors duration-150",
+                      "w-8 h-8 transition-colors duration-150",
                       star <= displayRating
                         ? "fill-yellow-400 text-yellow-400"
-                        : "text-muted-foreground/30"
+                        : "text-muted-foreground/30",
                     )}
                   />
                 </button>
               ))}
             </div>
-            {displayRating > 0 && (
-              <p
-                className={cn(
-                  "text-sm font-black animate-in fade-in duration-200",
-                  displayRating >= 5
-                    ? "text-emerald-600"
-                    : displayRating >= 4
-                    ? "text-blue-600"
-                    : displayRating >= 3
-                    ? "text-amber-600"
-                    : "text-red-500"
-                )}
-              >
-                {ratingLabels[displayRating]}
-              </p>
-            )}
           </div>
 
           {/* Comment */}
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-              <MessageSquare className="w-3.5 h-3.5" />
-              Comment{" "}
-              <span className="font-normal normal-case tracking-normal">
-                (optional)
-              </span>
+            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center justify-between w-full">
+              <div className="flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5" />
+                Comment{" "}
+                <span className="font-normal normal-case tracking-normal">
+                  (optional)
+                </span>
+              </div>
+              {displayRating > 0 && (
+                <span
+                  className={cn(
+                    "animate-in fade-in slide-in-from-right-2 duration-300",
+                    displayRating >= 5
+                      ? "text-emerald-600"
+                      : displayRating >= 4
+                        ? "text-blue-600"
+                        : displayRating >= 3
+                          ? "text-amber-600"
+                          : "text-red-500",
+                  )}
+                >
+                  {ratingLabels[displayRating]}
+                </span >
+              )}
             </label>
             <Textarea
               placeholder={`Describe your experience working with this ${revieweeRole === "CLIENT" ? "client" : "freelancer"}...`}
