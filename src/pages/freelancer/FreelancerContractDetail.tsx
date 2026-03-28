@@ -45,6 +45,7 @@ import {
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { ReviewModal } from "@/components/modals/ReviewModal";
 
 type MilestoneStatus =
   | "PENDING"
@@ -190,6 +191,14 @@ export default function FreelancerContractDetail() {
     files: File[];
   }>({ open: false, milestoneId: "", deliverables: "", files: [] });
 
+  // ── Review state ──
+  const [reviewModal, setReviewModal] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState<{
+    reviewStatus: "PENDING" | "WAITING" | "REVEALED";
+    myReview: any;
+    theirReview: any;
+  } | null>(null);
+
   const fetchContract = useCallback(async () => {
     try {
       const res = await api.get(`/contracts/${contractId}`);
@@ -202,9 +211,22 @@ export default function FreelancerContractDetail() {
     }
   }, [contractId, navigate]);
 
+  const fetchReviewStatus = useCallback(async () => {
+    try {
+      const res = await api.get(`/reviews/contract/${contractId}/status`);
+      setReviewStatus(res.data);
+    } catch {
+      // Non-critical
+    }
+  }, [contractId]);
+
   useEffect(() => {
     fetchContract();
   }, [fetchContract]);
+
+  useEffect(() => {
+    if (contract?.status === "COMPLETED") fetchReviewStatus();
+  }, [contract?.status, fetchReviewStatus]);
 
   const handleStart = async (milestoneId: string) => {
     setProcessingId(milestoneId);
@@ -1021,21 +1043,114 @@ export default function FreelancerContractDetail() {
           })}
         </div>
 
-        {/* Contract Complete */}
+        {/* Contract Complete + Review Section */}
         {contract.status === "COMPLETED" && (
-          <Card className="rounded-2xl border-emerald-400/30 bg-emerald-500/5 p-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-              <Star className="w-10 h-10 text-emerald-500" />
-            </div>
-            <h2 className="text-3xl font-black text-emerald-700 dark:text-emerald-400">
-              Contract Completed! 🎉
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              All milestones approved. $
-              {contract.releasedAmount.toLocaleString()} has been released to
-              you.
-            </p>
-          </Card>
+          <div className="space-y-4">
+            <Card className="rounded-2xl border-emerald-400/30 bg-emerald-500/5 p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+              </div>
+              <h2 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">Contract Completed!</h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                All milestones approved. ${contract.releasedAmount.toLocaleString()} has been released to you.
+              </p>
+            </Card>
+
+            {/* Review Panel */}
+            <Card className="rounded-2xl border-border/40 overflow-hidden">
+              <CardHeader className="pb-3 px-5 pt-4 border-b border-border/20">
+                <CardTitle className="text-base font-black flex items-center gap-2">
+                  <Star className="w-4 h-4 text-yellow-500" /> Mutual Review
+                  <span className="text-xs font-medium text-muted-foreground ml-1">(blind until both submit)</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 space-y-4">
+                {!reviewStatus ? (
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading review status...
+                  </div>
+                ) : reviewStatus.reviewStatus === "PENDING" || (reviewStatus.reviewStatus === "WAITING" && !reviewStatus.myReview) ? (
+                  <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-400/20">
+                    <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <Star className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left">
+                      <p className="font-black text-amber-800 dark:text-amber-400">
+                        {reviewStatus.reviewStatus === "WAITING" ? "Leave a Review — Client Already Submitted!" : "Leave a Review"}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {reviewStatus.reviewStatus === "WAITING"
+                          ? "Submit yours to instantly unlock both reviews!"
+                          : `Share your experience with ${contract.clientName}. Reviews are hidden until both parties submit.`}
+                      </p>
+                    </div>
+                    <Button
+                      className="gap-2 rounded-xl font-black bg-amber-500 hover:bg-amber-600 text-white shrink-0"
+                      onClick={() => setReviewModal(true)}
+                    >
+                      <Star className="w-4 h-4" /> Leave Review
+                    </Button>
+                  </div>
+                ) : reviewStatus.reviewStatus === "WAITING" && reviewStatus.myReview ? (
+                  <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-400/20 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="font-black text-blue-800 dark:text-blue-400">Review Submitted — Waiting for Client</p>
+                        <p className="text-xs text-muted-foreground">Your review is sealed. It will be revealed once the client submits or after the deadline.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 p-3 rounded-lg bg-muted/30 w-fit">
+                      {[1,2,3,4,5].map(s => (
+                        <Star key={s} className={cn("w-4 h-4", s <= reviewStatus.myReview.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20")} />
+                      ))}
+                      <span className="text-sm font-black ml-1">{reviewStatus.myReview.rating}/5</span>
+                    </div>
+                    {reviewStatus.myReview.reviewDeadline && (
+                      <p className="text-xs text-muted-foreground">
+                        Auto-reveals: {new Date(reviewStatus.myReview.reviewDeadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    )}
+                  </div>
+                ) : reviewStatus.reviewStatus === "REVEALED" ? (
+                  <div className="space-y-4">
+                    {reviewStatus.myReview && (
+                      <div className="p-4 rounded-xl bg-muted/30 border border-border/20 space-y-2">
+                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Your Review (for {contract.clientName})</p>
+                        <div className="flex items-center gap-1">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} className={cn("w-4 h-4", s <= reviewStatus.myReview.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20")} />
+                          ))}
+                          <span className="text-sm font-black ml-2">{reviewStatus.myReview.rating}/5</span>
+                        </div>
+                        {reviewStatus.myReview.comment && (
+                          <p className="text-sm text-muted-foreground leading-relaxed italic">"{reviewStatus.myReview.comment}"</p>
+                        )}
+                      </div>
+                    )}
+                    {reviewStatus.theirReview && (
+                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-400/20 space-y-2">
+                        <p className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                          {contract.clientName}'s Review of You
+                        </p>
+                        <div className="flex items-center gap-1">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} className={cn("w-4 h-4", s <= reviewStatus.theirReview.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20")} />
+                          ))}
+                          <span className="text-sm font-black ml-2">{reviewStatus.theirReview.rating}/5</span>
+                        </div>
+                        {reviewStatus.theirReview.comment && (
+                          <p className="text-sm text-muted-foreground leading-relaxed italic">"{reviewStatus.theirReview.comment}"</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Submit Deliverables Modal */}
@@ -1217,6 +1332,18 @@ export default function FreelancerContractDetail() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Review Modal */}
+        {contract && (
+          <ReviewModal
+            open={reviewModal}
+            onClose={() => setReviewModal(false)}
+            contractId={contract.id}
+            projectTitle={contract.projectTitle}
+            revieweeRole="CLIENT"
+            onSuccess={fetchReviewStatus}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

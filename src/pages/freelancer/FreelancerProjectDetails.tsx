@@ -206,14 +206,17 @@ export default function FreelancerProjectDetails() {
                       <h2 className="text-2xl font-black tracking-tight">
                         {client.name}
                       </h2>
-                      {client.rating && (
+                      {client.averageRating !== undefined && (
                         <div className="flex items-center gap-3">
                           <div className="flex items-center text-amber-500">
                             <Star className="w-4 h-4 fill-current" />
                             <span className="ml-1.5 font-black text-lg">
-                              {client.rating.toFixed(1)}
+                              {client.averageRating?.toFixed(1) || "5.0"}
                             </span>
                           </div>
+                          <span className="text-xs font-bold text-muted-foreground/60">
+                            ({client.totalReviews || 0} reviews)
+                          </span>
                         </div>
                       )}
                       <p className="text-primary font-black text-sm opacity-90">

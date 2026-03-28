@@ -26,8 +26,8 @@ export interface Freelancer {
   title: string;
   bio: string;
   hourlyRate: number | null;
-  rating: number;
-  reviewCount: number;
+  averageRating: number | null;
+  totalReviews: number;
   location: string;
   availability: "AVAILABLE" | "BUSY" | "UNAVAILABLE" | string;
   skills: string[];
@@ -135,9 +135,9 @@ export function FreelancerCard({
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                 <span className="text-foreground">
-                  {freelancer.rating?.toFixed(1) || "5.0"}
+                  {freelancer.averageRating?.toFixed(1) || "5.0"}
                 </span>
-                <span>({freelancer.reviewCount || 0})</span>
+                <span>({freelancer.totalReviews || 0})</span>
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" />

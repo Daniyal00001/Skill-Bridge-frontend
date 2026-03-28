@@ -259,6 +259,61 @@ const FreelancerProfileDetail = () => {
                 )}
               </div>
             </section>
+
+            <Separator className="bg-slate-100" />
+
+            {/* Reviews */}
+            <section className="space-y-6">
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                Client Feedback
+              </h3>
+              {freelancer.reviews?.length > 0 ? (
+                <div className="space-y-6">
+                  {freelancer.reviews.map((review: any) => (
+                    <div key={review.id} className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={review.giver?.profileImage} />
+                            <AvatarFallback className="text-[10px] font-bold">
+                              {review.giver?.name?.charAt(0) || "C"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-slate-900">
+                              {review.giver?.name}
+                            </span>
+                            <span className="text-[10px] text-slate-500">
+                              {new Date(review.revealedAt || review.submittedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={cn(
+                                "w-3 h-3",
+                                s <= review.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-slate-200",
+                              )}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600 leading-relaxed italic">
+                        "{review.comment}"
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-slate-400 italic text-sm">
+                  No public feedback available yet.
+                </div>
+              )}
+            </section>
           </div>
 
           {/* Sidebar */}
@@ -278,15 +333,20 @@ const FreelancerProfileDetail = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="space-y-0.5">
-                    <p className="text-xl font-bold text-slate-900">100%</p>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                      <p className="text-xl font-bold text-slate-900">
+                        {freelancer.averageRating?.toFixed(1) || "5.0"}
+                      </p>
+                    </div>
                     <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                      Success Rate
+                      Avg. Rating ({freelancer.totalReviews || 0} reviews)
                     </p>
                   </div>
                   <div className="space-y-0.5 text-right">
-                    <p className="text-xl font-bold text-slate-900">0</p>
+                    <p className="text-xl font-bold text-slate-900">100%</p>
                     <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                      Completed Jobs
+                      Success Rate
                     </p>
                   </div>
                 </div>

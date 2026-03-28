@@ -86,8 +86,8 @@ const BrowseFreelancersPage = () => {
             name: f.fullName,
             title: f.tagline,
             skills: f.skills.map((s: any) => s.skill.name),
-            rating: 5.0,
-            reviewCount: 0,
+            averageRating: f.averageRating,
+            totalReviews: f.totalReviews,
             profileImage: f.user.profileImage,
             availability: f.availability, // Comes as enum from schema
           })),

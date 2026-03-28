@@ -66,6 +66,7 @@ import FreelancerSubmitProposal from "./pages/freelancer/FreelancerSubmitProposa
 import FreelancerContractDetail from "./pages/freelancer/FreelancerContractDetail";
 import FreelancerContracts from "./pages/freelancer/FreelancerContracts";
 import FreelancerProposalDetail from "./pages/freelancer/FreelancerProposalDetail";
+import FreelancerReviewsPage from "./pages/freelancer/FreelancerReviews";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -249,6 +250,10 @@ const App = () => (
                   <Route
                     path="/freelancer/saved"
                     element={<SavedProjects />}
+                  />
+                  <Route
+                    path="/freelancer/reviews"
+                    element={<FreelancerReviewsPage />}
                   />
                 </Route>
 

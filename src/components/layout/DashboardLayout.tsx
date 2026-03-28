@@ -40,11 +40,12 @@ import {
   Inbox,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { mockNotifications } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
+import { formatDistanceToNow } from "date-fns";
 import logo from "@/assets/logo/logo.png";
+import { toast } from "sonner";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -71,7 +72,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [unreadChatCount, setUnreadChatCount] = useState<number>(0);
-  const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState<number>(0);
 
   useEffect(() => {
     if (user?.role === "FREELANCER") {
@@ -91,23 +93,47 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       try {
         const res = await api.get("/chat/unread-count");
         setUnreadChatCount(res.data.count);
-      } catch (err) {
-        // silent
-      }
+      } catch (err) {}
+    };
+
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get("/notifications?limit=5");
+        setNotifications(res.data.notifications);
+        setUnreadNotificationCount(res.data.unreadCount);
+      } catch (err) {}
     };
 
     if (user) {
       fetchUnreadChat();
+      fetchNotifications();
 
       const socket = getSocket();
-      const handleUpdate = ({ count }: { count: number }) => {
+      
+      const handleUnreadChatUpdate = ({ count }: { count: number }) => {
         setUnreadChatCount(count);
       };
 
-      socket.on("unread_count_update", handleUpdate);
+      const handleNewNotification = (notification: any) => {
+        setNotifications(prev => [notification, ...prev].slice(0, 10));
+        setUnreadNotificationCount(prev => prev + 1);
+        
+        // Show a nice toast
+        toast(notification.title, {
+          description: notification.body,
+          action: {
+            label: "View",
+            onClick: () => navigate(notification.link || "/notifications"),
+          },
+        });
+      };
+
+      socket.on("unread_count_update", handleUnreadChatUpdate);
+      socket.on("new_notification", handleNewNotification);
 
       return () => {
-        socket.off("unread_count_update", handleUpdate);
+        socket.off("unread_count_update", handleUnreadChatUpdate);
+        socket.off("new_notification", handleNewNotification);
       };
     }
   }, [user]);
@@ -227,6 +253,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 label: "Messages",
                 href: "/freelancer/messages",
                 badge: unreadChatCount > 0 ? unreadChatCount : undefined,
+              },
+              {
+                icon: Star,
+                label: "Reviews",
+                href: "/freelancer/reviews",
               },
             ],
           },
@@ -528,39 +559,71 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
-                  {unreadNotifications > 0 && (
+                  {unreadNotificationCount > 0 && (
                     <Badge
                       variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
                     >
-                      {unreadNotifications}
+                      {unreadNotificationCount}
                     </Badge>
                   )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {mockNotifications.slice(0, 3).map((notification) => (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className="flex flex-col items-start gap-1 py-3"
-                  >
-                    <span className="font-medium">{notification.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {notification.description}
-                    </span>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/notifications"
-                    className="w-full text-center text-primary"
-                  >
-                    View all notifications
-                  </Link>
-                </DropdownMenuItem>
+                <div className="flex items-center justify-between px-4 py-2 border-b">
+                  <span className="font-bold text-sm text-foreground/80">Notifications</span>
+                  {unreadNotificationCount > 0 && (
+                     <button 
+                        className="text-[10px] text-primary hover:underline font-bold"
+                        onClick={async () => {
+                          try {
+                            await api.patch('/notifications/read-all');
+                            setUnreadNotificationCount(0);
+                            setNotifications(prev => prev.map(n => ({...n, isRead: true})));
+                          } catch(err){}
+                        }}
+                     >
+                        Mark all as read
+                     </button>
+                  )}
+                </div>
+                <div className="max-h-[300px] overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="py-8 text-center text-muted-foreground text-xs">
+                      No notifications yet
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <DropdownMenuItem
+                        key={n.id}
+                        className={cn(
+                          "flex flex-col items-start gap-1 py-3 cursor-pointer border-b last:border-0",
+                          !n.isRead && "bg-primary/5 shadow-inner border-l-2 border-l-primary"
+                        )}
+                        onClick={() => {
+                          if (!n.isRead) {
+                            api.patch(`/notifications/${n.id}/read`);
+                            setUnreadNotificationCount(prev => Math.max(0, prev - 1));
+                            setNotifications(prev => prev.map(item => item.id === n.id ? {...item, isRead: true} : item));
+                          }
+                          if (n.link) navigate(n.link);
+                        }}
+                      >
+                        <div className="flex w-full justify-between items-start gap-2">
+                          <span className={cn("font-bold text-[13px] leading-tight", !n.isRead ? "text-foreground" : "text-muted-foreground")}>
+                            {n.title}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">
+                            {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                          </span>
+                        </div>
+                        <span className="text-xs text-muted-foreground line-clamp-2">
+                          {n.body}
+                        </span>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
 

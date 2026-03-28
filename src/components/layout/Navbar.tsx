@@ -97,12 +97,7 @@ export function Navbar() {
                         <span className="text-xs text-muted-foreground">{notification.description}</span>
                       </DropdownMenuItem>
                     ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/notifications" className="w-full text-center text-primary">
-                        View all notifications
-                      </Link>
-                    </DropdownMenuItem>
+
                   </DropdownMenuContent>
                 </DropdownMenu>
 
