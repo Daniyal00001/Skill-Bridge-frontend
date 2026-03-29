@@ -3,6 +3,7 @@
  * location: frontend/src/components/browse-freelancers/FreelancerCard.tsx
  */
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +16,15 @@ import {
   Briefcase,
   ArrowRight,
   Zap,
+  MessageSquare,
+  UserPlus,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoredFreelancer } from "@/hooks/useBrowseFreelancers";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { InviteFreelancerModal } from "@/components/modals/InviteFreelancerModal";
 
 interface Props {
   freelancer: ScoredFreelancer;
@@ -46,9 +53,34 @@ const AVAILABILITY_CONFIG = {
 };
 
 export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
+  const [isMessaging, setIsMessaging] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
   const avail = AVAILABILITY_CONFIG[f.availability];
   const isVerified = f.user?.isIdVerified || f.user?.isPaymentVerified;
   const topSkills = f.skills?.slice(0, 4) ?? [];
+
+  const handleMessage = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isMessaging) return;
+    setIsMessaging(true);
+    try {
+      const res = await api.post(`/freelancers/${f.id}/message`);
+      const chatRoomId = res.data.data.id;
+      toast.success("Chat initiated successfully");
+      window.location.href = `/client/messages?room=${chatRoomId}`;
+    } catch (err) {
+      toast.error("Could not start chat");
+      setIsMessaging(false);
+    }
+  };
+
+  const handleInvite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsInviteModalOpen(true);
+  };
 
   if (view === "list") {
     return (
@@ -138,7 +170,7 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
 
           {/* Right: rate + action */}
           <div className="flex items-center gap-4 shrink-0 border-t md:border-t-0 pt-3 md:pt-0">
-            <div className="text-right">
+            <div className="text-right hidden sm:block">
               {f.hourlyRate ? (
                 <>
                   <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">
@@ -167,16 +199,41 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
                 </span>
               )}
             </div>
-            <Link to={`/client/freelancers/${f.id}`}>
+            <div className="flex items-center gap-2">
               <Button
+                size="icon"
                 variant="outline"
-                className="h-9 px-4 rounded-xl text-xs font-bold border-blue-200 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all"
+                className="h-9 w-9 rounded-xl border-blue-100 text-blue-500 hover:bg-blue-50"
+                onClick={handleMessage}
+                disabled={isMessaging}
               >
-                View Profile
+                {isMessaging ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
               </Button>
-            </Link>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-9 w-9 rounded-xl border-blue-100 text-blue-500 hover:bg-blue-50"
+                onClick={handleInvite}
+              >
+                <UserPlus className="w-4 h-4" />
+              </Button>
+              <Link to={`/client/freelancers/${f.id}`}>
+                <Button
+                  variant="outline"
+                  className="h-9 px-4 rounded-xl text-xs font-bold border-blue-200 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all"
+                >
+                  View Profile
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
+        <InviteFreelancerModal
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          freelancerId={f.id}
+          freelancerName={f.fullName}
+        />
       </Card>
     );
   }
@@ -344,16 +401,41 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
               <span className="text-xs text-slate-400">Rate negotiable</span>
             )}
           </div>
-          <Link to={`/client/freelancers/${f.id}`}>
+          <div className="flex items-center gap-1.5">
             <Button
               size="icon"
-              className="h-8 w-8 rounded-xl bg-blue-500 hover:bg-blue-600 text-white shadow-sm shadow-blue-200 group-hover:translate-x-0.5 transition-all"
+              variant="outline"
+              className="h-8 w-8 rounded-xl border-blue-100 text-blue-500 hover:bg-blue-50"
+              onClick={handleMessage}
+              disabled={isMessaging}
             >
-              <ArrowRight className="w-3.5 h-3.5" />
+              {isMessaging ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MessageSquare className="w-3.5 h-3.5" />}
             </Button>
-          </Link>
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-8 w-8 rounded-xl border-blue-100 text-blue-500 hover:bg-blue-50"
+              onClick={handleInvite}
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+            </Button>
+            <Link to={`/client/freelancers/${f.id}`}>
+              <Button
+                size="icon"
+                className="h-8 w-8 rounded-xl bg-blue-500 hover:bg-blue-600 text-white shadow-sm shadow-blue-200 group-hover:translate-x-0.5 transition-all"
+              >
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
+      <InviteFreelancerModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        freelancerId={f.id}
+        freelancerName={f.fullName}
+      />
     </Card>
   );
 };
