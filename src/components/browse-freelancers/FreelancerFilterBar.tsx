@@ -100,30 +100,7 @@ export const FreelancerFilterBar = ({
 
       <Divider compact={compact} />
 
-      {/* Availability */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
-          Status
-        </span>
-        {AVAILABILITIES.map((a) => (
-          <Chip
-            key={a}
-            label={a.charAt(0) + a.slice(1).toLowerCase()}
-            active={filters.availability === a}
-            onClick={() =>
-              onFilterChange(
-                "availability",
-                filters.availability === a ? null : a,
-              )
-            }
-            activeColor={
-              a === "AVAILABLE"
-                ? "bg-emerald-500 border-emerald-500 text-white"
-                : "bg-amber-500 border-amber-500 text-white"
-            }
-          />
-        ))}
-      </div>
+
 
       <Divider compact={compact} />
 
@@ -142,7 +119,7 @@ export const FreelancerFilterBar = ({
               type="number"
               value={filters.hourlyRateMin}
               onChange={(e) => onFilterChange("hourlyRateMin", e.target.value)}
-              className="pl-5 h-8 w-16 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300"
+              className="pl-5 pr-2 h-8 w-24 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300"
             />
           </div>
           <span className="text-slate-300 text-xs">—</span>
@@ -155,7 +132,7 @@ export const FreelancerFilterBar = ({
               type="number"
               value={filters.hourlyRateMax}
               onChange={(e) => onFilterChange("hourlyRateMax", e.target.value)}
-              className="pl-5 h-8 w-16 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300"
+              className="pl-5 pr-2 h-8 w-24 text-xs bg-blue-50/50 border-blue-100 rounded-lg focus-visible:ring-1 focus-visible:ring-blue-300"
             />
           </div>
         </div>
@@ -209,23 +186,7 @@ export const FreelancerFilterBar = ({
         </SelectContent>
       </Select>
 
-      <Divider compact={compact} />
 
-      {/* Toggle chips */}
-      <div className="flex items-center gap-1.5">
-        <Chip
-          label="Verified"
-          icon={<BadgeCheck className="w-3 h-3" />}
-          active={filters.isVerified}
-          onClick={() => onFilterChange("isVerified", !filters.isVerified)}
-        />
-        <Chip
-          label="Has Portfolio"
-          icon={<Images className="w-3 h-3" />}
-          active={filters.hasPortfolio}
-          onClick={() => onFilterChange("hasPortfolio", !filters.hasPortfolio)}
-        />
-      </div>
 
       {/* Reset */}
       {hasActive && (
