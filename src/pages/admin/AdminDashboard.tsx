@@ -166,9 +166,19 @@ export default function AdminDashboard() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
               Admin Panel
             </p>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Platform Overview
-            </h1>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Platform Overview
+              </h1>
+              {stats.lastLoginAt && (
+                 <>
+                  <span className="hidden sm:inline text-border font-light">|</span>
+                  <p className="text-sm font-medium text-red-600/80 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                    Last active: {new Date(stats.lastLoginAt).toLocaleString()}
+                  </p>
+                 </>
+              )}
+            </div>
           </div>
           <Button
             size="sm"

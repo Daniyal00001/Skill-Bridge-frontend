@@ -252,9 +252,19 @@ export default function FreelancerDashboard() {
             <h1 className="text-4xl font-black tracking-tight">
               Overview
             </h1>
-            <p className="text-muted-foreground font-medium mt-1">
-              Track your performance and manage active projects.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-muted-foreground font-medium">
+              <p>
+                Track your performance and manage active projects.
+              </p>
+              {stats.lastLoginAt && (
+                 <>
+                  <span className="hidden sm:inline text-border">|</span>
+                  <p className="text-sm font-medium text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                    Last active: {new Date(stats.lastLoginAt).toLocaleString()}
+                  </p>
+                 </>
+              )}
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button

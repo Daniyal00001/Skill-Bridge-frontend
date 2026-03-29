@@ -84,9 +84,19 @@ export default function ClientDashboard() {
               <h1 className="text-4xl font-black tracking-tight">
                 Welcome back! 👋
               </h1>
-              <p className="text-muted-foreground mt-1 text-lg">
-                Here's what's happening with your projects today
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-muted-foreground text-lg">
+                <p>
+                  Here's what's happening with your projects today
+                </p>
+                {stats.lastLoginAt && (
+                   <>
+                    <span className="hidden sm:inline text-border">|</span>
+                    <p className="text-sm font-medium text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                      Last active: {new Date(stats.lastLoginAt).toLocaleString()}
+                    </p>
+                   </>
+                )}
+              </div>
             </div>
             <Button asChild>
               <Link to="/client/post-project">+ Post a Project</Link>

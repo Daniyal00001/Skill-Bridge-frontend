@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+/**
+ * BrowseFreelancers.tsx
+ * location: frontend/src/pages/client/BrowseFreelancers.tsx
+ */
+
+import { useEffect, useRef, useCallback, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -11,434 +13,398 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Search, Filter, Loader2, X, Plus } from "lucide-react";
-import { FreelancerCard, Freelancer } from "@/components/common/FreelancerCard";
-import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { toast } from "sonner";
-import { InviteFreelancerModal } from "@/components/modals/InviteFreelancerModal";
-import { SkillAutocomplete } from "@/components/common/SkillAutocomplete";
+  LayoutGrid,
+  List,
+  Filter,
+  Search,
+  Star,
+  Zap,
+  Users,
+  TrendingUp,
+  DollarSign,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-const BrowseFreelancersPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [skillInput, setSkillInput] = useState("");
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [experienceLevel, setExperienceLevel] = useState("all");
-  const [minRate, setMinRate] = useState("");
-  const [maxRate, setMaxRate] = useState("");
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState("desc");
+import {
+  useBrowseFreelancers,
+  FreelancerSortOption,
+} from "@/hooks/useBrowseFreelancers";
+import { FreelancerCard } from "@/components/browse-freelancers/FreelancerCard";
+import { FreelancerFilterBar } from "@/components/browse-freelancers/FreelancerFilterBar";
+import {
+  SkeletonFreelancersGrid,
+  SkeletonFreelancersList,
+} from "@/components/browse-freelancers/SkeletonFreelancerCard";
 
-  const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
+const SORT_OPTIONS: { value: FreelancerSortOption; label: string }[] = [
+  { value: "best_match", label: "Best Match" },
+  { value: "top_rated", label: "Top Rated" },
+  { value: "most_experienced", label: "Most Experienced" },
+  { value: "lowest_rate", label: "Lowest Rate" },
+  { value: "highest_rate", label: "Highest Rate" },
+  { value: "recently_active", label: "Recently Active" },
+];
 
-  const [inviteModal, setInviteModal] = useState<{
-    isOpen: boolean;
-    freelancerId: string;
-    freelancerName: string;
-  }>({
-    isOpen: false,
-    freelancerId: "",
-    freelancerName: "",
-  });
+export default function BrowseFreelancers() {
+  const [view, setView] = useState<"grid" | "list">("grid");
 
-  const fetchFreelancers = useCallback(
-    async (pageIdx = 1) => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams();
-        params.set("limit", "10");
-        params.set("page", pageIdx.toString());
+  const {
+    freelancers,
+    sections,
+    total,
+    loading,
+    loadingMore,
+    hasMore,
+    filters,
+    sort,
+    updateFilter,
+    setSort,
+    resetFilters,
+    loadMore,
+  } = useBrowseFreelancers();
 
-        if (searchTerm) params.set("search", searchTerm);
-        if (selectedSkills.length > 0)
-          params.set("skills", selectedSkills.join(","));
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-        // Schema-aligned filters
-        if (experienceLevel !== "all")
-          params.set("experienceLevel", experienceLevel);
-        // Only apply rate filter if provided
-        if (minRate) params.set("minRate", minRate);
-        if (maxRate) params.set("maxRate", maxRate);
-
-        params.set("sortBy", sortBy);
-        params.set("sortOrder", sortOrder);
-
-        const res = await api.get(`/freelancers?${params.toString()}`);
-        setFreelancers(
-          res.data.data.freelancers.map((f: any) => ({
-            ...f,
-            name: f.fullName,
-            title: f.tagline,
-            skills: f.skills.map((s: any) => s.skill.name),
-            averageRating: f.averageRating,
-            totalReviews: f.totalReviews,
-            profileImage: f.user.profileImage,
-            availability: f.availability, // Comes as enum from schema
-          })),
-        );
-        setPagination(res.data.data.pagination);
-      } catch (err) {
-        console.error("Failed to fetch freelancers", err);
-        toast.error("Failed to load freelancers");
-      } finally {
-        setLoading(false);
-      }
+  const handleIntersection = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) loadMore();
     },
-    [
-      searchTerm,
-      selectedSkills,
-      experienceLevel,
-      minRate,
-      maxRate,
-      sortBy,
-      sortOrder,
-    ],
+    [hasMore, loadingMore, loadMore],
   );
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchFreelancers(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [fetchFreelancers]);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= pagination.totalPages) {
-      fetchFreelancers(page);
-    }
-  };
-
-  const addSkill = (skill: string) => {
-    const trimmed = skill.trim();
-    if (trimmed && !selectedSkills.includes(trimmed)) {
-      setSelectedSkills([...selectedSkills, trimmed]);
-      setSkillInput("");
-    }
-  };
-
-  const removeSkill = (skill: string) => {
-    setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-  };
-
-  const resetFilters = () => {
-    setSearchTerm("");
-    setSelectedSkills([]);
-    setExperienceLevel("all");
-    setMinRate("");
-    setMaxRate("");
-    setSortBy("createdAt");
-    setSortOrder("desc");
-    setSkillInput("");
-  };
-
-  const handleMessage = async (freelancer: Freelancer) => {
-    try {
-      const res = await api.post(`/freelancers/${freelancer.id}/message`);
-      const chatRoomId = res.data.data.id;
-      toast.success(`Chat started with ${freelancer.name}`);
-      // Redirect to messages page with the room active
-      window.location.href = `/client/messages?room=${chatRoomId}`;
-    } catch (err) {
-      toast.error("Could not start chat");
-    }
-  };
-
-  const handleInvite = (freelancer: Freelancer) => {
-    setInviteModal({
-      isOpen: true,
-      freelancerId: freelancer.id,
-      freelancerName: freelancer.name,
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(handleIntersection, {
+      threshold: 0.1,
     });
-  };
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [handleIntersection]);
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <header className="mb-8">
-          <h1 className="text-4xl font-black tracking-tight text-foreground">
-            Browse Freelancers
-          </h1>
-          <p className="text-muted-foreground font-medium">
-            Find the right talent for your projects from our vetted community.
-          </p>
-        </header>
+      {/* Background gradient */}
+      <div
+        className="pointer-events-none fixed top-0 right-0 z-0"
+        style={{
+          width: 500,
+          height: 500,
+          borderRadius: "50%",
+          transform: "translate(35%, -35%)",
+          background:
+            "radial-gradient(ellipse at 65% 30%, rgba(55,138,221,0.15) 0%, transparent 70%)",
+        }}
+      />
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Simplified Sidebar Filters */}
-          <aside className="w-full lg:w-64 shrink-0 space-y-6 min-w-0 max-w-full">
-            <div className="bg-card border border-border rounded-xl p-5 space-y-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="flex items-center gap-2 font-bold text-sm text-foreground">
-                  <Filter className="w-4 h-4" /> Filters
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+              Find Freelancers
+            </h1>
+            <p className="text-sm text-slate-400 mt-0.5">
+              {loading
+                ? "Finding best matches..."
+                : `${total.toLocaleString()} freelancers ranked for you`}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Sort */}
+            <Select
+              value={sort}
+              onValueChange={(v) => setSort(v as FreelancerSortOption)}
+            >
+              <SelectTrigger className="h-9 bg-white border-blue-100 rounded-xl px-3 w-[175px] text-xs font-medium">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-blue-100">
+                {SORT_OPTIONS.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="text-xs"
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Grid/List toggle */}
+            <div className="flex p-1 bg-blue-50 rounded-xl border border-blue-100">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-7 w-7 rounded-lg transition-all",
+                  view === "grid"
+                    ? "bg-white shadow-sm text-blue-500"
+                    : "text-slate-400",
+                )}
+                onClick={() => setView("grid")}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-7 w-7 rounded-lg transition-all",
+                  view === "list"
+                    ? "bg-white shadow-sm text-blue-500"
+                    : "text-slate-400",
+                )}
+                onClick={() => setView("list")}
+              >
+                <List className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+
+            {/* Mobile filter sheet */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9 rounded-xl border-blue-100 bg-white"
+                  >
+                    <Filter className="w-3.5 h-3.5 text-blue-400" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] bg-white">
+                  <div className="pt-6">
+                    <FreelancerFilterBar
+                      filters={filters}
+                      onFilterChange={updateFilter}
+                      onReset={resetFilters}
+                      compact
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter bar desktop */}
+        <div className="hidden md:block">
+          <FreelancerFilterBar
+            filters={filters}
+            onFilterChange={updateFilter}
+            onReset={resetFilters}
+          />
+        </div>
+
+        {/* Loading */}
+        {loading ? (
+          view === "grid" ? (
+            <SkeletonFreelancersGrid count={6} />
+          ) : (
+            <SkeletonFreelancersList count={5} />
+          )
+        ) : (
+          <>
+            {/* Sections — only when no active search */}
+            {sections && !filters.search && !filters.skills.length && (
+              <div className="space-y-8">
+                {sections.topRated.length > 0 && (
+                  <Section
+                    title="Top Rated"
+                    subtitle="Highest rated on the platform"
+                    icon={<Star className="w-4 h-4 text-amber-500" />}
+                  >
+                    <ScrollRow>
+                      {sections.topRated.map((f) => (
+                        <div key={f.id} className="w-[300px] shrink-0">
+                          <FreelancerCard freelancer={f} view="grid" />
+                        </div>
+                      ))}
+                    </ScrollRow>
+                  </Section>
+                )}
+
+                {sections.recentlyActive.length > 0 && (
+                  <Section
+                    title="Recently Active"
+                    subtitle="Online in the last 7 days"
+                    icon={<Zap className="w-4 h-4 text-emerald-500" />}
+                  >
+                    <ScrollRow>
+                      {sections.recentlyActive.map((f) => (
+                        <div key={f.id} className="w-[300px] shrink-0">
+                          <FreelancerCard freelancer={f} view="grid" />
+                        </div>
+                      ))}
+                    </ScrollRow>
+                  </Section>
+                )}
+
+                {sections.newTalent.length > 0 && (
+                  <Section
+                    title="New Talent"
+                    subtitle="Fresh faces — joined recently"
+                    icon={<TrendingUp className="w-4 h-4 text-blue-500" />}
+                  >
+                    <ScrollRow>
+                      {sections.newTalent.map((f) => (
+                        <div key={f.id} className="w-[300px] shrink-0">
+                          <FreelancerCard freelancer={f} view="grid" />
+                        </div>
+                      ))}
+                    </ScrollRow>
+                  </Section>
+                )}
+
+                {sections.highlyExperienced.length > 0 && (
+                  <Section
+                    title="Highly Experienced"
+                    subtitle="5+ completed contracts"
+                    icon={<Users className="w-4 h-4 text-violet-500" />}
+                  >
+                    <ScrollRow>
+                      {sections.highlyExperienced.map((f) => (
+                        <div key={f.id} className="w-[300px] shrink-0">
+                          <FreelancerCard freelancer={f} view="grid" />
+                        </div>
+                      ))}
+                    </ScrollRow>
+                  </Section>
+                )}
+
+                {sections.perfectBudgetMatch.length > 0 && (
+                  <Section
+                    title="Budget Match"
+                    subtitle="Rate fits your preferred budget"
+                    icon={<DollarSign className="w-4 h-4 text-green-500" />}
+                  >
+                    <ScrollRow>
+                      {sections.perfectBudgetMatch.map((f) => (
+                        <div key={f.id} className="w-[300px] shrink-0">
+                          <FreelancerCard freelancer={f} view="grid" />
+                        </div>
+                      ))}
+                    </ScrollRow>
+                  </Section>
+                )}
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="h-px flex-1 bg-blue-50" />
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                    All Freelancers
+                  </span>
+                  <div className="h-px flex-1 bg-blue-50" />
+                </div>
+              </div>
+            )}
+
+            {/* Main feed */}
+            <div
+              className={cn(
+                "grid gap-4",
+                view === "grid"
+                  ? "md:grid-cols-2 xl:grid-cols-3"
+                  : "grid-cols-1",
+              )}
+            >
+              <AnimatePresence mode="popLayout">
+                {freelancers.map((f, idx) => (
+                  <motion.div
+                    key={f.id}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(idx * 0.02, 0.3) }}
+                  >
+                    <FreelancerCard freelancer={f} view={view} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Empty state */}
+            {freelancers.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-32 bg-blue-50/40 rounded-2xl border border-dashed border-blue-100 text-center">
+                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                  <Search className="w-5 h-5 text-blue-300" />
+                </div>
+                <h3 className="text-base font-bold text-slate-700">
+                  No freelancers found
                 </h3>
+                <p className="text-sm text-slate-400 mt-1 max-w-xs mx-auto">
+                  Try adjusting your filters or search keywords.
+                </p>
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="outline"
                   onClick={resetFilters}
-                  className="h-6 text-[11px] font-bold text-muted-foreground hover:text-primary transition-colors"
+                  className="mt-5 rounded-lg text-xs font-bold border-blue-200 text-blue-500 hover:bg-blue-50"
                 >
-                  Clear
+                  Clear filters
                 </Button>
               </div>
-
-              {/* Search */}
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
-                  Search
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Keywords..."
-                    className="pl-9 h-10 text-sm bg-muted/30 border-border focus-visible:ring-primary/20"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Skills */}
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
-                  Skills
-                </label>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedSkills.map((skill) => (
-                      <Badge
-                        key={skill}
-                        variant="secondary"
-                        className="bg-muted text-muted-foreground border-none px-2 py-0.5 text-[10px] flex items-center gap-1.5"
-                      >
-                        {skill}
-                        <X
-                          className="w-3 h-3 cursor-pointer hover:text-foreground transition-colors"
-                          onClick={() => removeSkill(skill)}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="relative">
-                    <SkillAutocomplete
-                      value={skillInput}
-                      onChange={setSkillInput}
-                      onSelect={(val) => {
-                        addSkill(val);
-                        setSkillInput("");
-                      }}
-                      placeholder="Search skills..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator className="bg-border/50" />
-
-              {/* Experience Level - Schema Enum */}
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
-                  Experience
-                </label>
-                <Select
-                  value={experienceLevel}
-                  onValueChange={setExperienceLevel}
-                >
-                  <SelectTrigger className="h-10 text-sm bg-muted/30 border-border">
-                    <SelectValue placeholder="All Levels" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Levels</SelectItem>
-                    <SelectItem value="ENTRY">Entry Level</SelectItem>
-                    <SelectItem value="MID">Intermediate</SelectItem>
-                    <SelectItem value="SENIOR">Senior</SelectItem>
-                    <SelectItem value="EXPERT">Expert</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Rate Range */}
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
-                  Rate ($/hr)
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center gap-1 bg-muted/30 border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="text-[11px] font-bold text-muted-foreground/50">
-                      $
-                    </span>
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      value={minRate}
-                      onChange={(e) => setMinRate(e.target.value)}
-                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                  <span className="text-muted-foreground/30 font-medium">-</span>
-                  <div className="flex-1 flex items-center gap-1 bg-muted/30 border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="text-[11px] font-bold text-muted-foreground/50">
-                      $
-                    </span>
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      value={maxRate}
-                      onChange={(e) => setMaxRate(e.target.value)}
-                      className="w-full bg-transparent border-none p-0 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* Main Feed */}
-          <main className="flex-1 space-y-6 min-w-0">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                Found{" "}
-                <span className="text-foreground font-bold">
-                  {pagination.total}
-                </span>{" "}
-                freelancers
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  Sort:
-                </span>
-                <Select
-                  value={`${sortBy}-${sortOrder}`}
-                  onValueChange={(val) => {
-                    const [field, order] = val.split("-");
-                    setSortBy(field);
-                    setSortOrder(order);
-                  }}
-                >
-                  <SelectTrigger className="h-8 border-none bg-transparent hover:bg-accent text-xs font-bold w-[140px] px-2 text-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="createdAt-desc">Newest First</SelectItem>
-                    <SelectItem value="hourlyRate-asc">Lowest Rate</SelectItem>
-                    <SelectItem value="hourlyRate-desc">
-                      Highest Rate
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-20 bg-card border border-border rounded-xl">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground/30 mb-4" />
-                <p className="text-sm font-bold text-muted-foreground/50 uppercase tracking-widest">
-                  Searching Professionals...
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="grid gap-4">
-                  {freelancers.map((freelancer) => (
-                    <FreelancerCard
-                      key={freelancer.id}
-                      freelancer={freelancer}
-                      onMessage={handleMessage}
-                      onInvite={handleInvite}
-                    />
-                  ))}
-
-                  {freelancers.length === 0 && (
-                    <div className="text-center py-20 bg-card border border-border rounded-xl">
-                      <p className="text-muted-foreground font-medium">
-                        No results found for your search.
-                      </p>
-                      <Button
-                        variant="link"
-                        onClick={resetFilters}
-                        className="mt-2 h-auto p-0 font-bold"
-                      >
-                        Reset all filters
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {pagination.totalPages > 1 && (
-                  <div className="flex justify-center mt-10">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() =>
-                              handlePageChange(pagination.page - 1)
-                            }
-                            className={cn(
-                              "cursor-pointer",
-                              pagination.page === 1 &&
-                                "pointer-events-none opacity-50",
-                            )}
-                          />
-                        </PaginationItem>
-                        {Array.from(
-                          { length: pagination.totalPages },
-                          (_, i) => i + 1,
-                        ).map((p) => (
-                          <PaginationItem key={p}>
-                            <PaginationLink
-                              isActive={pagination.page === p}
-                              onClick={() => handlePageChange(p)}
-                              className="cursor-pointer"
-                            >
-                              {p}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() =>
-                              handlePageChange(pagination.page + 1)
-                            }
-                            className={cn(
-                              "cursor-pointer",
-                              pagination.page === pagination.totalPages &&
-                                "pointer-events-none opacity-50",
-                            )}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
             )}
-          </main>
-        </div>
-      </div>
 
-      <InviteFreelancerModal
-        isOpen={inviteModal.isOpen}
-        onClose={() => setInviteModal((prev) => ({ ...prev, isOpen: false }))}
-        freelancerId={inviteModal.freelancerId}
-        freelancerName={inviteModal.freelancerName}
-      />
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="h-8" />
+
+            {loadingMore && (
+              <div className="flex justify-center py-6">
+                <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold">
+                  <div className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin" />
+                  Loading more...
+                </div>
+              </div>
+            )}
+
+            {!hasMore && freelancers.length > 0 && (
+              <div className="text-center py-8 text-xs text-slate-400 font-semibold">
+                You've seen all {total} freelancers
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </DashboardLayout>
   );
-};
+}
 
-export default BrowseFreelancersPage;
+// ── Section wrapper ────────────────────────────────────────────────
+const Section = ({
+  title,
+  icon,
+  subtitle,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  subtitle?: string;
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-3">
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+        {icon}
+      </div>
+      <div>
+        <h2 className="text-sm font-bold text-slate-700">{title}</h2>
+        {subtitle && <p className="text-[10px] text-slate-400">{subtitle}</p>}
+      </div>
+    </div>
+    {children}
+  </div>
+);
+
+// ── Horizontal scroll row ──────────────────────────────────────────
+const ScrollRow = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+    {children}
+  </div>
+);
