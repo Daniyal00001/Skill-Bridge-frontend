@@ -25,6 +25,7 @@ export interface ScoredFreelancer {
   averageRating?: number | null;
   totalReviews: number;
   completedContracts: number;
+  lastLoginAt?: Date | string | null;
   score: number;
   matchPercentage: number;
   isExploration: boolean;

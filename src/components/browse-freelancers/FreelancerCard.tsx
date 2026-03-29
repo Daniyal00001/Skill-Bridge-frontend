@@ -1,8 +1,3 @@
-/**
- * FreelancerCard.tsx
- * location: frontend/src/components/browse-freelancers/FreelancerCard.tsx
- */
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -19,12 +14,14 @@ import {
   MessageSquare,
   UserPlus,
   Loader2,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoredFreelancer } from "@/hooks/useBrowseFreelancers";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { InviteFreelancerModal } from "@/components/modals/InviteFreelancerModal";
+import { formatDistanceToNow } from "date-fns";
 
 interface Props {
   freelancer: ScoredFreelancer;
@@ -59,6 +56,10 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
   const avail = AVAILABILITY_CONFIG[f.availability];
   const isVerified = f.user?.isIdVerified || f.user?.isPaymentVerified;
   const topSkills = f.skills?.slice(0, 4) ?? [];
+
+  const lastActiveText = f.lastLoginAt 
+    ? `Active ${formatDistanceToNow(new Date(f.lastLoginAt), { addSuffix: true })}`
+    : "Recently active";
 
   const handleMessage = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -129,6 +130,10 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
               >
                 <span className={cn("w-1.5 h-1.5 rounded-full", avail.dot)} />
                 {avail.label}
+              </span>
+              <span className="flex items-center gap-1 text-[10px] text-slate-400 font-medium bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+                <Clock className="w-3 h-3 text-slate-400" />
+                {lastActiveText}
               </span>
             </div>
 
@@ -295,8 +300,15 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
           )}
         </div>
 
+        <div className="flex items-center gap-2 mt-1">
+          <span className="flex items-center gap-1 text-[9px] text-slate-400 font-medium uppercase tracking-tighter">
+            <Clock className="w-2.5 h-2.5" />
+            {lastActiveText}
+          </span>
+        </div>
+
         {f.tagline && (
-          <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+          <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
             {f.tagline}
           </p>
         )}
