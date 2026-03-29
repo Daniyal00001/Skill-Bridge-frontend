@@ -8,42 +8,400 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ChevronLeft,
   Edit,
   Calendar,
   Clock,
-  DollarSign,
   Users,
-  Eye,
-  Bookmark,
   MessageSquare,
   CheckCircle2,
   AlertCircle,
-  Briefcase,
   ExternalLink,
-  PlusCircle,
   Zap,
-  Trash2,
-  Archive,
-  Pause,
-  Layout,
   ChevronRight,
   Star,
   Loader2,
   MapPin,
   Languages,
-  Globe2,
   File as FileIcon,
+  Sparkles,
+  Copy,
+  CheckCheck,
+  FileText,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+
+// ─── Cover Letter Sub-component ───────────────────────────────────────────────
+
+const TONES = [
+  { value: "professional", label: "Professional" },
+  { value: "enthusiastic", label: "Enthusiastic" },
+  { value: "concise", label: "Concise & Direct" },
+  { value: "creative", label: "Creative" },
+];
+
+const CoverLetterTab = ({ project }: { project: any }) => {
+  const [mode, setMode] = useState<"ai" | "manual">("ai");
+  const [userName, setUserName] = useState("");
+  const [experience, setExperience] = useState("");
+  const [skills, setSkills] = useState("");
+  const [tone, setTone] = useState("professional");
+  const [jobDescription, setJobDescription] = useState("");
+  const [manualText, setManualText] = useState("");
+  const [output, setOutput] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [outputSource, setOutputSource] = useState<"ai" | "manual" | null>(null);
+
+  // Pre-fill job description from project data if available
+  useEffect(() => {
+    if (project?.description && !jobDescription) {
+      const prefill = [
+        project.title ? `Role: ${project.title}` : "",
+        project.description,
+        project.requirements ? `\nRequirements:\n${project.requirements}` : "",
+        project.skills?.length
+          ? `\nRequired Skills: ${project.skills.map((s: any) => s.skill?.name || s.name).join(", ")}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      setJobDescription(prefill);
+    }
+  }, [project]);
+
+  const handleGenerate = async () => {
+    if (!jobDescription.trim()) {
+      toast.error("Please paste a job description first.");
+      return;
+    }
+    setIsGenerating(true);
+    setOutput("");
+    setOutputSource(null);
+
+    const userInfo = [
+      userName ? `Applicant name: ${userName}` : "",
+      experience ? `Years of experience: ${experience}` : "",
+      skills ? `Key skills: ${skills}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const prompt = `Write a ${tone} cover letter for the following job description.
+${userInfo ? `\nApplicant details:\n${userInfo}` : ""}
+
+Job description:
+${jobDescription}
+
+Write a compelling, tailored cover letter. Use natural paragraphs. Do not use placeholders like [Your Name] — if name is not provided, omit the signature line. Output only the cover letter text, nothing else.`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
+      const data = await response.json();
+      const text = data.content?.map((b: any) => b.text || "").join("") || "";
+      if (!text) throw new Error("Empty response from AI");
+
+      setOutput(text);
+      setOutputSource("ai");
+      toast.success("Cover letter generated! ✨");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to generate cover letter.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!output) return;
+    await navigator.clipboard.writeText(output);
+    setCopied(true);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleClear = () => {
+    setUserName("");
+    setExperience("");
+    setSkills("");
+    setJobDescription("");
+    setManualText("");
+    setOutput("");
+    setOutputSource(null);
+  };
+
+  return (
+    <div className="p-8 space-y-8 animate-in fade-in duration-300 border-x border-b border-border/40 rounded-b-[2rem]">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+        {/* ── Input Panel ── */}
+        <div className="space-y-6">
+          {/* Mode toggle */}
+          <div className="flex items-center gap-2 p-1 rounded-2xl bg-muted/40 border border-border/40 w-fit">
+            {(["ai", "manual"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className={cn(
+                  "px-5 py-2 rounded-xl text-sm font-black transition-all capitalize",
+                  mode === m
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {m === "ai" ? (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5" /> AI Generate
+                  </span>
+                ) : (
+                  "Write Manually"
+                )}
+              </button>
+            ))}
+          </div>
+
+          {mode === "ai" ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="e.g. Alex Johnson"
+                    className="w-full h-10 px-3 rounded-xl border border-border/60 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                    Experience
+                  </label>
+                  <input
+                    type="text"
+                    value={experience}
+                    onChange={(e) => setExperience(e.target.value)}
+                    placeholder="e.g. 3 years"
+                    className="w-full h-10 px-3 rounded-xl border border-border/60 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                  Key Skills
+                </label>
+                <input
+                  type="text"
+                  value={skills}
+                  onChange={(e) => setSkills(e.target.value)}
+                  placeholder="e.g. React, Node.js, TypeScript"
+                  className="w-full h-10 px-3 rounded-xl border border-border/60 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                  Tone
+                </label>
+                <Select value={tone} onValueChange={setTone}>
+                  <SelectTrigger className="rounded-xl border-border/60 bg-muted/30 h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TONES.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                    Job Description <span className="text-destructive">*</span>
+                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    {jobDescription.length} chars
+                  </span>
+                </div>
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste or edit the job description here..."
+                  className="w-full min-h-[140px] p-3 rounded-xl border border-border/60 bg-muted/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all leading-relaxed"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 h-12 rounded-2xl font-black text-base gap-2 shadow-lg shadow-primary/20"
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" /> Generate with AI
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-12 rounded-2xl font-black px-4"
+                  onClick={handleClear}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+                    Write Your Cover Letter
+                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    {manualText.length} chars
+                  </span>
+                </div>
+                <textarea
+                  value={manualText}
+                  onChange={(e) => {
+                    setManualText(e.target.value);
+                    setOutput(e.target.value);
+                    setOutputSource("manual");
+                  }}
+                  placeholder="Start writing your cover letter here..."
+                  className="w-full min-h-[360px] p-4 rounded-xl border border-border/60 bg-muted/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all leading-relaxed"
+                />
+              </div>
+              <Button
+                variant="outline"
+                className="h-12 rounded-2xl font-black gap-2 w-full"
+                onClick={handleClear}
+              >
+                <Trash2 className="w-4 h-4" /> Clear
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Output Panel ── */}
+        <div className="space-y-4">
+          <div className="p-6 rounded-[2rem] border border-border/40 bg-card/60 backdrop-blur-sm min-h-[420px] flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h4 className="text-lg font-bold">Output</h4>
+                {outputSource === "ai" && (
+                  <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase tracking-widest gap-1">
+                    <Sparkles className="w-3 h-3" /> AI Generated
+                  </Badge>
+                )}
+                {outputSource === "manual" && (
+                  <Badge
+                    variant="outline"
+                    className="font-bold text-[10px] uppercase tracking-widest"
+                  >
+                    Manual
+                  </Badge>
+                )}
+              </div>
+              {output && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 font-bold h-8 rounded-xl"
+                  onClick={handleCopy}
+                >
+                  {copied ? (
+                    <>
+                      <CheckCheck className="w-3.5 h-3.5 text-emerald-500" />{" "}
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" /> Copy
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+
+            <div className="flex-1">
+              {isGenerating ? (
+                <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm font-medium">
+                    AI is writing your cover letter...
+                  </p>
+                </div>
+              ) : output ? (
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                  {output}
+                </p>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground/50 py-16">
+                  <FileText className="w-10 h-10" />
+                  <p className="text-sm font-medium">
+                    Your cover letter will appear here
+                  </p>
+                  <p className="text-xs">
+                    {mode === "ai"
+                      ? "Fill in the form and click Generate"
+                      : "Start typing on the left"}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Tips */}
+          {!output && mode === "ai" && (
+            <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-3">
+              <p className="text-amber-600 font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                <AlertCircle className="w-3.5 h-3.5" /> Tips for best results
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>The job description is pre-filled from this project</li>
+                <li>Add your real skills to personalize the output</li>
+                <li>Try different tones to match the company culture</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Main Page ─────────────────────────────────────────────────────────────────
 
 const ClientProjectDetailsPage = () => {
   const { projectId } = useParams();
@@ -67,7 +425,6 @@ const ClientProjectDetailsPage = () => {
     fetchProject();
   }, [projectId]);
 
-  // Approve milestone
   const handleApproveMilestone = async (milestoneId: string) => {
     const contractId = project?.contract?.id;
     if (!contractId) return;
@@ -82,19 +439,16 @@ const ClientProjectDetailsPage = () => {
       );
       const res = await api.get(`/projects/${projectId}`);
       setProject(res.data.project);
-    } catch {}
+    } catch { }
   };
 
-  // Request revision
   const handleRevision = async (milestoneId: string) => {
     const contractId = project?.contract?.id;
     if (!contractId) return;
     try {
       await api.patch(
         `/contracts/${contractId}/milestones/${milestoneId}/revision`,
-        {
-          feedback: "Please review and make the requested changes.",
-        },
+        { feedback: "Please review and make the requested changes." },
       );
       toast.info("Revision request sent.");
     } catch (err: any) {
@@ -102,7 +456,6 @@ const ClientProjectDetailsPage = () => {
     }
   };
 
-  // Delete project (only OPEN/DRAFT)
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this project?")) return;
     try {
@@ -112,7 +465,7 @@ const ClientProjectDetailsPage = () => {
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message ||
-          "Cannot delete project with active proposals",
+        "Cannot delete project with active proposals",
       );
     }
   };
@@ -122,9 +475,7 @@ const ClientProjectDetailsPage = () => {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh] gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground font-medium">
-            Loading project...
-          </p>
+          <p className="text-muted-foreground font-medium">Loading project...</p>
         </div>
       </DashboardLayout>
     );
@@ -144,7 +495,6 @@ const ClientProjectDetailsPage = () => {
     );
   }
 
-  // Derived data from API
   const contract = project.contract;
   const hiredDeveloper = contract?.freelancer;
   const milestones = contract?.milestones || [];
@@ -159,8 +509,8 @@ const ClientProjectDetailsPage = () => {
   const proposalsPreview = project.proposals?.slice(0, 3) || [];
   const daysRemaining = project.deadline
     ? Math.ceil(
-        (new Date(project.deadline).getTime() - Date.now()) / (1000 * 86400),
-      )
+      (new Date(project.deadline).getTime() - Date.now()) / (1000 * 86400),
+    )
     : null;
 
   const getStatusBadge = (status: string) => {
@@ -185,7 +535,6 @@ const ClientProjectDetailsPage = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto p-4 md:p-6 space-y-6 animate-fade-in max-w-7xl">
-        {/* Back */}
         <Button
           variant="ghost"
           asChild
@@ -199,7 +548,6 @@ const ClientProjectDetailsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* ── Main Content ── */}
           <div className="lg:col-span-8 space-y-8">
-            {/* Project Header Card */}
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
               <CardHeader className="p-6 pb-2">
                 <div className="flex justify-between items-start mb-6">
@@ -266,15 +614,22 @@ const ClientProjectDetailsPage = () => {
               </CardHeader>
 
               <CardContent className="p-0">
+                {/* ── 3 Tabs: overview / requirements / cover-letter ── */}
                 <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid grid-cols-2 w-full rounded-none border-b bg-transparent h-14 px-0">
-                    {["overview", "requirements"].map((tab) => (
+                  <TabsList className="grid grid-cols-3 w-full rounded-none border-b bg-transparent h-14 px-0">
+                    {["overview", "requirements", "cover-letter"].map((tab) => (
                       <TabsTrigger
                         key={tab}
                         value={tab}
-                        className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 capitalize"
+                        className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-full font-bold px-0 capitalize text-sm"
                       >
-                        {tab}
+                        {tab === "cover-letter" ? (
+                          <span className="flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5" /> Cover Letter
+                          </span>
+                        ) : (
+                          tab.replace("-", " ")
+                        )}
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -322,7 +677,6 @@ const ClientProjectDetailsPage = () => {
                         </a>
                       </div>
                     )}
-
                     {project.attachments && project.attachments.length > 0 && (
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
@@ -386,68 +740,69 @@ const ClientProjectDetailsPage = () => {
                         </div>
                       </div>
                       <div className="space-y-4">
-                        <div className="space-y-6">
-                          <div className="grid grid-cols-2 gap-4">
-                            {[
-                              {
-                                label: "Hiring Method",
-                                value: project.hiringMethod,
-                                icon: Zap,
-                                color: "text-amber-500",
-                                bgColor: "bg-amber-500/10",
-                              },
-                              {
-                                label: "Location",
-                                value: project.locationPref,
-                                icon: MapPin,
-                                color: "text-rose-500",
-                                bgColor: "bg-rose-500/10",
-                              },
-                              {
-                                label: "Language",
-                                value: project.language,
-                                icon: Languages,
-                                color: "text-indigo-500",
-                                bgColor: "bg-indigo-500/10",
-                              },
-                              {
-                                label: "Level",
-                                value: project.experienceLevel,
-                                icon: Star,
-                                color: "text-amber-500",
-                                bgColor: "bg-amber-500/10",
-                              },
-                            ].map((item, i) => (
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            {
+                              label: "Hiring Method",
+                              value: project.hiringMethod,
+                              icon: Zap,
+                              color: "text-amber-500",
+                              bgColor: "bg-amber-500/10",
+                            },
+                            {
+                              label: "Location",
+                              value: project.locationPref,
+                              icon: MapPin,
+                              color: "text-rose-500",
+                              bgColor: "bg-rose-500/10",
+                            },
+                            {
+                              label: "Language",
+                              value: project.language,
+                              icon: Languages,
+                              color: "text-indigo-500",
+                              bgColor: "bg-indigo-500/10",
+                            },
+                            {
+                              label: "Level",
+                              value: project.experienceLevel,
+                              icon: Star,
+                              color: "text-amber-500",
+                              bgColor: "bg-amber-500/10",
+                            },
+                          ].map((item, i) => (
+                            <div
+                              key={i}
+                              className="flex flex-col items-center justify-center p-6 rounded-[2rem] border border-border/40 bg-card/60 backdrop-blur-sm text-center space-y-3 hover:border-primary/20 transition-all group"
+                            >
                               <div
-                                key={i}
-                                className="flex flex-col items-center justify-center p-4 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm text-center space-y-2 hover:border-primary/20 transition-all group"
+                                className={cn(
+                                  "p-3.5 rounded-2xl transition-transform group-hover:scale-110",
+                                  item.bgColor,
+                                  item.color,
+                                )}
                               >
-                                <div
-                                  className={cn(
-                                    "p-3.5 rounded-2xl transition-transform group-hover:scale-110",
-                                    item.bgColor,
-                                    item.color,
-                                  )}
-                                >
-                                  <item.icon className="w-6 h-6" />
-                                </div>
-                                <div className="space-y-1">
-                                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                                    {item.label}
-                                  </p>
-                                  <p className="text-sm font-black capitalize">
-                                    {item.value || "Any"}
-                                  </p>
-                                </div>
+                                <item.icon className="w-6 h-6" />
                               </div>
-                            ))}
-                          </div>
+                              <div className="space-y-1">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                  {item.label}
+                                </p>
+                                <p className="text-sm font-black capitalize">
+                                  {item.value || "Any"}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
                   </TabsContent>
 
-                  {/* Milestones Tab content removed as per user request */}
+                  {/* Cover Letter Tab */}
+                  <TabsContent value="cover-letter">
+                    <CoverLetterTab project={project} />
+                  </TabsContent>
                 </Tabs>
               </CardContent>
             </Card>
@@ -491,7 +846,7 @@ const ClientProjectDetailsPage = () => {
               </div>
             )}
 
-            {/* Proposals Preview (only for OPEN projects) */}
+            {/* Proposals Preview */}
             {project.status === "OPEN" && proposalsPreview.length > 0 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
                 <CardHeader className="p-6 flex flex-row items-center justify-between">
@@ -521,9 +876,7 @@ const ClientProjectDetailsPage = () => {
                     >
                       <div className="flex items-center gap-4">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={proposal.freelancer?.profileImage}
-                          />
+                          <AvatarImage src={proposal.freelancer?.profileImage} />
                           <AvatarFallback>
                             {proposal.freelancer?.name?.[0] || "F"}
                           </AvatarFallback>
@@ -557,7 +910,6 @@ const ClientProjectDetailsPage = () => {
 
           {/* ── Sidebar ── */}
           <div className="lg:col-span-4 space-y-6 sticky top-24">
-            {/* Stats Card */}
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl overflow-hidden">
               <div className="h-2 bg-gradient-to-r from-primary to-blue-600" />
               <CardContent className="p-6 space-y-6">
@@ -593,7 +945,6 @@ const ClientProjectDetailsPage = () => {
               </CardContent>
             </Card>
 
-            {/* Actions Card */}
             <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm shadow-2xl shadow-primary/10">
               <CardContent className="p-6 space-y-4">
                 {project.status === "OPEN" ? (
@@ -642,7 +993,6 @@ const ClientProjectDetailsPage = () => {
               </CardContent>
             </Card>
 
-            {/* Hired Developer Card */}
             {hiredDeveloper && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
                 <div className="p-6 border-b bg-muted/30">

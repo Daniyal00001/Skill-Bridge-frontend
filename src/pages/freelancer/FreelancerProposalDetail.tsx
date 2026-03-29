@@ -193,7 +193,7 @@ const FreelancerProposalDetail = () => {
           <div className="flex items-center gap-3 shrink-0">
             <div className="text-right hidden sm:block">
               <p className="text-xl font-black tabular-nums tracking-tight leading-none">
-                ${proposal.bidAmount?.toLocaleString()}
+                ${proposal.bidAmount?.toLocaleString() || proposal.proposedPrice?.toLocaleString()}
               </p>
               <p className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">
                 Your Bid
@@ -491,7 +491,7 @@ const FreelancerProposalDetail = () => {
                       Your Bid
                     </p>
                     <p className="text-3xl font-black tabular-nums tracking-tighter leading-none mt-0.5">
-                      ${proposal.bidAmount?.toLocaleString()}
+                      ${(proposal.bidAmount || proposal.proposedPrice)?.toLocaleString()}
                     </p>
                   </div>
                   <div className="text-right">
@@ -509,7 +509,7 @@ const FreelancerProposalDetail = () => {
                       Timeline
                     </p>
                     <p className="text-sm font-black mt-0.5">
-                      {proposal.deliveryDays} Days
+                      {proposal.deliveryDays || proposal.deliveryTime} Days
                     </p>
                   </div>
                   <div className="bg-background/60 p-2.5 rounded-lg border border-border/30 text-center">

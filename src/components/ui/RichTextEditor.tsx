@@ -22,9 +22,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = value;
+      editorRef.current.innerHTML = value || "";
     }
-  }, []);
+  }, [value]);
 
   const handleCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);

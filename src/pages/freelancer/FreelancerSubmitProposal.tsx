@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import {
   ArrowLeft,
+  ChevronLeft,
   DollarSign,
   AlertCircle,
   Zap,
@@ -33,10 +34,13 @@ import {
   FileText,
   X,
   Plus,
-  Trash2,
-  ListChecks,
+  CheckCheck,
+  Copy,
+  Sparkles,
   ChevronDown,
   ChevronUp,
+  Trash2,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -64,6 +68,13 @@ export default function FreelancerSubmitProposal() {
   const [coverLetter, setCoverLetter] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  // AI Cover Letter State
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
+  const [aiTone, setAiTone] = useState("professional");
+  const [freelancerProfile, setFreelancerProfile] = useState<any>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Milestone state
   const [milestonesEnabled, setMilestonesEnabled] = useState(false);
@@ -108,6 +119,10 @@ export default function FreelancerSubmitProposal() {
           (p: any) => p.project?.id === projectId || p.projectId === projectId,
         );
         if (existing) setAlreadyApplied(true);
+
+        // Fetch freelancer profile for AI context
+        const profileRes = await api.get("/freelancers/me");
+        setFreelancerProfile(profileRes.data.data);
       } catch (err) {
         toast.error("Failed to load project details");
         navigate("/freelancer/browse");
@@ -231,6 +246,52 @@ export default function FreelancerSubmitProposal() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleGenerateAiCoverLetter = async () => {
+    if (!project?.description) {
+      toast.error("Project description missing. Cannot generate cover letter.");
+      return;
+    }
+    
+    setIsAiGenerating(true);
+    try {
+      const skillsNames = freelancerProfile?.skills?.map((s: any) => s.skill?.name).join(", ") || "";
+      
+      const portfolioContext = freelancerProfile?.portfolioItems?.map((p: any) => `${p.title}: ${p.description}`).join("; ") || "";
+      const certsContext = freelancerProfile?.certificates?.map((c: any) => c.title).join(", ") || "";
+      
+      const res = await api.post("/ai/cover-letter", {
+        projectId,
+        userName: freelancerProfile?.fullName,
+        experience: freelancerProfile?.tagline,
+        skills: skillsNames,
+        bio: freelancerProfile?.bio,
+        tone: aiTone,
+        portfolio: portfolioContext,
+        certificates: certsContext,
+      });
+
+      if (res.data.success) {
+        setCoverLetter(res.data.result);
+        setShowAiAssistant(false);
+        toast.success("Cover letter generated! ✨");
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to generate AI cover letter");
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
+
+  const handleCopyCoverLetter = () => {
+    if (!coverLetter) return;
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = coverLetter;
+    navigator.clipboard.writeText(tempDiv.textContent || "");
+    setIsCopied(true);
+    toast.success("Cover letter copied!");
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const addMilestone = () =>
@@ -435,31 +496,137 @@ export default function FreelancerSubmitProposal() {
 
                   {/* Cover Letter */}
                   <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
-                        <div className="w-1 h-6 bg-primary rounded-full" />{" "}
-                        Cover Letter
-                      </h3>
-                      <span
-                        className={cn(
-                          "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full",
-                          coverLetterTextLength < 50
-                            ? "bg-amber-500/10 text-amber-500"
-                            : coverLetterTextLength > 5000
-                            ? "bg-red-500/10 text-red-500"
-                            : "bg-emerald-500/10 text-emerald-500",
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-xl font-black tracking-tight flex items-center gap-3">
+                          <div className="w-1 h-6 bg-primary rounded-full" />{" "}
+                          Cover Letter
+                        </h3>
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowAiAssistant(!showAiAssistant)}
+                            className={cn(
+                              "h-9 rounded-xl font-black gap-2 border-primary/20 hover:bg-primary/5 transition-all text-sm",
+                              showAiAssistant ? "bg-primary/10 text-primary border-primary/40 shadow-sm" : "bg-muted/40 text-muted-foreground"
+                            )}
+                          >
+                            <Sparkles className="w-4 h-4" />
+                            AI Assist
+                            {showAiAssistant ? <ChevronUp className="w-3.5 h-3.5 ml-1" /> : <ChevronDown className="w-3.5 h-3.5 ml-1" />}
+                          </Button>
+                          <span
+                            className={cn(
+                              "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full whitespace-nowrap",
+                              coverLetterTextLength < 50
+                                ? "bg-amber-500/10 text-amber-500"
+                                : coverLetterTextLength > 5000
+                                ? "bg-red-500/10 text-red-500"
+                                : "bg-emerald-500/10 text-emerald-500",
+                            )}
+                          >
+                            {coverLetterTextLength} / 5000
+                          </span>
+                        </div>
+                      </div>
+
+                      {showAiAssistant && (
+                        <Card className="bg-primary/5 border-primary/20 rounded-3xl p-6 animate-in slide-in-from-top-4 duration-500 shadow-xl shadow-primary/5">
+                          <div className="flex flex-col md:flex-row gap-6">
+                            <div className="flex-1 space-y-4">
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-primary" />
+                                <h4 className="font-black text-foreground">AI Cover Letter Assistant</h4>
+                              </div>
+                              <p className="text-sm text-muted-foreground/80 leading-relaxed font-medium">
+                                We'll use your profile details (<strong>{freelancerProfile?.skills?.slice(0, 3).map((s: any) => s.skill?.name || "Skill").join(", ")}...</strong>) and the project's requirements to craft a winning proposal.
+                              </p>
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Select Tone</Label>
+                                  <Select value={aiTone} onValueChange={setAiTone}>
+                                    <SelectTrigger className="h-11 bg-background/50 border-primary/10 rounded-xl font-bold">
+                                      <SelectValue placeholder="Tone" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-border/40">
+                                      <SelectItem value="professional" className="font-bold py-2.5">Professional (Standard)</SelectItem>
+                                      <SelectItem value="enthusiastic" className="font-bold py-2.5">Enthusiastic & Driven</SelectItem>
+                                      <SelectItem value="concise" className="font-bold py-2.5">Concise & Direct</SelectItem>
+                                      <SelectItem value="creative" className="font-bold py-2.5">Creative & Bold</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="flex items-end">
+                                  <Button
+                                    type="button"
+                                    onClick={handleGenerateAiCoverLetter}
+                                    disabled={isAiGenerating}
+                                    className="w-full h-11 rounded-xl font-black bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 gap-2 transition-transform active:scale-95"
+                                  >
+                                    {isAiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                    {isAiGenerating ? "Generating..." : "Generate Magic"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="hidden md:block w-px bg-primary/10 self-stretch" />
+                            
+                            <div className="w-full md:w-48 space-y-3">
+                              <h5 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Instructions</h5>
+                              <ul className="space-y-2">
+                                {[
+                                  "Analyzes job requirements",
+                                  "Highlights your top skills",
+                                  "Tailors the pitch tone",
+                                  "Saves you 15+ minutes"
+                                ].map((item, i) => (
+                                  <li key={i} className="flex items-center gap-2 text-xs font-bold text-foreground/70">
+                                    <div className="w-1 h-1 rounded-full bg-primary" />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+
+                      <div className="group relative">
+                        {coverLetter && (
+                          <div className="absolute right-4 top-4 z-10 flex gap-2 animate-in fade-in zoom-in duration-300">
+                             <Button
+                              type="button"
+                              onClick={handleCopyCoverLetter}
+                              variant="secondary"
+                              size="sm"
+                              className="h-8 rounded-lg font-black bg-background/80 backdrop-blur border text-xs gap-1.5 shadow-sm"
+                            >
+                              {isCopied ? <CheckCheck className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                              {isCopied ? "Copied" : "Copy"}
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => setCoverLetter("")}
+                              variant="secondary"
+                              size="sm"
+                              className="h-8 rounded-lg font-black bg-background/80 backdrop-blur border text-red-500 text-xs gap-1.5 shadow-sm"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Clear
+                            </Button>
+                          </div>
                         )}
-                      >
-                        {coverLetterTextLength} / 5000
-                      </span>
-                    </div>
-                    <RichTextEditor
-                      value={coverLetter}
-                      onChange={setCoverLetter}
-                      maxLength={5000}
-                      placeholder="Introduce yourself, explain why you're a great fit for this project, and outline your approach..."
-                      className="min-h-[300px]"
-                    />
+                        <RichTextEditor
+                          value={coverLetter}
+                          onChange={setCoverLetter}
+                          maxLength={5000}
+                          placeholder="Introduce yourself, explain why you're a great fit for this project, and outline your approach..."
+                          className="min-h-[350px] transition-all hover:border-primary/20 focus-within:border-primary/40 rounded-3xl"
+                        />
+                      </div>
                     {coverLetterTextLength < 50 && coverLetterTextLength > 0 && (
                       <p className="text-xs font-bold text-amber-500 px-2 flex items-center gap-2">
                         <AlertCircle className="w-3 h-3" />
