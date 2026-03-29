@@ -33,6 +33,7 @@ export interface ClientDashboardData {
     shortlistedProposals: number;
     hireRate: number;
     totalProjects: number;
+    lastLoginAt?: string | null;
   };
   lists: {
     openProjects: any[];
@@ -55,6 +56,7 @@ export interface FreelancerDashboardData {
     profileCompletion: number;
     averageRating: number;
     totalReviews: number;
+    lastLoginAt?: string | null;
   };
   lists: {
     activeMilestones: any[];
