@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
@@ -13,17 +13,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bell, Menu, X, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { mockNotifications } from '@/lib/mockData';
+import { useNotifications } from '@/hooks/useNotifications';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
 import logo from '@/assets/logo/logo.png';
 
 export function Navbar() {
-
-
-  
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const unreadNotifications = mockNotifications.filter(n => !n.read).length;
+  const navigate = useNavigate();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   const publicLinks = [
     { href: '/', label: 'Home' },
@@ -46,10 +46,6 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            {/* <div className="w-8 h-8 gradient-hero rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div> */}
-            {/* // used logo here  */}
             <img src={logo} alt="Logo" className="w-8 h-8 flex items-center justify-center" />
             <span className="text-xl font-bold gradient-text">SkillBridge</span>
           </Link>
@@ -78,26 +74,67 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative">
                       <Bell className="h-5 w-5" />
-                      {unreadNotifications > 0 && (
+                      {unreadCount > 0 && (
                         <Badge 
                           variant="destructive" 
                           className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                         >
-                          {unreadNotifications}
+                          {unreadCount}
                         </Badge>
                       )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-80">
-                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {mockNotifications.slice(0, 3).map((notification) => (
-                      <DropdownMenuItem key={notification.id} className="flex flex-col items-start gap-1 py-3">
-                        <span className="font-medium">{notification.title}</span>
-                        <span className="text-xs text-muted-foreground">{notification.description}</span>
-                      </DropdownMenuItem>
-                    ))}
-
+                    <div className="flex items-center justify-between px-4 py-2 border-b">
+                      <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
+                      {unreadCount > 0 && (
+                        <button 
+                          className="text-[10px] text-primary hover:underline font-bold"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            markAllAsRead();
+                          }}
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="py-8 text-center text-muted-foreground text-xs">
+                          No notifications yet
+                        </div>
+                      ) : (
+                        notifications.slice(0, 5).map((notification) => (
+                          <DropdownMenuItem 
+                            key={notification.id} 
+                            className={cn(
+                              "flex flex-col items-start gap-1 py-3 cursor-pointer border-b last:border-0",
+                              !notification.isRead && "bg-primary/5 border-l-2 border-l-primary"
+                            )}
+                            onClick={() => {
+                              if (!notification.isRead) markAsRead(notification.id);
+                              if (notification.link) navigate(notification.link);
+                            }}
+                          >
+                            <div className="flex w-full justify-between items-start gap-2">
+                              <span className={cn(
+                                "font-bold text-[13px] leading-tight",
+                                !notification.isRead ? "text-foreground" : "text-muted-foreground"
+                              )}>
+                                {notification.title}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">
+                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground line-clamp-2">
+                              {notification.body}
+                            </span>
+                          </DropdownMenuItem>
+                        ))
+                      )}
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -106,7 +143,7 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.avatar} alt={user?.name} />
+                        <AvatarImage src={user?.profileImage} alt={user?.name} />
                         <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <span className="hidden lg:block">{user?.name}</span>
