@@ -43,6 +43,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
+import { useNotifications } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 import logo from "@/assets/logo/logo.png";
 import { toast } from "sonner";
@@ -72,9 +73,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [unreadChatCount, setUnreadChatCount] = useState<number>(0);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadNotificationCount, setUnreadNotificationCount] =
-    useState<number>(0);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   useEffect(() => {
     if (user?.role === "FREELANCER") {
@@ -97,17 +96,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       } catch (err) {}
     };
 
-    const fetchNotifications = async () => {
-      try {
-        const res = await api.get("/notifications?limit=5");
-        setNotifications(res.data.notifications);
-        setUnreadNotificationCount(res.data.unreadCount);
-      } catch (err) {}
-    };
-
     if (user) {
       fetchUnreadChat();
-      fetchNotifications();
 
       const socket = getSocket();
 
@@ -115,26 +105,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         setUnreadChatCount(count);
       };
 
-      const handleNewNotification = (notification: any) => {
-        setNotifications((prev) => [notification, ...prev].slice(0, 10));
-        setUnreadNotificationCount((prev) => prev + 1);
-
-        // Show a nice toast
-        toast(notification.title, {
-          description: notification.body,
-          action: {
-            label: "View",
-            onClick: () => navigate(notification.link || "/notifications"),
-          },
-        });
-      };
-
       socket.on("unread_count_update", handleUnreadChatUpdate);
-      socket.on("new_notification", handleNewNotification);
 
       return () => {
         socket.off("unread_count_update", handleUnreadChatUpdate);
-        socket.off("new_notification", handleNewNotification);
       };
     }
   }, [user]);
@@ -564,12 +538,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
-                  {unreadNotificationCount > 0 && (
+                  {unreadCount > 0 && (
                     <Badge
                       variant="destructive"
                       className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
                     >
-                      {unreadNotificationCount}
+                      {unreadCount}
                     </Badge>
                   )}
                 </Button>
@@ -579,21 +553,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <span className="font-bold text-sm text-foreground/80">
                     Notifications
                   </span>
-                  {unreadNotificationCount > 0 && (
+                  {unreadCount > 0 && (
                     <button
                       className="text-[10px] text-primary hover:underline font-bold"
-                      onClick={async () => {
-                        try {
-                          await api.patch("/notifications/mark-all-read");
-                          setUnreadNotificationCount(0);
-                          setNotifications((prev) =>
-                            prev.map((n) => ({ ...n, isRead: true })),
-                          );
-                          toast.success("All notifications marked as read");
-                        } catch (err) {
-                          toast.error("Failed to mark all as read");
-                        }
-                      }}
+                      onClick={() => markAllAsRead()}
                     >
                       Mark all as read
                     </button>
@@ -613,28 +576,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                           !n.isRead &&
                             "bg-primary/5 shadow-inner border-l-2 border-l-primary",
                         )}
-                        onClick={async () => {
-                          if (!n.isRead) {
-                            try {
-                              await api.patch(
-                                `/notifications/${n.id}/mark-read`,
-                              );
-                              setUnreadNotificationCount((prev) =>
-                                Math.max(0, prev - 1),
-                              );
-                              setNotifications((prev) =>
-                                prev.map((item) =>
-                                  item.id === n.id
-                                    ? { ...item, isRead: true }
-                                    : item,
-                                ),
-                              );
-                            } catch (err) {
-                              toast.error(
-                                "Failed to mark notification as read",
-                              );
-                            }
-                          }
+                        onClick={() => {
+                          if (!n.isRead) markAsRead(n.id);
                           if (n.link) navigate(n.link);
                         }}
                       >

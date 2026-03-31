@@ -45,6 +45,7 @@ import DirectInvitesPage from "./pages/client/DirectInvites";
 import ClientProfilePage from "./pages/client/ClientProfile";
 import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
+import GigDetail from "./pages/client/GigDetail";
 import NegotiationPage from "./pages/client/NegotiationPage";
 import ClientContractDetail from "./pages/client/ClientContractDetail";
 import ClientProposalDetail from "./pages/client/ClientProposalDetail";
@@ -159,6 +160,14 @@ const App = () => (
                   <Route
                     path="/client/browse"
                     element={<BrowseFreelancersPage />}
+                  />
+                  <Route
+                    path="/client/freelancers/:id"
+                    element={<FreelancerProfileDetail />}
+                  />
+                  <Route
+                    path="/client/gigs/:id"
+                    element={<GigDetail />}
                   />
                   <Route
                     path="/freelancer/:id"

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +57,7 @@ interface Contract {
   clientName: string;
   freelancerName: string;
   freelancerImage?: string;
+  freelancerId: string;
   agreedPrice: number;
   status: string;
   startDate: string;
@@ -276,13 +277,19 @@ export default function ClientContractDetail() {
           <Card className="rounded-2xl border-border/40 bg-card/60">
             <CardContent className="p-4">
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4">Working With</p>
-              <div className="flex items-center gap-4">
-                <Avatar className="h-14 w-14 ring-4 ring-border/30">
+              <Link 
+                to={`/client/freelancers/${contract.freelancerId}`}
+                className="flex items-center gap-4 group/flancer hover:opacity-80 transition-all"
+              >
+                <Avatar className="h-14 w-14 ring-4 ring-border/30 group-hover/flancer:ring-primary/40 transition-all">
                   <AvatarImage src={contract.freelancerImage} />
                   <AvatarFallback className="text-xl font-black">{contract.freelancerName?.[0]}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-lg font-black">{contract.freelancerName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-black group-hover/flancer:text-primary transition-colors">{contract.freelancerName}</p>
+                    <Eye className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/flancer:opacity-100 transition-all" />
+                  </div>
                   <p className="text-sm text-muted-foreground font-medium">
                     Contract started {new Date(contract.startDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                   </p>
@@ -292,7 +299,7 @@ export default function ClientContractDetail() {
                     </p>
                   )}
                 </div>
-              </div>
+              </Link>
             </CardContent>
           </Card>
 
