@@ -212,8 +212,15 @@ export default function BrowseFreelancers() {
           )
         ) : (
           <>
-            {/* Sections — only when no active search */}
-            {sections && !filters.search && !filters.skills.length && (
+            {/* Sections — only when no active filters */}
+            {sections && 
+              !filters.search && 
+              !filters.skills.length && 
+              !filters.hourlyRateMin && 
+              !filters.hourlyRateMax && 
+              !filters.experienceLevel &&
+              !filters.region &&
+              !filters.minRating && (
               <div className="space-y-8">
                 {sections.topRated.length > 0 && (
                   <Section
