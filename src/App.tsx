@@ -161,6 +161,10 @@ const App = () => (
                     element={<BrowseFreelancersPage />}
                   />
                   <Route
+                    path="/client/freelancers/:id"
+                    element={<FreelancerProfileDetail />}
+                  />
+                  <Route
                     path="/freelancer/:id"
                     element={<FreelancerProfileDetail />}
                   />
