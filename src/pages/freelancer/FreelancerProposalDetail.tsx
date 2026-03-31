@@ -523,21 +523,69 @@ const FreelancerProposalDetail = () => {
                   </div>
                 </div>
               </div>
-              <div className="px-4 pb-3 border-t border-primary/10 pt-3 flex items-center gap-2.5">
-                <Avatar className="h-7 w-7 border border-border/30">
-                  <AvatarImage src={client?.profileImage} />
-                  <AvatarFallback className="text-[10px] font-black">
-                    {client?.name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">
-                    Sent To
-                  </p>
-                  <p className="text-[11px] font-black">{client?.name}</p>
+
+            </div>
+
+            {/* Client Info Box */}
+            {client && (
+              <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-border/40 bg-muted/20 flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-md bg-primary/20 flex items-center justify-center shrink-0">
+                    <Star className="w-2.5 h-2.5 text-primary" />
+                  </div>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    About the Client
+                  </h4>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 border-2 border-background shadow-md">
+                      <AvatarImage src={client.profileImage} referrerPolicy="no-referrer" />
+                      <AvatarFallback className="bg-primary/20 text-primary font-black">
+                        {client.name?.[0] || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-black leading-tight text-foreground text-sm">
+                        {client.name}
+                      </p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                        <span className="text-xs font-bold">
+                          {client.averageRating?.toFixed(1) || "5.0"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-bold">
+                          ({client.totalReviews || 0} reviews)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 pt-4 border-t border-border/50">
+                    <div className="space-y-1">
+                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Member Since</p>
+                      <p className="font-bold text-[12px] leading-none text-foreground/80">{client.createdAt ? new Date(client.createdAt).getFullYear() : 'N/A'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Hired</p>
+                      <p className="font-bold text-[12px] leading-none text-foreground/80">{client.totalHires || 0}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Hire Rate</p>
+                      <p className="font-bold text-[12px] leading-none text-foreground/80">{client.hireRate ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%` : 'N/A'}</p>
+                    </div>
+                    {client.location && (
+                      <div className="space-y-1">
+                        <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Location</p>
+                        <p className="font-bold text-[12px] leading-none text-foreground/80">
+                          {client.location}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Payment Schedule / Milestones */}
             <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
