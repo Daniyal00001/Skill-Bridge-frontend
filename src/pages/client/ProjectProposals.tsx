@@ -431,28 +431,37 @@ const ProposalCard = ({
         {/* Top Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <Avatar className="h-14 w-14 ring-4 ring-border/40">
+            <Link 
+              to={`/client/freelancers/${freelancer?.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="relative group/flancer transition-transform hover:scale-105"
+            >
+              <Avatar className="h-14 w-14 ring-4 ring-border/40 group-hover/flancer:ring-primary/40 transition-all">
                 <AvatarImage src={freelancer?.profileImage} />
                 <AvatarFallback className="text-lg font-black">
                   {freelancer?.name?.[0] || "F"}
                 </AvatarFallback>
               </Avatar>
               {hasMilestones && (
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center border-2 border-background">
                   <ListChecks className="w-3 h-3 text-white" />
                 </div>
               )}
-            </div>
+            </Link>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-black">
+              <Link 
+                to={`/client/freelancers/${freelancer?.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 group/name"
+              >
+                <h3 className="text-lg font-black group-hover/name:text-primary transition-colors">
                   {freelancer?.name || "Freelancer"}
                 </h3>
                 {status === "ACCEPTED" && (
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 )}
-              </div>
+                <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover/name:opacity-100 transition-all" />
+              </Link>
               <p className="text-sm text-muted-foreground">
                 {freelancer?.title || "Developer"}
               </p>

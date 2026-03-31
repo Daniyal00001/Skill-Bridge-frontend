@@ -406,8 +406,11 @@ const ClientProposalDetail = () => {
             {/* Freelancer Header */}
             <Card className="border-border/40 bg-card/60 backdrop-blur-xl rounded-[1.5rem] overflow-hidden">
               <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row gap-8">
-                  <Avatar className="h-24 w-24 ring-8 ring-primary/5">
+                <Link 
+                  to={`/client/freelancers/${freelancer?.id}`}
+                  className="flex flex-col md:flex-row gap-8 group/flancer transition-all"
+                >
+                  <Avatar className="h-24 w-24 ring-8 ring-primary/5 transition-all group-hover/flancer:ring-primary/20">
                     <AvatarImage src={freelancer?.profileImage} />
                     <AvatarFallback className="text-3xl font-black">
                       {freelancer?.name?.[0]}
@@ -416,9 +419,14 @@ const ClientProposalDetail = () => {
                   <div className="flex-1 space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <h2 className="text-xl font-black tracking-tight">
-                          {freelancer?.name}
-                        </h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl font-black tracking-tight group-hover/flancer:text-primary transition-colors">
+                            {freelancer?.name}
+                          </h2>
+                          <div className="bg-primary/10 text-primary p-1 rounded-lg opacity-0 group-hover/flancer:opacity-100 transition-all scale-75 group-hover:scale-100">
+                            <ExternalLink className="w-3 h-3" />
+                          </div>
+                        </div>
                         <p className="text-muted-foreground font-black text-[10px] uppercase tracking-widest opacity-60">
                           {freelancer?.title || "Professional Developer"}
                         </p>
@@ -444,7 +452,7 @@ const ClientProposalDetail = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               </CardContent>
             </Card>
 
