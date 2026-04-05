@@ -392,13 +392,19 @@ export default function FreelancerContractDetail() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-                Contract —
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Client: {contract.clientName}
-              </p>
+            <div className="flex items-center gap-2 flex-wrap text-muted-foreground font-black text-[10px] uppercase tracking-[0.15em]">
+              Client: {contract.clientName}
+              <span className="text-muted-foreground/30 text-xs">•</span>
+              Contract: {contract.id.slice(0, 8)}...
+              {contract.endDate && (
+                <>
+                  <span className="text-muted-foreground/30 text-xs">•</span>
+                  <span className="flex items-center gap-1 text-emerald-600">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Deadline: {new Date(contract.endDate).toLocaleDateString()}
+                  </span>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-3 mt-1 flex-wrap">
               <h1 className="text-2xl md:text-3xl font-black tracking-tight leading-tight break-words">
@@ -983,8 +989,8 @@ export default function FreelancerContractDetail() {
                         )}
                         <div className="flex items-center gap-3 mt-2 flex-wrap">
                           {milestone.dueDate && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Calendar className="w-3 h-3" />
+                            <span className="flex items-center gap-1 text-[9px] font-black text-muted-foreground uppercase tracking-tighter opacity-60">
+                              <Calendar className="w-2.5 h-2.5" />
                               Due{" "}
                               {new Date(milestone.dueDate).toLocaleDateString()}
                             </span>

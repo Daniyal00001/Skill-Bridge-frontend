@@ -43,6 +43,7 @@ import {
   Edit2,
   PlusCircle,
   DollarSign,
+  Calendar,
   History,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -1279,6 +1280,12 @@ const MilestoneList = ({
                       : m.allowedRevisions}{" "}
                     Revisions
                   </Badge>
+                  {m.dueDate && (
+                    <span className="flex items-center gap-1 text-[9px] font-black text-muted-foreground uppercase tracking-tighter opacity-60">
+                      <Calendar className="w-2.5 h-2.5" />
+                      Due {new Date(m.dueDate).toLocaleDateString()}
+                    </span>
+                  )}
                   <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40">
                     Milestone {i + 1}
                   </span>

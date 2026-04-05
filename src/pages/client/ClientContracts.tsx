@@ -24,6 +24,7 @@ import {
   Eye,
   Lock,
   Layers,
+  Calendar,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ interface ContractSummary {
   escrowAmount: number;
   progress: number;
   createdAt: string;
+  endDate?: string;
   milestonesTotal: number;
   milestonesApproved: number;
   milestonesSubmitted: number;
@@ -76,6 +78,7 @@ const ClientContractsPage = () => {
             escrowAmount: c.escrowAmount || 0,
             progress: c.progress || 0,
             createdAt: c.createdAt,
+            endDate: c.endDate,
             milestonesTotal: c.milestonesTotal || 0,
             milestonesApproved: c.milestonesApproved || 0,
             milestonesSubmitted: c.milestonesSubmitted || 0,
@@ -280,9 +283,16 @@ const ClientContractCard = ({ contract }: { contract: ContractSummary }) => {
               <p className="font-bold text-sm truncate">{contract.freelancer?.name}</p>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">Started</p>
-              <p className="text-xs font-bold">
-                {new Date(contract.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+              <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">Deadline</p>
+              <p className="text-xs font-bold text-emerald-600 flex items-center justify-end gap-1">
+                {contract.endDate ? (
+                  <>
+                    <Calendar className="w-3 h-3" />
+                    {new Date(contract.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                  </>
+                ) : (
+                  "N/A"
+                )}
               </p>
             </div>
           </div>

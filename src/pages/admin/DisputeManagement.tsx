@@ -149,13 +149,6 @@ const STATUS_META: Record<
     border: "border-emerald-200",
     dot: "bg-emerald-500",
   },
-  ESCALATED: {
-    label: "Escalated",
-    color: "text-red-700",
-    bg: "bg-red-50",
-    border: "border-red-200",
-    dot: "bg-red-600",
-  },
   CLOSED: {
     label: "Closed",
     color: "text-zinc-600",
@@ -178,7 +171,6 @@ const FILTER_TABS: { key: DisputeStatus | "ALL"; label: string }[] = [
   { key: "OPEN", label: "Open" },
   { key: "UNDER_REVIEW", label: "Under Review" },
   { key: "WAITING_FOR_RESPONSE", label: "Waiting" },
-  { key: "ESCALATED", label: "Escalated" },
   { key: "RESOLVED", label: "Resolved" },
   { key: "CLOSED", label: "Closed" },
 ];
@@ -254,9 +246,7 @@ function DisputeCard({
       <div
         className={cn(
           "h-1 w-full",
-          dispute.status === "ESCALATED"
-            ? "bg-gradient-to-r from-red-500 to-rose-400"
-            : dispute.status === "OPEN"
+          dispute.status === "OPEN"
             ? "bg-gradient-to-r from-rose-400 to-pink-400"
             : dispute.status === "UNDER_REVIEW"
             ? "bg-gradient-to-r from-blue-500 to-indigo-400"
@@ -412,21 +402,13 @@ function DisputeCard({
               {(dispute.status === "UNDER_REVIEW" || dispute.status === "WAITING_FOR_RESPONSE") && (
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="h-7 text-[11px] px-2.5 font-semibold text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
-                  onClick={() => onChangeStatus(dispute, "ESCALATED")}
+                  className="h-7 text-[11px] px-2.5 font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-lg gap-1"
+                  onClick={() => onResolve(dispute)}
                 >
-                  Escalate
+                  <Gavel className="h-3 w-3" />
+                  Resolve
                 </Button>
               )}
-              <Button
-                size="sm"
-                className="h-7 text-[11px] px-2.5 font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-lg gap-1"
-                onClick={() => onResolve(dispute)}
-              >
-                <Gavel className="h-3 w-3" />
-                Resolve
-              </Button>
             </div>
           )}
 
@@ -904,14 +886,6 @@ export default function DisputeManagement() {
               icon={Clock}
               iconBg="bg-amber-50"
               iconColor="text-amber-500"
-            />
-            <StatCard
-              label="Escalated"
-              value={stats.escalated}
-              icon={TrendingUp}
-              iconBg="bg-red-50"
-              iconColor="text-red-600"
-              accent
             />
             <StatCard
               label="Resolved"

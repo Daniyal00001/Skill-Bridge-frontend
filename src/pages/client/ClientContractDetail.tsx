@@ -396,6 +396,15 @@ export default function ClientContractDetail() {
               <p className="text-xs text-muted-foreground">
                 ID: {contract.id.slice(0, 8)}...
               </p>
+              {contract.endDate && (
+                <>
+                  <span className="text-muted-foreground/30 text-xs">•</span>
+                  <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Deadline: {new Date(contract.endDate).toLocaleDateString()}
+                  </div>
+                </>
+              )}
             </div>
             <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words">
               {contract.projectTitle}
@@ -989,12 +998,10 @@ export default function ClientContractDetail() {
                             )}
                             <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                               {milestone.dueDate && (
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Calendar className="w-3 h-3" />
+                                <span className="flex items-center gap-1 text-[9px] font-black text-muted-foreground uppercase tracking-tighter opacity-60">
+                                  <Calendar className="w-2.5 h-2.5" />
                                   Due{" "}
-                                  {new Date(
-                                    milestone.dueDate,
-                                  ).toLocaleDateString()}
+                                  {new Date(milestone.dueDate).toLocaleDateString()}
                                 </span>
                               )}
                               <span

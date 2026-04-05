@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Briefcase, Search, Clock, CheckCircle2, DollarSign, ArrowRight,
-  Loader2, Shield, TrendingUp, Layers, Lock, RotateCcw, AlertTriangle,
+  Loader2, Shield, TrendingUp, Layers, Lock, RotateCcw, AlertTriangle, Calendar,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ interface ContractSummary {
   escrowAmount: number;
   progress: number;
   createdAt: string;
+  endDate?: string;
   milestonesTotal: number;
   milestonesApproved: number;
   milestonesSubmitted: number;
@@ -63,6 +64,7 @@ const FreelancerContractsPage = () => {
             escrowAmount: c.escrowAmount || 0,
             progress: c.progress || 0,
             createdAt: c.createdAt,
+            endDate: c.endDate,
             milestonesTotal: c.milestonesTotal || 0,
             milestonesApproved: c.milestonesApproved || 0,
             milestonesSubmitted: c.milestonesSubmitted || 0,
@@ -233,6 +235,13 @@ const FreelancerContractCard = ({ contract }: { contract: ContractSummary }) => 
             <Clock className="w-3.5 h-3.5" />
             Started {new Date(contract.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </div>
+
+          {contract.endDate && (
+            <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+              <Calendar className="w-3.5 h-3.5" />
+              Contract Deadline: {new Date(contract.endDate).toLocaleDateString()}
+            </div>
+          )}
 
           {/* Progress */}
           <div className="space-y-2">

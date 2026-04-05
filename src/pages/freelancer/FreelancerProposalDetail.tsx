@@ -20,6 +20,7 @@ import {
   Milestone,
   Paperclip,
   Inbox,
+  Calendar,
   ExternalLink,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -634,6 +635,12 @@ const FreelancerProposalDetail = () => {
                                 : m.allowedRevisions}{" "}
                               rev.
                             </span>
+                            {m.dueDate && (
+                              <span className="text-[9px] font-bold text-muted-foreground/60 flex items-center gap-0.5">
+                                <Calendar className="w-2.5 h-2.5" />
+                                Due {new Date(m.dueDate).toLocaleDateString()}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

@@ -9,7 +9,6 @@ export type DisputeStatus =
   | 'UNDER_REVIEW'
   | 'WAITING_FOR_RESPONSE'
   | 'RESOLVED'
-  | 'ESCALATED'
   | 'CLOSED';
 
 export type DisputeResolution =
@@ -122,7 +121,6 @@ export interface DisputeStats {
   underReview: number;
   waitingForResponse: number;
   resolved: number;
-  escalated: number;
   closed: number;
 }
 
