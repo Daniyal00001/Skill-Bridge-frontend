@@ -37,6 +37,15 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
   getDisputeFullDetail,
   updateDisputeStatus,
   resolveDispute,
@@ -61,6 +70,11 @@ const AdminDisputeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [resolutionModal, setResolutionModal] = useState<{
+    open: boolean;
+    type: DisputeResolution | null;
+    note: string;
+  }>({ open: false, type: null, note: "" });
 
   const fetchDetail = useCallback(async () => {
     if (!disputeId) return;
@@ -99,18 +113,19 @@ const AdminDisputeDetail = () => {
     }
   };
 
-  const handleResolve = async (resolution: DisputeResolution, note: string) => {
-    if (!disputeId) return;
+  const handleResolve = async () => {
+    if (!disputeId || !resolutionModal.type) return;
     try {
       setUpdating(true);
-      const res = await resolveDispute(disputeId, resolution, note);
+      const res = await resolveDispute(disputeId, resolutionModal.type, resolutionModal.note);
       if (res.success) {
         setDispute(res.dispute);
-        toast.success("Dispute resolved successfully");
+        toast.success("Dispute resolved successfully. Escrow funds processed.");
+        setResolutionModal({ open: false, type: null, note: "" });
         fetchDetail();
       }
     } catch (err: any) {
-      toast.error("Failed to resolve dispute");
+      toast.error(err?.response?.data?.message || "Failed to resolve dispute");
     } finally {
       setUpdating(false);
     }
@@ -332,40 +347,28 @@ const AdminDisputeDetail = () => {
                             <Button 
                               variant="outline" 
                               className="justify-start font-bold text-xs h-10 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 border-border/80"
-                              onClick={() => {
-                                const note = window.prompt("Resolution Note (Optional):");
-                                if (note !== null) handleResolve("FAVOR_CLIENT", note);
-                              }}
+                              onClick={() => setResolutionModal({ open: true, type: "FAVOR_CLIENT", note: "" })}
                             >
                               Favor Client
                             </Button>
                             <Button 
                               variant="outline" 
                               className="justify-start font-bold text-xs h-10 rounded-xl hover:bg-primary-50 hover:text-primary transition-all border-border/80"
-                              onClick={() => {
-                                const note = window.prompt("Resolution Note (Optional):");
-                                if (note !== null) handleResolve("FAVOR_FREELANCER", note);
-                              }}
+                              onClick={() => setResolutionModal({ open: true, type: "FAVOR_FREELANCER", note: "" })}
                             >
                               Favor Freelancer
                             </Button>
                             <Button 
                               variant="outline" 
                               className="justify-start font-bold text-xs h-10 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all border-border/80"
-                              onClick={() => {
-                                const note = window.prompt("Resolution Note (Optional):");
-                                if (note !== null) handleResolve("PARTIAL_SPLIT", note);
-                              }}
+                              onClick={() => setResolutionModal({ open: true, type: "PARTIAL_SPLIT", note: "" })}
                             >
                               Partial Split (50/50)
                             </Button>
                             <Button 
                               variant="outline" 
                               className="justify-start font-bold text-xs h-10 rounded-xl hover:bg-rose-50 hover:text-rose-700 transition-all border-border/80"
-                              onClick={() => {
-                                const note = window.prompt("Resolution Note (Optional):");
-                                if (note !== null) handleResolve("PROJECT_CANCELLED", note);
-                              }}
+                              onClick={() => setResolutionModal({ open: true, type: "PROJECT_CANCELLED", note: "" })}
                             >
                               Cancel Project & Refund
                             </Button>
@@ -871,6 +874,69 @@ const AdminDisputeDetail = () => {
              </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Resolution Note Modal */}
+        <Dialog 
+          open={resolutionModal.open} 
+          onOpenChange={(open) => setResolutionModal(prev => ({ ...prev, open }))}
+        >
+          <DialogContent className="rounded-3xl border-rose-100 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-black text-xl flex items-center gap-2 text-rose-600">
+                <Gavel className="w-5 h-5" />
+                Resolve Case
+              </DialogTitle>
+              <DialogDescription className="font-bold text-xs italic">
+                You are about to issue a final decision for Case #{dispute.id.slice(-6).toUpperCase()}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
+                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5">Selected Resolution</p>
+                 <Badge className="bg-rose-600 text-white font-black px-3 py-1 text-[10px] tracking-widest">
+                   {resolutionModal.type?.replace(/_/g, " ")}
+                 </Badge>
+                 <p className="text-xs font-medium text-muted-foreground mt-3 leading-relaxed">
+                   {resolutionModal.type === "FAVOR_CLIENT" && "All escrowed funds will be returned to the client's balance."}
+                   {resolutionModal.type === "FAVOR_FREELANCER" && "All escrowed funds will be released to the freelancer's balance."}
+                   {resolutionModal.type === "PARTIAL_SPLIT" && "Funds will be split 50/50 between both parties."}
+                   {resolutionModal.type === "PROJECT_CANCELLED" && "Project will be marked as cancelled and funds refunded to client."}
+                 </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Case Resolution Note</Label>
+                <Textarea 
+                  placeholder="Explain the reasoning behind this decision..."
+                  className="rounded-2xl min-h-[120px] resize-none border-border/60 focus:ring-rose-500/20 focus:border-rose-500/40"
+                  value={resolutionModal.note}
+                  onChange={(e) => setResolutionModal(prev => ({ ...prev, note: e.target.value }))}
+                />
+                <p className="text-[9px] font-bold text-muted-foreground italic px-1">
+                  This note will be visible to both the Client and Freelancer.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-2xl font-bold h-11 border-border/60"
+                onClick={() => setResolutionModal({ open: false, type: null, note: "" })}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="flex-1 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black h-11 shadow-lg shadow-rose-200"
+                onClick={handleResolve}
+                disabled={updating}
+              >
+                {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Resolution"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
