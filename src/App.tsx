@@ -74,6 +74,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ProjectModeration from "./pages/admin/ProjectModeration";
 import DisputeManagement from "./pages/admin/DisputeManagement";
+import AdminDisputeDetail from "./pages/admin/AdminDisputeDetail";
 import Analytics from "./pages/admin/Analytics";
 import Security from "./pages/admin/Security";
 import AdminSkills from "./pages/admin/AdminSkills";
@@ -273,6 +274,10 @@ const App = () => (
                   <Route
                     path="/admin/projects"
                     element={<ProjectModeration />}
+                  />
+                  <Route
+                    path="/admin/disputes/:disputeId"
+                    element={<AdminDisputeDetail />}
                   />
                   <Route
                     path="/admin/disputes"

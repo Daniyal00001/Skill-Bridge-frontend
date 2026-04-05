@@ -14,10 +14,18 @@ import {
   ArrowLeft, CheckCircle2, Clock, DollarSign, FileText, Loader2, Lock,
   Package, RotateCcw, Send, Shield, Upload, X, AlertCircle, AlertTriangle,
   Calendar, ShieldCheck, ListChecks, ChevronDown, ChevronUp, Eye,
-  TrendingUp, Activity, Star, Zap, Play,
+  TrendingUp, Activity, Star, Zap, Play, ShieldAlert, Gavel, MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { createDispute, type DisputeType } from "@/services/dispute.service";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ReviewModal } from "@/components/modals/ReviewModal";
 
@@ -127,10 +135,33 @@ export default function ClientContractDetail() {
     theirReview: any;
   } | null>(null);
 
+  // ── Dispute state ──
+  const [disputeModal, setDisputeModal] = useState(false);
+  const [disputeSubmitting, setDisputeSubmitting] = useState(false);
+  const [disputeForm, setDisputeForm] = useState({
+    disputeType: "PAYMENT" as DisputeType,
+    reason: "",
+    details: "",
+  });
+  const [existingDispute, setExistingDispute] = useState<any>(null);
+
   const fetchContract = useCallback(async () => {
     try {
       const res = await api.get(`/contracts/${contractId}`);
-      setContract(res.data.contract);
+      const contractData = res.data.contract;
+      setContract(contractData);
+
+      // Fetch dispute status for this project
+      if (contractData?.projectId) {
+        try {
+          const disputeRes = await api.get(`/disputes/my/${contractData.projectId}`);
+          if (disputeRes.data.success) {
+            setExistingDispute(disputeRes.data.dispute);
+          }
+        } catch (err) {
+          // No dispute exists or not found, ignore
+        }
+      }
     } catch {
       toast.error("Failed to load contract");
       navigate("/client/projects");
@@ -188,6 +219,28 @@ export default function ClientContractDetail() {
     } finally { setProcessingId(null); }
   };
 
+  const handleOpenDispute = async () => {
+    if (!disputeForm.reason.trim()) { toast.error("Please describe the issue."); return; }
+    setDisputeSubmitting(true);
+    try {
+      const res = await createDispute({
+        projectId: contract!.projectId,
+        disputeType: disputeForm.disputeType,
+        reason: disputeForm.reason,
+        details: disputeForm.details,
+      });
+      if (res.success) {
+        toast.success("Dispute submitted. Admin will review shortly.");
+        setDisputeModal(false);
+        setExistingDispute(res.dispute);
+        setDisputeForm({ disputeType: "PAYMENT", reason: "", details: "" });
+        await fetchContract();
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to submit dispute");
+    } finally { setDisputeSubmitting(false); }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -224,16 +277,59 @@ export default function ClientContractDetail() {
             </div>
             <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words">{contract.projectTitle}</h1>
           </div>
-          <Badge className={cn(
-            "font-bold px-4 py-1.5 text-sm shrink-0 border",
-            contract.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-700 border-emerald-400/30" :
-            contract.status === "OFFER_PENDING" ? "bg-amber-500/10 text-amber-700 border-amber-400/30" :
-            contract.status === "COMPLETED" ? "bg-blue-500/10 text-blue-700 border-blue-400/30" :
-            "bg-muted text-muted-foreground border-border"
-          )}>
-            {contract.status === "OFFER_PENDING" ? "Awaiting Freelancer Approval" : contract.status}
-          </Badge>
+          <div className="flex items-center gap-2 shrink-0">
+            {(contract.status === "ACTIVE" || existingDispute) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "h-8 rounded-xl font-bold text-xs gap-1.5",
+                  existingDispute ? "border-rose-200 text-rose-600 bg-rose-50" : "border-rose-200 text-rose-600 hover:bg-rose-50"
+                )}
+                onClick={() => !existingDispute && setDisputeModal(true)}
+                disabled={!!existingDispute}
+              >
+                <ShieldAlert className="w-3.5 h-3.5" />
+                {existingDispute ? "Case Active" : "Open Dispute"}
+              </Button>
+            )}
+            <Badge className={cn(
+              "font-bold px-4 py-1.5 text-sm border",
+              contract.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-700 border-emerald-400/30" :
+              contract.status === "OFFER_PENDING" ? "bg-amber-500/10 text-amber-700 border-amber-400/30" :
+              contract.status === "COMPLETED" ? "bg-blue-500/10 text-blue-700 border-blue-400/30" :
+              "bg-muted text-muted-foreground border-border"
+            )}>
+              {contract.status === "OFFER_PENDING" ? "Awaiting Freelancer Approval" : contract.status}
+            </Badge>
+          </div>
         </div>
+
+        {/* Active Dispute Banner */}
+        {existingDispute && (
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-4">
+             <div className="flex items-center gap-4">
+               <div className="p-3 bg-rose-100 rounded-xl">
+                 <AlertTriangle className="w-6 h-6 text-rose-600" />
+               </div>
+               <div className="space-y-1">
+                 <h4 className="text-sm font-black text-rose-900 flex items-center gap-2">
+                    Active Conflict Resolution Case
+                    <Badge className="bg-rose-600 text-white border-none font-black px-2 h-4 text-[9px]">{existingDispute.status.replace(/_/g, " ")}</Badge>
+                 </h4>
+                 <p className="text-xs font-medium text-rose-700 leading-relaxed max-w-2xl">
+                    A dispute has been filed regarding: "{existingDispute.reason}". A platform mediator is currently reviewing the project history, deliverables, and communication logs.
+                 </p>
+               </div>
+             </div>
+             <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-9 bg-white whitespace-nowrap" asChild>
+                <Link to="/client/messages">
+                  <MessageSquare className="w-3.5 h-3.5 mr-1" />
+                  Contact Support
+                </Link>
+             </Button>
+          </div>
+        )}
 
         {/* Offer Pending Alert */}
         {contract.status === "OFFER_PENDING" && (
@@ -887,6 +983,81 @@ export default function ClientContractDetail() {
             onSuccess={fetchReviewStatus}
           />
         )}
+
+        {/* Dispute Modal */}
+        <Dialog open={disputeModal} onOpenChange={(o) => !o && setDisputeModal(false)}>
+          <DialogContent className="rounded-2xl max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-black text-lg flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-rose-500" />
+                Open a Dispute
+              </DialogTitle>
+              <DialogDescription>
+                Describe the problem clearly. Admin will review and mediate between you and the freelancer.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-1">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Dispute Type <span className="text-red-500">*</span></label>
+                <Select
+                  value={disputeForm.disputeType}
+                  onValueChange={(v) => setDisputeForm(p => ({ ...p, disputeType: v as DisputeType }))}
+                >
+                  <SelectTrigger className="rounded-xl h-10 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {([
+                      ["PAYMENT",      "💰 Payment Dispute"],
+                      ["SCOPE",        "📄 Scope of Work"],
+                      ["DEADLINE",     "⏰ Deadline / Delay"],
+                      ["QUALITY",      "🧪 Quality of Work"],
+                      ["REVISION",     "🔁 Revision Dispute"],
+                      ["DELIVERABLES", "📂 Deliverables Not Provided"],
+                      ["IP",           "🔐 Intellectual Property"],
+                    ] as [DisputeType, string][]).map(([val, label]) => (
+                      <SelectItem key={val} value={val}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Issue Summary <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  placeholder="e.g. Freelancer missed deadline and work is incomplete"
+                  value={disputeForm.reason}
+                  onChange={(e) => setDisputeForm(p => ({ ...p, reason: e.target.value }))}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Full Details</label>
+                <Textarea
+                  placeholder="Explain in detail what went wrong, when, and what resolution you expect..."
+                  value={disputeForm.details}
+                  onChange={(e) => setDisputeForm(p => ({ ...p, details: e.target.value }))}
+                  rows={4}
+                  className="rounded-xl resize-none text-sm"
+                />
+              </div>
+              <div className="text-xs text-muted-foreground bg-amber-50 border border-amber-200 rounded-xl p-3">
+                ⚠️ Once submitted, this project will be marked as <strong>Disputed</strong> and an admin will be notified immediately.
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setDisputeModal(false)}>Cancel</Button>
+              <Button
+                className="flex-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black gap-2"
+                onClick={handleOpenDispute}
+                disabled={disputeSubmitting || !disputeForm.reason.trim()}
+              >
+                {disputeSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gavel className="w-4 h-4" />}
+                Submit Dispute
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
