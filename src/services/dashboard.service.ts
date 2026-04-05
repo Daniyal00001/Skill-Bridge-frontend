@@ -48,6 +48,7 @@ export interface FreelancerDashboardData {
     shortlistedProposals: number;
     proposalsThisMonth: number;
     activeContractsCount: number;
+    disputedContractsCount: number;
     completedJobs: number;
     pendingInvitationsCount: number;
     totalEarnings: number;

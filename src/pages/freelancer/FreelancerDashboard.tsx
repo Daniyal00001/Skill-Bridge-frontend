@@ -334,36 +334,37 @@ export default function FreelancerDashboard() {
 
           {stats.pendingInvitationsCount > 0 && (
             <Card className="border border-primary/20 bg-primary/5 rounded-2xl">
-            <CardContent className="p-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Inbox className="h-4 w-4 text-primary" />
+              <CardContent className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Inbox className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      You have{" "}
+                      <span className="text-primary">
+                        {stats.pendingInvitationsCount}
+                      </span>{" "}
+                      pending invitation
+                      {stats.pendingInvitationsCount > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Clients have invited you to their projects
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    You have{" "}
-                    <span className="text-primary">
-                      {stats.pendingInvitationsCount}
-                    </span>{" "}
-                    pending invitation
-                    {stats.pendingInvitationsCount > 1 ? "s" : ""}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Clients have invited you to their projects
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-xl font-semibold border-primary/30 text-primary hover:bg-primary/10 shrink-0"
-                asChild
-              >
-                <Link to="/freelancer/invitations">View Invitations</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-xl font-semibold border-primary/30 text-primary hover:bg-primary/10 shrink-0"
+                  asChild
+                >
+                  <Link to="/freelancer/invitations">View Invitations</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* ── KPI Stats Grid ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">

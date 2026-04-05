@@ -571,10 +571,9 @@ export default function FreelancerContractDetail() {
                           "RESOLVED",
                           "CLOSED",
                         ].includes(existingDispute.status),
-                        isDone: [
-                          "RESOLVED",
-                          "CLOSED",
-                        ].includes(existingDispute.status),
+                        isDone: ["RESOLVED", "CLOSED"].includes(
+                          existingDispute.status,
+                        ),
                       },
                       {
                         stage: "Final Decision",
@@ -629,14 +628,14 @@ export default function FreelancerContractDetail() {
               </div>
 
               <div className="px-5 py-3 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <div className="p-1 px-2 bg-rose-100 rounded text-[10px] font-black text-rose-600 uppercase">
                     Next Step
                   </div>
                   <p className="text-sm text-rose-800 dark:text-rose-300 font-bold leading-relaxed">
                     Mediator is reviewing the case. Check back soon.
                   </p>
-                </div>
+                </div> */}
                 <div className="flex gap-2">
                   {/* <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-8 bg-white" asChild>
                       <Link to="/messages">

@@ -547,10 +547,9 @@ export default function ClientContractDetail() {
                           "RESOLVED",
                           "CLOSED",
                         ].includes(existingDispute.status),
-                        isDone: [
-                          "RESOLVED",
-                          "CLOSED",
-                        ].includes(existingDispute.status),
+                        isDone: ["RESOLVED", "CLOSED"].includes(
+                          existingDispute.status,
+                        ),
                       },
                       {
                         stage: "Final Decision",
@@ -605,7 +604,7 @@ export default function ClientContractDetail() {
               </div>
 
               <div className="px-5 py-3 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <div className="p-1 px-2 bg-rose-100 rounded text-[10px] font-black text-rose-600 uppercase">
                     Next Step
                   </div>
@@ -614,7 +613,7 @@ export default function ClientContractDetail() {
                       Mediator is reviewing the case. Check back soon.
                     </p>
                   </p>
-                </div>
+                </div> */}
                 <div className="flex gap-2">
                   {/* <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-8 bg-white" asChild>
                       <Link to="/client/messages">
@@ -999,7 +998,9 @@ export default function ClientContractDetail() {
                                 <span className="flex items-center gap-1 text-[9px] font-black text-muted-foreground uppercase tracking-tighter opacity-60">
                                   <Calendar className="w-2.5 h-2.5" />
                                   Due{" "}
-                                  {new Date(milestone.dueDate).toLocaleDateString()}
+                                  {new Date(
+                                    milestone.dueDate,
+                                  ).toLocaleDateString()}
                                 </span>
                               )}
                               <span
