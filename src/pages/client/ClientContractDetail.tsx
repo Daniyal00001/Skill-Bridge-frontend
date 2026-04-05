@@ -514,6 +514,26 @@ export default function ClientContractDetail() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Official Resolution Section */}
+                  {existingDispute.status === "RESOLVED" && (
+                    <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-200/50 space-y-3 mt-4">
+                      <div className="flex items-center justify-between">
+                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">
+                            Official Resolution
+                         </p>
+                         <Badge className="bg-emerald-500 text-white border-none font-black text-[9px] h-5 px-2">
+                           {existingDispute.resolution.replace(/_/g, " ")}
+                         </Badge>
+                      </div>
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest">Decision Note</p>
+                        <p className="text-xs font-bold leading-relaxed text-emerald-900/80 bg-white/40 p-3 rounded-xl border border-emerald-100/50 italic">
+                          "{existingDispute.resolutionNote || "No explanatory note provided."}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Progress Tracker */}
