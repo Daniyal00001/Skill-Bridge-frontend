@@ -568,12 +568,10 @@ export default function FreelancerContractDetail() {
                         desc: "Project deliverables are being audited",
                         isActive: [
                           "UNDER_REVIEW",
-                          "WAITING_FOR_RESPONSE",
                           "RESOLVED",
                           "CLOSED",
                         ].includes(existingDispute.status),
                         isDone: [
-                          "WAITING_FOR_RESPONSE",
                           "RESOLVED",
                           "CLOSED",
                         ].includes(existingDispute.status),
@@ -635,10 +633,8 @@ export default function FreelancerContractDetail() {
                   <div className="p-1 px-2 bg-rose-100 rounded text-[10px] font-black text-rose-600 uppercase">
                     Next Step
                   </div>
-                  <p className="text-xs font-bold text-rose-800">
-                    {existingDispute.status === "WAITING_FOR_RESPONSE"
-                      ? "Mediator is waiting for your input. Check emails."
-                      : "Meditator is auditing project messages and milestones."}
+                  <p className="text-sm text-rose-800 dark:text-rose-300 font-bold leading-relaxed">
+                    Mediator is reviewing the case. Check back soon.
                   </p>
                 </div>
                 <div className="flex gap-2">

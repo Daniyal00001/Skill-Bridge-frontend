@@ -7,7 +7,6 @@ const BASE_URL = '/disputes';
 export type DisputeStatus =
   | 'OPEN'
   | 'UNDER_REVIEW'
-  | 'WAITING_FOR_RESPONSE'
   | 'RESOLVED'
   | 'CLOSED';
 
@@ -70,28 +69,41 @@ export interface Dispute {
     category?: { name: string };
     subCategory?: { name: string };
     skills?: { skill: { name: string } }[];
-    contract?: {
-      id: string;
-      status: string;
-      agreedPrice: number;
-      startDate: string;
-      endDate?: string;
-      milestones: {
+      contract?: {
         id: string;
-        title: string;
-        description?: string;
-        amount: number;
         status: string;
-        deliverables?: string;
-        attachments: string[];
-        history?: any;
-        approvedAt?: string;
-        submittedAt?: string;
-      }[];
-      freelancerProfile: {
-        user: { name: string, profileImage?: string };
+        agreedPrice: number;
+        startDate: string;
+        endDate?: string;
+        milestones: {
+          id: string;
+          title: string;
+          description?: string;
+          amount: number;
+          status: string;
+          dueDate?: string;
+          revisionNote?: string;
+          deliverables?: string;
+          attachments: string[];
+          history?: any;
+          approvedAt?: string;
+          submittedAt?: string;
+        }[];
+        chatRooms?: {
+          id: string;
+          messages: {
+            id: string;
+            content: string;
+            type: string;
+            fileUrl?: string;
+            sentAt: string;
+            sender: { name: string, profileImage?: string, role: string };
+          }[];
+        }[];
+        freelancerProfile: {
+          user: { name: string, profileImage?: string };
+        };
       };
-    };
     proposals?: {
       id: string;
       coverLetter: string;
@@ -115,11 +127,9 @@ export interface Dispute {
   freelancer?: DisputeUser;
   admin?: { id: string; fullName: string };
 }
-
 export interface DisputeStats {
   open: number;
   underReview: number;
-  waitingForResponse: number;
   resolved: number;
   closed: number;
 }

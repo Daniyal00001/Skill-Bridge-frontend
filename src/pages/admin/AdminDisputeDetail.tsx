@@ -372,18 +372,6 @@ const AdminDisputeDetail = () => {
                          </div>
                        </div>
                        
-                       <Separator className="my-2 bg-rose-100" />
-                       
-                       <div className="space-y-2">
-
-                         <Button 
-                            variant="ghost" 
-                            className="w-full justify-center font-bold text-xs text-muted-foreground h-9 rounded-xl"
-                            onClick={() => handleStatusUpdate("WAITING_FOR_RESPONSE")}
-                          >
-                            Mark: Waiting for Party Response
-                         </Button>
-                       </div>
                     </CardContent>
                   </Card>
                 )}
@@ -634,10 +622,16 @@ const AdminDisputeDetail = () => {
                     <p className="text-xs font-bold text-muted-foreground italic">Real-time status of work progress and payment escrow</p>
                   </div>
                   <div className="flex items-center gap-4 text-right">
-                     <div className="space-y-1">
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Total Contract Price</p>
-                        <p className="text-xl font-black text-primary">${dispute.project?.contract?.agreedPrice}</p>
-                     </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Project Deadline</p>
+                        <p className="text-sm font-black text-emerald-600">
+                          {dispute.project?.contract?.endDate ? safeFormat(dispute.project.contract.endDate, "MMM d, yyyy") : "No Deadline"}
+                        </p>
+                      </div>
+                      <div className="space-y-1 mx-4">
+                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Total Contract Price</p>
+                         <p className="text-xl font-black text-primary">${dispute.project?.contract?.agreedPrice}</p>
+                      </div>
                      <Badge className="bg-primary text-white font-black px-4 h-8 text-[10px] tracking-widest shadow-sm border-none uppercase">
                         {dispute.project?.contract?.status || "Active"}
                      </Badge>
@@ -669,7 +663,14 @@ const AdminDisputeDetail = () => {
                              <CardHeader className="p-4 pb-0 flex flex-row items-center justify-between border-b border-border/10 pb-4 bg-muted/5">
                                 <div>
                                   <CardTitle className="text-sm font-black tracking-tight">{m.title}</CardTitle>
-                                  <p className="text-[10px] text-muted-foreground font-black mt-1">Amount: ${m.amount}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-[10px] text-muted-foreground font-black">Amount: ${m.amount}</p>
+                                    {m.dueDate && (
+                                      <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground opacity-60">
+                                        <Calendar className="w-3 h-3" /> {safeFormat(m.dueDate, "MMM d, yy")}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                                 <Badge className={cn("px-2 py-0.5 text-[9px] font-black uppercase tracking-tighter", 
                                    m.status === "APPROVED" ? "bg-emerald-500/10 text-emerald-700 border-emerald-400/20" :
@@ -773,62 +774,97 @@ const AdminDisputeDetail = () => {
                 <CardContent className="p-0 flex-1 overflow-hidden">
                    <ScrollArea className="h-full p-6">
                       <div className="space-y-6">
-                        {dispute?.project?.chatRooms?.[0]?.messages?.map((msg: any) => (
-                           <div 
-                              key={msg.id} 
-                              className={cn(
-                                 "flex flex-col max-w-[85%] space-y-1.5",
-                                 msg.sender?.role === "CLIENT" ? "mr-auto" : "ml-auto items-end"
-                              )}
-                           >
-                              <div className="flex items-center gap-2 mb-1">
-                                 {msg.sender?.role === "CLIENT" && (
-                                    <Avatar className="w-5 h-5 border">
-                                       <AvatarImage src={msg.sender?.profileImage} />
-                                       <AvatarFallback className="text-[8px] font-bold">{msg.sender?.name?.[0]}</AvatarFallback>
-                                    </Avatar>
-                                 )}
-                                 <span className="text-[10px] font-black uppercase tracking-tight text-muted-foreground">
-                                    {msg.sender?.name} ({msg.sender?.role})
-                                 </span>
-                                 {msg.sender?.role !== "CLIENT" && (
-                                    <Avatar className="w-5 h-5 border">
-                                       <AvatarImage src={msg.sender?.profileImage} />
-                                       <AvatarFallback className="text-[8px] font-bold">{msg.sender?.name?.[0]}</AvatarFallback>
-                                    </Avatar>
-                                 )}
-                              </div>
-                              <div className={cn(
-                                 "p-4 rounded-2xl text-sm font-medium shadow-sm border",
-                                 msg.sender?.role === "CLIENT" 
-                                    ? "bg-white border-border/60 rounded-tl-none" 
-                                    : "bg-primary text-primary-foreground border-primary/20 rounded-tr-none"
-                              )}>
-                                 {msg.content}
-                                 {msg.type === "FILE" && msg.fileUrl && (
-                                    <a 
-                                       href={msg.fileUrl} 
-                                       target="_blank" 
-                                       rel="noreferrer"
-                                       className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-black/10 hover:bg-black/20 transition-all text-xs border border-white/10"
-                                    >
-                                       <Paperclip className="w-3.5 h-3.5" />
-                                       <span className="truncate">View shared file</span>
-                                    </a>
-                                 )}
-                              </div>
-                              <span className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-tighter">
-                                 {safeFormat(msg.sentAt, "MMM d, h:mm a")}
-                              </span>
-                           </div>
-                        ))}
+                        {(() => {
+                          // Combine all possible rooms from project and contract
+                          const projectRooms = dispute?.project?.chatRooms || [];
+                          const contractRooms = dispute?.project?.contract?.chatRooms || [];
+                          const allRooms = [...projectRooms, ...contractRooms];
 
-                        {(!dispute?.project?.chatRooms?.[0]?.messages || dispute.project.chatRooms[0].messages.length === 0) && (
-                           <div className="flex flex-col items-center justify-center h-full py-32 text-center gap-4 opacity-30 grayscale">
+                          // Collect ALL messages from ALL rooms
+                          const allMessages: any[] = [];
+                          allRooms.forEach(room => {
+                            if (room.messages) {
+                               allMessages.push(...room.messages);
+                            }
+                          });
+
+                          // De-duplicate by message ID and sort chronologically (oldest first)
+                          const uniqueMessages = Array.from(new Map(allMessages.map(m => [m.id, m])).values());
+                          const sortedMessages = uniqueMessages.sort((a, b) => 
+                            new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
+                          );
+
+                          if (sortedMessages.length > 0) {
+                            return sortedMessages.map((msg: any) => (
+                              <div
+                                key={msg.id}
+                                className={cn(
+                                  "flex flex-col max-w-[85%] space-y-1.5",
+                                  msg.sender?.role === "CLIENT"
+                                    ? "mr-auto"
+                                    : "ml-auto items-end",
+                                )}
+                              >
+                                <div className="flex items-center gap-2 mb-1">
+                                  {msg.sender?.role === "CLIENT" && (
+                                    <Avatar className="w-5 h-5 border">
+                                      <AvatarImage src={msg.sender?.profileImage} />
+                                      <AvatarFallback className="text-[8px] font-bold">
+                                        {msg.sender?.name?.[0]}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  )}
+                                  <span className="text-[10px] font-black uppercase tracking-tight text-muted-foreground">
+                                    {msg.sender?.name} ({msg.sender?.role})
+                                  </span>
+                                  {msg.sender?.role !== "CLIENT" && (
+                                    <Avatar className="w-5 h-5 border">
+                                      <AvatarImage src={msg.sender?.profileImage} />
+                                      <AvatarFallback className="text-[8px] font-bold">
+                                        {msg.sender?.name?.[0]}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  )}
+                                </div>
+                                <div
+                                  className={cn(
+                                    "p-4 rounded-2xl text-sm font-medium shadow-sm border",
+                                    msg.sender?.role === "CLIENT"
+                                      ? "bg-white border-border/60 rounded-tl-none"
+                                      : "bg-primary text-primary-foreground border-primary/20 rounded-tr-none",
+                                  )}
+                                >
+                                  {msg.content}
+                                  {msg.type === "FILE" && msg.fileUrl && (
+                                    <a
+                                      href={msg.fileUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-black/10 hover:bg-black/20 transition-all text-xs border border-white/10"
+                                    >
+                                      <Paperclip className="w-3.5 h-3.5" />
+                                      <span className="truncate">
+                                        View shared file
+                                      </span>
+                                    </a>
+                                  )}
+                                </div>
+                                <span className="text-[9px] font-black text-muted-foreground/50 uppercase tracking-tighter">
+                                  {safeFormat(msg.sentAt, "MMM d, h:mm a")}
+                                </span>
+                              </div>
+                            ));
+                          }
+
+                          return (
+                            <div className="flex flex-col items-center justify-center h-full py-32 text-center gap-4 opacity-30 grayscale">
                               <MessageSquare className="w-16 h-16" />
-                              <p className="text-sm font-black uppercase tracking-widest">No messages exchanged found</p>
-                           </div>
-                        )}
+                              <p className="text-sm font-black uppercase tracking-widest">
+                                No messages exchanged found before conflict
+                              </p>
+                            </div>
+                          );
+                        })()}
                       </div>
                    </ScrollArea>
                 </CardContent>

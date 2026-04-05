@@ -135,13 +135,6 @@ const STATUS_META: Record<
     border: "border-blue-200",
     dot: "bg-blue-500",
   },
-  WAITING_FOR_RESPONSE: {
-    label: "Waiting Response",
-    color: "text-amber-700",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-    dot: "bg-amber-500",
-  },
   RESOLVED: {
     label: "Resolved",
     color: "text-emerald-700",
@@ -170,7 +163,6 @@ const FILTER_TABS: { key: DisputeStatus | "ALL"; label: string }[] = [
   { key: "ALL", label: "All" },
   { key: "OPEN", label: "Open" },
   { key: "UNDER_REVIEW", label: "Under Review" },
-  { key: "WAITING_FOR_RESPONSE", label: "Waiting" },
   { key: "RESOLVED", label: "Resolved" },
   { key: "CLOSED", label: "Closed" },
 ];
@@ -250,8 +242,6 @@ function DisputeCard({
             ? "bg-gradient-to-r from-rose-400 to-pink-400"
             : dispute.status === "UNDER_REVIEW"
             ? "bg-gradient-to-r from-blue-500 to-indigo-400"
-            : dispute.status === "WAITING_FOR_RESPONSE"
-            ? "bg-gradient-to-r from-amber-400 to-yellow-300"
             : dispute.status === "RESOLVED"
             ? "bg-gradient-to-r from-emerald-400 to-teal-400"
             : "bg-gradient-to-r from-zinc-300 to-zinc-200"
@@ -369,6 +359,12 @@ function DisputeCard({
                 {dispute.project.budget.toLocaleString()}
               </span>
             )}
+            {dispute.project?.contract?.endDate && (
+              <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-700 px-1.5 py-0.5 rounded font-black text-[9px] uppercase tracking-tighter">
+                <Calendar className="h-3 w-3" />
+                {new Date(dispute.project.contract.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              </span>
+            )}
             {dispute.evidenceUrls.length > 0 && (
               <span className="flex items-center gap-1">
                 <Paperclip className="h-3 w-3" />
@@ -390,16 +386,6 @@ function DisputeCard({
                 </Button>
               )}
               {dispute.status === "UNDER_REVIEW" && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-[11px] px-2.5 font-semibold text-amber-700 border-amber-200 hover:bg-amber-50 rounded-lg"
-                  onClick={() => onChangeStatus(dispute, "WAITING_FOR_RESPONSE")}
-                >
-                  Await Reply
-                </Button>
-              )}
-              {(dispute.status === "UNDER_REVIEW" || dispute.status === "WAITING_FOR_RESPONSE") && (
                 <Button
                   size="sm"
                   className="h-7 text-[11px] px-2.5 font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-lg gap-1"
@@ -949,11 +935,7 @@ export default function DisputeManagement() {
                 const count =
                   tab.key === "ALL"
                     ? Object.values(stats || {}).reduce((a, b) => a + b, 0)
-                    : stats?.[
-                        tab.key === "WAITING_FOR_RESPONSE"
-                          ? "waitingForResponse"
-                          : (tab.key.toLowerCase() as keyof DisputeStats)
-                      ];
+                    : stats?.[tab.key.toLowerCase() as keyof DisputeStats];
                 return (
                   <button
                     key={tab.key}

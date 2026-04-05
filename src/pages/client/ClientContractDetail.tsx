@@ -544,12 +544,10 @@ export default function ClientContractDetail() {
                         desc: "Project deliverables are being audited",
                         isActive: [
                           "UNDER_REVIEW",
-                          "WAITING_FOR_RESPONSE",
                           "RESOLVED",
                           "CLOSED",
                         ].includes(existingDispute.status),
                         isDone: [
-                          "WAITING_FOR_RESPONSE",
                           "RESOLVED",
                           "CLOSED",
                         ].includes(existingDispute.status),
@@ -612,9 +610,9 @@ export default function ClientContractDetail() {
                     Next Step
                   </div>
                   <p className="text-xs font-bold text-rose-800">
-                    {existingDispute.status === "WAITING_FOR_RESPONSE"
-                      ? "Mediator is waiting for input. Check your dashboard."
-                      : "Meditator is auditing project messages and milestones."}
+                    <p className="text-sm text-rose-800 dark:text-rose-300 font-bold leading-relaxed">
+                      Mediator is reviewing the case. Check back soon.
+                    </p>
                   </p>
                 </div>
                 <div className="flex gap-2">
