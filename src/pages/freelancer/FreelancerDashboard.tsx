@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -296,9 +297,43 @@ export default function FreelancerDashboard() {
           </div>
         </div>
 
-        {/* ── Availability + Invitations banner ──────────────────────────────── */}
-        {stats.pendingInvitationsCount > 0 && (
-          <Card className="border border-primary/20 bg-primary/5 rounded-2xl">
+        {/* ── Availability + Invitations + Disputes banner ──────────────────── */}
+        <div className="space-y-4">
+          {stats.disputedContractsCount > 0 && (
+            <Card className="border border-rose-200 bg-rose-50/50 rounded-2xl">
+              <CardContent className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="h-4 w-4 text-rose-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      You have{" "}
+                      <span className="text-rose-600">
+                        {stats.disputedContractsCount}
+                      </span>{" "}
+                      disputed contract
+                      {stats.disputedContractsCount > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Please review the communication logs and work history
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="rounded-xl font-semibold shrink-0"
+                  asChild
+                >
+                  <Link to="/freelancer/contracts?tab=disputed">View Disputes</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {stats.pendingInvitationsCount > 0 && (
+            <Card className="border border-primary/20 bg-primary/5 rounded-2xl">
             <CardContent className="p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">

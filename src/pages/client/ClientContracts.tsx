@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -56,10 +56,12 @@ const statusConfig: Record<string, { label: string; color: string; dot: string }
 };
 
 const ClientContractsPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [contracts, setContracts] = useState<ContractSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("active");
+  const initialTab = searchParams.get("tab") || "active";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
     const fetchContracts = async () => {

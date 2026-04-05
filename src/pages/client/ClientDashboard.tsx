@@ -159,7 +159,7 @@ export default function ClientDashboard() {
                   className="ml-auto"
                   asChild
                 >
-                  <Link to="/client/disputes">View Disputes</Link>
+                  <Link to="/client/contracts?tab=disputed">View Disputes</Link>
                 </Button>
               </CardContent>
             </Card>
