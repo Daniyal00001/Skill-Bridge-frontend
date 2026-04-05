@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Briefcase, Search, Clock, CheckCircle2, DollarSign, ArrowRight,
-  Loader2, Shield, TrendingUp, Layers, Lock, RotateCcw,
+  Loader2, Shield, TrendingUp, Layers, Lock, RotateCcw, AlertTriangle,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -37,6 +37,7 @@ const statusConfig: Record<string, { label: string; color: string; dot: string }
   ACTIVE: { label: "Active", color: "bg-emerald-500/10 text-emerald-700 border-emerald-400/30", dot: "bg-emerald-500" },
   COMPLETED: { label: "Completed", color: "bg-blue-500/10 text-blue-700 border-blue-400/30", dot: "bg-blue-500" },
   CANCELLED: { label: "Cancelled", color: "bg-red-500/10 text-red-700 border-red-400/30", dot: "bg-red-500" },
+  DISPUTED: { label: "Disputed", color: "bg-rose-500/10 text-rose-700 border-rose-400/30", dot: "bg-rose-500" },
 };
 
 const FreelancerContractsPage = () => {
@@ -84,7 +85,8 @@ const FreelancerContractsPage = () => {
     const totalPotential = contracts.reduce((s, c) => s + c.totalAmount, 0);
     const active = contracts.filter((c) => c.status === "ACTIVE").length;
     const completed = contracts.filter((c) => c.status === "COMPLETED").length;
-    return { totalEarned, totalEscrow, totalPotential, active, completed };
+    const disputed = contracts.filter((c) => c.status === "DISPUTED").length;
+    return { totalEarned, totalEscrow, totalPotential, active, completed, disputed };
   }, [contracts]);
 
   const filtered = useMemo(() => {
@@ -93,6 +95,7 @@ const FreelancerContractsPage = () => {
       if (!matchSearch) return false;
       if (activeTab === "active") return c.status === "ACTIVE";
       if (activeTab === "completed") return c.status === "COMPLETED";
+      if (activeTab === "disputed") return c.status === "DISPUTED";
       return true;
     });
   }, [contracts, searchTerm, activeTab]);
@@ -109,13 +112,14 @@ const FreelancerContractsPage = () => {
         </div>
 
         {/* Earnings Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
             { label: "Total Earned", value: `$${stats.totalEarned.toLocaleString()}`, icon: <CheckCircle2 className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-500/5 border-emerald-500/15" },
             { label: "Guaranteed in Escrow", value: `$${stats.totalEscrow.toLocaleString()}`, icon: <Shield className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-500/5 border-blue-500/15" },
             { label: "Potential Earnings", value: `$${stats.totalPotential.toLocaleString()}`, icon: <TrendingUp className="w-5 h-5" />, color: "text-primary", bg: "bg-primary/5 border-primary/15" },
-            { label: "Active Contracts", value: stats.active.toString(), icon: <Briefcase className="w-5 h-5" />, color: "text-violet-600", bg: "bg-violet-500/5 border-violet-500/15" },
+            { label: "Active Work", value: stats.active.toString(), icon: <Briefcase className="w-5 h-5" />, color: "text-violet-600", bg: "bg-violet-500/5 border-violet-500/15" },
             { label: "Completed", value: stats.completed.toString(), icon: <DollarSign className="w-5 h-5" />, color: "text-amber-600", bg: "bg-amber-500/5 border-amber-500/15" },
+            { label: "Disputed", value: stats.disputed.toString(), icon: <AlertTriangle className="w-5 h-5" />, color: "text-rose-600", bg: "bg-rose-500/5 border-rose-500/15" },
           ].map((s, i) => (
             <Card key={i} className={cn("rounded-2xl border", s.bg)}>
               <CardContent className="p-4 flex items-center gap-3">
@@ -136,10 +140,16 @@ const FreelancerContractsPage = () => {
               {[
                 { value: "active", label: "Active" },
                 { value: "completed", label: "Completed" },
+                { value: "disputed", label: "Disputed" },
                 { value: "all", label: "All" },
               ].map((t) => (
                 <TabsTrigger key={t.value} value={t.value} className="rounded-xl font-black px-5 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm">
                   {t.label}
+                  {t.value === "disputed" && stats.disputed > 0 && (
+                    <span className="ml-1.5 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shrink-0">
+                      {stats.disputed}
+                    </span>
+                  )}
                 </TabsTrigger>
               ))}
             </TabsList>

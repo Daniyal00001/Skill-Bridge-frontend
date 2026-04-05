@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -225,11 +226,13 @@ export default function FreelancerContractDetail() {
       const res = await api.get(`/contracts/${contractId}`);
       const contractData = res.data.contract;
       setContract(contractData);
-      
+
       // Fetch dispute status for this project
       if (contractData?.projectId) {
         try {
-          const disputeRes = await api.get(`/disputes/my/${contractData.projectId}`);
+          const disputeRes = await api.get(
+            `/disputes/my/${contractData.projectId}`,
+          );
           if (disputeRes.data.success) {
             setExistingDispute(disputeRes.data.dispute);
           }
@@ -413,7 +416,7 @@ export default function FreelancerContractDetail() {
                 </Link>
               </Button>
             </div>
-            
+
             {/* Mobile View Project Button */}
             <Button
               variant="outline"
@@ -434,7 +437,9 @@ export default function FreelancerContractDetail() {
                 size="sm"
                 className={cn(
                   "h-8 rounded-xl font-bold text-xs gap-1.5",
-                  existingDispute ? "border-rose-200 text-rose-600 bg-rose-50" : "border-rose-200 text-rose-600 hover:bg-rose-50"
+                  existingDispute
+                    ? "border-rose-200 text-rose-600 bg-rose-50"
+                    : "border-rose-200 text-rose-600 hover:bg-rose-50",
                 )}
                 onClick={() => !existingDispute && setDisputeModal(true)}
                 disabled={!!existingDispute}
@@ -462,30 +467,191 @@ export default function FreelancerContractDetail() {
           </div>
         </div>
 
-        {/* Active Dispute Banner */}
+        {/* Active Dispute Resolution Center */}
         {existingDispute && (
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-4">
-             <div className="flex items-center gap-4">
-               <div className="p-3 bg-rose-100 rounded-xl">
-                 <AlertTriangle className="w-6 h-6 text-rose-600" />
-               </div>
-               <div className="space-y-1">
-                 <h4 className="text-sm font-black text-rose-900 flex items-center gap-2">
-                    Active Conflict Resolution Case
-                    <Badge className="bg-rose-600 text-white border-none font-black px-2 h-4 text-[9px]">{existingDispute.status.replace(/_/g, " ")}</Badge>
-                 </h4>
-                 <p className="text-xs font-medium text-rose-700 leading-relaxed max-w-2xl">
-                    You have filed a dispute regarding: "{existingDispute.reason}". A platform mediator is currently reviewing the project history, deliveries, and communication logs.
-                 </p>
-               </div>
-             </div>
-             <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-9 bg-white whitespace-nowrap" asChild>
-                <Link to="/messages">
-                  <MessageSquare className="w-3.5 h-3.5 mr-1" />
-                  Contact Support
-                </Link>
-             </Button>
-          </div>
+          <Card className="rounded-2xl border-rose-200 bg-rose-50/30 overflow-hidden animate-in slide-in-from-top-4">
+            <div className="bg-rose-500/10 px-5 py-3 border-b border-rose-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-rose-600" />
+                <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider">
+                  Conflict Resolution Center — Case #
+                  {existingDispute.id.slice(-6).toUpperCase()}
+                </h3>
+              </div>
+              <Badge className="bg-rose-600 text-white border-none font-black px-3 h-6">
+                {existingDispute.status.replace(/_/g, " ")}
+              </Badge>
+            </div>
+            <CardContent className="p-0">
+              <div className="p-5 grid md:grid-cols-2 gap-6 border-b border-rose-100">
+                {/* Case Details */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
+                      Status & Filing
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Avatar className="h-8 w-8 border border-rose-200">
+                        <AvatarImage
+                          src={
+                            existingDispute.filedBy === "CLIENT"
+                              ? existingDispute.client?.profileImage
+                              : existingDispute.freelancer?.profileImage
+                          }
+                        />
+                        <AvatarFallback className="bg-rose-100 text-rose-600 font-bold text-xs">
+                          {existingDispute.filedBy === "CLIENT" ? "CL" : "FL"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-xs font-bold text-rose-900">
+                          {existingDispute.filedBy === "CLIENT"
+                            ? "Client"
+                            : "You"}{" "}
+                          filed this case
+                        </p>
+                        <p className="text-[10px] text-rose-500 font-medium">
+                          Opened on{" "}
+                          {new Date(
+                            existingDispute.openedAt,
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
+                      Dispute Reason
+                    </p>
+                    <p className="text-sm font-bold text-rose-800 mt-1">
+                      {existingDispute.reason}
+                    </p>
+                    <div className="p-3 bg-white/60 border border-rose-100 rounded-xl mt-2 italic shadow-sm">
+                      <p className="text-xs text-rose-700 leading-relaxed font-medium">
+                        "{existingDispute.details}"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Tracker */}
+                <div className="bg-white/40 p-5 rounded-2xl border border-rose-100/50 space-y-4">
+                  <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-4">
+                    Resolution Progress
+                  </p>
+
+                  <div className="space-y-4 relative">
+                    {/* Stepper line */}
+                    <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-rose-200" />
+
+                    {[
+                      {
+                        stage: "Case Opened",
+                        desc: "Conflict submitted for review",
+                        isActive: true,
+                        isDone: true,
+                      },
+                      {
+                        stage: "Mediator Assigned",
+                        desc: "A platform admin is reviewing the logs",
+                        isActive: existingDispute.status !== "OPEN",
+                        isDone: !["OPEN"].includes(existingDispute.status),
+                      },
+                      {
+                        stage: "Evidence Check",
+                        desc: "Project deliverables are being audited",
+                        isActive: [
+                          "UNDER_REVIEW",
+                          "WAITING_FOR_RESPONSE",
+                          "RESOLVED",
+                          "CLOSED",
+                        ].includes(existingDispute.status),
+                        isDone: [
+                          "WAITING_FOR_RESPONSE",
+                          "RESOLVED",
+                          "CLOSED",
+                        ].includes(existingDispute.status),
+                      },
+                      {
+                        stage: "Final Decision",
+                        desc: "Review resolution and next steps",
+                        isActive: ["RESOLVED", "CLOSED"].includes(
+                          existingDispute.status,
+                        ),
+                        isDone:
+                          existingDispute.status === "RESOLVED" ||
+                          existingDispute.status === "CLOSED",
+                      },
+                    ].map((step, idx) => (
+                      <div key={idx} className="flex gap-4 relative z-10">
+                        <div
+                          className={cn(
+                            "w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors",
+                            step.isDone
+                              ? "bg-rose-500 border-rose-500 text-white"
+                              : step.isActive
+                                ? "bg-rose-100 border-rose-400 text-rose-600 animate-pulse"
+                                : "bg-white border-rose-200 text-rose-200",
+                          )}
+                        >
+                          {step.isDone ? (
+                            <CheckCircle2 className="w-3 h-3" />
+                          ) : (
+                            <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                          )}
+                        </div>
+                        <div>
+                          <p
+                            className={cn(
+                              "text-xs font-black",
+                              step.isActive ? "text-rose-900" : "text-rose-300",
+                            )}
+                          >
+                            {step.stage}
+                          </p>
+                          <p
+                            className={cn(
+                              "text-[10px] font-medium",
+                              step.isActive ? "text-rose-600" : "text-rose-200",
+                            )}
+                          >
+                            {step.desc}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-5 py-3 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 px-2 bg-rose-100 rounded text-[10px] font-black text-rose-600 uppercase">
+                    Next Step
+                  </div>
+                  <p className="text-xs font-bold text-rose-800">
+                    {existingDispute.status === "WAITING_FOR_RESPONSE"
+                      ? "Mediator is waiting for your input. Check emails."
+                      : "Meditator is auditing project messages and milestones."}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {/* <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-8 bg-white" asChild>
+                      <Link to="/messages">
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        Discuss in Workspace
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-8 bg-white" asChild>
+                      <Link to="/settings/support">
+                        <Shield className="w-3 h-3 mr-1" />
+                        Help Center
+                      </Link>
+                    </Button> */}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Offer Approval Banner */}
@@ -1154,9 +1320,13 @@ export default function FreelancerContractDetail() {
               <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
                 <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               </div>
-              <h2 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">Contract Completed!</h2>
+              <h2 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">
+                Contract Completed!
+              </h2>
               <p className="text-muted-foreground mt-1 text-sm">
-                All milestones approved. ${contract.releasedAmount.toLocaleString()} has been released to you.
+                All milestones approved. $
+                {contract.releasedAmount.toLocaleString()} has been released to
+                you.
               </p>
             </Card>
 
@@ -1165,22 +1335,29 @@ export default function FreelancerContractDetail() {
               <CardHeader className="pb-3 px-5 pt-4 border-b border-border/20">
                 <CardTitle className="text-base font-black flex items-center gap-2">
                   <Star className="w-4 h-4 text-yellow-500" /> Mutual Review
-                  <span className="text-xs font-medium text-muted-foreground ml-1">(blind until both submit)</span>
+                  <span className="text-xs font-medium text-muted-foreground ml-1">
+                    (blind until both submit)
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-4">
                 {!reviewStatus ? (
                   <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Loading review status...
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading review
+                    status...
                   </div>
-                ) : reviewStatus.reviewStatus === "PENDING" || (reviewStatus.reviewStatus === "WAITING" && !reviewStatus.myReview) ? (
+                ) : reviewStatus.reviewStatus === "PENDING" ||
+                  (reviewStatus.reviewStatus === "WAITING" &&
+                    !reviewStatus.myReview) ? (
                   <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-400/20">
                     <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
                       <Star className="w-6 h-6 text-amber-500" />
                     </div>
                     <div className="flex-1 text-center sm:text-left">
                       <p className="font-black text-amber-800 dark:text-amber-400">
-                        {reviewStatus.reviewStatus === "WAITING" ? "Leave a Review — Client Already Submitted!" : "Leave a Review"}
+                        {reviewStatus.reviewStatus === "WAITING"
+                          ? "Leave a Review — Client Already Submitted!"
+                          : "Leave a Review"}
                       </p>
                       <p className="text-sm text-muted-foreground mt-0.5">
                         {reviewStatus.reviewStatus === "WAITING"
@@ -1195,26 +1372,49 @@ export default function FreelancerContractDetail() {
                       <Star className="w-4 h-4" /> Leave Review
                     </Button>
                   </div>
-                ) : reviewStatus.reviewStatus === "WAITING" && reviewStatus.myReview ? (
+                ) : reviewStatus.reviewStatus === "WAITING" &&
+                  reviewStatus.myReview ? (
                   <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-400/20 space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
                         <Clock className="w-5 h-5 text-blue-500" />
                       </div>
                       <div>
-                        <p className="font-black text-blue-800 dark:text-blue-400">Review Submitted — Waiting for Client</p>
-                        <p className="text-xs text-muted-foreground">Your review is sealed. It will be revealed once the client submits or after the deadline.</p>
+                        <p className="font-black text-blue-800 dark:text-blue-400">
+                          Review Submitted — Waiting for Client
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Your review is sealed. It will be revealed once the
+                          client submits or after the deadline.
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 p-3 rounded-lg bg-muted/30 w-fit">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} className={cn("w-4 h-4", s <= reviewStatus.myReview.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20")} />
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={cn(
+                            "w-4 h-4",
+                            s <= reviewStatus.myReview.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-muted-foreground/20",
+                          )}
+                        />
                       ))}
-                      <span className="text-sm font-black ml-1">{reviewStatus.myReview.rating}/5</span>
+                      <span className="text-sm font-black ml-1">
+                        {reviewStatus.myReview.rating}/5
+                      </span>
                     </div>
                     {reviewStatus.myReview.reviewDeadline && (
                       <p className="text-xs text-muted-foreground">
-                        Auto-reveals: {new Date(reviewStatus.myReview.reviewDeadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        Auto-reveals:{" "}
+                        {new Date(
+                          reviewStatus.myReview.reviewDeadline,
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
                       </p>
                     )}
                   </div>
@@ -1222,15 +1422,29 @@ export default function FreelancerContractDetail() {
                   <div className="space-y-4">
                     {reviewStatus.myReview && (
                       <div className="p-4 rounded-xl bg-muted/30 border border-border/20 space-y-2">
-                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Your Review (for {contract.clientName})</p>
+                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                          Your Review (for {contract.clientName})
+                        </p>
                         <div className="flex items-center gap-1">
-                          {[1,2,3,4,5].map(s => (
-                            <Star key={s} className={cn("w-4 h-4", s <= reviewStatus.myReview.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20")} />
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={cn(
+                                "w-4 h-4",
+                                s <= reviewStatus.myReview.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground/20",
+                              )}
+                            />
                           ))}
-                          <span className="text-sm font-black ml-2">{reviewStatus.myReview.rating}/5</span>
+                          <span className="text-sm font-black ml-2">
+                            {reviewStatus.myReview.rating}/5
+                          </span>
                         </div>
                         {reviewStatus.myReview.comment && (
-                          <p className="text-sm text-muted-foreground leading-relaxed italic">"{reviewStatus.myReview.comment}"</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed italic">
+                            "{reviewStatus.myReview.comment}"
+                          </p>
                         )}
                       </div>
                     )}
@@ -1240,13 +1454,25 @@ export default function FreelancerContractDetail() {
                           {contract.clientName}'s Review of You
                         </p>
                         <div className="flex items-center gap-1">
-                          {[1,2,3,4,5].map(s => (
-                            <Star key={s} className={cn("w-4 h-4", s <= reviewStatus.theirReview.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/20")} />
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={cn(
+                                "w-4 h-4",
+                                s <= reviewStatus.theirReview.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground/20",
+                              )}
+                            />
                           ))}
-                          <span className="text-sm font-black ml-2">{reviewStatus.theirReview.rating}/5</span>
+                          <span className="text-sm font-black ml-2">
+                            {reviewStatus.theirReview.rating}/5
+                          </span>
                         </div>
                         {reviewStatus.theirReview.comment && (
-                          <p className="text-sm text-muted-foreground leading-relaxed italic">"{reviewStatus.theirReview.comment}"</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed italic">
+                            "{reviewStatus.theirReview.comment}"
+                          </p>
                         )}
                       </div>
                     )}
@@ -1343,11 +1569,15 @@ export default function FreelancerContractDetail() {
                         "application/x-zip-compressed",
                       ];
                       const selected = Array.from(e.target.files);
-                      
+
                       // Check for 500MB limit
-                      const oversized = selected.filter(f => f.size > 500 * 1024 * 1024);
+                      const oversized = selected.filter(
+                        (f) => f.size > 500 * 1024 * 1024,
+                      );
                       if (oversized.length > 0) {
-                        toast.error("Some files are too large. Maximum 500MB per file allowed.");
+                        toast.error(
+                          "Some files are too large. Maximum 500MB per file allowed.",
+                        );
                         return;
                       }
 
@@ -1450,7 +1680,10 @@ export default function FreelancerContractDetail() {
         )}
 
         {/* Dispute Modal */}
-        <Dialog open={disputeModal} onOpenChange={(o) => !o && setDisputeModal(false)}>
+        <Dialog
+          open={disputeModal}
+          onOpenChange={(o) => !o && setDisputeModal(false)}
+        >
           <DialogContent className="rounded-2xl max-w-lg">
             <DialogHeader>
               <DialogTitle className="font-black text-lg flex items-center gap-2">
@@ -1458,60 +1691,86 @@ export default function FreelancerContractDetail() {
                 Open a Dispute
               </DialogTitle>
               <DialogDescription>
-                Describe the issue clearly. Admin will review and mediate between you and the client.
+                Describe the issue clearly. Admin will review and mediate
+                between you and the client.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-1">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Dispute Type <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  Dispute Type <span className="text-red-500">*</span>
+                </label>
                 <Select
                   value={disputeForm.disputeType}
-                  onValueChange={(v) => setDisputeForm(p => ({ ...p, disputeType: v as DisputeType }))}
+                  onValueChange={(v) =>
+                    setDisputeForm((p) => ({
+                      ...p,
+                      disputeType: v as DisputeType,
+                    }))
+                  }
                 >
                   <SelectTrigger className="rounded-xl h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {([
-                      ["PAYMENT",      "💰 Payment Dispute"],
-                      ["SCOPE",        "📄 Scope of Work"],
-                      ["DEADLINE",     "⏰ Deadline / Delay"],
-                      ["QUALITY",      "🧪 Quality of Work"],
-                      ["REVISION",     "🔁 Revision Dispute"],
-                      ["DELIVERABLES", "📂 Deliverables Not Provided"],
-                      ["IP",           "🔐 Intellectual Property"],
-                    ] as [DisputeType, string][]).map(([val, label]) => (
-                      <SelectItem key={val} value={val}>{label}</SelectItem>
+                    {(
+                      [
+                        ["PAYMENT", "💰 Payment Dispute"],
+                        ["SCOPE", "📄 Scope of Work"],
+                        ["DEADLINE", "⏰ Deadline / Delay"],
+                        ["QUALITY", "🧪 Quality of Work"],
+                        ["REVISION", "🔁 Revision Dispute"],
+                        ["DELIVERABLES", "📂 Deliverables Not Provided"],
+                        ["IP", "🔐 Intellectual Property"],
+                      ] as [DisputeType, string][]
+                    ).map(([val, label]) => (
+                      <SelectItem key={val} value={val}>
+                        {label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Issue Summary <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  Issue Summary <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Client refuses to release payment after delivery"
                   value={disputeForm.reason}
-                  onChange={(e) => setDisputeForm(p => ({ ...p, reason: e.target.value }))}
+                  onChange={(e) =>
+                    setDisputeForm((p) => ({ ...p, reason: e.target.value }))
+                  }
                   className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Full Details</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  Full Details
+                </label>
                 <Textarea
                   placeholder="Explain what happened in detail. Include dates, milestones, and any relevant context..."
                   value={disputeForm.details}
-                  onChange={(e) => setDisputeForm(p => ({ ...p, details: e.target.value }))}
+                  onChange={(e) =>
+                    setDisputeForm((p) => ({ ...p, details: e.target.value }))
+                  }
                   rows={4}
                   className="rounded-xl resize-none text-sm"
                 />
               </div>
               <div className="text-xs text-muted-foreground bg-amber-50 border border-amber-200 rounded-xl p-3">
-                ⚠️ Once submitted, this project will be marked as <strong>Disputed</strong> and an admin will be notified immediately.
+                ⚠️ Once submitted, this project will be marked as{" "}
+                <strong>Disputed</strong> and an admin will be notified
+                immediately.
               </div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setDisputeModal(false)}>
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl"
+                onClick={() => setDisputeModal(false)}
+              >
                 Cancel
               </Button>
               <Button
@@ -1519,7 +1778,11 @@ export default function FreelancerContractDetail() {
                 onClick={handleOpenDispute}
                 disabled={disputeSubmitting || !disputeForm.reason.trim()}
               >
-                {disputeSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gavel className="w-4 h-4" />}
+                {disputeSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Gavel className="w-4 h-4" />
+                )}
                 Submit Dispute
               </Button>
             </div>

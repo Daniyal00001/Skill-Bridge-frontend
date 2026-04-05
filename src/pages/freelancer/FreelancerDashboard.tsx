@@ -98,6 +98,7 @@ const MILESTONE_STATUS_MAP: Record<
     text: "text-orange-600",
   },
   REJECTED: { label: "Rejected", dot: "bg-red-500", text: "text-red-600" },
+  DISPUTED: { label: "Disputed", dot: "bg-rose-500", text: "text-rose-600" },
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -722,6 +723,13 @@ export default function FreelancerDashboard() {
                     icon: CheckCircle,
                     color: "text-emerald-600",
                     bg: "bg-emerald-50",
+                  },
+                  {
+                    label: "Disputed Contracts",
+                    value: stats.disputedContractsCount || 0,
+                    icon: AlertTriangle,
+                    color: "text-rose-600",
+                    bg: "bg-rose-50",
                   },
                   {
                     label: "Pending Invitations",
