@@ -151,10 +151,22 @@ const STATUS_META: Record<
   },
 };
 
-const RESOLUTION_OPTIONS: { value: DisputeResolution; label: string; icon: string }[] = [
+const RESOLUTION_OPTIONS: {
+  value: DisputeResolution;
+  label: string;
+  icon: string;
+}[] = [
   { value: "FAVOR_CLIENT", label: "Favour Client (Refund)", icon: "👤" },
-  { value: "FAVOR_FREELANCER", label: "Favour Freelancer (Release payment)", icon: "🧑‍💻" },
-  { value: "PARTIAL_SPLIT", label: "Partial Split (50/50 or custom)", icon: "⚖️" },
+  {
+    value: "FAVOR_FREELANCER",
+    label: "Favour Freelancer (Release payment)",
+    icon: "🧑‍💻",
+  },
+  {
+    value: "PARTIAL_SPLIT",
+    label: "Partial Split (50/50 or custom)",
+    icon: "⚖️",
+  },
   { value: "PROJECT_CANCELLED", label: "Cancel Project", icon: "❌" },
   { value: "DISMISSED", label: "Dismiss Dispute", icon: "🚫" },
 ];
@@ -188,21 +200,25 @@ function StatCard({
     <Card
       className={cn(
         "border rounded-2xl transition-all hover:shadow-md",
-        accent && value > 0 ? "border-red-200 bg-red-50/40" : "border-border/50"
+        accent && value > 0
+          ? "border-red-200 bg-red-50/40"
+          : "border-border/50",
       )}
     >
       <CardContent className="p-4 flex items-center gap-3">
         <div
           className={cn(
             "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
-            iconBg
+            iconBg,
           )}
         >
           <Icon className={cn("h-5 w-5", iconColor)} />
         </div>
         <div>
           <p className="text-2xl font-bold tracking-tight">{value}</p>
-          <p className="text-[11px] text-muted-foreground font-medium">{label}</p>
+          <p className="text-[11px] text-muted-foreground font-medium">
+            {label}
+          </p>
         </div>
       </CardContent>
     </Card>
@@ -215,16 +231,16 @@ function DisputeCard({
   dispute,
   onView,
   onChangeStatus,
-  onResolve,
 }: {
   dispute: Dispute;
   onView: (d: Dispute) => void;
   onChangeStatus: (d: Dispute, status: DisputeStatus) => void;
-  onResolve: (d: Dispute) => void;
 }) {
-  const typeMeta = DISPUTE_TYPE_META[dispute.disputeType] ?? DISPUTE_TYPE_META["PAYMENT"];
+  const typeMeta =
+    DISPUTE_TYPE_META[dispute.disputeType] ?? DISPUTE_TYPE_META["PAYMENT"];
   const statusMeta = STATUS_META[dispute.status] ?? STATUS_META["OPEN"];
-  const isResolved = dispute.status === "RESOLVED" || dispute.status === "CLOSED";
+  const isResolved =
+    dispute.status === "RESOLVED" || dispute.status === "CLOSED";
   const clientName =
     dispute.client?.clientProfile?.fullName || dispute.client?.name || "Client";
   const freelancerName =
@@ -241,10 +257,10 @@ function DisputeCard({
           dispute.status === "OPEN"
             ? "bg-gradient-to-r from-rose-400 to-pink-400"
             : dispute.status === "UNDER_REVIEW"
-            ? "bg-gradient-to-r from-blue-500 to-indigo-400"
-            : dispute.status === "RESOLVED"
-            ? "bg-gradient-to-r from-emerald-400 to-teal-400"
-            : "bg-gradient-to-r from-zinc-300 to-zinc-200"
+              ? "bg-gradient-to-r from-blue-500 to-indigo-400"
+              : dispute.status === "RESOLVED"
+                ? "bg-gradient-to-r from-emerald-400 to-teal-400"
+                : "bg-gradient-to-r from-zinc-300 to-zinc-200",
         )}
       />
 
@@ -258,7 +274,7 @@ function DisputeCard({
                 "inline-flex items-center gap-1 text-[11px] font-semibold border px-2 py-0.5 rounded-md shrink-0 mt-0.5",
                 typeMeta.color,
                 typeMeta.bg,
-                typeMeta.border
+                typeMeta.border,
               )}
             >
               {typeMeta.emoji} {typeMeta.label}
@@ -272,10 +288,15 @@ function DisputeCard({
                 "inline-flex items-center gap-1.5 text-[11px] font-semibold border px-2 py-0.5 rounded-md",
                 statusMeta.color,
                 statusMeta.bg,
-                statusMeta.border
+                statusMeta.border,
               )}
             >
-              <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", statusMeta.dot)} />
+              <span
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full animate-pulse",
+                  statusMeta.dot,
+                )}
+              />
               {statusMeta.label}
             </span>
 
@@ -293,10 +314,13 @@ function DisputeCard({
         {/* Linked Dispute Badge */}
         {dispute.relatedDisputeId && (
           <div className="mb-3">
-             <Badge variant="outline" className="bg-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-[9px] px-2 py-0.5 flex items-center gap-1.5 w-fit">
-                <AlertTriangle className="w-3 h-3" />
-                Linked Counter-Dispute Detected
-             </Badge>
+            <Badge
+              variant="outline"
+              className="bg-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-[9px] px-2 py-0.5 flex items-center gap-1.5 w-fit"
+            >
+              <AlertTriangle className="w-3 h-3" />
+              Linked Counter-Dispute Detected
+            </Badge>
           </div>
         )}
 
@@ -362,7 +386,10 @@ function DisputeCard({
             {dispute.project?.contract?.endDate && (
               <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-700 px-1.5 py-0.5 rounded font-black text-[9px] uppercase tracking-tighter">
                 <Calendar className="h-3 w-3" />
-                {new Date(dispute.project.contract.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                {new Date(dispute.project.contract.endDate).toLocaleDateString(
+                  "en-US",
+                  { month: "short", day: "numeric" },
+                )}
               </span>
             )}
             {dispute.evidenceUrls.length > 0 && (
@@ -385,16 +412,6 @@ function DisputeCard({
                   Review
                 </Button>
               )}
-              {dispute.status === "UNDER_REVIEW" && (
-                <Button
-                  size="sm"
-                  className="h-7 text-[11px] px-2.5 font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-lg gap-1"
-                  onClick={() => onResolve(dispute)}
-                >
-                  <Gavel className="h-3 w-3" />
-                  Resolve
-                </Button>
-              )}
             </div>
           )}
 
@@ -404,7 +421,7 @@ function DisputeCard({
                 "text-[11px] font-semibold border px-2 py-0.5 rounded-md",
                 STATUS_META["RESOLVED"].color,
                 STATUS_META["RESOLVED"].bg,
-                STATUS_META["RESOLVED"].border
+                STATUS_META["RESOLVED"].border,
               )}
             >
               {dispute.resolution?.replace(/_/g, " ") || "Resolved"}
@@ -461,7 +478,9 @@ function DisputeDetailModal({
                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
                   Project
                 </p>
-                <p className="font-semibold text-sm break-words">{dispute.project?.title}</p>
+                <p className="font-semibold text-sm break-words">
+                  {dispute.project?.title}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Budget: ${dispute.project?.budget?.toLocaleString()}
                 </p>
@@ -471,12 +490,16 @@ function DisputeDetailModal({
                   Dispute Type
                 </p>
                 {(() => {
-                  const m = DISPUTE_TYPE_META[dispute.disputeType] || DISPUTE_TYPE_META["PAYMENT"];
+                  const m =
+                    DISPUTE_TYPE_META[dispute.disputeType] ||
+                    DISPUTE_TYPE_META["PAYMENT"];
                   return (
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 text-xs font-semibold border px-2 py-0.5 rounded-md",
-                        m.color, m.bg, m.border
+                        m.color,
+                        m.bg,
+                        m.border,
                       )}
                     >
                       {m.emoji} {m.label}
@@ -501,7 +524,8 @@ function DisputeDetailModal({
                   label: "Client",
                   user: dispute.client,
                   name:
-                    dispute.client?.clientProfile?.fullName || dispute.client?.name,
+                    dispute.client?.clientProfile?.fullName ||
+                    dispute.client?.name,
                   sub: dispute.client?.clientProfile?.company,
                   avatarBg: "bg-blue-100",
                   avatarColor: "text-blue-700",
@@ -525,15 +549,23 @@ function DisputeDetailModal({
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user?.profileImage || ""} />
                       <AvatarFallback
-                        className={cn("text-xs font-bold", avatarBg, avatarColor)}
+                        className={cn(
+                          "text-xs font-bold",
+                          avatarBg,
+                          avatarColor,
+                        )}
                       >
                         {name?.charAt(0) || "?"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="text-sm font-semibold">{name}</p>
-                      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
-                      <p className="text-[11px] text-muted-foreground">{user?.email}</p>
+                      {sub && (
+                        <p className="text-xs text-muted-foreground">{sub}</p>
+                      )}
+                      <p className="text-[11px] text-muted-foreground">
+                        {user?.email}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -546,14 +578,18 @@ function DisputeDetailModal({
                 <p className="text-[10px] font-semibold text-rose-600 uppercase tracking-wide mb-1">
                   Reported Issue
                 </p>
-                <p className="text-sm font-medium text-foreground break-words">{dispute.reason}</p>
+                <p className="text-sm font-medium text-foreground break-words">
+                  {dispute.reason}
+                </p>
               </div>
               {dispute.details && (
                 <div className="bg-muted/40 rounded-xl p-4">
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
                     Additional Details
                   </p>
-                  <p className="text-sm text-muted-foreground break-words">{dispute.details}</p>
+                  <p className="text-sm text-muted-foreground break-words">
+                    {dispute.details}
+                  </p>
                 </div>
               )}
             </div>
@@ -574,7 +610,8 @@ function DisputeDetailModal({
                       className="flex items-center gap-2 text-xs text-primary hover:underline bg-muted/40 rounded-lg px-3 py-2"
                     >
                       <Paperclip className="h-3 w-3" />
-                      Evidence File {i + 1} <ArrowUpRight className="h-3 w-3 ml-auto" />
+                      Evidence File {i + 1}{" "}
+                      <ArrowUpRight className="h-3 w-3 ml-auto" />
                     </a>
                   ))}
                 </div>
@@ -619,7 +656,7 @@ function DisputeDetailModal({
           <Button variant="outline" onClick={onClose} className="rounded-xl">
             Close
           </Button>
-          <Button 
+          <Button
             className="rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={() => {
               if (disputeId) {
@@ -653,7 +690,8 @@ function ResolveModal({
   const [note, setNote] = useState("");
 
   const mutation = useMutation({
-    mutationFn: () => resolveDispute(dispute!.id, resolution as DisputeResolution, note),
+    mutationFn: () =>
+      resolveDispute(dispute!.id, resolution as DisputeResolution, note),
     onSuccess: () => {
       toast.success("Dispute resolved successfully");
       queryClient.invalidateQueries({ queryKey: ["disputes"] });
@@ -737,8 +775,8 @@ function ResolveModal({
 
           {resolution && (
             <div className="text-xs text-muted-foreground bg-amber-50 border border-amber-200 rounded-xl p-3">
-              ⚠️ This action is <strong>irreversible</strong>. Both the client and
-              freelancer will be notified immediately.
+              ⚠️ This action is <strong>irreversible</strong>. Both the client
+              and freelancer will be notified immediately.
             </div>
           )}
         </div>
@@ -781,19 +819,10 @@ export default function DisputeManagement() {
     navigate(`/admin/disputes/${d.id}`);
   };
 
-  // Resolve modal
-  const [resolveTarget, setResolveTarget] = useState<Dispute | null>(null);
-  const [resolveOpen, setResolveOpen] = useState(false);
-
   // Status update mutation
   const statusMutation = useMutation({
-    mutationFn: ({
-      id,
-      status,
-    }: {
-      id: string;
-      status: DisputeStatus;
-    }) => updateDisputeStatus(id, status),
+    mutationFn: ({ id, status }: { id: string; status: DisputeStatus }) =>
+      updateDisputeStatus(id, status),
     onSuccess: (_, vars) => {
       toast.success(`Status updated to ${vars.status.replace(/_/g, " ")}`);
       queryClient.invalidateQueries({ queryKey: ["disputes"] });
@@ -834,14 +863,17 @@ export default function DisputeManagement() {
               Dispute Resolution Centre
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Review, mediate, and resolve conflicts between clients and freelancers.
+              Review, mediate, and resolve conflicts between clients and
+              freelancers.
             </p>
           </div>
           <Button
             size="sm"
             variant="outline"
             className="rounded-xl h-9 gap-2 font-semibold"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ["disputes"] })}
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: ["disputes"] })
+            }
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh
@@ -947,7 +979,7 @@ export default function DisputeManagement() {
                       "inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all",
                       activeTab === tab.key
                         ? "bg-foreground text-background border-foreground"
-                        : "bg-background border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                        : "bg-background border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                     )}
                   >
                     {tab.label}
@@ -957,7 +989,7 @@ export default function DisputeManagement() {
                           "text-[10px] font-bold px-1.5 py-0.5 rounded-md min-w-[18px] text-center",
                           activeTab === tab.key
                             ? "bg-background/20 text-background"
-                            : "bg-muted text-muted-foreground"
+                            : "bg-muted text-muted-foreground",
                         )}
                       >
                         {count}
@@ -975,7 +1007,9 @@ export default function DisputeManagement() {
           <div className="flex items-center justify-center py-20">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Loading disputes...</p>
+              <p className="text-sm text-muted-foreground">
+                Loading disputes...
+              </p>
             </div>
           </div>
         ) : error ? (
@@ -988,7 +1022,9 @@ export default function DisputeManagement() {
               size="sm"
               variant="outline"
               className="rounded-xl"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["disputes"] })}
+              onClick={() =>
+                queryClient.invalidateQueries({ queryKey: ["disputes"] })
+              }
             >
               Retry
             </Button>
@@ -998,7 +1034,9 @@ export default function DisputeManagement() {
             <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center">
               <Scale className="h-7 w-7 text-muted-foreground/40" />
             </div>
-            <p className="text-sm font-semibold text-foreground">No disputes found</p>
+            <p className="text-sm font-semibold text-foreground">
+              No disputes found
+            </p>
             <p className="text-xs text-muted-foreground">
               {activeTab === "ALL"
                 ? "No disputes have been raised yet."
@@ -1015,10 +1053,6 @@ export default function DisputeManagement() {
                   onView={handleViewDetail}
                   onChangeStatus={(d, status) => {
                     statusMutation.mutate({ id: d.id, status });
-                  }}
-                  onResolve={(d) => {
-                    setResolveTarget(d);
-                    setResolveOpen(true);
                   }}
                 />
               ))}
@@ -1037,7 +1071,8 @@ export default function DisputeManagement() {
                   Previous
                 </Button>
                 <span className="text-xs text-muted-foreground px-2">
-                  Page {page} of {Math.ceil(pagination.total / pagination.limit)}
+                  Page {page} of{" "}
+                  {Math.ceil(pagination.total / pagination.limit)}
                 </span>
                 <Button
                   variant="outline"
@@ -1053,16 +1088,6 @@ export default function DisputeManagement() {
           </>
         )}
       </div>
-
-      {/* ── Modals ──────────────────────────────────────────── */}
-      <ResolveModal
-        dispute={resolveTarget}
-        open={resolveOpen}
-        onClose={() => {
-          setResolveOpen(false);
-          setResolveTarget(null);
-        }}
-      />
     </DashboardLayout>
   );
 }
