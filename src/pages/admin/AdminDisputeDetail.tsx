@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
+  ShieldCheck,
   ShieldAlert,
   Gavel,
   ArrowLeft,
@@ -619,6 +620,18 @@ const AdminDisputeDetail = () => {
                     </Link>
                   </CardContent>
                 </Card>
+
+                <div className="mx-2 mt-4 p-4 rounded-2xl bg-primary/5 border border-primary/10 flex gap-3">
+                  <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
+                    <span className="font-black text-primary uppercase tracking-widest block mb-1">Investigation Tip</span>
+                    Click on any profile to view complete identity schematics including full 
+                    <span className="text-foreground font-black"> Platform Feedback</span>, 
+                    <span className="text-foreground font-black"> Dispute Logs</span>, and 
+                    <span className="text-foreground font-black"> Project Metrics</span>. 
+                    This data is critical for making an informed resolution protocol.
+                  </p>
+                </div>
               </div>
             </div>
           </TabsContent>

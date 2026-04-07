@@ -176,9 +176,9 @@ export default function AdminUserDetail() {
                 >
                   Suspend Account
                 </Button>
-                <Button className="rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 shadow-lg shadow-primary/20">
+                {/* <Button className="rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 shadow-lg shadow-primary/20">
                   Broadcast Notice
-                </Button>
+                </Button> */}
               </div>
             </div>
           </CardContent>
@@ -187,24 +187,45 @@ export default function AdminUserDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* ── Main Content Area (Tabbed) ───────────────────────────── */}
           <div className="lg:col-span-8">
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/40 w-full justify-start h-14">
-                <TabsTrigger value="overview" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="activity" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                  Activity
-                </TabsTrigger>
-                <TabsTrigger value="feedback" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                  Feedback
-                </TabsTrigger>
-                <TabsTrigger value="disputes" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                  Disputes
-                </TabsTrigger>
-              </TabsList>
+            <Tabs defaultValue="overview" className="space-y-8">
+              <div className="flex justify-center sm:justify-start">
+                <TabsList className="bg-muted/30 backdrop-blur-md p-1.5 rounded-[1.5rem] border border-border/50 w-full sm:w-auto flex flex-wrap h-auto sm:h-14 gap-1">
+                  <TabsTrigger
+                    value="overview"
+                    className="flex-1 sm:flex-none rounded-xl px-6 py-2.5 sm:py-0 h-full font-black uppercase text-[10px] tracking-[0.15em] flex items-center gap-2.5 transition-all data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary group"
+                  >
+                    <User className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="activity"
+                    className="flex-1 sm:flex-none rounded-xl px-6 py-2.5 sm:py-0 h-full font-black uppercase text-[10px] tracking-[0.15em] flex items-center gap-2.5 transition-all data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary group"
+                  >
+                    <Briefcase className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    Activity
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="feedback"
+                    className="flex-1 sm:flex-none rounded-xl px-6 py-2.5 sm:py-0 h-full font-black uppercase text-[10px] tracking-[0.15em] flex items-center gap-2.5 transition-all data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary group"
+                  >
+                    <Star className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    Feedback
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="disputes"
+                    className="flex-1 sm:flex-none rounded-xl px-6 py-2.5 sm:py-0 h-full font-black uppercase text-[10px] tracking-[0.15em] flex items-center gap-2.5 transition-all data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-rose-600 group"
+                  >
+                    <Gavel className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    Disputes
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               {/* OVERVIEW TAB */}
-              <TabsContent value="overview" className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
+              <TabsContent
+                value="overview"
+                className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-300"
+              >
                 {/* Metric Cards Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {isFreelancer ? (
@@ -246,7 +267,11 @@ export default function AdminUserDetail() {
                       />
                       <MetricCard
                         label="Hire Rate"
-                        value={profile?.hireRate ? `${Math.round(profile.hireRate * 100)}%` : "0%"}
+                        value={
+                          profile?.hireRate
+                            ? `${Math.round(profile.hireRate * 100)}%`
+                            : "0%"
+                        }
                         icon={TrendingUp}
                         accent="bg-emerald-500"
                       />
@@ -284,12 +309,17 @@ export default function AdminUserDetail() {
               </TabsContent>
 
               {/* ACTIVITY TAB */}
-              <TabsContent value="activity" className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <TabsContent
+                value="activity"
+                className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300"
+              >
                 <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
                   <CardHeader className="bg-muted/30 border-b border-border/40">
                     <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
                       <History className="w-4 h-4" />
-                      {isFreelancer ? "Recent Contract History" : "Recent Project Activity"}
+                      {isFreelancer
+                        ? "Recent Contract History"
+                        : "Recent Project Activity"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
@@ -300,14 +330,22 @@ export default function AdminUserDetail() {
                     ) : (
                       <div className="divide-y divide-border/40">
                         {profile?.projects?.map((prj: any) => (
-                          <div key={prj.id} className="p-6 hover:bg-muted/20 transition-colors flex items-center justify-between">
+                          <div
+                            key={prj.id}
+                            className="p-6 hover:bg-muted/20 transition-colors flex items-center justify-between"
+                          >
                             <div className="space-y-1">
                               <p className="font-bold text-sm">{prj.title}</p>
                               <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                                 Budget: ${prj.budget.toLocaleString()}
                               </p>
                             </div>
-                            <Badge variant="secondary" className="rounded-lg text-[9px] font-black">{prj.status}</Badge>
+                            <Badge
+                              variant="secondary"
+                              className="rounded-lg text-[9px] font-black"
+                            >
+                              {prj.status}
+                            </Badge>
                           </div>
                         ))}
                         {profile?.projects?.length === 0 && (
@@ -322,7 +360,10 @@ export default function AdminUserDetail() {
               </TabsContent>
 
               {/* FEEDBACK TAB */}
-              <TabsContent value="feedback" className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <TabsContent
+                value="feedback"
+                className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300"
+              >
                 <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
                   <CardHeader className="bg-muted/30 border-b border-border/40">
                     <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
@@ -338,23 +379,35 @@ export default function AdminUserDetail() {
                             <div className="flex items-center gap-3">
                               <Avatar className="w-10 h-10 border border-border/50">
                                 <AvatarImage src={review.giver?.profileImage} />
-                                <AvatarFallback className="text-[10px] font-black">{review.giver?.name?.[0]}</AvatarFallback>
+                                <AvatarFallback className="text-[10px] font-black">
+                                  {review.giver?.name?.[0]}
+                                </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="text-sm font-black">{review.giver?.name}</p>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Verified Reviewer</p>
+                                <p className="text-sm font-black">
+                                  {review.giver?.name}
+                                </p>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">
+                                  Verified Reviewer
+                                </p>
                               </div>
                             </div>
                             <div className="flex items-center gap-1 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
-                              <span className="text-xs font-black text-amber-700">{review.rating.toFixed(1)}</span>
+                              <span className="text-xs font-black text-amber-700">
+                                {review.rating.toFixed(1)}
+                              </span>
                               <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                             </div>
                           </div>
                           <p className="text-sm text-foreground/80 font-medium italic leading-relaxed pl-1">
-                            "{review.comment || "The reviewer left no written comments, but provided a high-quality rating for the interaction."}"
+                            "
+                            {review.comment ||
+                              "The reviewer left no written comments, but provided a high-quality rating for the interaction."}
+                            "
                           </p>
                           <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest pl-1">
-                            {new Date(review.submittedAt).toLocaleDateString()} · Contract Protocol
+                            {new Date(review.submittedAt).toLocaleDateString()}{" "}
+                            · Contract Protocol
                           </p>
                         </div>
                       ))}
@@ -363,7 +416,9 @@ export default function AdminUserDetail() {
                           <div className="w-16 h-16 bg-muted/20 rounded-3xl flex items-center justify-center mx-auto border border-border/40">
                             <Zap className="w-8 h-8 text-muted-foreground/40" />
                           </div>
-                          <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">No Feedback Transmissions Found</p>
+                          <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">
+                            No Feedback Transmissions Found
+                          </p>
                         </div>
                       )}
                     </div>
@@ -372,7 +427,10 @@ export default function AdminUserDetail() {
               </TabsContent>
 
               {/* DISPUTES TAB */}
-              <TabsContent value="disputes" className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <TabsContent
+                value="disputes"
+                className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300"
+              >
                 <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
                   <CardHeader className="bg-rose-500/5 border-b border-rose-500/10">
                     <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-rose-700 flex items-center gap-2">
