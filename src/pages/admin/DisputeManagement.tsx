@@ -301,12 +301,12 @@ function DisputeCard({
         )}
 
         {/* Project title */}
-        <h3 className="font-semibold text-sm text-foreground mb-1 truncate">
+        <h3 className="font-semibold text-sm text-foreground mb-1 break-words">
           📁 {dispute.project?.title || "Project"}
         </h3>
 
         {/* Reason */}
-        <p className="text-xs text-muted-foreground mb-4 line-clamp-2 italic">
+        <p className="text-xs text-muted-foreground mb-4 line-clamp-2 italic break-words">
           "{dispute.reason}"
         </p>
 
@@ -461,7 +461,7 @@ function DisputeDetailModal({
                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
                   Project
                 </p>
-                <p className="font-semibold text-sm">{dispute.project?.title}</p>
+                <p className="font-semibold text-sm break-words">{dispute.project?.title}</p>
                 <p className="text-xs text-muted-foreground">
                   Budget: ${dispute.project?.budget?.toLocaleString()}
                 </p>
@@ -546,14 +546,14 @@ function DisputeDetailModal({
                 <p className="text-[10px] font-semibold text-rose-600 uppercase tracking-wide mb-1">
                   Reported Issue
                 </p>
-                <p className="text-sm font-medium text-foreground">{dispute.reason}</p>
+                <p className="text-sm font-medium text-foreground break-words">{dispute.reason}</p>
               </div>
               {dispute.details && (
                 <div className="bg-muted/40 rounded-xl p-4">
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
                     Additional Details
                   </p>
-                  <p className="text-sm text-muted-foreground">{dispute.details}</p>
+                  <p className="text-sm text-muted-foreground break-words">{dispute.details}</p>
                 </div>
               )}
             </div>
@@ -681,22 +681,22 @@ function ResolveModal({
             <Gavel className="h-5 w-5 text-foreground" />
             Resolve Dispute
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="break-all whitespace-pre-wrap">
             {dispute?.project?.title} — Make a binding decision
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           {/* Parties reminder */}
-          <div className="flex items-center justify-between text-xs bg-muted/50 rounded-xl px-3 py-2.5">
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="h-2 w-2 rounded-full bg-blue-400" />
-              Client: {dispute?.client?.name}
+          <div className="flex items-center justify-between text-xs bg-muted/50 rounded-xl px-3 py-2.5 gap-2 overflow-hidden">
+            <span className="flex items-center gap-1.5 font-medium truncate min-w-0">
+              <span className="h-2 w-2 rounded-full bg-blue-400 shrink-0" />
+              <span className="truncate">{dispute?.client?.name}</span>
             </span>
-            <span className="text-muted-foreground">vs</span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="h-2 w-2 rounded-full bg-violet-400" />
-              Freelancer: {dispute?.freelancer?.name}
+            <span className="text-muted-foreground shrink-0">vs</span>
+            <span className="flex items-center gap-1.5 font-medium truncate min-w-0">
+              <span className="h-2 w-2 rounded-full bg-violet-400 shrink-0" />
+              <span className="truncate">{dispute?.freelancer?.name}</span>
             </span>
           </div>
 

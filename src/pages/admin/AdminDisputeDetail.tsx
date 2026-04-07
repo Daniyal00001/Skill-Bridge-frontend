@@ -75,6 +75,7 @@ const AdminDisputeDetail = () => {
     type: DisputeResolution | null;
     note: string;
   }>({ open: false, type: null, note: "" });
+  const [summaryModal, setSummaryModal] = useState({ open: false, content: "" });
 
   const fetchDetail = useCallback(async () => {
     if (!disputeId) return;
@@ -124,8 +125,25 @@ const AdminDisputeDetail = () => {
         setResolutionModal({ open: false, type: null, note: "" });
         fetchDetail();
       }
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleUpdateSummary = async () => {
+    if (!disputeId) return;
+    try {
+      setUpdating(true);
+      const { updateDisputeSummary } = await import("@/services/dispute.service");
+      const res = await updateDisputeSummary(disputeId, summaryModal.content);
+      if (res.success) {
+        setDispute(res.dispute);
+        toast.success("Dispute summary updated successfully");
+        setSummaryModal({ open: false, content: "" });
+        fetchDetail();
+      }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to resolve dispute");
+      toast.error(err?.response?.data?.message || "Failed to update summary");
     } finally {
       setUpdating(false);
     }
@@ -251,16 +269,40 @@ const AdminDisputeDetail = () => {
                   <div className={cn("h-2 w-full", dispute?.filedBy === "CLIENT" ? "bg-primary" : "bg-purple-500")} />
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-primary">
-                        <ShieldAlert className="w-5 h-5" />
-                        <span className="font-black text-sm uppercase tracking-widest">Dispute Summary</span>
+                      <div className="flex items-center gap-2">
+                         <div className="flex items-center gap-2 text-primary">
+                          <ShieldAlert className="w-5 h-5" />
+                          <span className="font-black text-sm uppercase tracking-widest">Dispute Summary</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0 rounded-full hover:bg-primary/10 text-primary/60 hover:text-primary transition-all"
+                          onClick={() => setSummaryModal({ open: true, content: dispute.summary || dispute.reason })}
+                        >
+                          <Tag className="w-3.5 h-3.5" />
+                        </Button>
                       </div>
                       <span className="text-[10px] text-muted-foreground font-bold italic">Opened {safeFormat(dispute?.openedAt, "MMM d, yyyy 'at' h:mm a")}</span>
                     </div>
-                    <CardTitle className="text-xl font-black mt-2 leading-tight">"{dispute?.reason || "Statement Missing"}"</CardTitle>
-                    <CardDescription className="flex items-center gap-2 font-bold text-xs mt-1">
-                      Filed by {dispute?.filedBy === "CLIENT" ? "Client" : "Freelancer"} •
-                      <span className="text-primary">{dispute?.disputeType?.replace(/_/g, " ") || "General"} Issue</span>
+                    <CardTitle className="text-xl font-black mt-2 leading-tight break-all">
+                      "{dispute?.summary || dispute?.reason || "Statement Missing"}"
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-3 font-bold text-xs mt-2">
+                       <span className={cn(
+                        "text-[10px] px-2 py-0.5 rounded font-black uppercase tracking-widest shadow-sm",
+                        dispute?.filedBy === "CLIENT" 
+                          ? "bg-blue-600 text-white shadow-blue-200" 
+                          : "bg-purple-600 text-white shadow-purple-200"
+                      )}>
+                        Filed by {dispute?.filedBy}
+                      </span>
+                      {dispute?.summary && (
+                        <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Admin Summary</span>
+                      )}
+                      <span className="text-primary font-black uppercase tracking-tighter border-l pl-3 border-border">
+                        {dispute?.disputeType?.replace(/_/g, " ") || "General"} Issue
+                      </span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -268,7 +310,7 @@ const AdminDisputeDetail = () => {
                       <p className="text-sm font-bold text-muted-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5 slice-6 opacity-80">
                          <span className="w-1.5 h-1.5 rounded-full bg-primary" /> Full Details Provided by Filer
                       </p>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap font-medium">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap font-medium break-words">
                         {dispute.details || "No complex details provided."}
                       </p>
                     </div>
@@ -317,7 +359,7 @@ const AdminDisputeDetail = () => {
                       </div>
                       <div className="space-y-2 py-2">
                          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700/60">Admin Note</span>
-                         <p className="text-sm font-medium leading-relaxed italic text-emerald-900/80 bg-white/50 p-4 rounded-xl border border-emerald-200/50 underline-offset-4 decoration-emerald-200">
+                         <p className="text-sm font-medium leading-relaxed italic text-emerald-900/80 bg-white/50 p-4 rounded-xl border border-emerald-200/50 underline-offset-4 decoration-emerald-200 break-words">
                            "{dispute?.resolutionNote || "No resolution note provided."}"
                          </p>
                       </div>
@@ -432,7 +474,7 @@ const AdminDisputeDetail = () => {
                 <div className="flex items-center gap-2 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-2">
                    Post Date: {safeFormat(dispute?.project?.createdAt, "MMMM d, yyyy", "N/A")}
                 </div>
-                <CardTitle className="text-3xl font-black tracking-tight leading-tight">{dispute?.project?.title || "Untitled Project"}</CardTitle>
+                <CardTitle className="text-3xl font-black tracking-tight leading-tight break-words">{dispute?.project?.title || "Untitled Project"}</CardTitle>
                 <div className="flex flex-wrap gap-2 mt-4">
                   <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-black px-3 py-1 text-xs">
                     Budget: ${dispute?.project?.budget || 0} ({dispute?.project?.budgetType || "FIXED"})
@@ -451,7 +493,7 @@ const AdminDisputeDetail = () => {
                     <FileText className="w-4 h-4" /> Comprehensive Description
                   </h4>
                   <div className="prose prose-sm dark:prose-invert max-w-none bg-muted/20 p-6 rounded-2xl border border-border/50 min-h-[150px]">
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap font-medium font-inter">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap font-medium font-inter break-words">
                       {dispute?.project?.description || "No project description available."}
                     </p>
                   </div>
@@ -532,7 +574,7 @@ const AdminDisputeDetail = () => {
                         <p className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                            <FileText className="w-3.5 h-3.5" /> Cover Letter / Pitch
                         </p>
-                        <div className="text-sm font-medium leading-relaxed bg-muted/10 p-6 rounded-2xl border border-dashed border-border text-foreground/90 whitespace-pre-wrap">
+                        <div className="text-sm font-medium leading-relaxed bg-muted/10 p-6 rounded-2xl border border-dashed border-border text-foreground/90 whitespace-pre-wrap break-words">
                           {dispute.project?.proposals?.[0]?.coverLetter || "No cover letter provided in proposal data."}
                         </div>
                      </div>
@@ -584,7 +626,7 @@ const AdminDisputeDetail = () => {
                           )}
                         </div>
                         <div className="flex-1 space-y-1 pb-2">
-                          <p className="font-black text-sm group-hover:text-primary transition-colors">{m.title}</p>
+                          <p className="font-black text-sm group-hover:text-primary transition-colors break-words">{m.title}</p>
                           <div className="flex items-center gap-3 mt-1">
                              <div className="flex items-center gap-1 text-[10px] font-black text-primary">
                                <DollarSign className="w-3 h-3" /> {m.amount}
@@ -596,7 +638,7 @@ const AdminDisputeDetail = () => {
                              )}
                           </div>
                           {m.description && (
-                            <p className="text-[11px] font-medium text-muted-foreground leading-relaxed mt-2 line-clamp-2">
+                            <p className="text-[11px] font-medium text-muted-foreground leading-relaxed mt-2 line-clamp-2 break-words">
                               {m.description}
                             </p>
                           )}
@@ -665,7 +707,7 @@ const AdminDisputeDetail = () => {
                           )}>
                              <CardHeader className="p-4 pb-0 flex flex-row items-center justify-between border-b border-border/10 pb-4 bg-muted/5">
                                 <div>
-                                  <CardTitle className="text-sm font-black tracking-tight">{m.title}</CardTitle>
+                                  <CardTitle className="text-sm font-black tracking-tight break-words">{m.title}</CardTitle>
                                   <div className="flex items-center gap-2 mt-1">
                                     <p className="text-[10px] text-muted-foreground font-black">Amount: ${m.amount}</p>
                                     {m.dueDate && (
@@ -694,7 +736,7 @@ const AdminDisputeDetail = () => {
                                           </p>
                                           <span className="text-[9px] font-bold text-muted-foreground italic">Submitted {safeFormat(m.submittedAt, "MMM d, yy")}</span>
                                        </div>
-                                       <div className="p-4 rounded-xl bg-white/50 border border-border/40 text-sm font-medium leading-relaxed italic text-foreground/80">
+                                       <div className="p-4 rounded-xl bg-white/50 border border-border/40 text-sm font-medium leading-relaxed italic text-foreground/80 break-words">
                                          "{m.deliverables}"
                                        </div>
                                        
@@ -723,8 +765,8 @@ const AdminDisputeDetail = () => {
                                        <p className="text-[10px] font-black uppercase tracking-widest text-rose-600 flex items-center gap-1.5">
                                           <History className="w-3 h-3" /> Revision Request History
                                        </p>
-                                       <p className="text-xs font-semibold leading-relaxed text-rose-900/80 italic">
-                                          "{m.revisionNote}"
+                                       <p className="text-xs font-bold leading-relaxed text-muted-foreground/80 break-all whitespace-pre-wrap">
+                                          {dispute?.details}
                                        </p>
                                     </div>
                                  )}
@@ -744,7 +786,7 @@ const AdminDisputeDetail = () => {
                                                       <span className="text-[10px] font-black uppercase tracking-tight text-foreground/80">{h.type.replace(/_/g, " ")}</span>
                                                       <span className="text-[9px] font-bold text-muted-foreground">{safeFormat(h.timestamp, "MMM d, yyyy h:mm a")}</span>
                                                    </div>
-                                                   <p className="text-[11px] font-medium text-muted-foreground leading-relaxed">{h.content}</p>
+                                                   <p className="text-[11px] font-medium text-muted-foreground leading-relaxed break-words">{h.content}</p>
                                                 </div>
                                              </div>
                                           ))}
@@ -837,7 +879,9 @@ const AdminDisputeDetail = () => {
                                       : "bg-primary text-primary-foreground border-primary/20 rounded-tr-none",
                                   )}
                                 >
-                                  {msg.content}
+                                  <div className="break-words">
+                                    {msg.content}
+                                  </div>
                                   {msg.type === "FILE" && msg.fileUrl && (
                                     <a
                                       href={msg.fileUrl}
@@ -933,6 +977,55 @@ const AdminDisputeDetail = () => {
                 disabled={updating}
               >
                 {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Resolution"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        {/* Summary Edit Modal */}
+        <Dialog 
+          open={summaryModal.open} 
+          onOpenChange={(open) => setSummaryModal(prev => ({ ...prev, open }))}
+        >
+          <DialogContent className="rounded-3xl border-primary/20 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-black text-xl flex items-center gap-2 text-primary">
+                <Tag className="w-5 h-5" />
+                Edit Dispute Summary
+              </DialogTitle>
+              <DialogDescription className="font-bold text-xs italic">
+                Create a professional summary of the core issue.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Internal Reference Summary</Label>
+                <Textarea 
+                  placeholder="e.g. Failure to deliver milestones on agreed timeframe..."
+                  className="rounded-2xl min-h-[120px] resize-none border-border/60 focus:ring-primary/20 focus:border-primary/40"
+                  value={summaryModal.content}
+                  onChange={(e) => setSummaryModal(prev => ({ ...prev, content: e.target.value }))}
+                />
+                <p className="text-[9px] font-bold text-muted-foreground italic px-1 leading-relaxed">
+                  This summary will be displayed prominently instead of the raw filing reason. Use it to clarify the actual point of contention.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-2xl font-bold h-11 border-border/60"
+                onClick={() => setSummaryModal({ open: false, content: "" })}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="flex-1 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black h-11 shadow-lg shadow-primary/20"
+                onClick={handleUpdateSummary}
+                disabled={updating}
+              >
+                {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Summary"}
               </Button>
             </div>
           </DialogContent>

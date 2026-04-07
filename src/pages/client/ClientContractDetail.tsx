@@ -406,9 +406,9 @@ export default function ClientContractDetail() {
                 </>
               )}
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words">
-              {contract.projectTitle}
-            </h1>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words overflow-hidden">
+               {contract.projectTitle}
+             </h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {(contract.status === "ACTIVE" || existingDispute) && (
@@ -505,11 +505,11 @@ export default function ClientContractDetail() {
                     <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
                       Dispute Reason
                     </p>
-                    <p className="text-sm font-bold text-rose-800 mt-1">
+                    <p className="text-sm font-bold text-rose-800 mt-1 break-words">
                       {existingDispute.reason}
                     </p>
                     <div className="p-3 bg-white/60 border border-rose-100 rounded-xl mt-2 italic shadow-sm">
-                      <p className="text-xs text-rose-700 leading-relaxed font-medium">
+                      <p className="text-xs text-rose-700 leading-relaxed font-medium break-words">
                         "{existingDispute.details}"
                       </p>
                     </div>
@@ -528,7 +528,7 @@ export default function ClientContractDetail() {
                       </div>
                       <div className="space-y-1.5">
                         <p className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest">Decision Note</p>
-                        <p className="text-xs font-bold leading-relaxed text-emerald-900/80 bg-white/40 p-3 rounded-xl border border-emerald-100/50 italic">
+                        <p className="text-xs font-bold leading-relaxed text-emerald-900/80 bg-white/40 p-3 rounded-xl border border-emerald-100/50 italic break-words">
                           "{existingDispute.resolutionNote || "No explanatory note provided."}"
                         </p>
                       </div>
@@ -992,7 +992,7 @@ export default function ClientContractDetail() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="font-black text-base">
+                              <h3 className="font-black text-base break-words">
                                 {milestone.title}
                               </h3>
                               {submissionHistory.length > 0 && (
@@ -1009,7 +1009,7 @@ export default function ClientContractDetail() {
                               )}
                             </div>
                             {milestone.description && (
-                              <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                              <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2 break-words">
                                 {milestone.description}
                               </p>
                             )}
@@ -1108,7 +1108,7 @@ export default function ClientContractDetail() {
                             )}
                           </div>
                           {milestone.deliverables && (
-                            <p className="text-sm leading-relaxed">
+                            <p className="text-sm leading-relaxed break-words">
                               {milestone.deliverables}
                             </p>
                           )}
@@ -1148,7 +1148,7 @@ export default function ClientContractDetail() {
                               <RotateCcw className="w-3.5 h-3.5" /> Your Latest
                               Revision Request
                             </p>
-                            <p className="text-sm">{milestone.revisionNote}</p>
+                            <p className="text-sm break-words">{milestone.revisionNote}</p>
                           </div>
                         )}
 
