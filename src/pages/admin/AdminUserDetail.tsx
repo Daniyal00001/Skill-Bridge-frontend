@@ -14,6 +14,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft,
   Mail,
   MapPin,
@@ -25,6 +32,7 @@ import {
   Star,
   Zap,
   Globe,
+  DollarSign,
   TrendingUp,
   Gavel,
   History,
@@ -32,6 +40,11 @@ import {
   Building2,
   Award,
   GraduationCap,
+  FileText,
+  Clock,
+  CheckCircle2,
+  Paperclip,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminService } from "@/services/admin.service";
@@ -41,6 +54,7 @@ export default function AdminUserDetail() {
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -97,6 +111,9 @@ export default function AdminUserDetail() {
     .map((n: string) => n[0])
     .join("")
     .substring(0, 2);
+
+  // Unified list of activity (projects for client, contracts for freelancer)
+  const activityItems = isFreelancer ? user.freelancerProfile?.contracts : user.clientProfile?.projects;
 
   return (
     <DashboardLayout>
@@ -323,36 +340,44 @@ export default function AdminUserDetail() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    {isFreelancer ? (
+                    {(!activityItems || activityItems.length === 0) ? (
                       <div className="p-12 text-center text-muted-foreground italic text-sm">
-                        No contract history found in active scrolls.
+                         No activity logs encrypted for this user.
                       </div>
                     ) : (
                       <div className="divide-y divide-border/40">
-                        {profile?.projects?.map((prj: any) => (
-                          <div
-                            key={prj.id}
-                            className="p-6 hover:bg-muted/20 transition-colors flex items-center justify-between"
-                          >
-                            <div className="space-y-1">
-                              <p className="font-bold text-sm">{prj.title}</p>
-                              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
-                                Budget: ${prj.budget.toLocaleString()}
-                              </p>
-                            </div>
-                            <Badge
-                              variant="secondary"
-                              className="rounded-lg text-[9px] font-black"
+                        {activityItems.map((item: any) => {
+                          const project = isFreelancer ? item.project : item;
+                          const contract = isFreelancer ? item : item.contract;
+                          const milestoneCount = contract?.milestones?.length || 0;
+                          
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => setSelectedProject({ ...project, contract })}
+                              className="p-6 hover:bg-muted/20 transition-all flex items-center justify-between cursor-pointer group active:scale-[0.99]"
                             >
-                              {prj.status}
-                            </Badge>
-                          </div>
-                        ))}
-                        {profile?.projects?.length === 0 && (
-                          <div className="p-12 text-center text-muted-foreground italic text-sm">
-                            No projects launched under this identity.
-                          </div>
-                        )}
+                              <div className="space-y-1 pr-4 max-w-[70%]">
+                                <p className="font-bold text-sm text-foreground line-clamp-2 break-words transition-colors group-hover:text-primary">
+                                  {project?.title}
+                                </p>
+                                <div className="flex items-center gap-4 text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">
+                                   <span>Budget: ${project?.budget?.toLocaleString() || item.agreedPrice?.toLocaleString()}</span>
+                                   {milestoneCount > 0 && <span>· {milestoneCount} Milestones</span>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge
+                                  variant="secondary"
+                                  className="rounded-lg text-[9px] font-black uppercase tracking-tight"
+                                >
+                                  {project?.status || item.status}
+                                </Badge>
+                                <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary transition-colors group-hover:translate-x-1" />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>
@@ -612,6 +637,144 @@ export default function AdminUserDetail() {
           </aside>
         </div>
       </div>
+
+      {/* ── Project/Contract Detail Dialog ───────────────────────────── */}
+      <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-border/50 shadow-2xl p-0 gap-0 outline-none scrollbar-hide">
+          <div className="h-28 bg-gradient-to-br from-primary/20 via-primary/5 to-background sticky top-0 z-10 border-b border-border/40 backdrop-blur-xl">
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[length:16px_16px]" />
+            <div className="relative h-full flex flex-col justify-end px-8 pb-4">
+              <div className="flex items-center gap-3 mb-1.5">
+                <Badge variant="outline" className="rounded-xl px-2.5 py-0.5 bg-background/50 text-primary border-primary/20 font-black tracking-widest text-[8px] uppercase backdrop-blur-sm">
+                  Protocol Insight
+                </Badge>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm">
+                  <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", 
+                    selectedProject?.status === "COMPLETED" ? "bg-emerald-500" : "bg-primary"
+                  )} />
+                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{selectedProject?.status}</span>
+                </div>
+              </div>
+              <DialogTitle className="text-xl font-black leading-tight break-all line-clamp-2 pr-16 max-w-full">
+                {selectedProject?.title}
+              </DialogTitle>
+            </div>
+          </div>
+          
+          <div className="px-8 py-8 space-y-8">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-muted/30 border border-border/40">
+                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Identified Protocol</p>
+                <p className="text-[10px] font-bold truncate text-foreground/80">#{selectedProject?.contract?.id || "N/A"}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-muted/30 border border-border/40">
+                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Financial Allocation</p>
+                <p className="text-[10px] font-bold text-foreground/80">${selectedProject?.budget?.toLocaleString() || selectedProject?.agreedPrice?.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground flex items-center gap-2">
+                  <History className="w-3.5 h-3.5 text-primary" />
+                  Submission Timeline
+                </h4>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                  {selectedProject?.contract?.milestones?.length || 0} Phase(s)
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {selectedProject?.contract?.milestones?.map((milestone: any, idx: number) => (
+                  <div key={milestone.id} className="relative pl-12 group">
+                    {/* Timeline Line */}
+                    {idx !== selectedProject.contract.milestones.length - 1 && (
+                      <div className="absolute left-[19px] top-8 bottom-0 w-0.5 bg-border/40 group-hover:bg-primary/20 transition-colors" />
+                    )}
+                    
+                    {/* Timeline Node */}
+                    <div className={cn(
+                      "absolute left-0 top-0 w-10 h-10 rounded-2xl flex items-center justify-center border transition-all shadow-sm z-10",
+                      milestone.status === "APPROVED" ? "bg-emerald-500 border-emerald-600 shadow-emerald-500/20" : 
+                      milestone.status === "SUBMITTED" ? "bg-primary border-primary shadow-primary/20" : "bg-muted border-border/50"
+                    )}>
+                       {milestone.status === "APPROVED" ? (
+                         <CheckCircle2 className="w-5 h-5 text-white" />
+                       ) : milestone.status === "SUBMITTED" ? (
+                         <Zap className="w-5 h-5 text-white animate-pulse" />
+                       ) : (
+                         <span className="text-xs font-black text-muted-foreground">{idx + 1}</span>
+                       )}
+                    </div>
+
+                    <div className="space-y-4 bg-muted/20 hover:bg-muted/30 p-6 rounded-[2rem] border border-border/40 transition-all">
+                       <div className="flex items-center justify-between">
+                         <h5 className="font-bold text-sm tracking-tight text-foreground/90">{milestone.title}</h5>
+                         <Badge variant="outline" className={cn(
+                           "rounded-lg text-[8px] font-black uppercase tracking-tighter backdrop-blur-sm",
+                           milestone.status === "APPROVED" ? "bg-emerald-50 text-emerald-700 border-emerald-100" : 
+                           milestone.status === "SUBMITTED" ? "bg-primary/10 text-primary border-primary/20" : "bg-muted/50 text-muted-foreground border-border/50"
+                         )}>
+                            {milestone.status}
+                         </Badge>
+                       </div>
+
+                       {milestone.deliverables && (
+                         <div className="bg-background/40 backdrop-blur-md p-4 rounded-2xl border border-border/40 space-y-2">
+                            <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5">
+                               <FileText className="w-3 h-3 text-primary opacity-70" />
+                               Submission Deliverable
+                            </p>
+                            <p className="text-[11px] text-foreground/70 leading-relaxed font-medium italic">
+                               "{milestone.deliverables}"
+                            </p>
+                         </div>
+                       )}
+
+                       {milestone.attachments?.length > 0 && (
+                         <div className="space-y-3">
+                            <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5 px-1">
+                               <Paperclip className="w-3 h-3 text-primary opacity-70" />
+                               Artifact Evidence
+                            </p>
+                            <div className="flex flex-wrap gap-2 px-1">
+                               {milestone.attachments.map((url: string, aidx: number) => (
+                                 <a 
+                                   key={aidx} 
+                                   href={url} 
+                                   target="_blank" 
+                                   rel="noreferrer"
+                                   className="text-[9px] font-black bg-primary/5 hover:bg-primary/10 text-primary px-3 py-1.5 rounded-xl border border-primary/20 transition-all flex items-center gap-2 active:scale-95 hover:shadow-sm"
+                                 >
+                                    <Globe className="w-3 h-3 shrink-0" />
+                                    Artifact #{aidx + 1}
+                                 </a>
+                               ))}
+                            </div>
+                         </div>
+                       )}
+
+                       <div className="flex items-center justify-between text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40 px-1 pt-2">
+                          <span className="flex items-center gap-1"><DollarSign className="w-2.5 h-2.5" />{milestone.amount?.toLocaleString()}</span>
+                          {milestone.submittedAt && <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{new Date(milestone.submittedAt).toLocaleDateString()}</span>}
+                       </div>
+                    </div>
+                  </div>
+                ))}
+
+                {(!selectedProject?.contract?.milestones || selectedProject.contract.milestones.length === 0) && (
+                  <div className="p-12 text-center space-y-4 bg-muted/5 rounded-[2.5rem] border border-dashed border-border/40">
+                     <div className="w-12 h-12 rounded-2xl bg-muted/20 flex items-center justify-center mx-auto mb-2 opacity-50">
+                        <Clock className="w-6 h-6 text-muted-foreground" />
+                     </div>
+                     <p className="text-muted-foreground font-black uppercase tracking-widest text-[9px] opacity-60">No encrypted milestones found in protocol logs.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
