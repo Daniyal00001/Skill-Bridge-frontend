@@ -192,7 +192,7 @@ export default function AdminUserDetail() {
                 <>
                   <MetricCard
                     label="Avg Rating"
-                    value="5.0"
+                    value={profile?.averageRating?.toFixed(1) || "5.0"}
                     icon={Star}
                     accent="bg-amber-400"
                   />
@@ -220,8 +220,14 @@ export default function AdminUserDetail() {
               ) : (
                 <>
                   <MetricCard
+                    label="Avg Rating"
+                    value={profile?.averageRating?.toFixed(1) || "0.0"}
+                    icon={Star}
+                    accent="bg-amber-400"
+                  />
+                  <MetricCard
                     label="Hire Rate"
-                    value="100%"
+                    value={profile?.hireRate ? `${Math.round(profile.hireRate * 100)}%` : "0%"}
                     icon={TrendingUp}
                     accent="bg-emerald-500"
                   />
@@ -232,16 +238,10 @@ export default function AdminUserDetail() {
                     accent="bg-sky-500"
                   />
                   <MetricCard
-                    label="Total Spent"
-                    value="$0"
+                    label="Total Hires"
+                    value={profile?.totalHires || 0}
                     icon={Zap}
                     accent="bg-amber-400"
-                  />
-                  <MetricCard
-                    label="Disputes"
-                    value={user.disputeHistory.length}
-                    icon={Gavel}
-                    accent="bg-rose-500"
                   />
                 </>
               )}
@@ -307,6 +307,54 @@ export default function AdminUserDetail() {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Platform Feedback Section */}
+            <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border/40">
+                <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-500" />
+                  Platform Feedback
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y divide-border/40">
+                  {user.reviews?.map((review: any) => (
+                    <div key={review.id} className="p-8 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10 border border-border/50">
+                            <AvatarImage src={review.giver?.profileImage} />
+                            <AvatarFallback className="text-[10px] font-black">{review.giver?.name?.[0]}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-black">{review.giver?.name}</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Verified Reviewer</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
+                          <span className="text-xs font-black text-amber-700">{review.rating.toFixed(1)}</span>
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-foreground/80 font-medium italic leading-relaxed pl-1">
+                        "{review.comment || "The reviewer left no written comments, but provided a high-quality rating for the interaction."}"
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest pl-1">
+                        {new Date(review.submittedAt).toLocaleDateString()} · Contract Protocol
+                      </p>
+                    </div>
+                  ))}
+                  {(!user.reviews || user.reviews.length === 0) && (
+                    <div className="p-12 text-center space-y-4 bg-muted/5">
+                      <div className="w-16 h-16 bg-muted/20 rounded-3xl flex items-center justify-center mx-auto border border-border/40">
+                        <Zap className="w-8 h-8 text-muted-foreground/40" />
+                      </div>
+                      <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">No Feedback Transmissions Found</p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
