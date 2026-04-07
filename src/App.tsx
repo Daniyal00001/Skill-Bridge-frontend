@@ -78,6 +78,7 @@ import AdminDisputeDetail from "./pages/admin/AdminDisputeDetail";
 import Analytics from "./pages/admin/Analytics";
 import Security from "./pages/admin/Security";
 import AdminSkills from "./pages/admin/AdminSkills";
+import AdminUserDetail from "./pages/admin/AdminUserDetail";
 
 import NotFound from "./pages/NotFound";
 
@@ -271,6 +272,7 @@ const App = () => (
                 <Route element={<RoleRoute allowedRole="ADMIN" />}>
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/users" element={<UserManagement />} />
+                  <Route path="/admin/users/:id" element={<AdminUserDetail />} />
                   <Route
                     path="/admin/projects"
                     element={<ProjectModeration />}

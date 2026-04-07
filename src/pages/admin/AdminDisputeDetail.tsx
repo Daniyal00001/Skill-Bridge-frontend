@@ -560,8 +560,11 @@ const AdminDisputeDetail = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-12 h-12 border-2 border-primary/20">
+                    <Link 
+                      to={`/admin/users/${dispute?.clientId}`}
+                      className="flex items-center gap-4 group p-2 -m-2 rounded-2xl hover:bg-muted/40 transition-all active:scale-[0.98]"
+                    >
+                      <Avatar className="w-12 h-12 border-2 border-primary/20 group-hover:border-primary/40 transition-colors">
                         <AvatarImage src={dispute?.client?.profileImage} />
                         <AvatarFallback className="bg-primary/5 text-primary font-black">
                           {dispute?.client?.name?.[0] || "C"}
@@ -569,7 +572,7 @@ const AdminDisputeDetail = () => {
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="font-black text-sm truncate">
+                          <p className="font-black text-sm truncate group-hover:text-primary transition-colors">
                             {dispute?.client?.name || "Client"}
                           </p>
                           <Badge
@@ -584,10 +587,13 @@ const AdminDisputeDetail = () => {
                           {dispute?.client?.email || "No email"}
                         </p>
                       </div>
-                    </div>
+                    </Link>
 
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-12 h-12 border-2 border-purple-500/20">
+                    <Link 
+                      to={`/admin/users/${dispute?.freelancerId}`}
+                      className="flex items-center gap-4 group p-2 -m-2 rounded-2xl hover:bg-muted/40 transition-all active:scale-[0.98]"
+                    >
+                      <Avatar className="w-12 h-12 border-2 border-purple-500/20 group-hover:border-purple-500/40 transition-colors">
                         <AvatarImage src={dispute?.freelancer?.profileImage} />
                         <AvatarFallback className="bg-purple-500/5 text-purple-500 font-black">
                           {dispute?.freelancer?.name?.[0] || "F"}
@@ -595,7 +601,7 @@ const AdminDisputeDetail = () => {
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="font-black text-sm truncate">
+                          <p className="font-black text-sm truncate group-hover:text-purple-600 transition-colors">
                             {dispute?.freelancer?.name || "Freelancer"}
                           </p>
                           <Badge
@@ -610,7 +616,7 @@ const AdminDisputeDetail = () => {
                           {dispute?.freelancer?.email || "No email"}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   </CardContent>
                 </Card>
               </div>
