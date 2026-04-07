@@ -12,6 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   Mail,
@@ -184,234 +185,249 @@ export default function AdminUserDetail() {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* ── Left Column: Metrics & Detailed Info ────────────────── */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {isFreelancer ? (
-                <>
-                  <MetricCard
-                    label="Avg Rating"
-                    value={profile?.averageRating?.toFixed(1) || "5.0"}
-                    icon={Star}
-                    accent="bg-amber-400"
-                  />
-                  <MetricCard
-                    label="Contracts"
-                    value={profile?._count?.contracts || 0}
-                    icon={Briefcase}
-                    accent="bg-emerald-500"
-                  />
-                  <MetricCard
-                    label="Hourly Rate"
-                    value={
-                      profile?.hourlyRate ? `$${profile.hourlyRate}` : "TBD"
-                    }
-                    icon={TrendingUp}
-                    accent="bg-sky-500"
-                  />
-                  <MetricCard
-                    label="Reviews"
-                    value={user._count?.reviewsReceived || 0}
-                    icon={Zap}
-                    accent="bg-violet-500"
-                  />
-                </>
-              ) : (
-                <>
-                  <MetricCard
-                    label="Avg Rating"
-                    value={profile?.averageRating?.toFixed(1) || "0.0"}
-                    icon={Star}
-                    accent="bg-amber-400"
-                  />
-                  <MetricCard
-                    label="Hire Rate"
-                    value={profile?.hireRate ? `${Math.round(profile.hireRate * 100)}%` : "0%"}
-                    icon={TrendingUp}
-                    accent="bg-emerald-500"
-                  />
-                  <MetricCard
-                    label="Projects"
-                    value={profile?._count?.projects || 0}
-                    icon={Building2}
-                    accent="bg-sky-500"
-                  />
-                  <MetricCard
-                    label="Total Hires"
-                    value={profile?.totalHires || 0}
-                    icon={Zap}
-                    accent="bg-amber-400"
-                  />
-                </>
-              )}
-            </div>
+          {/* ── Main Content Area (Tabbed) ───────────────────────────── */}
+          <div className="lg:col-span-8">
+            <Tabs defaultValue="overview" className="space-y-6">
+              <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/40 w-full justify-start h-14">
+                <TabsTrigger value="overview" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  Activity
+                </TabsTrigger>
+                <TabsTrigger value="feedback" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  Feedback
+                </TabsTrigger>
+                <TabsTrigger value="disputes" className="rounded-xl px-6 h-full font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  Disputes
+                </TabsTrigger>
+              </TabsList>
 
-            {/* About/Bio Section */}
-            <Card className="rounded-[2rem] border-border/50 shadow-sm overflow-hidden">
-              <CardHeader className="bg-muted/30 border-b border-border/40">
-                <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
-                  Case Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8">
-                <p className="text-base text-muted-foreground font-medium leading-relaxed italic whitespace-pre-wrap">
-                  "
-                  {profile?.bio ||
-                    "No detailed summary provided for this user identity."}
-                  "
-                </p>
-              </CardContent>
-            </Card>
+              {/* OVERVIEW TAB */}
+              <TabsContent value="overview" className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* Metric Cards Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {isFreelancer ? (
+                    <>
+                      <MetricCard
+                        label="Avg Rating"
+                        value={profile?.averageRating?.toFixed(1) || "5.0"}
+                        icon={Star}
+                        accent="bg-amber-400"
+                      />
+                      <MetricCard
+                        label="Contracts"
+                        value={profile?._count?.contracts || 0}
+                        icon={Briefcase}
+                        accent="bg-emerald-500"
+                      />
+                      <MetricCard
+                        label="Hourly Rate"
+                        value={
+                          profile?.hourlyRate ? `$${profile.hourlyRate}` : "TBD"
+                        }
+                        icon={TrendingUp}
+                        accent="bg-sky-500"
+                      />
+                      <MetricCard
+                        label="Reviews"
+                        value={user._count?.reviewsReceived || 0}
+                        icon={Zap}
+                        accent="bg-violet-500"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <MetricCard
+                        label="Avg Rating"
+                        value={profile?.averageRating?.toFixed(1) || "0.0"}
+                        icon={Star}
+                        accent="bg-amber-400"
+                      />
+                      <MetricCard
+                        label="Hire Rate"
+                        value={profile?.hireRate ? `${Math.round(profile.hireRate * 100)}%` : "0%"}
+                        icon={TrendingUp}
+                        accent="bg-emerald-500"
+                      />
+                      <MetricCard
+                        label="Projects"
+                        value={profile?._count?.projects || 0}
+                        icon={Building2}
+                        accent="bg-sky-500"
+                      />
+                      <MetricCard
+                        label="Total Hires"
+                        value={profile?.totalHires || 0}
+                        icon={Zap}
+                        accent="bg-amber-400"
+                      />
+                    </>
+                  )}
+                </div>
 
-            {/* Work History / Projects */}
-            <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
-              <CardHeader className="bg-muted/30 border-b border-border/40">
-                <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
-                  <History className="w-4 h-4" />
-                  {isFreelancer
-                    ? "Recent Contract History"
-                    : "Recent Project Activity"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {isFreelancer ? (
-                  <div className="p-8 text-center text-muted-foreground italic text-sm">
-                    No contract history found in active scrolls.
-                  </div>
-                ) : (
-                  <div className="divide-y divide-border/40">
-                    {profile?.projects?.map((prj: any) => (
-                      <div
-                        key={prj.id}
-                        className="p-6 hover:bg-muted/20 transition-colors flex items-center justify-between"
-                      >
-                        <div className="space-y-1">
-                          <p className="font-bold text-sm">{prj.title}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
-                            Budget: ${prj.budget.toLocaleString()}
-                          </p>
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className="rounded-lg text-[9px] font-black"
-                        >
-                          {prj.status}
-                        </Badge>
+                <Card className="rounded-[2rem] border-border/50 shadow-sm overflow-hidden">
+                  <CardHeader className="bg-muted/30 border-b border-border/40">
+                    <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
+                      Case Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <p className="text-base text-muted-foreground font-medium leading-relaxed italic whitespace-pre-wrap">
+                      "
+                      {profile?.bio ||
+                        "No detailed summary provided for this user identity."}
+                      "
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* ACTIVITY TAB */}
+              <TabsContent value="activity" className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
+                  <CardHeader className="bg-muted/30 border-b border-border/40">
+                    <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
+                      <History className="w-4 h-4" />
+                      {isFreelancer ? "Recent Contract History" : "Recent Project Activity"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {isFreelancer ? (
+                      <div className="p-12 text-center text-muted-foreground italic text-sm">
+                        No contract history found in active scrolls.
                       </div>
-                    ))}
-                    {profile?.projects?.length === 0 && (
-                      <div className="p-8 text-center text-muted-foreground italic text-sm">
-                        No projects launched under this identity.
+                    ) : (
+                      <div className="divide-y divide-border/40">
+                        {profile?.projects?.map((prj: any) => (
+                          <div key={prj.id} className="p-6 hover:bg-muted/20 transition-colors flex items-center justify-between">
+                            <div className="space-y-1">
+                              <p className="font-bold text-sm">{prj.title}</p>
+                              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
+                                Budget: ${prj.budget.toLocaleString()}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="rounded-lg text-[9px] font-black">{prj.status}</Badge>
+                          </div>
+                        ))}
+                        {profile?.projects?.length === 0 && (
+                          <div className="p-12 text-center text-muted-foreground italic text-sm">
+                            No projects launched under this identity.
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            {/* Platform Feedback Section */}
-            <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
-              <CardHeader className="bg-muted/30 border-b border-border/40">
-                <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
-                  <Star className="w-4 h-4 text-amber-500" />
-                  Platform Feedback
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-border/40">
-                  {user.reviews?.map((review: any) => (
-                    <div key={review.id} className="p-8 space-y-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-10 h-10 border border-border/50">
-                            <AvatarImage src={review.giver?.profileImage} />
-                            <AvatarFallback className="text-[10px] font-black">{review.giver?.name?.[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-black">{review.giver?.name}</p>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Verified Reviewer</p>
+              {/* FEEDBACK TAB */}
+              <TabsContent value="feedback" className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
+                  <CardHeader className="bg-muted/30 border-b border-border/40">
+                    <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-foreground flex items-center gap-2">
+                      <Star className="w-4 h-4 text-amber-500" />
+                      Platform Feedback
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-border/40">
+                      {user.reviews?.map((review: any) => (
+                        <div key={review.id} className="p-8 space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10 border border-border/50">
+                                <AvatarImage src={review.giver?.profileImage} />
+                                <AvatarFallback className="text-[10px] font-black">{review.giver?.name?.[0]}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-black">{review.giver?.name}</p>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Verified Reviewer</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
+                              <span className="text-xs font-black text-amber-700">{review.rating.toFixed(1)}</span>
+                              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                            </div>
                           </div>
+                          <p className="text-sm text-foreground/80 font-medium italic leading-relaxed pl-1">
+                            "{review.comment || "The reviewer left no written comments, but provided a high-quality rating for the interaction."}"
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest pl-1">
+                            {new Date(review.submittedAt).toLocaleDateString()} · Contract Protocol
+                          </p>
                         </div>
-                        <div className="flex items-center gap-1 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
-                          <span className="text-xs font-black text-amber-700">{review.rating.toFixed(1)}</span>
-                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                      ))}
+                      {(!user.reviews || user.reviews.length === 0) && (
+                        <div className="p-16 text-center space-y-4 bg-muted/5">
+                          <div className="w-16 h-16 bg-muted/20 rounded-3xl flex items-center justify-center mx-auto border border-border/40">
+                            <Zap className="w-8 h-8 text-muted-foreground/40" />
+                          </div>
+                          <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">No Feedback Transmissions Found</p>
                         </div>
-                      </div>
-                      <p className="text-sm text-foreground/80 font-medium italic leading-relaxed pl-1">
-                        "{review.comment || "The reviewer left no written comments, but provided a high-quality rating for the interaction."}"
-                      </p>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest pl-1">
-                        {new Date(review.submittedAt).toLocaleDateString()} · Contract Protocol
-                      </p>
+                      )}
                     </div>
-                  ))}
-                  {(!user.reviews || user.reviews.length === 0) && (
-                    <div className="p-12 text-center space-y-4 bg-muted/5">
-                      <div className="w-16 h-16 bg-muted/20 rounded-3xl flex items-center justify-center mx-auto border border-border/40">
-                        <Zap className="w-8 h-8 text-muted-foreground/40" />
-                      </div>
-                      <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">No Feedback Transmissions Found</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            {/* Dispute History Table */}
-            <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
-              <CardHeader className="bg-rose-500/5 border-b border-rose-500/10">
-                <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-rose-700 flex items-center gap-2">
-                  <Gavel className="w-4 h-4" />
-                  Dispute Log
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-border/40">
-                  {user.disputeHistory.map((d: any) => (
-                    <Link
-                      key={d.id}
-                      to={`/admin/disputes/${d.id}`}
-                      className="p-6 hover:bg-rose-500/5 transition-colors flex items-center justify-between group"
-                    >
-                      <div className="space-y-1">
-                        <p className="font-bold text-sm group-hover:text-rose-600 transition-colors">
-                          Case #{d.id.substring(0, 8).toUpperCase()}
-                        </p>
-                        <p className="text-xs text-muted-foreground italic line-clamp-1">
-                          "{d.reason}"
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right hidden sm:block">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                            Opened
-                          </p>
-                          <p className="text-[11px] font-bold">
-                            {new Date(d.openedAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Badge
-                          className={cn(
-                            "rounded-lg font-black text-[9px] tracking-tight px-2 py-0.5",
-                            d.status === "RESOLVED"
-                              ? "bg-emerald-500"
-                              : "bg-amber-500",
-                          )}
+              {/* DISPUTES TAB */}
+              <TabsContent value="disputes" className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <Card className="rounded-[2.5rem] border-border/50 shadow-sm overflow-hidden">
+                  <CardHeader className="bg-rose-500/5 border-b border-rose-500/10">
+                    <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-rose-700 flex items-center gap-2">
+                      <Gavel className="w-4 h-4" />
+                      Dispute Log
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-border/40">
+                      {user.disputeHistory.map((d: any) => (
+                        <Link
+                          key={d.id}
+                          to={`/admin/disputes/${d.id}`}
+                          className="p-6 hover:bg-rose-500/5 transition-colors flex items-center justify-between group"
                         >
-                          {d.status}
-                        </Badge>
-                      </div>
-                    </Link>
-                  ))}
-                  {user.disputeHistory.length === 0 && (
-                    <div className="p-8 text-center text-muted-foreground italic text-sm">
-                      No historical disputes recorded. Protocol clean.
+                          <div className="space-y-1">
+                            <p className="font-bold text-sm group-hover:text-rose-600 transition-colors">
+                              Case #{d.id.substring(0, 8).toUpperCase()}
+                            </p>
+                            <p className="text-xs text-muted-foreground italic line-clamp-1">
+                              "{d.reason}"
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right hidden sm:block">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                Opened
+                              </p>
+                              <p className="text-[11px] font-bold">
+                                {new Date(d.openedAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <Badge
+                              className={cn(
+                                "rounded-lg font-black text-[9px] tracking-tight px-2 py-0.5",
+                                d.status === "RESOLVED"
+                                  ? "bg-emerald-500"
+                                  : "bg-amber-500",
+                              )}
+                            >
+                              {d.status}
+                            </Badge>
+                          </div>
+                        </Link>
+                      ))}
+                      {user.disputeHistory.length === 0 && (
+                        <div className="p-16 text-center text-muted-foreground italic text-sm">
+                          No historical disputes recorded. Protocol clean.
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* ── Right Column: Sidebar Specs ──────────────────────────── */}
@@ -440,16 +456,6 @@ export default function AdminUserDetail() {
                   label="Payment Methods"
                   ok={user.isPaymentVerified}
                 />
-
-                {/* <Separator className="bg-border/40" />
-
-                    <div className="space-y-2">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Internal Statistics</p>
-                        <div className="flex justify-between items-center bg-muted/20 p-3 rounded-2xl border border-border/40">
-                           <span className="text-xs font-bold">Network Reputation</span>
-                           <span className="text-xs font-black text-emerald-600">ALPHA CORE</span>
-                        </div>
-                    </div> */}
               </CardContent>
             </Card>
 
