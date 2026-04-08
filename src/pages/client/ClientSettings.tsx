@@ -45,7 +45,11 @@ import {
   Activity,
   Trophy,
   Star,
+  UploadCloud,
+  XCircle,
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 // Mock User Data
 const MOCK_USER = {
@@ -72,8 +76,45 @@ const MOCK_USER = {
 };
 
 const ClientSettingsPage = () => {
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(MOCK_USER);
+  
+  const { data: profileResponse, isLoading } = useQuery({
+    queryKey: ["clientProfileSettings"],
+    queryFn: async () => {
+      const res = await api.get("/client/profile");
+      return res.data;
+    },
+  });
+
+  const [idFile, setIdFile] = useState<File | null>(null);
+
+  const uploadIdMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("idDocument", file);
+      const res = await api.post("/client/profile/upload-id", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("ID Document uploaded successfully!");
+      setIdFile(null);
+      queryClient.invalidateQueries({ queryKey: ["clientProfileSettings"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to upload ID document.");
+    },
+  });
+
+  const handleIdUpload = () => {
+    if (!idFile) return;
+    uploadIdMutation.mutate(idFile);
+  };
+
+  const user = profileResponse?.profile?.user || MOCK_USER;
+  const profile = profileResponse?.profile || MOCK_USER;
 
   const handleSaveAccount = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,44 +173,8 @@ const ClientSettingsPage = () => {
             value="account"
             className="animate-in fade-in-50 duration-500"
           >
-            <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
-              <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
-                <CardHeader>
-                  <CardTitle>Account Details</CardTitle>
-                  <CardDescription>
-                    Update your personal information and contact details.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-2 text-left">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        defaultValue={user.name}
-                        onChange={(e) =>
-                          setUser({ ...user, name: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2 text-left">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        defaultValue={user.email}
-                        disabled
-                        className="bg-muted/50"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-end border-t p-6">
-                  <Button onClick={handleSaveAccount}>Save Account</Button>
-                </CardFooter>
-              </Card>
-
-              <aside className="space-y-6">
-                <Card className="border-border/40 bg-card/80 shadow-md">
+            <div className="max-w-xl mx-auto space-y-6">
+              <Card className="border-border/40 bg-card/80 shadow-md">
                   <CardHeader className="pb-3 text-left">
                     <CardTitle className="text-lg font-bold">
                       Verification
@@ -184,15 +189,81 @@ const ClientSettingsPage = () => {
                         Verified
                       </Badge>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Identity
-                      </span>
-                      <Badge variant="outline">Pending</Badge>
-                    </div>
                   </CardContent>
                 </Card>
-              </aside>
+
+                {/* Identity Verification Section */}
+                <Card className="border-border/40 bg-card/80 shadow-md flex-1">
+                  <CardHeader className="pb-3 text-left">
+                    <CardTitle className="text-lg font-bold">Identity Verification</CardTitle>
+                    <CardDescription>Upload your national ID or passport</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-left">
+                    <div className="flex justify-between items-center bg-muted/50 p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5 text-primary" /> 
+                        <span className="font-semibold text-sm">Status:</span>
+                      </div>
+                      {user.idVerificationStatus === "APPROVED" && (
+                        <Badge className="bg-green-500/10 text-green-500 border-none"><CheckCircle2 className="h-3 w-3 mr-1"/> Approved</Badge>
+                      )}
+                      {user.idVerificationStatus === "PENDING" && (
+                        <Badge className="bg-blue-500/10 text-blue-500 border-none"><Loader2 className="h-3 w-3 mr-1 animate-spin"/> Pending Review</Badge>
+                      )}
+                      {user.idVerificationStatus === "REJECTED" && (
+                        <Badge variant="destructive" className="border-none"><XCircle className="h-3 w-3 mr-1"/> Rejected</Badge>
+                      )}
+                      {(!user.idVerificationStatus || user.idVerificationStatus === "UNSUBMITTED") && (
+                        <Badge className="bg-amber-500/10 text-amber-500 border-none">Unsubmitted</Badge>
+                      )}
+                    </div>
+
+                    {user.idVerificationStatus === "REJECTED" && user.idRejectionReason && (
+                      <div className="p-3 bg-red-50 text-red-600 rounded-lg text-xs leading-relaxed border border-red-100">
+                        <span className="font-bold block mb-1">Reason for Rejection:</span>
+                        {user.idRejectionReason}
+                      </div>
+                    )}
+
+                    {(!user.idVerificationStatus || user.idVerificationStatus === "UNSUBMITTED" || user.idVerificationStatus === "REJECTED") && (
+                      <div className="space-y-3 pt-2">
+                        <div className="border-2 border-dashed border-border/50 rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 relative">
+                          <input 
+                            type="file" 
+                            accept="image/*,.pdf"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setIdFile(e.target.files[0]);
+                              }
+                            }}
+                          />
+                          {!idFile ? (
+                            <>
+                              <UploadCloud className="h-8 w-8 text-muted-foreground mb-2" />
+                              <p className="text-xs text-muted-foreground font-medium">Click or drag file to upload</p>
+                              <p className="text-[10px] text-muted-foreground mt-1">JPEG, PNG, or PDF max 5MB</p>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center gap-2">
+                               <ShieldCheck className="h-8 w-8 text-primary mb-1" />
+                               <p className="text-xs font-semibold">{idFile.name}</p>
+                               <p className="text-[10px] text-muted-foreground">Click to change file</p>
+                            </div>
+                          )}
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          disabled={!idFile || uploadIdMutation.isPending}
+                          onClick={handleIdUpload}
+                        >
+                          {uploadIdMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                          Submit for Verification
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
             </div>
           </TabsContent>
 

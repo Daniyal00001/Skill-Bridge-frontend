@@ -38,6 +38,7 @@ import {
   Moon,
   Sparkles,
   Inbox,
+  UserCheck,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
@@ -265,6 +266,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             label: "Users & Content",
             items: [
               { icon: Users, label: "Users", href: "/admin/users" },
+              { icon: UserCheck, label: "ID Approvals", href: "/admin/verifications" },
               { icon: FolderOpen, label: "Projects", href: "/admin/projects" },
               { icon: Star, label: "Skills", href: "/admin/skills" },
               {

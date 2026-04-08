@@ -79,6 +79,7 @@ import Analytics from "./pages/admin/Analytics";
 import Security from "./pages/admin/Security";
 import AdminSkills from "./pages/admin/AdminSkills";
 import AdminUserDetail from "./pages/admin/AdminUserDetail";
+import AdminVerifications from "./pages/admin/AdminVerifications";
 
 import NotFound from "./pages/NotFound";
 
@@ -285,6 +286,7 @@ const App = () => (
                     path="/admin/disputes"
                     element={<DisputeManagement />}
                   />
+                  <Route path="/admin/verifications" element={<AdminVerifications />} />
                   <Route path="/admin/skills" element={<AdminSkills />} />
                   <Route path="/admin/analytics" element={<Analytics />} />
                   <Route path="/admin/security" element={<Security />} />

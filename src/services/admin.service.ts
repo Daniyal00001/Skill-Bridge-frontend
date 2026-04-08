@@ -9,6 +9,8 @@ export interface AdminUserProfile {
   createdAt: string;
   isEmailVerified: boolean;
   isIdVerified: boolean;
+  idVerificationStatus?: "UNSUBMITTED" | "PENDING" | "APPROVED" | "REJECTED";
+  idRejectionReason?: string | null;
   isPhoneVerified: boolean;
   isPaymentVerified: boolean;
   lastActiveAt?: string;
@@ -44,4 +46,16 @@ export const adminService = {
     );
     return res.data.user;
   },
+  getPendingVerifications: async () => {
+    const res = await api.get<{ success: boolean; users: any[] }>(`/admin/verifications/pending`);
+    return res.data.users;
+  },
+  approveVerification: async (userId: string) => {
+    const res = await api.post(`/admin/verifications/approve/${userId}`);
+    return res.data;
+  },
+  rejectVerification: async (userId: string, reason: string) => {
+    const res = await api.post(`/admin/verifications/reject/${userId}`, { reason });
+    return res.data;
+  }
 };
