@@ -46,7 +46,6 @@ import ClientProfilePage from "./pages/client/ClientProfile";
 import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
 import GigDetail from "./pages/client/GigDetail";
-import NegotiationPage from "./pages/client/NegotiationPage";
 import ClientContractDetail from "./pages/client/ClientContractDetail";
 import ClientProposalDetail from "./pages/client/ClientProposalDetail";
 import ClientContracts from "./pages/client/ClientContracts";
@@ -193,12 +192,8 @@ const App = () => (
                   <Route path="/settings" element={<ClientSettingsPage />} />
                   {/* Redirect legacy route */}
                   <Route
-                    path="/client/help-me-find"
+                    path="/client/ai-assistant"
                     element={<AIAssistantPage />}
-                  />
-                  <Route
-                    path="/client/negotiation/:sessionId"
-                    element={<NegotiationPage />}
                   />
                 </Route>
                 {/* ── Freelancer Only ───────────────────────────────── */}
