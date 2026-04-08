@@ -28,6 +28,7 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import GoogleSuccess from "./pages/auth/GoogleSuccess";
 import SelectRole from "./pages/auth/SelectRole";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ChatRedirect from "./pages/auth/ChatRedirect";
 
 // Client Pages
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -119,6 +120,7 @@ const App = () => (
               {/* Not logged in? → redirected to /login               */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/select-role" element={<SelectRole />} />
+                <Route path="/chat/:roomId" element={<ChatRedirect />} />
                 {/* ── Client Only ──────────────────────────────────── */}
                 <Route element={<RoleRoute allowedRole="CLIENT" />}>
                   <Route path="/client" element={<ClientDashboard />} />

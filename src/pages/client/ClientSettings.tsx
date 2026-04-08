@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 import {
   User,
   Lock,
@@ -132,6 +133,20 @@ const ClientSettingsPage = () => {
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.message || "Failed to update password");
+    },
+  });
+
+  const updateNotificationsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await api.put("/auth/notification-settings", data);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Notification settings updated");
+      queryClient.invalidateQueries({ queryKey: ["clientProfileSettings"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to update notifications");
     },
   });
 
@@ -452,35 +467,45 @@ const ClientSettingsPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-left">
-                {[
-                  {
-                    title: "Project Updates",
-                    desc: "Get notified when someone bids on your project.",
-                  },
-                  {
-                    title: "Messages",
-                    desc: "Get notified when you receive a message.",
-                  },
-                  {
-                    title: "Account Alerts",
-                    desc: "Security and billing notifications.",
-                  },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border/40"
-                  >
-                    <div>
-                      <p className="font-bold">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.desc}
-                      </p>
-                    </div>
-                    <div className="h-6 w-10 bg-primary/20 rounded-full flex items-center px-1 cursor-pointer">
-                      <div className="h-4 w-4 bg-primary rounded-full transition-all translate-x-4" />
-                    </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border/40">
+                  <div>
+                    <p className="font-bold">Project Updates</p>
+                    <p className="text-xs text-muted-foreground">
+                      Get notified when someone bids on your project.
+                    </p>
                   </div>
-                ))}
+                  <Switch 
+                    checked={user.projectNotifications ?? true}
+                    onCheckedChange={(checked) => updateNotificationsMutation.mutate({ projectNotifications: checked })}
+                    disabled={updateNotificationsMutation.isPending}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border/40">
+                  <div>
+                    <p className="font-bold">Messages</p>
+                    <p className="text-xs text-muted-foreground">
+                      Get notified when you receive a message.
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={user.messageNotifications ?? true}
+                    onCheckedChange={(checked) => updateNotificationsMutation.mutate({ messageNotifications: checked })}
+                    disabled={updateNotificationsMutation.isPending}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border/40">
+                  <div>
+                    <p className="font-bold">Account Alerts</p>
+                    <p className="text-xs text-muted-foreground">
+                      Security and billing notifications.
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={user.accountNotifications ?? true}
+                    onCheckedChange={(checked) => updateNotificationsMutation.mutate({ accountNotifications: checked })}
+                    disabled={updateNotificationsMutation.isPending}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
