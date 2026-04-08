@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +24,7 @@ import {
   Eye,
   Lock,
   Layers,
+  Calendar,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ interface ContractSummary {
   escrowAmount: number;
   progress: number;
   createdAt: string;
+  endDate?: string;
   milestonesTotal: number;
   milestonesApproved: number;
   milestonesSubmitted: number;
@@ -50,13 +52,16 @@ const statusConfig: Record<string, { label: string; color: string; dot: string }
   OFFER_PENDING: { label: "Offer Pending", color: "bg-amber-500/10 text-amber-700 border-amber-400/30", dot: "bg-amber-500" },
   COMPLETED: { label: "Completed", color: "bg-blue-500/10 text-blue-700 border-blue-400/30", dot: "bg-blue-500" },
   CANCELLED: { label: "Cancelled", color: "bg-red-500/10 text-red-700 border-red-400/30", dot: "bg-red-500" },
+  DISPUTED: { label: "Disputed", color: "bg-rose-500/10 text-rose-700 border-rose-400/30", dot: "bg-rose-500" },
 };
 
 const ClientContractsPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [contracts, setContracts] = useState<ContractSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("active");
+  const initialTab = searchParams.get("tab") || "active";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
     const fetchContracts = async () => {
@@ -75,6 +80,7 @@ const ClientContractsPage = () => {
             escrowAmount: c.escrowAmount || 0,
             progress: c.progress || 0,
             createdAt: c.createdAt,
+            endDate: c.endDate,
             milestonesTotal: c.milestonesTotal || 0,
             milestonesApproved: c.milestonesApproved || 0,
             milestonesSubmitted: c.milestonesSubmitted || 0,
@@ -96,7 +102,8 @@ const ClientContractsPage = () => {
     const escrow = contracts.reduce((s, c) => s + (c.escrowAmount || 0), 0);
     const active = contracts.filter((c) => c.status === "ACTIVE").length;
     const needsReview = contracts.filter((c) => (c.milestonesSubmitted || 0) > 0).length;
-    return { total, released, escrow, active, needsReview };
+    const disputed = contracts.filter((c) => c.status === "DISPUTED").length;
+    return { total, released, escrow, active, needsReview, disputed };
   }, [contracts]);
 
   const filtered = useMemo(() => {
@@ -106,6 +113,7 @@ const ClientContractsPage = () => {
       if (!matchSearch) return false;
       if (activeTab === "active") return c.status === "ACTIVE" || c.status === "OFFER_PENDING";
       if (activeTab === "completed") return c.status === "COMPLETED";
+      if (activeTab === "disputed") return c.status === "DISPUTED";
       return true;
     });
   }, [contracts, searchTerm, activeTab]);
@@ -129,13 +137,14 @@ const ClientContractsPage = () => {
         </div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { label: "Total Contract Value", value: `$${stats.total.toLocaleString()}`, icon: <DollarSign className="w-5 h-5" />, color: "text-primary", bg: "bg-primary/5 border-primary/10" },
+            { label: "Total Asset Value", value: `$${stats.total.toLocaleString()}`, icon: <DollarSign className="w-5 h-5" />, color: "text-primary", bg: "bg-primary/5 border-primary/10" },
             { label: "Total Released", value: `$${stats.released.toLocaleString()}`, icon: <CheckCircle2 className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-500/5 border-emerald-500/10" },
             { label: "In Escrow", value: `$${stats.escrow.toLocaleString()}`, icon: <Shield className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-500/5 border-blue-500/10" },
-            { label: "Active Contracts", value: stats.active.toString(), icon: <TrendingUp className="w-5 h-5" />, color: "text-violet-600", bg: "bg-violet-500/5 border-violet-500/10" },
+            { label: "Active Jobs", value: stats.active.toString(), icon: <TrendingUp className="w-5 h-5" />, color: "text-violet-600", bg: "bg-violet-500/5 border-violet-500/10" },
             { label: "Needs Review", value: stats.needsReview.toString(), icon: <AlertTriangle className="w-5 h-5" />, color: "text-orange-600", bg: "bg-orange-500/5 border-orange-500/10" },
+            { label: "Disputed", value: stats.disputed.toString(), icon: <Shield className="w-5 h-5" />, color: "text-rose-600", bg: "bg-rose-500/5 border-rose-500/10" },
           ].map((s, i) => (
             <Card key={i} className={cn("rounded-2xl border", s.bg)}>
               <CardContent className="p-4 flex items-center gap-3">
@@ -166,6 +175,7 @@ const ClientContractsPage = () => {
               {[
                 { value: "active", label: "Active" },
                 { value: "completed", label: "Completed" },
+                { value: "disputed", label: "Disputed" },
                 { value: "all", label: "All" },
               ].map((t) => (
                 <TabsTrigger key={t.value} value={t.value} className="rounded-xl font-black px-5 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm">
@@ -173,6 +183,11 @@ const ClientContractsPage = () => {
                   {t.value === "active" && contracts.filter(c => c.status === "ACTIVE" || c.status === "OFFER_PENDING").length > 0 && (
                     <span className="ml-1.5 bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
                       {contracts.filter(c => c.status === "ACTIVE" || c.status === "OFFER_PENDING").length}
+                    </span>
+                  )}
+                  {t.value === "disputed" && stats.disputed > 0 && (
+                    <span className="ml-1.5 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                      {stats.disputed}
                     </span>
                   )}
                 </TabsTrigger>
@@ -270,9 +285,16 @@ const ClientContractCard = ({ contract }: { contract: ContractSummary }) => {
               <p className="font-bold text-sm truncate">{contract.freelancer?.name}</p>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">Started</p>
-              <p className="text-xs font-bold">
-                {new Date(contract.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+              <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">Deadline</p>
+              <p className="text-xs font-bold text-emerald-600 flex items-center justify-end gap-1">
+                {contract.endDate ? (
+                  <>
+                    <Calendar className="w-3 h-3" />
+                    {new Date(contract.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                  </>
+                ) : (
+                  "N/A"
+                )}
               </p>
             </div>
           </div>

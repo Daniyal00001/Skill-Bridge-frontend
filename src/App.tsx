@@ -73,9 +73,12 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ProjectModeration from "./pages/admin/ProjectModeration";
 import DisputeManagement from "./pages/admin/DisputeManagement";
+import AdminDisputeDetail from "./pages/admin/AdminDisputeDetail";
 import Analytics from "./pages/admin/Analytics";
 import Security from "./pages/admin/Security";
 import AdminSkills from "./pages/admin/AdminSkills";
+import AdminUserDetail from "./pages/admin/AdminUserDetail";
+import AdminVerifications from "./pages/admin/AdminVerifications";
 
 import NotFound from "./pages/NotFound";
 
@@ -265,14 +268,20 @@ const App = () => (
                 <Route element={<RoleRoute allowedRole="ADMIN" />}>
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/users" element={<UserManagement />} />
+                  <Route path="/admin/users/:id" element={<AdminUserDetail />} />
                   <Route
                     path="/admin/projects"
                     element={<ProjectModeration />}
                   />
                   <Route
+                    path="/admin/disputes/:disputeId"
+                    element={<AdminDisputeDetail />}
+                  />
+                  <Route
                     path="/admin/disputes"
                     element={<DisputeManagement />}
                   />
+                  <Route path="/admin/verifications" element={<AdminVerifications />} />
                   <Route path="/admin/skills" element={<AdminSkills />} />
                   <Route path="/admin/analytics" element={<Analytics />} />
                   <Route path="/admin/security" element={<Security />} />

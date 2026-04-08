@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,7 @@ const MILESTONE_STATUS_MAP: Record<
     text: "text-orange-600",
   },
   REJECTED: { label: "Rejected", dot: "bg-red-500", text: "text-red-600" },
+  DISPUTED: { label: "Disputed", dot: "bg-rose-500", text: "text-rose-600" },
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -295,39 +297,74 @@ export default function FreelancerDashboard() {
           </div>
         </div>
 
-        {/* ── Availability + Invitations banner ──────────────────────────────── */}
-        {stats.pendingInvitationsCount > 0 && (
-          <Card className="border border-primary/20 bg-primary/5 rounded-2xl">
-            <CardContent className="p-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Inbox className="h-4 w-4 text-primary" />
+        {/* ── Availability + Invitations + Disputes banner ──────────────────── */}
+        <div className="space-y-4">
+          {stats.disputedContractsCount > 0 && (
+            <Card className="border border-rose-200 bg-rose-50/50 rounded-2xl">
+              <CardContent className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="h-4 w-4 text-rose-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      You have{" "}
+                      <span className="text-rose-600">
+                        {stats.disputedContractsCount}
+                      </span>{" "}
+                      disputed contract
+                      {stats.disputedContractsCount > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Please review the communication logs and work history
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    You have{" "}
-                    <span className="text-primary">
-                      {stats.pendingInvitationsCount}
-                    </span>{" "}
-                    pending invitation
-                    {stats.pendingInvitationsCount > 1 ? "s" : ""}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Clients have invited you to their projects
-                  </p>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="rounded-xl font-semibold shrink-0"
+                  asChild
+                >
+                  <Link to="/freelancer/contracts?tab=disputed">View Disputes</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {stats.pendingInvitationsCount > 0 && (
+            <Card className="border border-primary/20 bg-primary/5 rounded-2xl">
+              <CardContent className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Inbox className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      You have{" "}
+                      <span className="text-primary">
+                        {stats.pendingInvitationsCount}
+                      </span>{" "}
+                      pending invitation
+                      {stats.pendingInvitationsCount > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Clients have invited you to their projects
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-xl font-semibold border-primary/30 text-primary hover:bg-primary/10 shrink-0"
-                asChild
-              >
-                <Link to="/freelancer/invitations">View Invitations</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-xl font-semibold border-primary/30 text-primary hover:bg-primary/10 shrink-0"
+                  asChild
+                >
+                  <Link to="/freelancer/invitations">View Invitations</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* ── KPI Stats Grid ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -722,6 +759,13 @@ export default function FreelancerDashboard() {
                     icon: CheckCircle,
                     color: "text-emerald-600",
                     bg: "bg-emerald-50",
+                  },
+                  {
+                    label: "Disputed Contracts",
+                    value: stats.disputedContractsCount || 0,
+                    icon: AlertTriangle,
+                    color: "text-rose-600",
+                    bg: "bg-rose-50",
                   },
                   {
                     label: "Pending Invitations",

@@ -118,7 +118,7 @@ export default function FreelancerProjectDetails() {
     );
   }
 
-  const client = project.client;
+  const client = project.clientProfile || project.client;
 
   return (
     <DashboardLayout>
@@ -186,57 +186,6 @@ export default function FreelancerProjectDetails() {
               </div>
             </div>
 
-            {/* Client Info Card */}
-            {client && (
-              <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2rem] overflow-hidden shadow-2xl p-6 border-l-4 border-l-primary/40">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                  <div className="flex items-center gap-6">
-                    <div className="relative">
-                      <Avatar className="h-16 w-16 border-4 border-background shadow-2xl">
-                        <AvatarImage src={client.profileImage} />
-                        <AvatarFallback className="bg-primary/20 text-primary text-xl font-black">
-                          {client.name?.[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1.5 border-4 border-background">
-                        <BadgeCheck className="w-4 h-4 text-white" />
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <h2 className="text-2xl font-black tracking-tight">
-                        {client.name}
-                      </h2>
-                      {client.averageRating !== undefined && (
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center text-amber-500">
-                            <Star className="w-4 h-4 fill-current" />
-                            <span className="ml-1.5 font-black text-lg">
-                              {client.averageRating?.toFixed(1) || "5.0"}
-                            </span>
-                          </div>
-                          <span className="text-xs font-bold text-muted-foreground/60">
-                            ({client.totalReviews || 0} reviews)
-                          </span>
-                        </div>
-                      )}
-                      <p className="text-primary font-black text-sm opacity-90">
-                        {client.totalProjects || 0} projects posted
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-10 gap-y-4">
-                    <VerificationItem label="Payment" verified={true} />
-                    <VerificationItem label="Identity" verified={true} />
-                    {client.location && (
-                      <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
-                        <MapPin className="w-4 h-4 text-primary" />
-                        {client.location}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            )}
 
             {/* Description */}
             <div className="space-y-6 py-2">
@@ -434,7 +383,62 @@ export default function FreelancerProjectDetails() {
           {/* ── RIGHT: Proposal Sidebar ── */}
           <aside className="lg:col-span-4 space-y-6">
             <div className="sticky top-10 space-y-6">
-              {/* Competition Card */}
+              {/* Client Info Box */}
+              {client && (
+                <Card className="bg-card/40 backdrop-blur-xl border-border/40 rounded-[2rem] p-6 shadow-xl border-t-4 border-t-primary/40">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                    <Briefcase className="w-3.5 h-3.5" /> About the Client
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border-2 border-background shadow-md">
+                        <AvatarImage src={client.user?.profileImage || client.profileImage} referrerPolicy="no-referrer" />
+                        <AvatarFallback className="bg-primary/20 text-primary font-black">
+                          {client.user?.name?.[0] || client.name?.[0] || client.fullName?.[0] || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-black leading-tight text-foreground">
+                          {client.user?.name || client.name || client.fullName}
+                        </p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                          <span className="text-xs font-bold">
+                            {client.averageRating?.toFixed(1) || "5.0"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-bold">
+                            ({client.totalReviews || 0} reviews)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-2 pt-4 border-t border-border/50">
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Member Since</p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><Calendar className="w-3 h-3 text-primary"/> {client.createdAt ? new Date(client.createdAt).getFullYear() : 'N/A'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Hired</p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><Users className="w-3 h-3 text-primary"/> {client.totalHires || 0}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Hire Rate</p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-500"/> {client.hireRate ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%` : 'N/A'}</p>
+                      </div>
+                      {client.location && (
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Location</p>
+                          <p className="font-bold text-sm leading-none flex items-center gap-1.5">
+                            <MapPin className="w-3 h-3 text-primary" />
+                            {client.location}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )}
 
               {/* Already applied banner */}
               {myProposal ? (
