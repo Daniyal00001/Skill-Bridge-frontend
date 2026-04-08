@@ -15,8 +15,12 @@ import {
   Clock,
   Target
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 export default function LandingPage() {
+  const { isAuthenticated, user } = useAuth();
+
   const features = [
     {
       icon: Brain,
@@ -82,15 +86,26 @@ export default function LandingPage() {
             {/* --------------------------------------------------------------------------------- */}
             {/* --------------------------------------------------------------------------------- */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="hero" size="xl" asChild>
-                <Link to="/signup">
-                  Start Hiring
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button variant="outline" size="xl" className="font-bold" asChild>
-                <Link to="/signup?role=freelancer">Find Work</Link>
-              </Button>
+              {isAuthenticated ? (
+                <Button variant="hero" size="xl" asChild>
+                  <Link to={user?.role === 'FREELANCER' ? '/freelancer' : user?.role === 'ADMIN' ? '/admin' : '/client'}>
+                    Go to Your Dashboard
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="hero" size="xl" asChild>
+                    <Link to="/signup?role=client">
+                      Start Hiring
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="xl" className="font-bold" asChild>
+                    <Link to="/signup?role=freelancer">Find Work</Link>
+                  </Button>
+                </>
+              )}
             </div>
             {/* ----------------------------------------------------------------------------------------- */}
 
@@ -341,12 +356,21 @@ export default function LandingPage() {
                   Be part of the early wave of creators and businesses building the future on SkillBridge.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="xl" variant="hero" className="shadow-xl" asChild>
-                    <Link to="/signup">
-                      Get Started Free
-                      <ArrowRight className="ml-2" />
-                    </Link>
-                  </Button>
+                  {isAuthenticated ? (
+                    <Button size="xl" variant="hero" className="shadow-xl" asChild>
+                      <Link to={user?.role === 'FREELANCER' ? '/freelancer' : user?.role === 'ADMIN' ? '/admin' : '/client'}>
+                        Go to Your Dashboard
+                        <ArrowRight className="ml-2" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button size="xl" variant="hero" className="shadow-xl" asChild>
+                      <Link to="/signup">
+                        Get Started Free
+                        <ArrowRight className="ml-2" />
+                      </Link>
+                    </Button>
+                  )}
                   <Button size="xl" variant="outline" className="text-white border-white hover:bg-white/10 bg-transparent font-bold" asChild>
                     <Link to="/how-it-works">Learn More</Link>
                   </Button>

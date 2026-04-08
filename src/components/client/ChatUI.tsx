@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Paperclip, MoreVertical, Phone, Video } from "lucide-react";
+import { Send, Paperclip, MoreVertical, Phone, Video, Bot, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Message } from "@/types/client";
 
@@ -78,37 +78,56 @@ export function ChatUI({ messages, currentUser, otherUser, onSendMessage }: Chat
           <div className="space-y-4">
             {messages.map((msg, index) => {
               const isMe = msg.senderId === currentUser.id;
-              const showAvatar = !isMe && (index === 0 || messages[index - 1].senderId !== msg.senderId);
+              const isAI = msg.isAiMessage === true;
+              
+              // Only orientation: Me on right, Others/AI on left
+              const isRight = isMe;
+              const showAvatar = !isMe && (index === 0 || messages[index - 1].senderId !== msg.senderId || messages[index-1].isAiMessage !== msg.isAiMessage);
 
               return (
                 <div key={msg.id} className={cn(
-                  "flex gap-2 max-w-[80%]",
-                  isMe ? "ml-auto flex-row-reverse" : "mr-auto"
+                  "flex gap-2 max-w-[85%]",
+                  isRight ? "ml-auto flex-row-reverse" : "mr-auto"
                 )}>
-                  {!isMe && (
+                  {!isRight && (
                     <div className="w-8 flex-shrink-0">
                       {showAvatar ? (
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={otherUser.avatar} />
-                          <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
+                        <Avatar className={cn("h-8 w-8", isAI && "ring-2 ring-purple-400 ring-offset-1")}>
+                          {isAI ? (
+                            <div className="bg-gradient-to-br from-purple-600 to-indigo-600 h-full w-full flex items-center justify-center text-white">
+                              <Bot className="h-4 w-4" />
+                            </div>
+                          ) : (
+                            <>
+                              <AvatarImage src={otherUser.avatar} />
+                              <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
+                            </>
+                          )}
                         </Avatar>
                       ) : <div className="w-8" />}
                     </div>
                   )}
 
-                  <div className={cn(
-                    "rounded-2xl px-4 py-2 text-sm shadow-sm",
-                    isMe
-                      ? "bg-primary text-primary-foreground rounded-tr-sm"
-                      : "bg-white dark:bg-card text-foreground rounded-tl-sm border"
-                  )}>
-                    <p>{msg.content}</p>
-                    <span className={cn(
-                      "text-[10px] block text-right mt-1 opacity-70",
-                      isMe ? "text-primary-foreground/80" : "text-muted-foreground"
+                  <div className="flex flex-col">
+                    {isAI && showAvatar && (
+                      <span className="text-[10px] font-bold text-purple-600 mb-1 ml-1 uppercase tracking-wider">FreelanceAI</span>
+                    )}
+                    <div className={cn(
+                      "rounded-2xl px-4 py-2 text-sm shadow-sm relative transition-all",
+                      isRight
+                        ? "bg-primary text-primary-foreground rounded-tr-sm"
+                        : isAI 
+                          ? "bg-purple-50 dark:bg-purple-950/20 border-purple-100 dark:border-purple-800/30 text-foreground rounded-tl-sm border"
+                          : "bg-white dark:bg-card text-foreground rounded-tl-sm border"
                     )}>
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                      <p className="leading-relaxed">{msg.content}</p>
+                      <span className={cn(
+                        "text-[10px] block text-right mt-1 opacity-60",
+                        isRight ? "text-primary-foreground/80" : "text-muted-foreground"
+                      )}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
