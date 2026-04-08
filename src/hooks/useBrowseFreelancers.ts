@@ -132,7 +132,7 @@ export function useBrowseFreelancers() {
       if (filters.region) params.set("region", filters.region);
       if (filters.minRating) params.set("minRating", filters.minRating);
       if (filters.hasPortfolio) params.set("hasPortfolio", "true");
-      if (filters.isVerified) params.set("isVerified", "true");
+      if (filters.isVerified) params.set("isIdVerified", "true");
       return params.toString();
     },
     [filters, sort],

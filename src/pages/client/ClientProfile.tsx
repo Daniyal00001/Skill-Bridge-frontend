@@ -69,7 +69,8 @@ export default function ClientProfilePage() {
   const isPhoneVerified = profile?.user?.isPhoneVerified ?? false;
 
   const client = {
-    name: profile?.fullName || profile?.user?.name || user?.name || "Name not set",
+    name:
+      profile?.fullName || profile?.user?.name || user?.name || "Name not set",
     location: profile?.location || "Location not set",
     region: profile?.region || "",
     avatar: profile?.user?.profileImage || user?.profileImage || "",
@@ -129,7 +130,11 @@ export default function ClientProfilePage() {
                 <AvatarImage src={client.avatar} />
                 <AvatarFallback className="text-4xl font-black">
                   {client.name !== "Name not set"
-                    ? client.name.split(" ").map((n: string) => n[0]).join("").substring(0, 2)
+                    ? client.name
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")
+                        .substring(0, 2)
                     : "CL"}
                 </AvatarFallback>
               </Avatar>
@@ -190,33 +195,51 @@ export default function ClientProfilePage() {
                   <span className="text-2xl font-black text-foreground tracking-tighter">
                     {client.metrics.hireRate}%
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Hire Rate</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                    Hire Rate
+                  </span>
                 </div>
                 <div className="w-px h-8 bg-border/40 hidden sm:block" />
                 <div className="flex flex-col items-center md:items-start gap-1">
                   <span className="text-2xl font-black text-foreground tracking-tighter">
                     {client.metrics.totalProjects}
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Projects Posted</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                    Projects Posted
+                  </span>
                 </div>
                 <div className="w-px h-8 bg-border/40 hidden sm:block" />
                 <div className="flex flex-col items-center md:items-start gap-1">
                   <span className="text-2xl font-black text-foreground tracking-tighter">
                     ${client.metrics.totalSpent.toLocaleString()}
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Total Spent</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                    Total Spent
+                  </span>
                 </div>
                 <div className="w-px h-8 bg-border/40 hidden sm:block" />
                 <div className="flex flex-col items-center md:items-start gap-1">
                   {client.verification.payment ? (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">Payment Verified</span>
+                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">
+                        Payment Verified
+                      </span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg">
                       <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                      <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter">Payment Not Verified</span>
+                      <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter">
+                        Payment Not Verified
+                      </span>
+                    </div>
+                  )}
+                  {client.verification.id && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg mt-2">
+                      <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">
+                        Identity Verified
+                      </span>
                     </div>
                   )}
                 </div>
@@ -240,8 +263,15 @@ export default function ClientProfilePage() {
             {/* ── 1. PROFILE OVERVIEW ─────────────────────────── */}
             <div className="space-y-4 max-w-full overflow-hidden">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Profile Overview</h3>
-                <Button variant="ghost" size="icon" onClick={() => handleOpenModal("about")} className="h-8 w-8 text-muted-foreground hover:text-primary">
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">
+                  Profile Overview
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleOpenModal("about")}
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
@@ -253,22 +283,44 @@ export default function ClientProfilePage() {
             {/* ── 2. TRUST & VERIFICATION ─────────────────────── */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Trust & Verification</h3>
-                <Button variant="ghost" size="icon" onClick={() => handleOpenModal("verification")} className="h-8 w-8 text-muted-foreground hover:text-primary">
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">
+                  Trust & Verification
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleOpenModal("verification")}
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  { label: "Email Verified", verified: client.verification.email },
-                  { label: "Phone Verified", verified: client.verification.phone },
+                  {
+                    label: "Email Verified",
+                    verified: client.verification.email,
+                  },
+                  {
+                    label: "Phone Verified",
+                    verified: client.verification.phone,
+                  },
+                  {
+                    label: "Identity Verified",
+                    verified: client.verification.id,
+                  },
                 ].map(({ label, verified }) => (
                   <div
                     key={label}
                     className="flex items-center justify-between p-4 bg-muted/20 border rounded-xl"
                   >
-                    <span className={cn("text-sm font-semibold", verified ? "text-foreground" : "text-muted-foreground")}>
+                    <span
+                      className={cn(
+                        "text-sm font-semibold",
+                        verified ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    >
                       {label}
                     </span>
                     <div className="flex items-center gap-2">
@@ -276,7 +328,9 @@ export default function ClientProfilePage() {
                         <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                       ) : (
                         <>
-                          <span className="text-xs font-bold text-muted-foreground/50">Unverified</span>
+                          <span className="text-xs font-bold text-muted-foreground/50">
+                            Unverified
+                          </span>
                           <Button
                             variant="outline"
                             size="sm"
@@ -297,14 +351,24 @@ export default function ClientProfilePage() {
             {client.preferences.spokenLanguages.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b pb-2">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-foreground">My Languages</h3>
-                  <Button variant="ghost" size="icon" onClick={() => handleOpenModal("about")} className="h-8 w-8 text-muted-foreground hover:text-primary">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-foreground">
+                    My Languages
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleOpenModal("about")}
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {client.preferences.spokenLanguages.map((lang: string) => (
-                    <Badge key={lang} className="px-3 py-1.5 text-sm font-semibold bg-primary/5 text-primary border-primary/20">
+                    <Badge
+                      key={lang}
+                      className="px-3 py-1.5 text-sm font-semibold bg-primary/5 text-primary border-primary/20"
+                    >
                       {lang}
                     </Badge>
                   ))}
@@ -315,8 +379,15 @@ export default function ClientProfilePage() {
             {/* ── 4. PREFERRED FREELANCER ─────────────────────── */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Preferred Freelancer</h3>
-                <Button variant="ghost" size="icon" onClick={() => handleOpenModal("project")} className="h-8 w-8 text-muted-foreground hover:text-primary">
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">
+                  Preferred Freelancer
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleOpenModal("project")}
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
@@ -336,7 +407,8 @@ export default function ClientProfilePage() {
                     icon: Award,
                     label: "Experience Level",
                     value: client.preferences.experienceNeeded
-                      ? expLabel[client.preferences.experienceNeeded] || client.preferences.experienceNeeded
+                      ? expLabel[client.preferences.experienceNeeded] ||
+                        client.preferences.experienceNeeded
                       : "Not set",
                   },
                   {
@@ -350,12 +422,17 @@ export default function ClientProfilePage() {
                     value: client.preferences.preferredRegion || "Any location",
                   },
                 ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex gap-4 items-start p-4 bg-muted/10 border rounded-xl shadow-sm">
+                  <div
+                    key={label}
+                    className="flex gap-4 items-start p-4 bg-muted/10 border rounded-xl shadow-sm"
+                  >
                     <div className="mt-1 p-2 bg-primary/10 rounded-xl text-primary shrink-0">
                       <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-muted-foreground tracking-wider uppercase">{label}</p>
+                      <p className="text-xs font-bold text-muted-foreground tracking-wider uppercase">
+                        {label}
+                      </p>
                       <p className="text-base font-semibold mt-1">{value}</p>
                     </div>
                   </div>

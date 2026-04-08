@@ -51,29 +51,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
-// Mock User Data
-const MOCK_USER = {
-  name: "John Client",
-  email: "john@techcorp.com",
-  company: "TechCorp Inc.",
-  avatar: "https://github.com/shadcn.png",
-  bio: "Visionary entrepreneur focused on scaling AI-driven SaaS platforms. Looking for top-tier developers who value code quality and long-term collaboration.",
-  companyType: "Startup",
-  industry: "e-commerce",
-  hiringPreference: "Hourly",
-  budgetRange: "Medium",
-  experienceLevel: "Expert",
-  commMethod: "Slack/Messages",
-  timezone: "UTC+5",
-  availability: "Part-time (20hrs/week)",
-  totalProjects: 14,
-  completedProjects: 12,
-  avgRating: 4.8,
-  memberSince: "Jan 2024",
-  emailVerified: true,
-  paymentVerified: true,
-  profileCompletion: 85,
-};
+
+
 
 const ClientSettingsPage = () => {
   const queryClient = useQueryClient();
@@ -113,8 +92,9 @@ const ClientSettingsPage = () => {
     uploadIdMutation.mutate(idFile);
   };
 
-  const user = profileResponse?.profile?.user || MOCK_USER;
-  const profile = profileResponse?.profile || MOCK_USER;
+  // ClientProfile returns { success, profile: { ...clientProfile, user: {...} } }
+  const user = profileResponse?.profile?.user || {};
+  const profile = profileResponse?.profile || {};
 
   const handleSaveAccount = (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,10 +124,22 @@ const ClientSettingsPage = () => {
               Manage your account security and preferences.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
-            <ShieldCheck className="w-5 h-5 text-primary" />
-            <span className="text-sm font-bold text-primary">
-              Account Status: Verified
+          <div className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-full border",
+            user.idVerificationStatus === "APPROVED"
+              ? "bg-green-500/10 border-green-200 text-green-600"
+              : user.idVerificationStatus === "PENDING"
+              ? "bg-blue-500/10 border-blue-200 text-blue-600"
+              : user.idVerificationStatus === "REJECTED"
+              ? "bg-red-500/10 border-red-200 text-red-600"
+              : "bg-amber-500/10 border-amber-200 text-amber-600"
+          )}>
+            <ShieldCheck className="w-5 h-5" />
+            <span className="text-sm font-bold">
+              ID: {user.idVerificationStatus === "APPROVED" ? "Verified"
+                : user.idVerificationStatus === "PENDING" ? "Under Review"
+                : user.idVerificationStatus === "REJECTED" ? "Rejected"
+                : "Not Submitted"}
             </span>
           </div>
         </div>
@@ -174,23 +166,28 @@ const ClientSettingsPage = () => {
             className="animate-in fade-in-50 duration-500"
           >
             <div className="max-w-xl mx-auto space-y-6">
-              <Card className="border-border/40 bg-card/80 shadow-md">
+                <Card className="border-border/40 bg-card/80 shadow-md">
                   <CardHeader className="pb-3 text-left">
                     <CardTitle className="text-lg font-bold">
-                      Verification
+                      Account Verification
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4 text-left">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Email
-                      </span>
-                      <Badge className="bg-green-500/10 text-green-500 border-none">
-                        Verified
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">Email Address</span>
+                      </div>
+                      <Badge className={cn(
+                        "border-none",
+                        user.isEmailVerified ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                      )}>
+                        {user.isEmailVerified ? "Verified" : "Unverified"}
                       </Badge>
                     </div>
                   </CardContent>
                 </Card>
+
 
                 {/* Identity Verification Section */}
                 <Card className="border-border/40 bg-card/80 shadow-md flex-1">
@@ -225,12 +222,36 @@ const ClientSettingsPage = () => {
                       </div>
                     )}
 
+                    {user.idVerificationStatus === "PENDING" && (
+                      <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-xl text-center space-y-3">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                          <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-bold text-blue-900 text-sm">Verification in Progress</p>
+                          <p className="text-xs text-blue-700/70">Your documents are being reviewed by our team. This usually takes 24-48 hours.</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {user.idVerificationStatus === "APPROVED" && (
+                      <div className="p-6 bg-emerald-50/50 border border-emerald-100 rounded-xl text-center space-y-3">
+                        <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+                          <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-bold text-emerald-900 text-sm">Identity Verified</p>
+                          <p className="text-xs text-emerald-700/70">Your identity has been fully verified. You can now access all platform features.</p>
+                        </div>
+                      </div>
+                    )}
+
                     {(!user.idVerificationStatus || user.idVerificationStatus === "UNSUBMITTED" || user.idVerificationStatus === "REJECTED") && (
                       <div className="space-y-3 pt-2">
                         <div className="border-2 border-dashed border-border/50 rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 relative">
                           <input 
                             type="file" 
-                            accept="image/*,.pdf"
+                            accept="image/jpeg,image/png,image/webp,image/jpg"
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             onChange={(e) => {
                               if (e.target.files && e.target.files[0]) {
@@ -242,7 +263,7 @@ const ClientSettingsPage = () => {
                             <>
                               <UploadCloud className="h-8 w-8 text-muted-foreground mb-2" />
                               <p className="text-xs text-muted-foreground font-medium">Click or drag file to upload</p>
-                              <p className="text-[10px] text-muted-foreground mt-1">JPEG, PNG, or PDF max 5MB</p>
+                              <p className="text-[10px] text-muted-foreground mt-1">JPEG, PNG, or WEBP max 5MB</p>
                             </>
                           ) : (
                             <div className="flex flex-col items-center gap-2">
@@ -262,6 +283,7 @@ const ClientSettingsPage = () => {
                         </Button>
                       </div>
                     )}
+
                   </CardContent>
                 </Card>
             </div>

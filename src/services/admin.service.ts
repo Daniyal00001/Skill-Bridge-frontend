@@ -39,6 +39,25 @@ export interface AdminUserProfile {
   disputeHistory: any[];
 }
 
+export interface VerificationUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "CLIENT" | "FREELANCER";
+  idDocumentUrl: string | null;
+  idVerificationStatus: "PENDING" | "APPROVED" | "REJECTED";
+  idRejectionReason?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface StatusCounts {
+  ALL: number;
+  PENDING: number;
+  APPROVED: number;
+  REJECTED: number;
+}
+
 export const adminService = {
   getUserProfile: async (userId: string) => {
     const res = await api.get<{ success: boolean; user: AdminUserProfile }>(
@@ -47,8 +66,13 @@ export const adminService = {
     return res.data.user;
   },
   getPendingVerifications: async () => {
-    const res = await api.get<{ success: boolean; users: any[] }>(`/admin/verifications/pending`);
+    const res = await api.get<{ success: boolean; users: VerificationUser[] }>(`/admin/verifications/pending`);
     return res.data.users;
+  },
+  getAllVerifications: async (status?: string) => {
+    const params = status && status !== 'ALL' ? `?status=${status}` : '';
+    const res = await api.get<{ success: boolean; users: VerificationUser[]; statusCounts: StatusCounts }>(`/admin/verifications${params}`);
+    return res.data;
   },
   approveVerification: async (userId: string) => {
     const res = await api.post(`/admin/verifications/approve/${userId}`);

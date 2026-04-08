@@ -208,7 +208,7 @@ export const FilterBar = ({
       {/* ── Toggle chips ───────────────────────────────── */}
       <div className="flex items-center gap-1.5">
         <ChipButton
-          label="Verified Client"
+          label="ID Verified Client"
           icon={<BadgeCheck className="w-3 h-3" />}
           active={filters.clientVerified}
           onClick={() =>

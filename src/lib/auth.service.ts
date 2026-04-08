@@ -21,6 +21,8 @@ export interface AuthUser {
   role: 'CLIENT' | 'FREELANCER' | 'ADMIN' | null
   profileImage: string | null
   isEmailVerified: boolean
+  idVerificationStatus: 'UNSUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED'
+  isIdVerified: boolean
 }
 
 export interface AuthResponse {

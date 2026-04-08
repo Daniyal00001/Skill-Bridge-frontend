@@ -169,9 +169,9 @@ export default function FreelancerProfile() {
               </Avatar>
               <div className="absolute bottom-4 right-4 w-8 h-8 bg-background rounded-xl flex items-center justify-center shadow-lg border border-border">
                 {displayProfile?.user?.isIdVerified ? (
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <ShieldCheck className="w-5 h-5 text-blue-500" />
                 ) : (
-                  <ShieldCheck className="w-5 h-5 text-muted-foreground" />
+                  <ShieldCheck className="w-5 h-5 text-muted-foreground opacity-50" />
                 )}
               </div>
             </div>
@@ -211,10 +211,20 @@ export default function FreelancerProfile() {
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <Verified className="w-4 h-4 text-emerald-500" />
-                  Payment Verified
-                </div>
+                {displayProfile?.user?.isPaymentVerified && (
+                  <div className="flex items-center gap-2">
+                    <Verified className="w-4 h-4 text-emerald-500" />
+                    Payment Verified
+                  </div>
+                )}
+                {displayProfile?.user?.isIdVerified && (
+                  <div className="flex items-center gap-2 border border-blue-500/20 bg-blue-500/10 text-blue-600 px-2.5 py-0.5 rounded-full">
+                    <ShieldCheck className="w-4 h-4 text-blue-500" />
+                    <span className="text-xs font-bold tracking-tight">
+                      Identity Verified
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                   {displayProfile.reviewsAvg || "5.0"} (
@@ -496,7 +506,7 @@ export default function FreelancerProfile() {
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
                   Work History & Reviews
                 </h3>
-                
+
                 <div className="space-y-6">
                   {/* Scrollable container for work history logs */}
                   <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/10">
@@ -517,7 +527,9 @@ export default function FreelancerProfile() {
                                   <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-black opacity-40">No Rating Provided</span>
+                                <span className="text-[10px] font-black opacity-40">
+                                  No Rating Provided
+                                </span>
                               )}
                               <span>{work.date}</span>
                             </div>
@@ -544,10 +556,10 @@ export default function FreelancerProfile() {
                           </div>
                         ) : (
                           <div className="bg-muted/30 p-4 rounded-2xl md:ml-4 border border-border/40">
-                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                Project Successfully Settled
-                             </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Project Successfully Settled
+                            </p>
                           </div>
                         )}
                       </div>
@@ -562,7 +574,7 @@ export default function FreelancerProfile() {
                       </p>
                     </div>
                   )}
-                  
+
                   <Button
                     asChild
                     variant="outline"

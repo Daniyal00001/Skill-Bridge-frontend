@@ -32,16 +32,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
-// Mock Freelancer Data
-const MOCK_USER = {
-  name: "Alex Chen",
-  email: "alex.chen@work.com",
-  phone: "+1 (555) 000-1111",
-  accountType: "Freelancer",
-  emailVerified: true,
-  phoneVerified: true,
-  balance: 1250.0,
-};
+
+
 
 const FreelancerSettings = () => {
   const queryClient = useQueryClient();
@@ -61,6 +53,7 @@ const FreelancerSettings = () => {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("idDocument", file);
+      // Use the dedicated ID upload endpoint (not onboarding)
       const res = await api.post("/freelancers/onboarding/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -81,8 +74,9 @@ const FreelancerSettings = () => {
     uploadIdMutation.mutate(idFile);
   };
 
-  const user = profileResponse?.profile?.user || MOCK_USER;
-  const profile = profileResponse?.profile || MOCK_USER;
+  // The freelancer /me endpoint returns { success, data: { ...profile, user: {...} } }
+  const user = profileResponse?.data?.user || {};
+  const profile = profileResponse?.data || {};
 
   const handleSaveAccount = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,10 +106,22 @@ const FreelancerSettings = () => {
               Manage your freelancer account and payment preferences.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
-            <ShieldCheck className="w-5 h-5 text-primary" />
-            <span className="text-sm font-bold text-primary">
-              Account Status: Top Rated
+          <div className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-full border",
+            user.idVerificationStatus === "APPROVED"
+              ? "bg-green-500/10 border-green-200 text-green-600"
+              : user.idVerificationStatus === "PENDING"
+              ? "bg-blue-500/10 border-blue-200 text-blue-600"
+              : user.idVerificationStatus === "REJECTED"
+              ? "bg-red-500/10 border-red-200 text-red-600"
+              : "bg-amber-500/10 border-amber-200 text-amber-600"
+          )}>
+            <ShieldCheck className="w-5 h-5" />
+            <span className="text-sm font-bold">
+              ID: {user.idVerificationStatus === "APPROVED" ? "Verified"
+                : user.idVerificationStatus === "PENDING" ? "Under Review"
+                : user.idVerificationStatus === "REJECTED" ? "Rejected"
+                : "Not Submitted"}
             </span>
           </div>
         </div>
@@ -152,23 +158,30 @@ const FreelancerSettings = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-primary" />
-                        <span className="text-sm">Email</span>
+                        <span className="text-sm font-medium">Email Address</span>
                       </div>
-                      <Badge className="bg-green-500/10 text-green-500 border-none">
-                        Verified
+                      <Badge className={cn(
+                        "border-none",
+                        user.isEmailVerified ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                      )}>
+                        {user.isEmailVerified ? "Verified" : "Unverified"}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-primary" />
-                        <span className="text-sm">Phone</span>
+                        <span className="text-sm font-medium">Phone Number</span>
                       </div>
-                      <Badge className="bg-amber-500/10 text-amber-500 border-none">
-                        Pending
+                      <Badge className={cn(
+                        "border-none",
+                        user.isPhoneVerified ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-500"
+                      )}>
+                        {user.isPhoneVerified ? "Verified" : "Unverified"}
                       </Badge>
                     </div>
                   </CardContent>
                 </Card>
+
 
                 {/* Identity Verification Section */}
                 <Card className="border-border/40 bg-card/80 shadow-md">
@@ -203,12 +216,36 @@ const FreelancerSettings = () => {
                       </div>
                     )}
 
+                    {user.idVerificationStatus === "PENDING" && (
+                      <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-xl text-center space-y-3">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                          <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-bold text-blue-900 text-sm">Verification in Progress</p>
+                          <p className="text-xs text-blue-700/70">Your documents are being reviewed by our team. This usually takes 24-48 hours.</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {user.idVerificationStatus === "APPROVED" && (
+                      <div className="p-6 bg-emerald-50/50 border border-emerald-100 rounded-xl text-center space-y-3">
+                        <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+                          <CheckCircle className="h-6 w-6 text-emerald-600" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-bold text-emerald-900 text-sm">Identity Verified</p>
+                          <p className="text-xs text-emerald-700/70">Your identity has been fully verified. You can now access all platform features.</p>
+                        </div>
+                      </div>
+                    )}
+
                     {(!user.idVerificationStatus || user.idVerificationStatus === "UNSUBMITTED" || user.idVerificationStatus === "REJECTED") && (
                       <div className="space-y-3 pt-2">
                         <div className="border-2 border-dashed border-border/50 rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 relative">
                           <input 
                             type="file" 
-                            accept="image/*,.pdf"
+                            accept="image/jpeg,image/png,image/webp,image/jpg"
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             onChange={(e) => {
                               if (e.target.files && e.target.files[0]) {
@@ -220,7 +257,7 @@ const FreelancerSettings = () => {
                             <>
                               <UploadCloud className="h-8 w-8 text-muted-foreground mb-2" />
                               <p className="text-xs text-muted-foreground font-medium">Click or drag file to upload</p>
-                              <p className="text-[10px] text-muted-foreground mt-1">JPEG, PNG, or PDF max 5MB</p>
+                              <p className="text-[10px] text-muted-foreground mt-1">JPEG, PNG, or WEBP max 5MB</p>
                             </>
                           ) : (
                             <div className="flex flex-col items-center gap-2">
@@ -240,6 +277,7 @@ const FreelancerSettings = () => {
                         </Button>
                       </div>
                     )}
+
                   </CardContent>
                 </Card>
             </div>
@@ -285,8 +323,9 @@ const FreelancerSettings = () => {
                     Available Balance
                   </CardTitle>
                   <p className="text-4xl font-black">
-                    ${user.balance.toFixed(2)}
+                    ${(profile.balance || 0).toFixed(2)}
                   </p>
+
                 </CardHeader>
                 <CardContent>
                   <Button className="w-full bg-white text-primary hover:bg-white/90 font-bold">

@@ -36,6 +36,7 @@ import {
   MapPin,
   MessageSquare,
   BadgeCheck,
+  ShieldCheck,
   ChevronRight,
   Zap,
   ExternalLink,
@@ -411,6 +412,20 @@ export default function FreelancerProjectDetails() {
                           </span>
                         </div>
                       </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {client.user?.isIdVerified && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                          <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                          <span className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">Identity Verified</span>
+                        </div>
+                      )}
+                      {client.user?.isPaymentVerified && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                          <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Payment Verified</span>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="grid grid-cols-2 gap-y-4 gap-x-2 pt-4 border-t border-border/50">
