@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,8 @@ import {
   Star,
   UploadCloud,
   XCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -57,6 +59,19 @@ import { api } from "@/lib/api";
 const ClientSettingsPage = () => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
+  const [showPassword, setShowPassword] = useState(false);
+
+  const passwordRequirements = useMemo(
+    () => [
+      { label: "At least 8 characters", met: passwords.newPassword.length >= 8 },
+      { label: "Uppercase letter", met: /[A-Z]/.test(passwords.newPassword) },
+      { label: "Lowercase letter", met: /[a-z]/.test(passwords.newPassword) },
+      { label: "One number", met: /[0-9]/.test(passwords.newPassword) },
+      { label: "Special character (@$!%*?&)", met: /[@$!%*?&]/.test(passwords.newPassword) },
+    ],
+    [passwords.newPassword]
+  );
   
   const { data: profileResponse, isLoading } = useQuery({
     queryKey: ["clientProfileSettings"],
@@ -105,13 +120,43 @@ const ClientSettingsPage = () => {
     }, 1000);
   };
 
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: typeof passwords) => {
+      const res = await api.put("/auth/change-password", data);
+      return res.data;
+    },
+    onSuccess: (data: any) => {
+      toast.success(data.message || "Password updated successfully");
+      setPasswords({ currentPassword: "", newPassword: "" });
+      queryClient.invalidateQueries({ queryKey: ["clientProfileSettings"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to update password");
+    },
+  });
+
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Password updated successfully");
-    }, 1500);
+    const isFirstTimePassword = user.googleId && !user.hasPassword;
+    
+    if (isFirstTimePassword) {
+      if (!passwords.newPassword) {
+        return toast.error("Please enter a new password");
+      }
+    } else {
+      if (!passwords.currentPassword || !passwords.newPassword) {
+        return toast.error("Please fill in all password fields");
+      }
+    }
+    
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
+    if (passwords.newPassword.length < 8) {
+      return toast.error("New password must be at least 8 characters");
+    }
+    if (!passwordRegex.test(passwords.newPassword)) {
+      return toast.error("Password must include uppercase, lowercase, number and special character (@$!%*?&)");
+    }
+    changePasswordMutation.mutate(passwords);
   };
 
   return (
@@ -302,18 +347,95 @@ const ClientSettingsPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2 text-left">
-                  <Label htmlFor="current-password">Current Password</Label>
-                  <Input id="current-password" type="password" />
-                </div>
-                <div className="space-y-2 text-left">
-                  <Label htmlFor="new-password">New Password</Label>
-                  <Input id="new-password" type="password" />
-                </div>
+                {user.googleId && (
+                  <div className="p-3 bg-blue-500/5 border border-blue-200/50 rounded-lg flex items-center gap-3 mb-4">
+                    <Globe className="h-4 w-4 text-blue-500" />
+                    <p className="text-[11px] text-blue-700 font-medium">
+                      Linked with Google. {user.hasPassword ? "You can login with either Google or your password." : "Set a password to enable email/password login alongside Google."}
+                    </p>
+                  </div>
+                )}
+
+                {(!user.googleId || user.hasPassword) && (
+                  <div className="space-y-2 text-left">
+                    <Label htmlFor="current-password">Current Password</Label>
+                    <Input 
+                      id="current-password" 
+                      type="password" 
+                      placeholder="Enter current password"
+                      value={passwords.currentPassword}
+                      onChange={(e) => setPasswords(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    />
+                  </div>
+                )}
+
+                  <div className="space-y-2 text-left">
+                    <Label htmlFor="new-password">
+                      {user.googleId && !user.hasPassword ? "Set Password" : "New Password"}
+                    </Label>
+                    <div className="relative group">
+                      <Input 
+                        id="new-password" 
+                        type={showPassword ? "text" : "password"}
+                        placeholder={user.googleId && !user.hasPassword ? "Create a new password" : "Enter new password"}
+                        className="pr-10"
+                        value={passwords.newPassword}
+                        onChange={(e) => setPasswords(prev => ({ ...prev, newPassword: e.target.value }))}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    {/* Password Requirements Checklist */}
+                    {passwords.newPassword.length > 0 && (
+                      <div className="mt-3 p-3 bg-muted/30 rounded-xl border border-border/50 space-y-2">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                          Security Requirements
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                          {passwordRequirements.map((req, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <div
+                                className={cn(
+                                  "w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-300",
+                                  req.met
+                                    ? "bg-primary text-white scale-110"
+                                    : "bg-muted-foreground/20",
+                                )}
+                              >
+                                {req.met && <CheckCircle2 className="w-2.5 h-2.5" />}
+                              </div>
+                              <span
+                                className={cn(
+                                  "text-[10px] transition-colors duration-300",
+                                  req.met
+                                    ? "text-foreground font-medium"
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                {req.label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
               </CardContent>
               <CardFooter className="flex justify-end border-t p-6">
-                <Button onClick={handleChangePassword}>Update Security</Button>
-              </CardFooter>
+                  <Button 
+                    onClick={handleChangePassword} 
+                    disabled={changePasswordMutation.isPending}
+                  >
+                    {changePasswordMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {user.googleId && !user.hasPassword ? "Set Password" : "Update Security"}
+                  </Button>
+                </CardFooter>
             </Card>
           </TabsContent>
 
