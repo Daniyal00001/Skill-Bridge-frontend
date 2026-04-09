@@ -193,6 +193,12 @@ const eventConfig: any = {
     icon: <CheckCircle2 className="w-3 h-3 text-white" />,
     border: "border-l-emerald-400",
   },
+  DISPUTE_RESOLUTION: {
+    label: "Dispute Resolved",
+    color: "bg-indigo-600",
+    icon: <Gavel className="w-3 h-3 text-white" />,
+    border: "border-l-indigo-400",
+  },
 };
 
 export default function ClientContractDetail() {
@@ -1280,7 +1286,12 @@ export default function ClientContractDetail() {
                             {/* vertical line */}
                             <div className="absolute left-[19px] top-3 bottom-3 w-0.5 bg-border/50 rounded-full" />
                             {history.map((event, idx) => {
-                              const eCfg = eventConfig[event.type];
+                              const eCfg = eventConfig[event.type] || {
+                                label: event.type,
+                                color: "bg-slate-500",
+                                icon: <Activity className="w-3 h-3 text-white" />,
+                                border: "border-l-slate-400",
+                              };
                               const isLatest = idx === history.length - 1;
                               return (
                                 <div
@@ -1306,7 +1317,7 @@ export default function ClientContractDetail() {
                                     <div className="p-3 flex items-center justify-between gap-2 border-b border-border/10">
                                       <div className="flex items-center gap-2">
                                         <p className="text-sm font-black text-foreground">
-                                          {eCfg?.label || event.type}
+                                          {eCfg.label}
                                         </p>
                                         {event.actorName && (
                                           <Badge
