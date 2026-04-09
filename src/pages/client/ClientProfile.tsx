@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clientService } from "@/lib/client.service";
+import { useNavigate } from "react-router-dom";
 import { ClientProfileModal } from "@/components/modals/ClientProfileModal";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ import { motion } from "framer-motion";
 
 export default function ClientProfilePage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -301,16 +303,24 @@ export default function ClientProfilePage() {
                   {
                     label: "Email Verified",
                     verified: client.verification.email,
+                    action: () => handleOpenModal("verification"),
+                  },
+                  {
+                    label: "Payment Verified",
+                    verified: client.verification.payment,
+                    action: () => navigate("/settings?tab=billing"),
                   },
                   {
                     label: "Phone Verified",
                     verified: client.verification.phone,
+                    action: () => handleOpenModal("verification"),
                   },
                   {
                     label: "Identity Verified",
                     verified: client.verification.id,
+                    action: () => handleOpenModal("verification"),
                   },
-                ].map(({ label, verified }) => (
+                ].map(({ label, verified, action }) => (
                   <div
                     key={label}
                     className="flex items-center justify-between p-4 bg-muted/20 border rounded-xl"
@@ -335,7 +345,7 @@ export default function ClientProfilePage() {
                             variant="outline"
                             size="sm"
                             className="h-7 text-xs font-bold"
-                            onClick={() => handleOpenModal("verification")}
+                            onClick={action}
                           >
                             Verify Now
                           </Button>
