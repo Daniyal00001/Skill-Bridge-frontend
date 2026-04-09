@@ -50,9 +50,11 @@ import {
   XCircle,
   Eye,
   EyeOff,
+  Plus,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { StripeAddMethodModal } from "@/components/modals/StripeAddMethodModal";
 
 
 
@@ -62,6 +64,7 @@ const ClientSettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [showAddMethod, setShowAddMethod] = useState(false);
 
   const passwordRequirements = useMemo(
     () => [
@@ -78,6 +81,14 @@ const ClientSettingsPage = () => {
     queryKey: ["clientProfileSettings"],
     queryFn: async () => {
       const res = await api.get("/client/profile");
+      return res.data;
+    },
+  });
+
+  const { data: stripeMethods, isLoading: isLoadingMethods } = useQuery({
+    queryKey: ["stripePaymentMethods"],
+    queryFn: async () => {
+      const res = await api.get("/stripe/payment-methods");
       return res.data;
     },
   });
@@ -510,26 +521,100 @@ const ClientSettingsPage = () => {
             </Card>
           </TabsContent>
 
-          {/* Billing Tab */}
           <TabsContent
             value="billing"
             className="animate-in fade-in-50 duration-500"
           >
-            <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl max-w-2xl">
-              <CardHeader>
-                <CardTitle>Billing & Payments</CardTitle>
-                <CardDescription>
-                  Manage your payment methods and billing history.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="p-6 border-2 border-dashed rounded-xl flex flex-col items-center gap-3 text-muted-foreground hover:border-primary/50 hover:text-primary transition-all cursor-pointer">
-                  <CreditCard className="h-8 w-8" />
-                  <p className="font-bold">Add Payment Method</p>
+            <div className="space-y-6 max-w-2xl mx-auto">
+              <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl overflow-hidden">
+                <CardHeader className="bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Payment Methods</CardTitle>
+                      <CardDescription>
+                        Manage your bank accounts and cards.
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowAddMethod(true)}
+                      className="rounded-xl font-bold"
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> Add Method
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {isLoadingMethods ? (
+                    <div className="p-8 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : stripeMethods?.methods?.length > 0 ? (
+                    <div className="divide-y divide-border/40">
+                      {stripeMethods.methods.map((method: any) => (
+                        <div key={method.id} className="p-4 flex items-center justify-between hover:bg-muted/20 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-10 rounded-lg bg-muted flex items-center justify-center border border-border/60">
+                              {method.type === 'card' ? (
+                                <CreditCard className="w-5 h-5 text-indigo-500" />
+                              ) : (
+                                <Building className="w-5 h-5 text-emerald-500" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm capitalize">
+                                {method.type === 'card' ? `${method.brand} •••• ${method.last4}` : `${method.bankName} Account`}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                                {method.type === 'card' ? `Expires ${method.expMonth}/${method.expYear}` : `Ending in ${method.last4}`}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] font-black uppercase tracking-tighter">Verified</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div 
+                      className="p-12 flex flex-col items-center gap-4 text-muted-foreground cursor-pointer hover:bg-muted/20 transition-all border-y border-dashed mt-[-1px]"
+                      onClick={() => setShowAddMethod(true)}
+                    >
+                      <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
+                        <CreditCard className="h-8 w-8 text-primary/40" />
+                      </div>
+                      <div className="text-center">
+                        <p className="font-bold text-foreground">No payment methods found</p>
+                        <p className="text-xs">Attach a bank account or credit card to fund projects.</p>
+                      </div>
+                      <Button variant="outline" className="rounded-xl mt-2 font-bold px-8">
+                        Add My First Method
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
+                <ShieldCheck className="w-8 h-8 text-indigo-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-indigo-900">Bank-Level Security</p>
+                  <p className="text-[11px] text-indigo-700/70 leading-relaxed font-medium">
+                    SkillBridge never stores your card or bank details. All transactions are encrypted and processed by Stripe, the world's most secure payment infrastructure.
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
+          
+          <StripeAddMethodModal 
+            open={showAddMethod} 
+            onClose={() => setShowAddMethod(false)} 
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["stripePaymentMethods"] });
+              toast.success("Payment methods updated!");
+            }} 
+          />
         </Tabs>
       </div>
     </DashboardLayout>

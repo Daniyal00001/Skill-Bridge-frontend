@@ -43,6 +43,7 @@ import { api } from "@/lib/api";
 const FreelancerSettings = () => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -64,6 +65,33 @@ const FreelancerSettings = () => {
       return res.data;
     },
   });
+
+  const { data: stripeStatus, isLoading: isLoadingStripe } = useQuery({
+    queryKey: ["stripeOnboardingStatus"],
+    queryFn: async () => {
+      const res = await api.get("/stripe/onboarding-status");
+      return res.data;
+    },
+  });
+
+  const setupStripeMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.get("/stripe/setup-payouts");
+      return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to start Stripe onboarding.");
+    },
+  });
+
+  const handleConnectStripe = () => {
+    setupStripeMutation.mutate();
+  };
 
   const [idFile, setIdFile] = useState<File | null>(null);
 
@@ -481,25 +509,63 @@ const FreelancerSettings = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-primary/5">
-                    <div className="flex items-center gap-3">
-                      <Wallet className="h-6 w-6 text-primary" />
-                      <div>
-                        <p className="font-bold">Bank Account (...8829)</p>
-                        <p className="text-xs text-muted-foreground">
-                          Standard Withdrawal (2-3 days)
-                        </p>
+                  {stripeStatus?.complete ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                          <div>
+                            <p className="font-bold">Stripe Connected</p>
+                            <p className="text-xs text-muted-foreground">
+                              Withdrawals enabled via Stripe Connect
+                            </p>
+                          </div>
+                        </div>
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-none">Active</Badge>
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        className="w-full border-dashed group"
+                        onClick={handleConnectStripe}
+                        disabled={setupStripeMutation.isPending}
+                      >
+                        {setupStripeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Globe className="mr-2 h-4 w-4 group-hover:text-primary" />}
+                        Stripe Dashboard
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="p-6 bg-muted/30 rounded-2xl text-center space-y-4 border border-border/40">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                          <Wallet className="h-8 w-8 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-bold text-lg">Connect Your Bank Account</p>
+                          <p className="text-xs text-muted-foreground px-4">
+                            We use Stripe to securely process your payouts. Connect your bank account to start withdrawing funds.
+                          </p>
+                        </div>
+                        <Button 
+                          className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12"
+                          onClick={handleConnectStripe}
+                          disabled={setupStripeMutation.isPending}
+                        >
+                          {setupStripeMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          ) : (
+                            <CreditCard className="h-4 w-4 mr-2" />
+                          )}
+                          {stripeStatus?.detailsSubmitted ? "Complete Onboarding" : "Connect with Stripe"}
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center gap-2 justify-center text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                        <ShieldCheck className="w-3 h-3" />
+                        <span>Secured by Stripe Financial Connections</span>
                       </div>
                     </div>
-                    <Badge variant="outline">Default</Badge>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="w-full border-dashed group"
-                  >
-                    <CreditCard className="mr-2 h-4 w-4 group-hover:text-primary" />
-                    Add Method
-                  </Button>
+                  )}
                 </CardContent>
               </Card>
             </div>
