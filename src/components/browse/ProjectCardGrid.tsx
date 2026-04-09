@@ -128,7 +128,7 @@ export const ProjectCardGrid = ({
             </span>
           )}
           {project.client?.hireRate != null && (
-            <span>{Math.round(project.client.hireRate * 100)}% hire rate</span>
+            <span>{Math.round(project.client.hireRate * 100)}% hire rate • ${project.client.totalSpent?.toLocaleString() || 0} spent</span>
           )}
           <span className="ml-auto">
             {formatDistanceToNow(new Date(project.createdAt), {

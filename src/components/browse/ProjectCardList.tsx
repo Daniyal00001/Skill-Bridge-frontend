@@ -115,7 +115,7 @@ export const ProjectCardList = ({
               </span>
             )}
             {project.client?.totalHires != null && (
-              <span>{project.client.totalHires} hires</span>
+              <span>{project.client.totalHires} hires • ${project.client.totalSpent?.toLocaleString() || 0} spent</span>
             )}
           </div>
         </div>
