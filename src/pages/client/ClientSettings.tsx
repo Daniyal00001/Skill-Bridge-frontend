@@ -256,6 +256,21 @@ const ClientSettingsPage = () => {
                         {user.isEmailVerified ? "Verified" : "Unverified"}
                       </Badge>
                     </div>
+
+                    <Separator className="bg-border/50" />
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">Payment Method</span>
+                      </div>
+                      <Badge className={cn(
+                        "border-none",
+                        user.isPaymentVerified ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                      )}>
+                        {user.isPaymentVerified ? "Verified" : "Unverified"}
+                      </Badge>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -608,6 +623,7 @@ const ClientSettingsPage = () => {
             onClose={() => setShowAddMethod(false)} 
             onSuccess={() => {
               queryClient.invalidateQueries({ queryKey: ["stripePaymentMethods"] });
+              queryClient.invalidateQueries({ queryKey: ["clientProfileSettings"] });
               toast.success("Payment methods updated!");
             }} 
           />

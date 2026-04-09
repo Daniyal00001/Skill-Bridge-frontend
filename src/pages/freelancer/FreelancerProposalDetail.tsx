@@ -22,6 +22,11 @@ import {
   Inbox,
   Calendar,
   ExternalLink,
+  ShieldCheck,
+  BadgeCheck,
+  Users,
+  DollarSign,
+  MapPin,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -562,23 +567,43 @@ const FreelancerProposalDetail = () => {
                     </div>
                   </div>
                   
+                  <div className="flex flex-wrap gap-2 pt-1 pb-2">
+                    {client.isIdVerified && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">Identity Verified</span>
+                      </div>
+                    )}
+                    {client.isPaymentVerified && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                        <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Payment Verified</span>
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="grid grid-cols-2 gap-y-4 gap-x-2 pt-4 border-t border-border/50">
                     <div className="space-y-1">
-                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Member Since</p>
-                      <p className="font-bold text-[12px] leading-none text-foreground/80">{client.createdAt ? new Date(client.createdAt).getFullYear() : 'N/A'}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Member Since</p>
+                      <p className="font-bold text-sm leading-none flex items-center gap-1.5"><Calendar className="w-3 h-3 text-primary"/> {client.createdAt ? new Date(client.createdAt).getFullYear() : 'N/A'}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Hired</p>
-                      <p className="font-bold text-[12px] leading-none text-foreground/80">{client.totalHires || 0}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Hired</p>
+                      <p className="font-bold text-sm leading-none flex items-center gap-1.5"><Users className="w-3 h-3 text-primary"/> {client.totalHires || 0}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Hire Rate</p>
-                      <p className="font-bold text-[12px] leading-none text-foreground/80">{client.hireRate ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%` : 'N/A'}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Released</p>
+                      <p className="font-bold text-sm leading-none flex items-center gap-1.5"><DollarSign className="w-3 h-3 text-emerald-500"/> ${client.totalSpent?.toLocaleString() || 0}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Hire Rate</p>
+                      <p className="font-bold text-sm leading-none flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-500"/> {client.hireRate ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%` : 'N/A'}</p>
                     </div>
                     {client.location && (
-                      <div className="space-y-1">
-                        <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest leading-none">Location</p>
-                        <p className="font-bold text-[12px] leading-none text-foreground/80">
+                      <div className="space-y-1 col-span-2 text-center flex flex-col items-center pt-2 border-t border-border/30 mt-2">
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Location</p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5 justify-center mt-1">
+                          <MapPin className="w-3 h-3 text-primary" />
                           {client.location}
                         </p>
                       </div>

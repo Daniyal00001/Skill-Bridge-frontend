@@ -446,9 +446,9 @@ export default function FreelancerProjectDetails() {
                         <p className="font-bold text-sm leading-none flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-500"/> {client.hireRate ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%` : 'N/A'}</p>
                       </div>
                       {client.location && (
-                        <div className="space-y-1">
+                        <div className="space-y-1 col-span-2 text-center flex flex-col items-center pt-2 border-t border-border/30 mt-2">
                           <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Location</p>
-                          <p className="font-bold text-sm leading-none flex items-center gap-1.5">
+                          <p className="font-bold text-sm leading-none flex items-center gap-1.5 justify-center mt-1">
                             <MapPin className="w-3 h-3 text-primary" />
                             {client.location}
                           </p>
