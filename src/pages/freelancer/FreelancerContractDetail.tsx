@@ -110,6 +110,7 @@ interface Contract {
   releasedAmount: number;
   escrowAmount: number;
   pendingAmount: number;
+  refundedAmount?: number;
   milestonesModifiedByClient: boolean;
 }
 
@@ -789,7 +790,7 @@ export default function FreelancerContractDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent className="px-5 pb-5 space-y-3">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-2">
                 {[
                   {
                     label: "Earned",
@@ -804,6 +805,12 @@ export default function FreelancerContractDetail() {
                     bg: "bg-blue-500/5 border-blue-500/15",
                   },
                   {
+                    label: "Refunded",
+                    value: contract.refundedAmount || 0,
+                    color: "text-rose-600",
+                    bg: "bg-rose-500/5 border-rose-500/15",
+                  },
+                  {
                     label: "Remaining",
                     value: contract.pendingAmount,
                     color: "text-slate-500",
@@ -812,12 +819,12 @@ export default function FreelancerContractDetail() {
                 ].map((e, i) => (
                   <div
                     key={i}
-                    className={cn("p-3 rounded-xl border text-center", e.bg)}
+                    className={cn("p-2 rounded-xl border text-center", e.bg)}
                   >
-                    <p className={cn("text-lg font-black", e.color)}>
+                    <p className={cn("text-base font-black", e.color)}>
                       ${e.value.toFixed(0)}
                     </p>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">
                       {e.label}
                     </p>
                   </div>
@@ -839,10 +846,16 @@ export default function FreelancerContractDetail() {
                         width: `${(contract.escrowAmount / contract.totalMilestoneAmount) * 100}%`,
                       }}
                     />
+                    <div
+                      className="h-full bg-rose-500"
+                      style={{
+                        width: `${((contract.refundedAmount || 0) / contract.totalMilestoneAmount) * 100}%`,
+                      }}
+                    />
                   </>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
                   Earned
@@ -850,6 +863,10 @@ export default function FreelancerContractDetail() {
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
                   Escrow
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
+                  Refunded
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-muted-foreground/30 inline-block" />

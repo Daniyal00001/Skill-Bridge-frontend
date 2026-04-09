@@ -112,6 +112,7 @@ interface Contract {
   releasedAmount: number;
   escrowAmount: number;
   pendingAmount: number;
+  refundedAmount?: number;
 }
 
 const statusConfig: Record<
@@ -775,37 +776,39 @@ export default function ClientContractDetail() {
               <div className="grid grid-cols-4 gap-2">
                 {[
                   {
-                    label: "Done",
-                    value: approvedCount,
+                    label: "Paid/Released",
+                    value: contract.releasedAmount,
                     color: "text-emerald-600",
+                    bg: "bg-emerald-500/5 border-emerald-500/15",
                   },
                   {
-                    label: "Submitted",
-                    value: submittedCount,
-                    color: "text-purple-600",
+                    label: "In Escrow",
+                    value: contract.escrowAmount,
+                    color: "text-blue-600",
+                    bg: "bg-blue-500/5 border-blue-500/15",
                   },
                   {
-                    label: "In Progress",
-                    value: contract.milestones.filter((m) =>
-                      ["IN_PROGRESS", "FUNDED"].includes(m.status),
-                    ).length,
-                    color: "text-amber-600",
+                    label: "Refunded",
+                    value: contract.refundedAmount || 0,
+                    color: "text-rose-600",
+                    bg: "bg-rose-500/5 border-rose-500/15",
                   },
                   {
-                    label: "Pending",
-                    value: pendingToFund,
+                    label: "Remaining",
+                    value: contract.pendingAmount,
                     color: "text-slate-500",
+                    bg: "bg-slate-500/5 border-slate-500/15",
                   },
-                ].map((s, i) => (
+                ].map((e, i) => (
                   <div
                     key={i}
-                    className="text-center p-2 rounded-xl bg-muted/30"
+                    className={cn("p-2 rounded-xl border text-center", e.bg)}
                   >
-                    <p className={cn("text-base font-black", s.color)}>
-                      {s.value}
+                    <p className={cn("text-base font-black", e.color)}>
+                      ${e.value.toFixed(0)}
                     </p>
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
-                      {s.label}
+                    <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">
+                      {e.label}
                     </p>
                   </div>
                 ))}
@@ -892,26 +895,36 @@ export default function ClientContractDetail() {
                       }}
                     />
                     <div
-                      className="h-full bg-blue-500 transition-all duration-700"
+                      className="h-full bg-blue-500"
                       style={{
                         width: `${(contract.escrowAmount / contract.totalMilestoneAmount) * 100}%`,
+                      }}
+                    />
+                    <div
+                      className="h-full bg-rose-500"
+                      style={{
+                        width: `${((contract.refundedAmount || 0) / contract.totalMilestoneAmount) * 100}%`,
                       }}
                     />
                   </>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                  Released
+                  Paid
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-                  In Escrow
+                  Escrow
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-muted-foreground/30 inline-block" />
-                  Pending
+                  <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
+                  Refunded
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-muted inline-block" />
+                  Remaining
                 </span>
               </div>
             </div>
