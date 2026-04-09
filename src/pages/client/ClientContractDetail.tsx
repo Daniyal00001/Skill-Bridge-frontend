@@ -57,6 +57,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ReviewModal } from "@/components/modals/ReviewModal";
+import { StripeFundModal } from "@/components/modals/StripeFundModal";
 
 type MilestoneStatus =
   | "PENDING"
@@ -217,6 +218,12 @@ export default function ClientContractDetail() {
     theirReview: any;
   } | null>(null);
 
+  // ── Stripe Fund Modal state ──
+  const [stripeFundModal, setStripeFundModal] = useState<{
+    open: boolean;
+    milestone: { id: string; title: string; amount: number; order: number } | null;
+  }>({ open: false, milestone: null });
+
   // ── Dispute state ──
   const [disputeModal, setDisputeModal] = useState(false);
   const [disputeSubmitting, setDisputeSubmitting] = useState(false);
@@ -270,17 +277,8 @@ export default function ClientContractDetail() {
     if (contract?.status === "COMPLETED") fetchReviewStatus();
   }, [contract?.status, fetchReviewStatus]);
 
-  const handleFund = async (milestoneId: string) => {
-    setProcessingId(milestoneId);
-    try {
-      await api.post(`/contracts/${contractId}/milestones/${milestoneId}/fund`);
-      toast.success("Milestone funded! Funds are now in escrow. 🔒");
-      await fetchContract();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to fund milestone");
-    } finally {
-      setProcessingId(null);
-    }
+  const handleFund = (milestone: { id: string; title: string; amount: number; order: number }) => {
+    setStripeFundModal({ open: true, milestone });
   };
 
   const handleApprove = async (milestoneId: string) => {
@@ -1160,20 +1158,20 @@ export default function ClientContractDetail() {
                         {milestone.status === "PENDING" && (
                           <div className="space-y-1">
                             <Button
-                              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black"
-                              onClick={() => handleFund(milestone.id)}
-                              disabled={
-                                isProcessing ||
-                                contract.status === "OFFER_PENDING"
+                              className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white rounded-xl font-black"
+                              onClick={() =>
+                                handleFund({
+                                  id: milestone.id,
+                                  title: milestone.title,
+                                  amount: milestone.amount,
+                                  order: milestone.order,
+                                })
                               }
+                              disabled={contract.status === "OFFER_PENDING"}
                             >
-                              {isProcessing ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <Shield className="w-4 h-4" />
-                              )}
-                              Fund ${milestone.amount.toLocaleString()} into
-                              Escrow
+                              <Shield className="w-4 h-4" />
+                              Fund ${milestone.amount.toLocaleString()} via
+                              Stripe
                             </Button>
                             {contract.status === "OFFER_PENDING" && (
                               <p className="text-[11px] font-bold text-amber-600 flex items-center gap-1">
@@ -1783,6 +1781,20 @@ export default function ClientContractDetail() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* ── Stripe Fund Modal ── */}
+        {stripeFundModal.milestone && (
+          <StripeFundModal
+            open={stripeFundModal.open}
+            onClose={() => setStripeFundModal({ open: false, milestone: null })}
+            contractId={contractId!}
+            milestone={stripeFundModal.milestone}
+            onSuccess={async () => {
+              toast.success("Milestone funded via Stripe! Funds locked in escrow. 🔒");
+              await fetchContract();
+            }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
