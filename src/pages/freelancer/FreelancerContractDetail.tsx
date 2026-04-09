@@ -449,15 +449,29 @@ export default function FreelancerContractDetail() {
                 size="sm"
                 className={cn(
                   "h-8 rounded-xl font-bold text-xs gap-1.5",
-                  existingDispute
+                  existingDispute &&
+                    !["RESOLVED", "CLOSED"].includes(existingDispute.status)
                     ? "border-rose-200 text-rose-600 bg-rose-50"
                     : "border-rose-200 text-rose-600 hover:bg-rose-50",
                 )}
-                onClick={() => !existingDispute && setDisputeModal(true)}
-                disabled={!!existingDispute}
+                onClick={() => {
+                  if (
+                    !existingDispute ||
+                    ["RESOLVED", "CLOSED"].includes(existingDispute.status)
+                  ) {
+                    setDisputeModal(true);
+                  }
+                }}
+                disabled={
+                  existingDispute &&
+                  !["RESOLVED", "CLOSED"].includes(existingDispute.status)
+                }
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
-                {existingDispute ? "Case Active" : "Open Dispute"}
+                {existingDispute &&
+                !["RESOLVED", "CLOSED"].includes(existingDispute.status)
+                  ? "Case Active"
+                  : "Open Dispute"}
               </Button>
             )}
             <Badge
