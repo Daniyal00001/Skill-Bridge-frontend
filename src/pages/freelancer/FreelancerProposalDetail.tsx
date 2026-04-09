@@ -27,6 +27,7 @@ import {
   Users,
   DollarSign,
   MapPin,
+  AlertCircle,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
@@ -567,17 +568,28 @@ const FreelancerProposalDetail = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap gap-2 pt-1 pb-2">
-                    {client.isIdVerified && (
+                  <div className="flex flex-wrap gap-2 pt-1 pb-1">
+                    {client.isIdVerified ? (
                       <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                         <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
                         <span className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">Identity Verified</span>
                       </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 border border-border/50 rounded-lg">
+                        <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">Identity Unverified</span>
+                      </div>
                     )}
-                    {client.isPaymentVerified && (
+                    
+                    {client.isPaymentVerified ? (
                       <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                         <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
                         <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Payment Verified</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 border border-border/50 rounded-lg">
+                        <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">Payment Unverified</span>
                       </div>
                     )}
                   </div>
