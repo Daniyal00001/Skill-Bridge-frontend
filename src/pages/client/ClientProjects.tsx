@@ -219,7 +219,7 @@ const ClientProjectsPage = () => {
 
   // Stats from real data
   const stats = {
-    totalValue: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
+    total: projects.length,
     inProgress: projects.filter((p) => p.status === "IN_PROGRESS").length,
     open: projects.filter((p) => p.status === "OPEN").length,
     completed: projects.filter((p) => p.status === "COMPLETED").length,
@@ -706,9 +706,7 @@ const ClientProjectsPage = () => {
             >
               Unified Management Hub
             </Badge>
-            <h1 className="text-4xl font-black tracking-tight">
-              My Projects
-            </h1>
+            <h1 className="text-4xl font-black tracking-tight">My Projects</h1>
             <p className="text-muted-foreground text-base max-w-xl">
               Consolidated view of all your projects, from discovery to
               delivery.
@@ -729,10 +727,10 @@ const ClientProjectsPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             {
-              label: "Total Value",
-              value: `$${stats.totalValue.toLocaleString()}`,
-              icon: DollarSign,
-              color: "text-emerald-500",
+              label: "Total Projects",
+              value: stats.total,
+              icon: Layout,
+              color: "text-primary",
             },
             {
               label: "In Progress",
