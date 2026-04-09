@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import {
   Elements,
-  PaymentElement,
+  CardElement,
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
@@ -94,9 +94,13 @@ function PaymentForm({
     setError(null);
 
     try {
-      const { error: stripeError } = await stripe.confirmPayment({
-        elements,
-        redirect: "if_required",
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) throw new Error("Card element not found");
+
+      const { error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+        },
       });
 
       if (stripeError) {
@@ -133,14 +137,29 @@ function PaymentForm({
 
         <div
           className={cn(
-            "rounded-xl border border-border/60 p-4 transition-all min-h-[160px]",
+            "rounded-xl border border-border/60 p-4 transition-all min-h-[60px]",
             isDark ? "bg-[#1e1e2e]" : "bg-white",
             !ready && "animate-pulse"
           )}
         >
-          <PaymentElement onReady={() => setReady(true)} />
+          <div className={cn(ready ? "block" : "hidden")}>
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: isDark ? '#e2e8f0' : '#1a1a1a',
+                    '::placeholder': { color: isDark ? '#64748b' : '#a1a1aa' },
+                    fontFamily: "Inter, system-ui, sans-serif",
+                  },
+                  invalid: { color: '#f87171' },
+                },
+              }}
+              onReady={() => setReady(true)}
+            />
+          </div>
           {!ready && (
-            <div className="flex items-center justify-center py-6">
+            <div className="flex items-center justify-center py-2">
               <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
             </div>
           )}
@@ -293,7 +312,7 @@ export function StripeFundModal({
                   {
                     icon: <CreditCard className="w-4 h-4 text-violet-500" />,
                     title: "Powered by Stripe",
-                    desc: "Bank-grade encryption. Secure and reliable.",
+                    desc: "Secure 256-bit encryption. Safe and reliable.",
                   },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">

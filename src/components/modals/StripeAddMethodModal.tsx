@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import {
   Elements,
-  PaymentElement,
+  CardElement,
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
@@ -71,9 +71,13 @@ function SetupForm({
     setError(null);
 
     try {
-      const { error: stripeError } = await stripe.confirmSetup({
-        elements,
-        redirect: "if_required",
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) throw new Error("Card element not found");
+
+      const { error: stripeError } = await stripe.confirmCardSetup(clientSecret, {
+        payment_method: {
+          card: cardElement,
+        },
       });
 
       if (stripeError) {
@@ -96,14 +100,29 @@ function SetupForm({
         <p className="text-sm font-black">Method Details</p>
         <div
           className={cn(
-            "rounded-xl border border-border/60 p-4 min-h-[160px]",
+            "rounded-xl border border-border/60 p-4 transition-all min-h-[60px]",
             isDark ? "bg-[#1e1e2e]" : "bg-white",
             !ready && "animate-pulse"
           )}
         >
-          <PaymentElement onReady={() => setReady(true)} />
+          <div className={cn(ready ? "block" : "hidden")}>
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: isDark ? '#e2e8f0' : '#1a1a1a',
+                    '::placeholder': { color: isDark ? '#64748b' : '#a1a1aa' },
+                    fontFamily: "Inter, system-ui, sans-serif",
+                  },
+                  invalid: { color: '#f87171' },
+                },
+              }}
+              onReady={() => setReady(true)}
+            />
+          </div>
           {!ready && (
-            <div className="flex items-center justify-center py-6">
+            <div className="flex items-center justify-center py-2">
               <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
             </div>
           )}
@@ -195,7 +214,7 @@ export function StripeAddMethodModal({
                     Add Payment Method
                 </DialogTitle>
                 <DialogDescription className="text-primary-foreground/70 text-xs mt-1">
-                    Securely add a bank account or credit card.
+                    Securely add a credit or debit card.
                 </DialogDescription>
             </DialogHeader>
         </div>

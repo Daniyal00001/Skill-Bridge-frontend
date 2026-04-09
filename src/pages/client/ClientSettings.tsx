@@ -532,7 +532,7 @@ const ClientSettingsPage = () => {
                     <div>
                       <CardTitle>Payment Methods</CardTitle>
                       <CardDescription>
-                        Manage your bank accounts and cards.
+                        Manage your secure payment cards.
                       </CardDescription>
                     </div>
                     <Button 
@@ -556,18 +556,14 @@ const ClientSettingsPage = () => {
                         <div key={method.id} className="p-4 flex items-center justify-between hover:bg-muted/20 transition-colors">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-10 rounded-lg bg-muted flex items-center justify-center border border-border/60">
-                              {method.type === 'card' ? (
-                                <CreditCard className="w-5 h-5 text-indigo-500" />
-                              ) : (
-                                <Building className="w-5 h-5 text-emerald-500" />
-                              )}
+                              <CreditCard className="w-5 h-5 text-indigo-500" />
                             </div>
                             <div>
                               <p className="font-bold text-sm capitalize">
-                                {method.type === 'card' ? `${method.brand} •••• ${method.last4}` : `${method.bankName} Account`}
+                                {method.brand} •••• {method.last4}
                               </p>
                               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
-                                {method.type === 'card' ? `Expires ${method.expMonth}/${method.expYear}` : `Ending in ${method.last4}`}
+                                Expires {method.expMonth}/{method.expYear}
                               </p>
                             </div>
                           </div>
@@ -584,8 +580,8 @@ const ClientSettingsPage = () => {
                         <CreditCard className="h-8 w-8 text-primary/40" />
                       </div>
                       <div className="text-center">
-                        <p className="font-bold text-foreground">No payment methods found</p>
-                        <p className="text-xs">Attach a bank account or credit card to fund projects.</p>
+                        <p className="font-bold text-foreground">No payment cards found</p>
+                        <p className="text-xs">Attach a credit or debit card to fund projects.</p>
                       </div>
                       <Button variant="outline" className="rounded-xl mt-2 font-bold px-8">
                         Add My First Method
@@ -598,9 +594,9 @@ const ClientSettingsPage = () => {
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
                 <ShieldCheck className="w-8 h-8 text-indigo-500 shrink-0" />
                 <div>
-                  <p className="text-sm font-bold text-indigo-900">Bank-Level Security</p>
+                  <p className="text-sm font-bold text-indigo-900">Secure Industrial-Grade Security</p>
                   <p className="text-[11px] text-indigo-700/70 leading-relaxed font-medium">
-                    SkillBridge never stores your card or bank details. All transactions are encrypted and processed by Stripe, the world's most secure payment infrastructure.
+                    SkillBridge never stores your card details. All transactions are encrypted and processed by Stripe, the world's most secure payment infrastructure.
                   </p>
                 </div>
               </div>

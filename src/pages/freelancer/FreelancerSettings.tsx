@@ -541,9 +541,9 @@ const FreelancerSettings = () => {
                           <Wallet className="h-8 w-8 text-primary" />
                         </div>
                         <div className="space-y-1">
-                          <p className="font-bold text-lg">Connect Your Bank Account</p>
+                          <p className="font-bold text-lg">Connect Payout Method</p>
                           <p className="text-xs text-muted-foreground px-4">
-                            We use Stripe to securely process your payouts. Connect your bank account to start withdrawing funds.
+                            We use Stripe to securely process your payouts. Connect a supported payout method to start withdrawing funds.
                           </p>
                         </div>
                         <Button 
