@@ -244,12 +244,10 @@ export function FreelancerOnboardingModal({
   const [gigs, setGigs] = useState<any[]>(profile?.gigs || []);
 
   const [files, setFiles] = useState<{
-    idDocument: File | null;
     profileImage: File | null;
     certFiles: (File | null)[];
     gigFiles: (File | null)[];
   }>({
-    idDocument: null,
     profileImage: null,
     certFiles: [null, null, null, null],
     gigFiles: [null, null, null, null],
@@ -389,8 +387,6 @@ export function FreelancerOnboardingModal({
           return;
         }
         const formPayload = new FormData();
-        if (files.idDocument)
-          formPayload.append("idDocument", files.idDocument);
         if (files.profileImage)
           formPayload.append("profileImage", files.profileImage);
 
@@ -1122,59 +1118,64 @@ export function FreelancerOnboardingModal({
 
           {step === 4 && (
             <div className="space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold flex items-center gap-2">
+              <div className="flex justify-center">
+                <div className="space-y-4 w-full max-w-sm">
+                  <Label className="text-sm font-bold flex items-center justify-center gap-2">
                     <Upload className="w-4 h-4 text-primary" /> Profile Picture
                     <WeightBadge pct={WEIGHTS.profileImage} isComplete={!!(files.profileImage || profile?.user?.profileImage)} />
                   </Label>
                   {/* If user already has a profile image (e.g. from Google/OAuth), show preview */}
                   {profile?.user?.profileImage && !files.profileImage ? (
-                    <div className="flex flex-col items-center gap-3 p-4 border-2 border-green-200 bg-green-50 rounded-xl">
-                      <div className="relative">
+                    <div className="flex flex-col items-center gap-4 p-8 border-2 border-emerald-100 bg-emerald-50/50 rounded-[2.5rem] transition-all duration-300">
+                      <div className="relative group">
                         <img
                           src={profile.user.profileImage}
                           alt="Profile"
-                          className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
+                          className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-2xl transition-transform duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
-                          <CheckCircle2 className="w-3 h-3 text-white" />
+                        <div className="absolute bottom-1 right-1 bg-emerald-500 rounded-full p-1.5 border-4 border-white shadow-lg">
+                          <CheckCircle2 className="w-4 h-4 text-white" />
                         </div>
                       </div>
-                      <p className="text-xs font-bold text-green-700">Already uploaded</p>
-                      <label className="flex items-center gap-1.5 text-xs font-bold text-primary cursor-pointer hover:underline">
-                        <Pencil className="w-3 h-3" /> Change Photo
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) =>
-                            setFiles((p) => ({
-                              ...p,
-                              profileImage: e.target.files?.[0] || null,
-                            }))
-                          }
-                        />
-                      </label>
+                      <div className="text-center space-y-1">
+                        <p className="text-sm font-black text-emerald-700">Already uploaded</p>
+                        <label className="flex items-center justify-center gap-1.5 text-xs font-bold text-primary cursor-pointer hover:underline transition-all">
+                          <Pencil className="w-3.5 h-3.5" /> Change Photo
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) =>
+                              setFiles((p) => ({
+                                ...p,
+                                profileImage: e.target.files?.[0] || null,
+                              }))
+                            }
+                          />
+                        </label>
+                      </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 gap-2 hover:bg-muted/50 transition-colors cursor-pointer relative overflow-hidden group">
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-[2.5rem] p-8 gap-4 hover:bg-muted/30 transition-all duration-300 cursor-pointer relative overflow-hidden group min-h-[180px]">
                       {files.profileImage ? (
-                        <div className="flex flex-col items-center gap-2">
+                        <div className="flex flex-col items-center gap-4 animate-in zoom-in-95 duration-300">
                           <img
                             src={URL.createObjectURL(files.profileImage)}
                             alt="Preview"
-                            className="w-20 h-20 rounded-full object-cover border-4 border-primary/20 shadow-md"
+                            className="w-32 h-32 rounded-full object-cover border-4 border-primary/20 shadow-2xl"
                           />
-                          <div className="flex items-center gap-2 text-green-600 font-bold text-xs">
+                          <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
                             <CheckCircle2 className="w-4 h-4" />
                             {files.profileImage.name}
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center">
-                          <p className="text-xs font-semibold">Click to upload</p>
-                          <p className="text-[10px] text-muted-foreground">
+                        <div className="text-center space-y-2">
+                          <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-2 transition-transform duration-300 group-hover:scale-110">
+                            <Upload className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                          <p className="text-sm font-black">Click to upload photo</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
                             PNG, JPG up to 10MB
                           </p>
                         </div>
@@ -1197,43 +1198,6 @@ export function FreelancerOnboardingModal({
                       />
                     </div>
                   )}
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold flex items-center gap-2">
-                    <Upload className="w-4 h-4 text-primary" /> Verification ID
-                  </Label>
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 gap-2 hover:bg-muted/50 transition-colors cursor-pointer relative overflow-hidden">
-                    {files.idDocument ? (
-                      <div className="flex items-center gap-2 text-green-500 font-bold text-sm">
-                        <CheckCircle2 className="w-4 h-4" />{" "}
-                        {files.idDocument.name}
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-xs font-semibold">
-                          National ID / Passport
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          PDF, JPG
-                        </p>
-                      </div>
-                    )}
-                    <Input
-                      type="file"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        if (file && file.size > 10 * 1024 * 1024) {
-                          toast.error("ID document exceeds 10MB limit.");
-                          return;
-                        }
-                        setFiles((p) => ({
-                          ...p,
-                          idDocument: file,
-                        }));
-                      }}
-                    />
-                  </div>
                 </div>
               </div>
 
