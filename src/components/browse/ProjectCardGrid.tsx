@@ -113,11 +113,13 @@ export const ProjectCardGrid = ({
 
         {/* Client info row */}
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          {project.client?.isVerified && (
-            <span className="flex items-center gap-0.5 text-primary font-semibold">
+          {project.client?.isVerified ? (
+            <span className="flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded-md text-[9px] font-bold">
               <BadgeCheck className="w-3 h-3" />
-              Verified
+              <span>ID Verified</span>
             </span>
+          ) : (
+            <span className="text-[9px] font-bold text-slate-300 border border-slate-200 px-1.5 rounded-md uppercase tracking-tighter">Unverified</span>
           )}
           {project.client?.averageRating && (
             <span className="flex items-center gap-0.5">
@@ -126,7 +128,7 @@ export const ProjectCardGrid = ({
             </span>
           )}
           {project.client?.hireRate != null && (
-            <span>{Math.round(project.client.hireRate * 100)}% hire rate</span>
+            <span>{Math.round(project.client.hireRate * 100)}% hire rate • ${project.client.totalSpent?.toLocaleString() || 0} spent</span>
           )}
           <span className="ml-auto">
             {formatDistanceToNow(new Date(project.createdAt), {

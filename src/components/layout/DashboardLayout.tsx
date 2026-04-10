@@ -38,6 +38,8 @@ import {
   Moon,
   Sparkles,
   Inbox,
+  UserCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
@@ -265,6 +267,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             label: "Users & Content",
             items: [
               { icon: Users, label: "Users", href: "/admin/users" },
+              { icon: UserCheck, label: "ID Approvals", href: "/admin/verifications" },
               { icon: FolderOpen, label: "Projects", href: "/admin/projects" },
               { icon: Star, label: "Skills", href: "/admin/skills" },
               {
@@ -481,8 +484,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </Avatar>
             {!sidebarCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold truncate leading-none mb-1">
+                <p className="text-xs font-semibold truncate leading-none mb-1 flex items-center gap-1">
                   {user?.name}
+                  {user?.isIdVerified && (
+                    <ShieldCheck className="w-3 h-3 text-blue-500 fill-blue-500/10" />
+                  )}
                 </p>
                 <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-bold">
                   {user?.role}

@@ -188,6 +188,19 @@ export const FreelancerFilterBar = ({
 
 
 
+      <Divider compact={compact} />
+
+      {/* Verified Filter */}
+      <div className="flex items-center gap-1.5 whitespace-nowrap">
+        <Chip
+          label="Verified Only"
+          icon={<BadgeCheck className={cn("w-3.5 h-3.5", filters.isVerified ? "text-white" : "text-blue-500")} />}
+          active={filters.isVerified}
+          onClick={() => onFilterChange("isVerified", !filters.isVerified)}
+          activeColor="bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-200"
+        />
+      </div>
+
       {/* Reset */}
       {hasActive && (
         <button

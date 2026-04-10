@@ -27,8 +27,8 @@ export default function SavedProjects() {
   const fetchSavedProjects = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/browse/projects/saved");
-      setProjects(res.data);
+      const res = await api.get("/browse-projects/projects/saved");
+      setProjects(res.data.projects || []);
     } catch (err) {
       console.error("Failed to fetch saved projects:", err);
       toast.error("Failed to load saved projects");
@@ -47,7 +47,7 @@ export default function SavedProjects() {
     setProjects(prev => prev.filter(p => p.id !== projectId));
     
     try {
-      await api.post(`/browse/projects/${projectId}/save`);
+      await api.post(`/browse-projects/projects/${projectId}/save`);
       toast.success("Project removed from saved");
     } catch (err) {
       setProjects(previousProjects);
@@ -81,7 +81,7 @@ export default function SavedProjects() {
               Saved Projects
             </h1>
             <p className="text-sm text-slate-400">
-              {loading ? "Loading your bookmarks..." : `${projects.length} projects you've bookmarked for later`}
+              {loading ? "Loading your bookmarks..." : `${projects?.length || 0} projects you've bookmarked for later`}
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export default function SavedProjects() {
         {/* Content */}
         {loading ? (
           view === "grid" ? <SkeletonGrid count={6} /> : <SkeletonList count={4} />
-        ) : projects.length > 0 ? (
+        ) : (projects?.length || 0) > 0 ? (
           <div className={cn(
             "grid gap-6",
             view === "grid" ? "md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"

@@ -19,6 +19,7 @@ export interface ChatRoom {
   }
   isMuted?: boolean
   isRestricted?: boolean
+  isActiveAI?: boolean
 }
 
 export interface ChatMessage {
@@ -32,6 +33,7 @@ export interface ChatMessage {
   fileSize?: number | null
   fileMimeType?: string | null
   isRead: boolean
+  isAiMessage?: boolean
   sentAt: string
   sender: {
     id: string

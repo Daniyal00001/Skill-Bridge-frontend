@@ -28,6 +28,8 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import GoogleSuccess from "./pages/auth/GoogleSuccess";
 import SelectRole from "./pages/auth/SelectRole";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ChatRedirect from "./pages/auth/ChatRedirect";
+import DisputeRedirect from "./pages/auth/DisputeRedirect";
 
 // Client Pages
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -46,7 +48,6 @@ import ClientProfilePage from "./pages/client/ClientProfile";
 import ClientProjectDetailsPage from "./pages/client/ClientProjectDetails";
 import FreelancerProfileDetail from "./pages/client/FreelancerProfileDetail";
 import GigDetail from "./pages/client/GigDetail";
-import NegotiationPage from "./pages/client/NegotiationPage";
 import ClientContractDetail from "./pages/client/ClientContractDetail";
 import ClientProposalDetail from "./pages/client/ClientProposalDetail";
 import ClientContracts from "./pages/client/ClientContracts";
@@ -78,6 +79,8 @@ import AdminDisputeDetail from "./pages/admin/AdminDisputeDetail";
 import Analytics from "./pages/admin/Analytics";
 import Security from "./pages/admin/Security";
 import AdminSkills from "./pages/admin/AdminSkills";
+import AdminUserDetail from "./pages/admin/AdminUserDetail";
+import AdminVerifications from "./pages/admin/AdminVerifications";
 
 import NotFound from "./pages/NotFound";
 
@@ -118,6 +121,8 @@ const App = () => (
               {/* Not logged in? → redirected to /login               */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/select-role" element={<SelectRole />} />
+                <Route path="/chat/:roomId" element={<ChatRedirect />} />
+                <Route path="/disputes/:disputeId" element={<DisputeRedirect />} />
                 {/* ── Client Only ──────────────────────────────────── */}
                 <Route element={<RoleRoute allowedRole="CLIENT" />}>
                   <Route path="/client" element={<ClientDashboard />} />
@@ -194,12 +199,8 @@ const App = () => (
                   <Route path="/settings" element={<ClientSettingsPage />} />
                   {/* Redirect legacy route */}
                   <Route
-                    path="/client/help-me-find"
+                    path="/client/ai-assistant"
                     element={<AIAssistantPage />}
-                  />
-                  <Route
-                    path="/client/negotiation/:sessionId"
-                    element={<NegotiationPage />}
                   />
                 </Route>
                 {/* ── Freelancer Only ───────────────────────────────── */}
@@ -271,6 +272,7 @@ const App = () => (
                 <Route element={<RoleRoute allowedRole="ADMIN" />}>
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/users" element={<UserManagement />} />
+                  <Route path="/admin/users/:id" element={<AdminUserDetail />} />
                   <Route
                     path="/admin/projects"
                     element={<ProjectModeration />}
@@ -283,6 +285,7 @@ const App = () => (
                     path="/admin/disputes"
                     element={<DisputeManagement />}
                   />
+                  <Route path="/admin/verifications" element={<AdminVerifications />} />
                   <Route path="/admin/skills" element={<AdminSkills />} />
                   <Route path="/admin/analytics" element={<Analytics />} />
                   <Route path="/admin/security" element={<Security />} />

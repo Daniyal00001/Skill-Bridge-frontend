@@ -36,6 +36,7 @@ import {
   MapPin,
   MessageSquare,
   BadgeCheck,
+  ShieldCheck,
   ChevronRight,
   Zap,
   ExternalLink,
@@ -412,6 +413,31 @@ export default function FreelancerProjectDetails() {
                         </div>
                       </div>
                     </div>
+                    <div className="flex flex-wrap gap-2 pt-1 pb-1">
+                      {client.user?.isIdVerified ? (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                          <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                          <span className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">Identity Verified</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 border border-border/50 rounded-lg">
+                          <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">Identity Unverified</span>
+                        </div>
+                      )}
+                      
+                      {client.user?.isPaymentVerified ? (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                          <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Payment Verified</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 border border-border/50 rounded-lg">
+                          <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">Payment Unverified</span>
+                        </div>
+                      )}
+                    </div>
                     
                     <div className="grid grid-cols-2 gap-y-4 gap-x-2 pt-4 border-t border-border/50">
                       <div className="space-y-1">
@@ -423,13 +449,17 @@ export default function FreelancerProjectDetails() {
                         <p className="font-bold text-sm leading-none flex items-center gap-1.5"><Users className="w-3 h-3 text-primary"/> {client.totalHires || 0}</p>
                       </div>
                       <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Released</p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><DollarSign className="w-3 h-3 text-emerald-500"/> ${client.totalSpent?.toLocaleString() || 0}</p>
+                      </div>
+                      <div className="space-y-1">
                         <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Hire Rate</p>
                         <p className="font-bold text-sm leading-none flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-500"/> {client.hireRate ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%` : 'N/A'}</p>
                       </div>
                       {client.location && (
-                        <div className="space-y-1">
+                        <div className="space-y-1 col-span-2 text-center flex flex-col items-center pt-2 border-t border-border/30 mt-2">
                           <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Location</p>
-                          <p className="font-bold text-sm leading-none flex items-center gap-1.5">
+                          <p className="font-bold text-sm leading-none flex items-center gap-1.5 justify-center mt-1">
                             <MapPin className="w-3 h-3 text-primary" />
                             {client.location}
                           </p>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Paperclip,
@@ -187,9 +188,16 @@ export function ChatWindow({
             />
           </div>
           <div>
-            <h3 className="font-bold text-sm tracking-tight">
-              {other?.name ?? "Unknown"}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm tracking-tight">
+                {other?.name ?? "Unknown"}
+              </h3>
+              {room.isActiveAI && (
+                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20 font-bold uppercase tracking-wider animate-pulse">
+                  AI Managed
+                </Badge>
+              )}
+            </div>
             <p className="text-[11px] text-muted-foreground">
               {other?.isOnline
                 ? "Active now"
@@ -208,6 +216,7 @@ export function ChatWindow({
           onDelete={onDelete}
         />
       </div>
+
 
       {/* ── Messages ── */}
       <ScrollArea className="flex-1 px-4 py-3">
@@ -410,6 +419,19 @@ export function ChatWindow({
                             isMe ? "justify-end" : "justify-end",
                           )}
                         >
+                          {msg.isAiMessage && (
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                "h-3.5 px-1 py-0 text-[8px] font-bold uppercase mr-1",
+                                isMe 
+                                  ? "border-primary-foreground/30 text-primary-foreground" 
+                                  : "border-primary/30 text-primary bg-primary/5"
+                              )}
+                            >
+                              AI Agent
+                            </Badge>
+                          )}
                           <span
                             className={cn(
                               "text-[10px] opacity-70 font-medium",
@@ -461,6 +483,36 @@ export function ChatWindow({
           <div ref={bottomRef} />
         </div>
       </ScrollArea>
+
+      {/* 🚀 Smart Suggestion Buttons */}
+      {room.isActiveAI && currentUserRole === "CLIENT" && (
+        <div className="px-4 py-2 flex flex-wrap gap-2 border-t bg-muted/20 animate-in slide-in-from-bottom-2 duration-300">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-[10px] h-7 rounded-full border-primary/20 bg-background hover:bg-primary/5 transition-colors gap-1.5"
+            onClick={() => onSendMessage("Can you offer a competitive discount for this project?")}
+          >
+            <span role="img" aria-label="discount">💸</span> Ask for discount
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-[10px] h-7 rounded-full border-primary/20 bg-background hover:bg-primary/5 transition-colors gap-1.5"
+            onClick={() => onSendMessage("What is your earliest possible delivery date?")}
+          >
+            <span role="img" aria-label="clock">⏱️</span> Faster delivery?
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-[10px] h-7 rounded-full border-primary/20 bg-background hover:bg-primary/5 transition-colors gap-1.5"
+            onClick={() => onSendMessage("The terms look great. I would like to proceed and finalize our agreement!")}
+          >
+             <span role="img" aria-label="shake">🤝</span> Accept & Close
+          </Button>
+        </div>
+      )}
 
       {/* ── Input Area ── */}
       <div className="px-4 py-3 border-t bg-background/80 backdrop-blur-sm flex-shrink-0">

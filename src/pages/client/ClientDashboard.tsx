@@ -112,9 +112,9 @@ export default function ClientDashboard() {
               icon={FolderOpen}
             />
             <StatsCard
-              title="Committed Budget"
+              title="Total Budget Spent"
               value={`$${stats.committedBudget.toLocaleString()}`}
-              change="Across in-progress work"
+              change="Escrowed + Released funds"
               changeType="neutral"
               icon={DollarSign}
             />

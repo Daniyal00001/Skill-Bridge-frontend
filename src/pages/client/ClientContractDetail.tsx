@@ -57,6 +57,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ReviewModal } from "@/components/modals/ReviewModal";
+import { StripeFundModal } from "@/components/modals/StripeFundModal";
 
 type MilestoneStatus =
   | "PENDING"
@@ -111,13 +112,7 @@ interface Contract {
   releasedAmount: number;
   escrowAmount: number;
   pendingAmount: number;
-  disputeInfo?: {
-    id: string;
-    status: string;
-    resolution?: string;
-    resolutionNote?: string;
-    resolvedAt?: string;
-  };
+  refundedAmount?: number;
 }
 
 const statusConfig: Record<
@@ -201,9 +196,9 @@ const eventConfig: any = {
   },
   DISPUTE_RESOLUTION: {
     label: "Dispute Resolved",
-    color: "bg-primary text-white",
+    color: "bg-indigo-600",
     icon: <Gavel className="w-3 h-3 text-white" />,
-    border: "border-l-primary",
+    border: "border-l-indigo-400",
   },
 };
 
@@ -229,6 +224,12 @@ export default function ClientContractDetail() {
     myReview: any;
     theirReview: any;
   } | null>(null);
+
+  // ── Stripe Fund Modal state ──
+  const [stripeFundModal, setStripeFundModal] = useState<{
+    open: boolean;
+    milestone: { id: string; title: string; amount: number; order: number } | null;
+  }>({ open: false, milestone: null });
 
   // ── Dispute state ──
   const [disputeModal, setDisputeModal] = useState(false);
@@ -283,17 +284,8 @@ export default function ClientContractDetail() {
     if (contract?.status === "COMPLETED") fetchReviewStatus();
   }, [contract?.status, fetchReviewStatus]);
 
-  const handleFund = async (milestoneId: string) => {
-    setProcessingId(milestoneId);
-    try {
-      await api.post(`/contracts/${contractId}/milestones/${milestoneId}/fund`);
-      toast.success("Milestone funded! Funds are now in escrow. 🔒");
-      await fetchContract();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to fund milestone");
-    } finally {
-      setProcessingId(null);
-    }
+  const handleFund = (milestone: { id: string; title: string; amount: number; order: number }) => {
+    setStripeFundModal({ open: true, milestone });
   };
 
   const handleApprove = async (milestoneId: string) => {
@@ -419,9 +411,9 @@ export default function ClientContractDetail() {
                 </>
               )}
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words">
-              {contract.projectTitle}
-            </h1>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight break-words overflow-hidden">
+               {contract.projectTitle}
+             </h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {(contract.status === "ACTIVE" || existingDispute) && (
@@ -430,15 +422,29 @@ export default function ClientContractDetail() {
                 size="sm"
                 className={cn(
                   "h-8 rounded-xl font-bold text-xs gap-1.5",
-                  existingDispute
+                  existingDispute &&
+                    !["RESOLVED", "CLOSED"].includes(existingDispute.status)
                     ? "border-rose-200 text-rose-600 bg-rose-50"
                     : "border-rose-200 text-rose-600 hover:bg-rose-50",
                 )}
-                onClick={() => !existingDispute && setDisputeModal(true)}
-                disabled={!!existingDispute}
+                onClick={() => {
+                  if (
+                    !existingDispute ||
+                    ["RESOLVED", "CLOSED"].includes(existingDispute.status)
+                  ) {
+                    setDisputeModal(true);
+                  }
+                }}
+                disabled={
+                  existingDispute &&
+                  !["RESOLVED", "CLOSED"].includes(existingDispute.status)
+                }
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
-                {existingDispute ? "Case Active" : "Open Dispute"}
+                {existingDispute &&
+                !["RESOLVED", "CLOSED"].includes(existingDispute.status)
+                  ? "Case Active"
+                  : "Open Dispute"}
               </Button>
             )}
             <Badge
@@ -518,15 +524,35 @@ export default function ClientContractDetail() {
                     <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
                       Dispute Reason
                     </p>
-                    <p className="text-sm font-bold text-rose-800 mt-1">
+                    <p className="text-sm font-bold text-rose-800 mt-1 break-words">
                       {existingDispute.reason}
                     </p>
                     <div className="p-3 bg-white/60 border border-rose-100 rounded-xl mt-2 italic shadow-sm">
-                      <p className="text-xs text-rose-700 leading-relaxed font-medium">
+                      <p className="text-xs text-rose-700 leading-relaxed font-medium break-words">
                         "{existingDispute.details}"
                       </p>
                     </div>
                   </div>
+
+                  {/* Official Resolution Section */}
+                  {existingDispute.status === "RESOLVED" && (
+                    <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-200/50 space-y-3 mt-4">
+                      <div className="flex items-center justify-between">
+                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">
+                            Official Resolution
+                         </p>
+                         <Badge className="bg-emerald-500 text-white border-none font-black text-[9px] h-5 px-2">
+                           {existingDispute.resolution.replace(/_/g, " ")}
+                         </Badge>
+                      </div>
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest">Decision Note</p>
+                        <p className="text-xs font-bold leading-relaxed text-emerald-900/80 bg-white/40 p-3 rounded-xl border border-emerald-100/50 italic break-words">
+                          "{existingDispute.resolutionNote || "No explanatory note provided."}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Progress Tracker */}
@@ -750,37 +776,39 @@ export default function ClientContractDetail() {
               <div className="grid grid-cols-4 gap-2">
                 {[
                   {
-                    label: "Done",
-                    value: approvedCount,
+                    label: "Paid/Released",
+                    value: contract.releasedAmount,
                     color: "text-emerald-600",
+                    bg: "bg-emerald-500/5 border-emerald-500/15",
                   },
                   {
-                    label: "Submitted",
-                    value: submittedCount,
-                    color: "text-purple-600",
+                    label: "In Escrow",
+                    value: contract.escrowAmount,
+                    color: "text-blue-600",
+                    bg: "bg-blue-500/5 border-blue-500/15",
                   },
                   {
-                    label: "In Progress",
-                    value: contract.milestones.filter((m) =>
-                      ["IN_PROGRESS", "FUNDED"].includes(m.status),
-                    ).length,
-                    color: "text-amber-600",
+                    label: "Refunded",
+                    value: contract.refundedAmount || 0,
+                    color: "text-rose-600",
+                    bg: "bg-rose-500/5 border-rose-500/15",
                   },
                   {
-                    label: "Pending",
-                    value: pendingToFund,
+                    label: "Remaining",
+                    value: contract.pendingAmount,
                     color: "text-slate-500",
+                    bg: "bg-slate-500/5 border-slate-500/15",
                   },
-                ].map((s, i) => (
+                ].map((e, i) => (
                   <div
                     key={i}
-                    className="text-center p-2 rounded-xl bg-muted/30"
+                    className={cn("p-2 rounded-xl border text-center", e.bg)}
                   >
-                    <p className={cn("text-base font-black", s.color)}>
-                      {s.value}
+                    <p className={cn("text-base font-black", e.color)}>
+                      ${e.value.toFixed(0)}
                     </p>
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
-                      {s.label}
+                    <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">
+                      {e.label}
                     </p>
                   </div>
                 ))}
@@ -867,26 +895,36 @@ export default function ClientContractDetail() {
                       }}
                     />
                     <div
-                      className="h-full bg-blue-500 transition-all duration-700"
+                      className="h-full bg-blue-500"
                       style={{
                         width: `${(contract.escrowAmount / contract.totalMilestoneAmount) * 100}%`,
+                      }}
+                    />
+                    <div
+                      className="h-full bg-rose-500"
+                      style={{
+                        width: `${((contract.refundedAmount || 0) / contract.totalMilestoneAmount) * 100}%`,
                       }}
                     />
                   </>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                  Released
+                  Paid
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-                  In Escrow
+                  Escrow
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-muted-foreground/30 inline-block" />
-                  Pending
+                  <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
+                  Refunded
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-muted inline-block" />
+                  Remaining
                 </span>
               </div>
             </div>
@@ -985,7 +1023,7 @@ export default function ClientContractDetail() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="font-black text-base">
+                              <h3 className="font-black text-base break-words">
                                 {milestone.title}
                               </h3>
                               {submissionHistory.length > 0 && (
@@ -1002,7 +1040,7 @@ export default function ClientContractDetail() {
                               )}
                             </div>
                             {milestone.description && (
-                              <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                              <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2 break-words">
                                 {milestone.description}
                               </p>
                             )}
@@ -1115,7 +1153,7 @@ export default function ClientContractDetail() {
                             )}
                           </div>
                           {milestone.deliverables && (
-                            <p className="text-sm leading-relaxed">
+                            <p className="text-sm leading-relaxed break-words">
                               {milestone.deliverables}
                             </p>
                           )}
@@ -1155,7 +1193,7 @@ export default function ClientContractDetail() {
                               <RotateCcw className="w-3.5 h-3.5" /> Your Latest
                               Revision Request
                             </p>
-                            <p className="text-sm">{milestone.revisionNote}</p>
+                            <p className="text-sm break-words">{milestone.revisionNote}</p>
                           </div>
                         )}
 
@@ -1167,20 +1205,20 @@ export default function ClientContractDetail() {
                         {milestone.status === "PENDING" && (
                           <div className="space-y-1">
                             <Button
-                              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black"
-                              onClick={() => handleFund(milestone.id)}
-                              disabled={
-                                isProcessing ||
-                                contract.status === "OFFER_PENDING"
+                              className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white rounded-xl font-black"
+                              onClick={() =>
+                                handleFund({
+                                  id: milestone.id,
+                                  title: milestone.title,
+                                  amount: milestone.amount,
+                                  order: milestone.order,
+                                })
                               }
+                              disabled={contract.status === "OFFER_PENDING"}
                             >
-                              {isProcessing ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <Shield className="w-4 h-4" />
-                              )}
-                              Fund ${milestone.amount.toLocaleString()} into
-                              Escrow
+                              <Shield className="w-4 h-4" />
+                              Fund ${milestone.amount.toLocaleString()} via
+                              Stripe
                             </Button>
                             {contract.status === "OFFER_PENDING" && (
                               <p className="text-[11px] font-bold text-amber-600 flex items-center gap-1">
@@ -1289,7 +1327,12 @@ export default function ClientContractDetail() {
                             {/* vertical line */}
                             <div className="absolute left-[19px] top-3 bottom-3 w-0.5 bg-border/50 rounded-full" />
                             {history.map((event, idx) => {
-                              const eCfg = eventConfig[event.type];
+                              const eCfg = eventConfig[event.type] || {
+                                label: event.type,
+                                color: "bg-slate-500",
+                                icon: <Activity className="w-3 h-3 text-white" />,
+                                border: "border-l-slate-400",
+                              };
                               const isLatest = idx === history.length - 1;
                               return (
                                 <div
@@ -1317,7 +1360,7 @@ export default function ClientContractDetail() {
                                     <div className="p-3 flex items-center justify-between gap-2 border-b border-border/10">
                                       <div className="flex items-center gap-2">
                                         <p className="text-sm font-black text-foreground">
-                                          {eCfg?.label || event.type}
+                                          {eCfg.label}
                                         </p>
                                         {event.actorName && (
                                           <Badge
@@ -1792,6 +1835,20 @@ export default function ClientContractDetail() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* ── Stripe Fund Modal ── */}
+        {stripeFundModal.milestone && (
+          <StripeFundModal
+            open={stripeFundModal.open}
+            onClose={() => setStripeFundModal({ open: false, milestone: null })}
+            contractId={contractId!}
+            milestone={stripeFundModal.milestone}
+            onSuccess={async () => {
+              toast.success("Milestone funded via Stripe! Funds locked in escrow. 🔒");
+              await fetchContract();
+            }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

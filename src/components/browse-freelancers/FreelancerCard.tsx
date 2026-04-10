@@ -54,7 +54,7 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   const avail = AVAILABILITY_CONFIG[f.availability];
-  const isVerified = f.user?.isIdVerified || f.user?.isPaymentVerified;
+  const isVerified = !!f.user?.isIdVerified;
   const topSkills = f.skills?.slice(0, 4) ?? [];
 
   const lastActiveText = f.lastLoginAt 
@@ -111,8 +111,13 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
               >
                 {f.fullName}
               </Link>
-              {isVerified && (
-                <BadgeCheck className="w-4 h-4 text-blue-500 shrink-0" />
+              {isVerified ? (
+                <div className="flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-md text-[10px] font-bold">
+                  <BadgeCheck className="w-3.5 h-3.5" />
+                  <span>ID Verified</span>
+                </div>
+              ) : (
+                <span className="text-[10px] font-bold text-slate-300 border border-slate-200 px-1.5 rounded-md uppercase tracking-tighter">Unverified</span>
               )}
               <span
                 className={cn(
@@ -295,8 +300,13 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
               {f.fullName}
             </h3>
           </Link>
-          {isVerified && (
-            <BadgeCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+          {isVerified ? (
+            <div className="flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider">
+              <BadgeCheck className="w-3 h-3" />
+              <span>ID Verified</span>
+            </div>
+          ) : (
+            <span className="text-[9px] font-bold text-slate-300 border border-slate-200 px-1.5 rounded-md uppercase tracking-tighter">Unverified</span>
           )}
         </div>
 

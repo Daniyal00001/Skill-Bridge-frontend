@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   Mail,
   FileText,
+  DollarSign,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -38,15 +39,7 @@ import { freelancerService } from "@/lib/freelancer.service";
 import { FreelancerOnboardingModal } from "./Onboarding/FreelancerOnboardingModal";
 import { useEffect } from "react";
 
-// Mock Data
-// Placeholder for features not built yet
-const FUTURE_PLACEHOLDERS = {
-  jobSuccess: "100%",
-  projectsCompleted: 0,
-  repeatClientRate: "0%",
-  reviewsAvg: "5.0",
-  reviewsTotal: 0,
-};
+// Statistics calculation helpers moved to backend
 
 export default function FreelancerProfile() {
   const [isAvailable, setIsAvailable] = useState(true);
@@ -176,9 +169,9 @@ export default function FreelancerProfile() {
               </Avatar>
               <div className="absolute bottom-4 right-4 w-8 h-8 bg-background rounded-xl flex items-center justify-center shadow-lg border border-border">
                 {displayProfile?.user?.isIdVerified ? (
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <ShieldCheck className="w-5 h-5 text-blue-500" />
                 ) : (
-                  <ShieldCheck className="w-5 h-5 text-muted-foreground" />
+                  <ShieldCheck className="w-5 h-5 text-muted-foreground opacity-50" />
                 )}
               </div>
             </div>
@@ -218,14 +211,24 @@ export default function FreelancerProfile() {
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <Verified className="w-4 h-4 text-emerald-500" />
-                  Payment Verified #
-                </div>
+                {displayProfile?.user?.isPaymentVerified && (
+                  <div className="flex items-center gap-2">
+                    <Verified className="w-4 h-4 text-emerald-500" />
+                    Payment Verified
+                  </div>
+                )}
+                {displayProfile?.user?.isIdVerified && (
+                  <div className="flex items-center gap-2 border border-blue-500/20 bg-blue-500/10 text-blue-600 px-2.5 py-0.5 rounded-full">
+                    <ShieldCheck className="w-4 h-4 text-blue-500" />
+                    <span className="text-xs font-bold tracking-tight">
+                      Identity Verified
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  {FUTURE_PLACEHOLDERS.reviewsAvg} (
-                  {FUTURE_PLACEHOLDERS.reviewsTotal} reviews) #
+                  {displayProfile.reviewsAvg || "5.0"} (
+                  {displayProfile.reviewsTotal || 0} reviews)
                 </div>
               </div>
 
@@ -298,20 +301,20 @@ export default function FreelancerProfile() {
                 {[
                   {
                     label: "Job Success",
-                    value: `${FUTURE_PLACEHOLDERS.jobSuccess} #`,
+                    value: displayProfile.jobSuccess || "100%",
                     icon: ShieldCheck,
                     color: "text-blue-500",
                   },
                   {
                     label: "Completed",
-                    value: `${FUTURE_PLACEHOLDERS.projectsCompleted} #`,
+                    value: displayProfile.projectsCompleted || 0,
                     icon: CheckCircle2,
                     color: "text-emerald-500",
                   },
                   {
-                    label: "Repeat Hires",
-                    value: `${FUTURE_PLACEHOLDERS.repeatClientRate} #`,
-                    icon: Zap,
+                    label: "Total Earnings",
+                    value: displayProfile.totalEarnings || "$0",
+                    icon: DollarSign,
                     color: "text-amber-500",
                   },
                   {
@@ -503,59 +506,81 @@ export default function FreelancerProfile() {
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
                   Work History & Reviews
                 </h3>
+
                 <div className="space-y-6">
-                  {(displayProfile.workHistory || []).map((work: any) => (
-                    <div
-                      key={work.id}
-                      className="p-8 rounded-[2.5rem] bg-card border border-border/40 hover:border-primary/20 transition-all space-y-6"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-2">
-                          <h4 className="text-xl font-black group-hover:text-primary transition-colors">
-                            {work.title}
-                          </h4>
-                          <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground/60 tracking-wider uppercase">
-                            <span className="flex items-center gap-2">
-                              {work.rating.toFixed(1)}{" "}
-                              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                            </span>
-                            <span>{work.date}</span>
+                  {/* Scrollable container for work history logs */}
+                  <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/10">
+                    {(displayProfile.workHistory || []).map((work: any) => (
+                      <div
+                        key={work.id}
+                        className="p-8 rounded-[2.5rem] bg-card border border-border/40 hover:border-primary/20 transition-all space-y-6 group"
+                      >
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="space-y-2">
+                            <h4 className="text-xl font-black group-hover:text-primary transition-colors">
+                              {work.title}
+                            </h4>
+                            <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground/60 tracking-wider uppercase">
+                              {work.rating ? (
+                                <span className="flex items-center gap-2">
+                                  {Number(work.rating).toFixed(1)}{" "}
+                                  <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-black opacity-40">
+                                  No Rating Provided
+                                </span>
+                              )}
+                              <span>{work.date}</span>
+                            </div>
+                          </div>
+                          <div className="text-left md:text-right">
+                            <p className="text-2xl font-black text-foreground">
+                              ${work.amount.toLocaleString()}
+                            </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                              Fixed Price
+                            </p>
                           </div>
                         </div>
-                        <div className="text-left md:text-right">
-                          <p className="text-2xl font-black text-foreground">
-                            ${work.amount.toLocaleString()}
-                          </p>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                            Fixed Price
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="bg-accent/30 p-6 rounded-2xl md:ml-4 border-l-4 border-primary/40 italic">
-                        <p className="text-muted-foreground font-medium text-sm leading-relaxed">
-                          "{work.comment}"
-                        </p>
-                        <div className="mt-4 flex items-center gap-2 text-xs font-black uppercase text-foreground">
-                          <div className="h-px w-6 bg-border" />
-                          {work.client}
-                        </div>
+                        {work.comment ? (
+                          <div className="bg-accent/30 p-6 rounded-2xl md:ml-4 border-l-4 border-primary/40 italic">
+                            <p className="text-muted-foreground font-medium text-sm leading-relaxed">
+                              "{work.comment}"
+                            </p>
+                            <div className="mt-4 flex items-center gap-2 text-xs font-black uppercase text-foreground">
+                              <div className="h-px w-6 bg-border" />
+                              {work.client}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-muted/30 p-4 rounded-2xl md:ml-4 border border-border/40">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Project Successfully Settled
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+
                   {(displayProfile.workHistory || []).length === 0 && (
                     <div className="p-12 border border-dashed rounded-[3rem] text-center space-y-2 bg-primary/5">
-                      <p className="font-bold">No work history yet #</p>
+                      <p className="font-bold">No work history yet</p>
                       <p className="text-xs text-muted-foreground tracking-widest uppercase">
                         Verified projects will appear here
                       </p>
                     </div>
                   )}
+
                   <Button
+                    asChild
                     variant="outline"
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-primary/5 hover:border-primary/40 shadow-sm transition-all active:scale-[0.98]"
                   >
-                    View All Feedback #
+                    <Link to="/freelancer/reviews">View All Feedback</Link>
                   </Button>
                 </div>
               </section>

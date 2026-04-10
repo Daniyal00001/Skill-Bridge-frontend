@@ -44,6 +44,7 @@ export interface Dispute {
   disputeType: DisputeType;
   filedBy: 'CLIENT' | 'FREELANCER';
   reason: string;
+  summary?: string;
   details?: string;
   evidenceUrls: string[];
   status: DisputeStatus;
@@ -186,6 +187,11 @@ export const createDispute = async (payload: {
 
 export const getMyDispute = async (projectId: string) => {
   const { data } = await api.get(`${BASE_URL}/my/${projectId}`);
+  return data as { success: boolean; dispute: Dispute };
+};
+
+export const updateDisputeSummary = async (id: string, summary: string) => {
+  const { data } = await api.patch(`${BASE_URL}/${id}/summary`, { summary });
   return data as { success: boolean; dispute: Dispute };
 };
 

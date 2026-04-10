@@ -100,11 +100,13 @@ export const ProjectCardList = ({
 
           {/* Client row */}
           <div className="flex items-center gap-3 text-[10px] text-muted-foreground/60">
-            {project.client?.isVerified && (
-              <span className="flex items-center gap-0.5 text-primary font-semibold">
+            {project.client?.isVerified ? (
+              <span className="flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-md text-[9px] font-bold">
                 <BadgeCheck className="w-3 h-3" />
-                Verified Client
+                <span>ID Verified Client</span>
               </span>
+            ) : (
+              <span className="text-[9px] font-bold text-slate-300 border border-slate-200 px-1.5 rounded-md uppercase tracking-tighter">Unverified Client</span>
             )}
             {project.client?.averageRating && (
               <span className="flex items-center gap-0.5">
@@ -113,7 +115,7 @@ export const ProjectCardList = ({
               </span>
             )}
             {project.client?.totalHires != null && (
-              <span>{project.client.totalHires} hires</span>
+              <span>{project.client.totalHires} hires • ${project.client.totalSpent?.toLocaleString() || 0} spent</span>
             )}
           </div>
         </div>
