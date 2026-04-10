@@ -1054,6 +1054,20 @@ export default function ClientContractDetail() {
                                   ).toLocaleDateString()}
                                 </span>
                               )}
+                              {contract.disputeInfo &&
+                                contract.disputeInfo.status === "RESOLVED" &&
+                                ["APPROVED", "REJECTED"].includes(
+                                  milestone.status,
+                                ) && (
+                                  <span className="flex items-center gap-1 text-[9px] font-black text-primary uppercase tracking-tighter bg-primary/10 px-2 py-0.5 rounded-full">
+                                    <Gavel className="w-2.5 h-2.5" />
+                                    Dispute Resolved:{" "}
+                                    {contract.disputeInfo.resolution?.replace(
+                                      /_/g,
+                                      " ",
+                                    )}
+                                  </span>
+                                )}
                               <span
                                 className={cn(
                                   "flex items-center gap-1 text-xs font-bold",
@@ -1329,16 +1343,18 @@ export default function ClientContractDetail() {
                                   <div
                                     className={cn(
                                       "w-9 h-9 shrink-0 rounded-full flex items-center justify-center z-10 border-4 border-background shadow-sm transition-transform hover:scale-110",
-                                      eCfg.color,
+                                      eCfg?.color || "bg-muted",
                                     )}
                                   >
-                                    {eCfg.icon}
+                                    {eCfg?.icon || (
+                                      <Activity className="w-4 h-4 text-white" />
+                                    )}
                                   </div>
                                   {/* Content card */}
                                   <div
                                     className={cn(
                                       "flex-1 min-w-0 rounded-xl border-l-4 bg-muted/20 border border-border/20 overflow-hidden",
-                                      eCfg.border,
+                                      eCfg?.border || "border-l-muted",
                                     )}
                                   >
                                     <div className="p-3 flex items-center justify-between gap-2 border-b border-border/10">
