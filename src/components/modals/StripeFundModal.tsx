@@ -171,6 +171,17 @@ function PaymentForm({
             <p className="text-xs text-red-600 font-medium">{error}</p>
           </div>
         )}
+
+        {/* Test Mode Tip */}
+        <div className="mt-4 p-3 rounded-xl bg-indigo-50 border border-indigo-100 flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Dev Tip: Faster Withdrawals</p>
+            <p className="text-[10px] text-indigo-600 leading-relaxed">
+              In test mode, use <span className="font-mono bg-indigo-100 px-1 rounded">4000 0000 0000 0077</span> to make funds available <span className="font-bold">instantly</span> for freelancer withdrawals.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
