@@ -1,55 +1,98 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Calendar, CheckCircle2, Clock, DollarSign, ExternalLink, 
-  FileText, MessageSquare, Play, Package, RotateCcw, 
-  Search, ShieldCheck, UploadCloud, AlertCircle, 
-  ChevronDown, ChevronUp, Loader2, MoreVertical, 
-  LayoutDashboard, Activity, AlertTriangle, ArrowLeft, 
-  ShieldAlert, Shield, Eye, Lock, Gavel, Handshake, Info
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  ArrowLeft,
+  Clock,
+  DollarSign,
+  FileText,
+  Lock,
+  Package,
+  Play,
+  RotateCcw,
+  Shield,
+  UploadCloud,
+  X,
+  Calendar,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  MessageSquare,
+  ListChecks,
+  ChevronDown,
+  ChevronUp,
+  Activity,
+  Eye,
+  ShieldCheck,
+  TrendingUp,
+  Star,
+  Zap,
+  ExternalLink,
+  ShieldAlert,
+  Gavel,
+  AlertTriangle,
 } from "lucide-react";
-import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
+import { createDispute, type DisputeType } from "@/services/dispute.service";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ReviewModal } from "@/components/modals/ReviewModal";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-type MilestoneStatus = "PENDING" | "FUNDED" | "IN_PROGRESS" | "SUBMITTED" | "REVISION_REQUESTED" | "APPROVED" | "REJECTED";
-type ContractStatus = "OFFER_PENDING" | "ACTIVE" | "COMPLETED" | "CANCELLED" | "DISPUTED";
-type DisputeType = "PAYMENT" | "SCOPE" | "DEADLINE" | "QUALITY" | "REVISION" | "DELIVERABLES" | "IP";
+type MilestoneStatus =
+  | "PENDING"
+  | "FUNDED"
+  | "IN_PROGRESS"
+  | "SUBMITTED"
+  | "APPROVED"
+  | "REVISION_REQUESTED"
+  | "REJECTED";
+
+interface HistoryEvent {
+  type: string;
+  timestamp: string;
+  content: string;
+  attachments?: string[];
+  actorName?: string;
+  actorRole?: "CLIENT" | "FREELANCER";
+}
 
 interface Milestone {
   id: string;
-  title: string;
-  description: string;
-  amount: number;
-  status: MilestoneStatus;
-  dueDate?: string;
   order: number;
+  title: string;
+  description?: string;
+  amount: number;
+  dueDate?: string;
+  status: MilestoneStatus;
+  deliverables?: string;
+  revisionNote?: string;
   submittedAt?: string;
   approvedAt?: string;
-  deliverables?: string;
-  attachments?: string[];
-  revisionNote?: string;
-  revisionsUsed: number;
   allowedRevisions: number;
-  history: any[];
-}
-
-interface DisputeInfo {
-  id: string;
-  status: string;
-  resolution?: string;
-  resolutionNote?: string;
-  resolvedAt?: string;
+  revisionsUsed: number;
+  attachments: string[];
+  history?: HistoryEvent[];
 }
 
 interface Contract {
@@ -58,28 +101,58 @@ interface Contract {
   projectTitle: string;
   clientName: string;
   freelancerName: string;
-  freelancerImage?: string;
   agreedPrice: number;
-  status: ContractStatus;
+  status: string;
   startDate: string;
   endDate?: string;
   milestones: Milestone[];
+  totalMilestoneAmount: number;
   releasedAmount: number;
   escrowAmount: number;
   pendingAmount: number;
   refundedAmount?: number;
   milestonesModifiedByClient: boolean;
-  disputeInfo?: DisputeInfo;
 }
 
-const statusConfig: Record<MilestoneStatus, { label: string; color: string; icon: any }> = {
-  PENDING: { label: "Pending", color: "bg-slate-500/10 text-slate-500 border-slate-500/20", icon: <Clock className="w-3 h-3" /> },
-  FUNDED: { label: "Funded", color: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: <DollarSign className="w-3 h-3" /> },
-  IN_PROGRESS: { label: "In Progress", color: "bg-primary/10 text-primary border-primary/20", icon: <Play className="w-3 h-3" /> },
-  SUBMITTED: { label: "Under Review", color: "bg-purple-500/10 text-purple-600 border-purple-500/20", icon: <Search className="w-3 h-3" /> },
-  REVISION_REQUESTED: { label: "Revision Requested", color: "bg-orange-500/10 text-orange-600 border-orange-500/20", icon: <RotateCcw className="w-3 h-3" /> },
-  APPROVED: { label: "Approved", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: <CheckCircle2 className="w-3 h-3" /> },
-  REJECTED: { label: "Rejected", color: "bg-rose-500/10 text-rose-600 border-rose-500/20", icon: <AlertTriangle className="w-3 h-3" /> },
+const statusConfig: Record<
+  MilestoneStatus,
+  { label: string; color: string; icon: React.ReactNode }
+> = {
+  PENDING: {
+    label: "Awaiting Funding",
+    color: "bg-slate-500/10 text-slate-600 border-slate-300",
+    icon: <Lock className="w-3.5 h-3.5" />,
+  },
+  FUNDED: {
+    label: "Funded — Start Work",
+    color: "bg-blue-500/10 text-blue-600 border-blue-300",
+    icon: <Shield className="w-3.5 h-3.5" />,
+  },
+  IN_PROGRESS: {
+    label: "In Progress",
+    color: "bg-amber-500/10 text-amber-600 border-amber-300",
+    icon: <Clock className="w-3.5 h-3.5" />,
+  },
+  SUBMITTED: {
+    label: "Under Review",
+    color: "bg-purple-500/10 text-purple-600 border-purple-300",
+    icon: <Package className="w-3.5 h-3.5" />,
+  },
+  APPROVED: {
+    label: "Approved ✓",
+    color: "bg-emerald-500/10 text-emerald-600 border-emerald-300",
+    icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+  },
+  REVISION_REQUESTED: {
+    label: "Revision Requested",
+    color: "bg-orange-500/10 text-orange-600 border-orange-300",
+    icon: <RotateCcw className="w-3.5 h-3.5" />,
+  },
+  REJECTED: {
+    label: "Rejected",
+    color: "bg-red-500/10 text-red-600 border-red-300",
+    icon: <X className="w-3.5 h-3.5" />,
+  },
 };
 
 const eventConfig: any = {
@@ -127,68 +200,86 @@ export default function FreelancerContractDetail() {
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
-  const [reviewModal, setReviewModal] = useState(false);
-  const [isReviewed, setIsReviewed] = useState(false);
-  
-  const [submitModal, setSubmitModal] = useState({
-    open: false,
-    milestoneId: "",
-    deliverables: "",
-    files: [] as File[],
-  });
+  const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(
+    null,
+  );
+  const [submitModal, setSubmitModal] = useState<{
+    open: boolean;
+    milestoneId: string;
+    deliverables: string;
+    files: File[];
+  }>({ open: false, milestoneId: "", deliverables: "", files: [] });
 
+  // ── Review state ──
+  const [reviewModal, setReviewModal] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState<{
+    reviewStatus: "PENDING" | "WAITING" | "REVEALED";
+    myReview: any;
+    theirReview: any;
+  } | null>(null);
+
+  // ── Dispute state ──
   const [disputeModal, setDisputeModal] = useState(false);
   const [disputeSubmitting, setDisputeSubmitting] = useState(false);
   const [disputeForm, setDisputeForm] = useState({
     disputeType: "PAYMENT" as DisputeType,
     reason: "",
-    details: ""
+    details: "",
   });
   const [existingDispute, setExistingDispute] = useState<any>(null);
 
-  useEffect(() => {
-    fetchContract();
-    fetchReviewStatus();
-  }, [contractId]);
-
-  const fetchContract = async () => {
+  const fetchContract = useCallback(async () => {
     try {
-      setLoading(true);
       const res = await api.get(`/contracts/${contractId}`);
-      if (res.data.success) {
-        setContract(res.data.contract);
-        const disputeRes = await api.get(`/disputes/project/${res.data.contract.projectId}`);
-        if (disputeRes.data.success && disputeRes.data.disputes && disputeRes.data.disputes.length > 0) {
-          setExistingDispute(disputeRes.data.disputes[0]);
+      const contractData = res.data.contract;
+      setContract(contractData);
+
+      // Fetch dispute status for this project
+      if (contractData?.projectId) {
+        try {
+          const disputeRes = await api.get(
+            `/disputes/my/${contractData.projectId}`,
+          );
+          if (disputeRes.data.success) {
+            setExistingDispute(disputeRes.data.dispute);
+          }
+        } catch (err) {
+          // No dispute exists or not found, ignore
         }
       }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to fetch contract");
+    } catch {
+      toast.error("Failed to load contract");
       navigate("/freelancer/contracts");
     } finally {
       setLoading(false);
     }
-  };
+  }, [contractId, navigate]);
 
-  const fetchReviewStatus = async () => {
-    if (!contractId) return;
+  const fetchReviewStatus = useCallback(async () => {
     try {
-      const res = await api.get(`/contracts/${contractId}/review-status`);
-      if (res.data.success) {
-        setIsReviewed(res.data.isReviewed);
-      }
-    } catch (err) {
-      console.error("Error fetching review status:", err);
+      const res = await api.get(`/reviews/contract/${contractId}/status`);
+      setReviewStatus(res.data);
+    } catch {
+      // Non-critical
     }
-  };
+  }, [contractId]);
+
+  useEffect(() => {
+    fetchContract();
+  }, [fetchContract]);
+
+  useEffect(() => {
+    if (contract?.status === "COMPLETED") fetchReviewStatus();
+  }, [contract?.status, fetchReviewStatus]);
 
   const handleStart = async (milestoneId: string) => {
+    setProcessingId(milestoneId);
     try {
-      setProcessingId(milestoneId);
-      await api.patch(`/contracts/${contractId}/milestones/${milestoneId}/start`);
-      toast.success("Milestone started! Keep up the great work. 🚀");
-      fetchContract();
+      await api.post(
+        `/contracts/${contractId}/milestones/${milestoneId}/start`,
+      );
+      toast.success("Milestone started! Get to work 💪");
+      await fetchContract();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to start milestone");
     } finally {
@@ -197,39 +288,30 @@ export default function FreelancerContractDetail() {
   };
 
   const handleSubmit = async () => {
-    if (!submitModal.deliverables.trim()) {
-      toast.error("Please describe your deliverables");
+    if (!submitModal.deliverables.trim() && submitModal.files.length === 0) {
+      toast.error("Please add a description or attach files.");
       return;
     }
+    setProcessingId(submitModal.milestoneId);
     try {
-      setProcessingId(submitModal.milestoneId);
       const formData = new FormData();
       formData.append("deliverables", submitModal.deliverables);
-      submitModal.files.forEach(f => formData.append("attachments", f));
-      await api.patch(
+      submitModal.files.forEach((f) => formData.append("files", f));
+      await api.post(
         `/contracts/${contractId}/milestones/${submitModal.milestoneId}/submit`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { headers: { "Content-Type": "multipart/form-data" } },
       );
-      toast.success("Deliverables submitted! Client notified. 📮");
-      setSubmitModal({ open: false, milestoneId: "", deliverables: "", files: [] });
-      fetchContract();
+      toast.success("Deliverables submitted! Awaiting client review. 📦");
+      setSubmitModal({
+        open: false,
+        milestoneId: "",
+        deliverables: "",
+        files: [],
+      });
+      await fetchContract();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Submission failed");
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
-  const handleReject = async () => {
-    if (!window.confirm("Are you sure you want to reject this contract offer? This cannot be undone.")) return;
-    try {
-      setProcessingId("contract-rejection");
-      await api.patch(`/contracts/${contractId}/reject`);
-      toast.success("Offer rejected.");
-      navigate("/freelancer/contracts");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Action failed");
+      toast.error(err?.response?.data?.message || "Failed to submit");
     } finally {
       setProcessingId(null);
     }
@@ -237,34 +319,57 @@ export default function FreelancerContractDetail() {
 
   const handleOpenDispute = async () => {
     if (!disputeForm.reason.trim()) {
-      toast.error("Please provide a reason for the dispute");
+      toast.error("Please describe the issue.");
       return;
     }
+    setDisputeSubmitting(true);
     try {
-      setDisputeSubmitting(true);
-      await api.post("/disputes", {
-        projectId: contract?.projectId,
+      const res = await createDispute({
+        projectId: contract!.projectId,
         disputeType: disputeForm.disputeType,
         reason: disputeForm.reason,
-        details: disputeForm.details
+        details: disputeForm.details,
       });
-      toast.success("Dispute case opened. Our trust team will investigate.");
-      setDisputeModal(false);
-      fetchContract();
+      if (res.success) {
+        toast.success("Dispute submitted. Admin will review shortly.");
+        setDisputeModal(false);
+        setExistingDispute(res.dispute);
+        setDisputeForm({ disputeType: "PAYMENT", reason: "", details: "" });
+        await fetchContract();
+      }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to open dispute");
+      toast.error(err?.response?.data?.message || "Failed to submit dispute");
     } finally {
       setDisputeSubmitting(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to reject this offer? The project returns to open bidding.",
+      )
+    )
+      return;
+    setProcessingId("contract-rejection");
+    try {
+      await api.delete(`/contracts/${contractId}/reject`);
+      toast.success("Offer rejected. Redirecting...");
+      navigate("/freelancer/contracts");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to reject offer");
+    } finally {
+      setProcessingId(null);
     }
   };
 
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p className="text-muted-foreground font-black uppercase tracking-widest text-xs">
-            Loading Contract Details...
+        <div className="flex items-center justify-center min-h-[60vh] gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground font-medium">
+            Loading contract...
           </p>
         </div>
       </DashboardLayout>
@@ -272,6 +377,14 @@ export default function FreelancerContractDetail() {
   }
 
   if (!contract) return null;
+
+  const approvedCount = contract.milestones.filter(
+    (m) => m.status === "APPROVED",
+  ).length;
+  const progress =
+    contract.milestones.length > 0
+      ? Math.round((approvedCount / contract.milestones.length) * 100)
+      : 0;
 
   return (
     <DashboardLayout>
@@ -307,7 +420,7 @@ export default function FreelancerContractDetail() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 rounded-xl font-bold text-xs bg-card hover:bg-muted shrink-0 text-muted-foreground border-border/60 transition-colors hidden md:flex"
+                className="h-8 rounded-xl font-bold text-xs bg-card hover:bg-muted shrink-0 text-muted-foreground hover:text-foreground border-border/60 transition-colors hidden md:flex"
                 asChild
               >
                 <Link to={`/freelancer/projects/${contract.projectId}`}>
@@ -316,6 +429,19 @@ export default function FreelancerContractDetail() {
                 </Link>
               </Button>
             </div>
+
+            {/* Mobile View Project Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 h-8 w-full rounded-xl font-bold text-xs bg-card hover:bg-muted flex md:hidden text-muted-foreground hover:text-foreground border-border/60"
+              asChild
+            >
+              <Link to={`/freelancer/projects/${contract.projectId}`}>
+                <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                View Project Details
+              </Link>
+            </Button>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {(contract.status === "ACTIVE" || existingDispute) && (
@@ -352,24 +478,31 @@ export default function FreelancerContractDetail() {
             <Badge
               className={cn(
                 "font-bold px-4 py-1.5 text-sm border",
-                contract.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-700 border-emerald-400/30" : 
-                contract.status === "OFFER_PENDING" ? "bg-primary/10 text-primary border-primary/30" : 
-                contract.status === "COMPLETED" ? "bg-blue-500/10 text-blue-700 border-blue-400/30" : "bg-muted border-border",
+                contract.status === "ACTIVE"
+                  ? "bg-emerald-500/10 text-emerald-700 border-emerald-400/30"
+                  : contract.status === "OFFER_PENDING"
+                    ? "bg-primary/10 text-primary border-primary/30"
+                    : contract.status === "COMPLETED"
+                      ? "bg-blue-500/10 text-blue-700 border-blue-400/30"
+                      : "bg-muted text-muted-foreground border-border",
               )}
             >
-              {contract.status === "OFFER_PENDING" ? "Offer Pending" : contract.status}
+              {contract.status === "OFFER_PENDING"
+                ? "Offer Pending"
+                : contract.status}
             </Badge>
           </div>
         </div>
 
-        {/* Dispute Center */}
+        {/* Active Dispute Resolution Center */}
         {existingDispute && (
           <Card className="rounded-2xl border-rose-200 bg-rose-50/30 overflow-hidden animate-in slide-in-from-top-4">
-            <CardHeader className="bg-rose-500/10 px-5 py-3 border-b border-rose-200 flex flex-row items-center justify-between">
+            <div className="bg-rose-500/10 px-5 py-3 border-b border-rose-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600" />
                 <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider">
-                  Conflict Resolution — Case #{existingDispute.id.slice(-6).toUpperCase()}
+                  Conflict Resolution Center — Case #
+                  {existingDispute.id.slice(-6).toUpperCase()}
                 </h3>
               </div>
               <Badge className="bg-rose-600 text-white border-none font-black px-3 h-6">
@@ -563,27 +696,90 @@ export default function FreelancerContractDetail() {
           </Card>
         )}
 
-        {/* Offer Banner */}
+        {/* Offer Approval Banner */}
         {contract.status === "OFFER_PENDING" && (
-          <Card className="rounded-2xl border-primary/30 bg-primary/5 border-2 p-4">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <AlertCircle className="w-14 h-14 text-primary shrink-0" />
-              <div className="flex-1">
-                <h3 className="text-xl font-black">Review Contract Offer</h3>
-                <p className="text-muted-foreground text-sm">Review milestones and accept to start the job.</p>
+          <Card className="rounded-2xl border-primary/30 bg-primary/5 border-2 overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <AlertCircle className="w-7 h-7 text-primary" />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-xl font-black flex items-center justify-center md:justify-start gap-2">
+                    Review Contract Offer
+                    {contract.milestonesModifiedByClient && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none text-xs"
+                      >
+                        Milestones Modified
+                      </Badge>
+                    )}
+                  </h3>
+                  <p className="text-muted-foreground text-sm font-medium mt-1">
+                    Review the milestone plan and revision limits. Accept to
+                    start work, reject to cancel the hire, or message the client
+                    to negotiate.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto shrink-0">
+                  <Button
+                    variant="outline"
+                    className="rounded-xl border-border/40 font-black gap-2 h-11"
+                    onClick={() =>
+                      navigate(`/messages?projectId=${contract.projectId}`)
+                    }
+                  >
+                    <MessageSquare className="w-4 h-4" /> Message Client
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-black gap-2 h-11"
+                    onClick={handleReject}
+                    disabled={!!processingId}
+                  >
+                    {processingId === "contract-rejection" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                    Reject Offer
+                  </Button>
+                  <Button
+                    className="rounded-xl px-6 font-black bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 gap-2 h-11"
+                    onClick={async () => {
+                      try {
+                        setProcessingId("contract-approval");
+                        await api.patch(`/contracts/${contract.id}/approve`);
+                        toast.success(
+                          "Contract approved! Let's get to work! 🚀",
+                        );
+                        fetchContract();
+                      } catch (err: any) {
+                        toast.error(
+                          err?.response?.data?.message ||
+                            "Failed to approve contract",
+                        );
+                      } finally {
+                        setProcessingId(null);
+                      }
+                    }}
+                    disabled={!!processingId}
+                  >
+                    {processingId === "contract-approval" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    Accept &amp; Start Work
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="rounded-xl font-black" onClick={handleReject}>Reject</Button>
-                <Button className="rounded-xl font-black bg-primary text-white" onClick={async () => {
-                  await api.patch(`/contracts/${contract.id}/approve`);
-                  fetchContract();
-                }}>Accept & Start</Button>
-              </div>
-            </div>
+            </CardContent>
           </Card>
         )}
 
-        {/* Dashboard */}
+        {/* Earnings + Progress Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Earnings breakdown */}
           <Card className="rounded-2xl border-border/40 bg-card/60">
@@ -679,29 +875,103 @@ export default function FreelancerContractDetail() {
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl border-border/40 bg-card/60 p-5">
-             <CardTitle className="text-sm font-black flex items-center gap-2 mb-4">
-                <LayoutDashboard className="w-4 h-4 text-primary" /> Completion
-             </CardTitle>
-             <div className="flex items-center justify-between mb-2">
-                <p className="text-2xl font-black">{Math.round((contract.completedMilestones/contract.totalMilestones)*100)}%</p>
-                <p className="text-xs font-bold text-muted-foreground">{contract.completedMilestones}/{contract.totalMilestones} Milestones</p>
-             </div>
-             <Progress value={(contract.completedMilestones/contract.totalMilestones)*100} className="h-2" />
+
+          {/* Progress */}
+          <Card className="rounded-2xl border-border/40 bg-card/60">
+            <CardHeader className="pb-2 px-5 pt-4">
+              <CardTitle className="text-sm font-black flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-primary" /> Project Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-bold text-muted-foreground">
+                  Milestones Completed
+                </span>
+                <span className="text-sm font-black text-primary">
+                  {approvedCount}/{contract.milestones.length}
+                </span>
+              </div>
+              <Progress value={progress} className="h-3 rounded-full" />
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  {
+                    label: "Done",
+                    value: approvedCount,
+                    color: "text-emerald-600",
+                  },
+                  {
+                    label: "Working",
+                    value: contract.milestones.filter(
+                      (m) => m.status === "IN_PROGRESS",
+                    ).length,
+                    color: "text-amber-600",
+                  },
+                  {
+                    label: "Submitted",
+                    value: contract.milestones.filter(
+                      (m) => m.status === "SUBMITTED",
+                    ).length,
+                    color: "text-purple-600",
+                  },
+                  {
+                    label: "Revisions",
+                    value: contract.milestones.filter(
+                      (m) => m.status === "REVISION_REQUESTED",
+                    ).length,
+                    color: "text-orange-600",
+                  },
+                ].map((s, i) => (
+                  <div
+                    key={i}
+                    className="text-center p-2 rounded-xl bg-muted/30"
+                  >
+                    <p className={cn("text-base font-black", s.color)}>
+                      {s.value}
+                    </p>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                      {s.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
           </Card>
         </div>
 
         {/* Milestones */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-black flex items-center gap-2">
-            <Activity className="w-5 h-5 text-primary" /> Roadmap
-          </h2>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black flex items-center gap-2">
+              <ListChecks className="w-5 h-5 text-primary" /> Milestones
+              <span className="text-sm font-medium text-muted-foreground ml-1">
+                ({contract.milestones.length})
+              </span>
+            </h2>
+            <p className="text-xs text-muted-foreground font-medium">
+              Click any milestone to view full history
+            </p>
+          </div>
+
           {contract.milestones.map((milestone, index) => {
+            const cfg = statusConfig[milestone.status];
             const isProcessing = processingId === milestone.id;
             const isExpanded = expandedMilestoneId === milestone.id;
             const canStart = milestone.status === "FUNDED";
-            const canSubmit = ["IN_PROGRESS", "FUNDED", "REVISION_REQUESTED"].includes(milestone.status);
-            const history = Array.isArray(milestone.history) ? milestone.history : [];
+            const canSubmit = [
+              "IN_PROGRESS",
+              "FUNDED",
+              "REVISION_REQUESTED",
+            ].includes(milestone.status);
+            const history = Array.isArray(milestone.history)
+              ? milestone.history
+              : [];
+            const revisionHistory = history.filter(
+              (e) => e.type === "REVISION_REQUEST",
+            );
+            const submissionHistory = history.filter(
+              (e) => e.type === "SUBMISSION",
+            );
 
             return (
               <Card
@@ -1082,35 +1352,504 @@ export default function FreelancerContractDetail() {
                       </div>
                     )}
 
-                   <div className="mt-4 flex gap-2">
-                      {canStart && <Button size="sm" className="rounded-xl font-black" onClick={() => handleStart(milestone.id)}>Start Work</Button>}
-                      {canSubmit && !canStart && <Button size="sm" className="rounded-xl font-black" onClick={() => setSubmitModal({open: true, milestoneId: milestone.id, deliverables: "", files: []})}>Submit Work</Button>}
-                   </div>
-                </div>
+                    {submissionHistory.length > 0 && (
+                      <div className="mt-3 p-3 rounded-xl bg-muted/30 border border-border/20 flex items-center gap-3">
+                        <Eye className="w-4 h-4 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-black text-foreground">
+                            {submissionHistory.length}
+                          </span>{" "}
+                          total submission
+                          {submissionHistory.length > 1 ? "s" : ""} •{" "}
+                          <span className="font-black text-foreground">
+                            {revisionHistory.length}
+                          </span>{" "}
+                          revision{revisionHistory.length !== 1 ? "s" : ""}{" "}
+                          requested by client
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </Card>
             );
           })}
         </div>
 
-        {/* Modals */}
-        <Dialog open={submitModal.open} onOpenChange={o => !o && setSubmitModal(p => ({ ...p, open: false }))}>
-           <DialogContent className="rounded-2xl max-w-lg">
-              <DialogHeader><DialogTitle className="font-black">Submit Deliverables</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                 <Textarea placeholder="Explain your delivery..." value={submitModal.deliverables} onChange={e => setSubmitModal(p => ({...p, deliverables: e.target.value}))} />
-                 <Button className="w-full rounded-xl font-black" onClick={handleSubmit}>Submit for Review</Button>
+        {/* Contract Complete + Review Section */}
+        {contract.status === "COMPLETED" && (
+          <div className="space-y-4">
+            <Card className="rounded-2xl border-emerald-400/30 bg-emerald-500/5 p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               </div>
-           </DialogContent>
+              <h2 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">
+                Contract Completed!
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                All milestones approved. $
+                {contract.releasedAmount.toLocaleString()} has been released to
+                you.
+              </p>
+            </Card>
+
+            {/* Review Panel */}
+            <Card className="rounded-2xl border-border/40 overflow-hidden">
+              <CardHeader className="pb-3 px-5 pt-4 border-b border-border/20">
+                <CardTitle className="text-base font-black flex items-center gap-2">
+                  <Star className="w-4 h-4 text-yellow-500" /> Mutual Review
+                  <span className="text-xs font-medium text-muted-foreground ml-1">
+                    (blind until both submit)
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 space-y-4">
+                {!reviewStatus ? (
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading review
+                    status...
+                  </div>
+                ) : reviewStatus.reviewStatus === "PENDING" ||
+                  (reviewStatus.reviewStatus === "WAITING" &&
+                    !reviewStatus.myReview) ? (
+                  <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-amber-500/5 border border-amber-400/20">
+                    <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <Star className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left">
+                      <p className="font-black text-amber-800 dark:text-amber-400">
+                        {reviewStatus.reviewStatus === "WAITING"
+                          ? "Leave a Review — Client Already Submitted!"
+                          : "Leave a Review"}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {reviewStatus.reviewStatus === "WAITING"
+                          ? "Submit yours to instantly unlock both reviews!"
+                          : `Share your experience with ${contract.clientName}. Reviews are hidden until both parties submit.`}
+                      </p>
+                    </div>
+                    <Button
+                      className="gap-2 rounded-xl font-black bg-amber-500 hover:bg-amber-600 text-white shrink-0"
+                      onClick={() => setReviewModal(true)}
+                    >
+                      <Star className="w-4 h-4" /> Leave Review
+                    </Button>
+                  </div>
+                ) : reviewStatus.reviewStatus === "WAITING" &&
+                  reviewStatus.myReview ? (
+                  <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-400/20 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="font-black text-blue-800 dark:text-blue-400">
+                          Review Submitted — Waiting for Client
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Your review is sealed. It will be revealed once the
+                          client submits or after the deadline.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 p-3 rounded-lg bg-muted/30 w-fit">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={cn(
+                            "w-4 h-4",
+                            s <= reviewStatus.myReview.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-muted-foreground/20",
+                          )}
+                        />
+                      ))}
+                      <span className="text-sm font-black ml-1">
+                        {reviewStatus.myReview.rating}/5
+                      </span>
+                    </div>
+                    {reviewStatus.myReview.reviewDeadline && (
+                      <p className="text-xs text-muted-foreground">
+                        Auto-reveals:{" "}
+                        {new Date(
+                          reviewStatus.myReview.reviewDeadline,
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                    )}
+                  </div>
+                ) : reviewStatus.reviewStatus === "REVEALED" ? (
+                  <div className="space-y-4">
+                    {reviewStatus.myReview && (
+                      <div className="p-4 rounded-xl bg-muted/30 border border-border/20 space-y-2">
+                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                          Your Review (for {contract.clientName})
+                        </p>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={cn(
+                                "w-4 h-4",
+                                s <= reviewStatus.myReview.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground/20",
+                              )}
+                            />
+                          ))}
+                          <span className="text-sm font-black ml-2">
+                            {reviewStatus.myReview.rating}/5
+                          </span>
+                        </div>
+                        {reviewStatus.myReview.comment && (
+                          <p className="text-sm text-muted-foreground leading-relaxed italic">
+                            "{reviewStatus.myReview.comment}"
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {reviewStatus.theirReview && (
+                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-400/20 space-y-2">
+                        <p className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                          {contract.clientName}'s Review of You
+                        </p>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={cn(
+                                "w-4 h-4",
+                                s <= reviewStatus.theirReview.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground/20",
+                              )}
+                            />
+                          ))}
+                          <span className="text-sm font-black ml-2">
+                            {reviewStatus.theirReview.rating}/5
+                          </span>
+                        </div>
+                        {reviewStatus.theirReview.comment && (
+                          <p className="text-sm text-muted-foreground leading-relaxed italic">
+                            "{reviewStatus.theirReview.comment}"
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Submit Deliverables Modal */}
+        <Dialog
+          open={submitModal.open}
+          onOpenChange={(o) =>
+            !o &&
+            setSubmitModal({
+              open: false,
+              milestoneId: "",
+              deliverables: "",
+              files: [],
+            })
+          }
+        >
+          <DialogContent className="rounded-2xl max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-black text-lg">
+                {contract.milestones.find(
+                  (m) => m.id === submitModal.milestoneId,
+                )?.status === "REVISION_REQUESTED"
+                  ? "Re-submit with Revisions"
+                  : "Submit Deliverables"}
+              </DialogTitle>
+              <DialogDescription>
+                Describe your work and/or attach files for the client's review.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Show latest revision note if re-submitting */}
+              {(() => {
+                const m = contract.milestones.find(
+                  (m) => m.id === submitModal.milestoneId,
+                );
+                if (m?.status === "REVISION_REQUESTED" && m.revisionNote) {
+                  return (
+                    <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-400/25">
+                      <p className="text-xs font-black text-orange-700 mb-1">
+                        Client's Revision Note:
+                      </p>
+                      <p className="text-sm">{m.revisionNote}</p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              <div>
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Description
+                </Label>
+                <Textarea
+                  placeholder="Describe what you've completed, links to your work, notes for the client..."
+                  value={submitModal.deliverables}
+                  onChange={(e) =>
+                    setSubmitModal((p) => ({
+                      ...p,
+                      deliverables: e.target.value,
+                    }))
+                  }
+                  rows={4}
+                  className="rounded-xl mt-2 resize-none"
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Attachments (Optional — Max 5 files)
+                </Label>
+                <div className="mt-2 border-2 border-dashed border-border/40 rounded-xl p-6 text-center relative hover:border-primary/40 transition-colors">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt,.zip"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={(e) => {
+                      if (!e.target.files) return;
+                      const ALLOWED = [
+                        "image/jpeg",
+                        "image/png",
+                        "application/pdf",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "text/plain",
+                        "application/zip",
+                        "application/x-zip-compressed",
+                      ];
+                      const selected = Array.from(e.target.files);
+
+                      // Check for 500MB limit
+                      const oversized = selected.filter(
+                        (f) => f.size > 500 * 1024 * 1024,
+                      );
+                      if (oversized.length > 0) {
+                        toast.error(
+                          "Some files are too large. Maximum 500MB per file allowed.",
+                        );
+                        return;
+                      }
+
+                      const valid = selected.filter((f) =>
+                        ALLOWED.includes(f.type),
+                      );
+                      const invalid = selected.filter(
+                        (f) => !ALLOWED.includes(f.type),
+                      );
+                      if (invalid.length > 0)
+                        toast.error(
+                          `${invalid.length} file(s) skipped — only JPG, PNG, PDF, Word, TXT, and ZIP allowed.`,
+                        );
+                      setSubmitModal((p) => ({
+                        ...p,
+                        files: [...p.files, ...valid].slice(0, 5),
+                      }));
+                      e.target.value = "";
+                    }}
+                  />
+                  <UploadCloud className="w-8 h-8 text-primary/60 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-muted-foreground">
+                    Click or drag to upload files
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    JPG, PNG, PDF, Word, TXT, ZIP
+                  </p>
+                </div>
+                {submitModal.files.length > 0 && (
+                  <div className="mt-2 space-y-1.5">
+                    {submitModal.files.map((f, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 text-xs font-bold p-2.5 bg-muted/30 rounded-xl border border-border/20"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span className="truncate flex-1">{f.name}</span>
+                        <span className="text-muted-foreground shrink-0">
+                          {(f.size / 1024).toFixed(0)}KB
+                        </span>
+                        <button
+                          className="text-red-500 hover:text-red-600 shrink-0"
+                          onClick={() =>
+                            setSubmitModal((p) => ({
+                              ...p,
+                              files: p.files.filter((_, idx) => idx !== i),
+                            }))
+                          }
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                  onClick={() =>
+                    setSubmitModal({
+                      open: false,
+                      milestoneId: "",
+                      deliverables: "",
+                      files: [],
+                    })
+                  }
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black gap-2"
+                  onClick={handleSubmit}
+                  disabled={!!processingId}
+                >
+                  {processingId ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <UploadCloud className="w-4 h-4" />
+                  )}
+                  Submit for Review
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
         </Dialog>
 
-        <Dialog open={disputeModal} onOpenChange={o => !o && setDisputeModal(false)}>
-           <DialogContent className="rounded-2xl max-w-lg">
-              <DialogHeader><DialogTitle className="font-black">Open Dispute</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                 <Textarea placeholder="Reason for dispute..." value={disputeForm.details} onChange={e => setDisputeForm(p => ({...p, details: e.target.value}))} />
-                 <Button className="w-full rounded-xl font-black bg-rose-600 text-white" onClick={handleOpenDispute}>Submit Case</Button>
+        {/* Review Modal */}
+        {contract && (
+          <ReviewModal
+            open={reviewModal}
+            onClose={() => setReviewModal(false)}
+            contractId={contract.id}
+            projectTitle={contract.projectTitle}
+            revieweeRole="CLIENT"
+            onSuccess={fetchReviewStatus}
+          />
+        )}
+
+        {/* Dispute Modal */}
+        <Dialog
+          open={disputeModal}
+          onOpenChange={(o) => !o && setDisputeModal(false)}
+        >
+          <DialogContent className="rounded-2xl max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-black text-lg flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-rose-500" />
+                Open a Dispute
+              </DialogTitle>
+              <DialogDescription>
+                Describe the issue clearly. Admin will review and mediate
+                between you and the client.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-1">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  Dispute Type <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  value={disputeForm.disputeType}
+                  onValueChange={(v) =>
+                    setDisputeForm((p) => ({
+                      ...p,
+                      disputeType: v as DisputeType,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="rounded-xl h-10 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(
+                      [
+                        ["PAYMENT", "💰 Payment Dispute"],
+                        ["SCOPE", "📄 Scope of Work"],
+                        ["DEADLINE", "⏰ Deadline / Delay"],
+                        ["QUALITY", "🧪 Quality of Work"],
+                        ["REVISION", "🔁 Revision Dispute"],
+                        ["DELIVERABLES", "📂 Deliverables Not Provided"],
+                        ["IP", "🔐 Intellectual Property"],
+                      ] as [DisputeType, string][]
+                    ).map(([val, label]) => (
+                      <SelectItem key={val} value={val}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-           </DialogContent>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  Issue Summary <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Client refuses to release payment after delivery"
+                  value={disputeForm.reason}
+                  onChange={(e) =>
+                    setDisputeForm((p) => ({ ...p, reason: e.target.value }))
+                  }
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  Full Details
+                </label>
+                <Textarea
+                  placeholder="Explain what happened in detail. Include dates, milestones, and any relevant context..."
+                  value={disputeForm.details}
+                  onChange={(e) =>
+                    setDisputeForm((p) => ({ ...p, details: e.target.value }))
+                  }
+                  rows={4}
+                  className="rounded-xl resize-none text-sm"
+                />
+              </div>
+              <div className="text-xs text-muted-foreground bg-amber-50 border border-amber-200 rounded-xl p-3">
+                ⚠️ Once submitted, this project will be marked as{" "}
+                <strong>Disputed</strong> and an admin will be notified
+                immediately.
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl"
+                onClick={() => setDisputeModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black gap-2"
+                onClick={handleOpenDispute}
+                disabled={disputeSubmitting || !disputeForm.reason.trim()}
+              >
+                {disputeSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Gavel className="w-4 h-4" />
+                )}
+                Submit Dispute
+              </Button>
+            </div>
+          </DialogContent>
         </Dialog>
       </div>
     </DashboardLayout>
