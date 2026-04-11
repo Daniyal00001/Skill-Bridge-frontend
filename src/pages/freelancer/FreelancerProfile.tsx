@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { getFreelancerLevel } from "@/lib/levelUtils";
 import { LevelBadge } from "@/components/common/LevelBadge";
+import { LevelInfoPopover } from "@/components/common/LevelInfoPopover";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -186,14 +187,15 @@ export default function FreelancerProfile() {
                       displayProfile.user?.name ||
                       "Unnamed Freelancer"}
                   </h1>
-                  <LevelBadge
-                    level={getFreelancerLevel({
-                      totalEarnings: displayProfile.totalEarningsNum ?? displayProfile.totalEarnings,
+                  <LevelInfoPopover
+                    stats={{
+                      type: "freelancer",
+                      totalEarnings: displayProfile.totalEarningsNum ?? displayProfile.totalEarnings ?? 0,
                       clientsCount: displayProfile.reviewsTotal ?? displayProfile.totalReviews ?? 0,
                       projectsCount: displayProfile.projectsCompleted ?? displayProfile.completedContracts ?? 0,
                       averageRating: displayProfile.reviewsAvg ?? displayProfile.averageRating ?? 0,
-                    })}
-                    size="sm"
+                    }}
+                    badgeSize="sm"
                   />
                 </div>
                 <p className="text-xl font-medium text-muted-foreground italic">
@@ -325,22 +327,33 @@ export default function FreelancerProfile() {
                     icon: DollarSign,
                     color: "text-amber-500",
                   },
-                  {
-                    label: "Level",
-                    value: displayProfile.experienceLevel || "Expert",
-                    icon: TrendingUp,
-                    color: "text-purple-500",
-                  },
+                  // {
+                  //   label: "Level",
+                  //   value: displayProfile.experienceLevel || "Expert",
+                  //   icon: TrendingUp,
+                  //   color: "text-purple-500",
+                  // },
                   {
                     label: "Platform Level",
                     value: null,
                     icon: Award,
                     color: "text-primary",
                     _level: getFreelancerLevel({
-                      totalEarnings: displayProfile.totalEarningsNum ?? displayProfile.totalEarnings,
-                      clientsCount: displayProfile.reviewsTotal ?? displayProfile.totalReviews ?? 0,
-                      projectsCount: displayProfile.projectsCompleted ?? displayProfile.completedContracts ?? 0,
-                      averageRating: displayProfile.reviewsAvg ?? displayProfile.averageRating ?? 0,
+                      totalEarnings:
+                        displayProfile.totalEarningsNum ??
+                        displayProfile.totalEarnings,
+                      clientsCount:
+                        displayProfile.reviewsTotal ??
+                        displayProfile.totalReviews ??
+                        0,
+                      projectsCount:
+                        displayProfile.projectsCompleted ??
+                        displayProfile.completedContracts ??
+                        0,
+                      averageRating:
+                        displayProfile.reviewsAvg ??
+                        displayProfile.averageRating ??
+                        0,
                     }),
                   },
                 ].map((stat: any) => (
@@ -351,7 +364,16 @@ export default function FreelancerProfile() {
                     <stat.icon className={cn("w-6 h-6", stat.color)} />
                     <div>
                       {stat._level ? (
-                        <LevelBadge level={stat._level} size="sm" />
+                        <LevelInfoPopover
+                          stats={{
+                            type: "freelancer",
+                            totalEarnings: displayProfile.totalEarningsNum ?? displayProfile.totalEarnings ?? 0,
+                            clientsCount: displayProfile.reviewsTotal ?? displayProfile.totalReviews ?? 0,
+                            projectsCount: displayProfile.projectsCompleted ?? displayProfile.completedContracts ?? 0,
+                            averageRating: displayProfile.reviewsAvg ?? displayProfile.averageRating ?? 0,
+                          }}
+                          badgeSize="sm"
+                        />
                       ) : (
                         <p className="text-2xl font-black">{stat.value}</p>
                       )}

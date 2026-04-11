@@ -41,6 +41,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getFreelancerDashboardStats } from "@/services/dashboard.service";
 import { getFreelancerLevel } from "@/lib/levelUtils";
 import { LevelBadge } from "@/components/common/LevelBadge";
+import { LevelInfoPopover } from "@/components/common/LevelInfoPopover";
 
 // ─── Status color maps ────────────────────────────────────────────────────────
 
@@ -257,14 +258,15 @@ export default function FreelancerDashboard() {
               <h1 className="text-4xl font-black tracking-tight">
                 Overview
               </h1>
-              <LevelBadge
-                level={getFreelancerLevel({
+              <LevelInfoPopover
+                stats={{
+                  type: "freelancer",
                   totalEarnings: stats.totalEarnings ?? 0,
                   clientsCount: stats.totalReviews ?? 0,
                   projectsCount: stats.completedJobs ?? 0,
                   averageRating: stats.averageRating ?? 0,
-                })}
-                size="sm"
+                }}
+                badgeSize="sm"
               />
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-muted-foreground font-medium">

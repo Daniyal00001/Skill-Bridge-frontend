@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { getClientLevel } from "@/lib/levelUtils";
 import { LevelBadge } from "@/components/common/LevelBadge";
+import { LevelInfoPopover } from "@/components/common/LevelInfoPopover";
 
 export default function ClientProfilePage() {
   const { user } = useAuth();
@@ -157,13 +158,14 @@ export default function ClientProfilePage() {
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                     {client.name}
                   </h1>
-                  <LevelBadge
-                    level={getClientLevel({
+                  <LevelInfoPopover
+                    stats={{
+                      type: "client",
                       totalSpent: client.metrics.totalSpent,
                       totalHires: client.metrics.hireRate > 0 ? Math.round((client.metrics.hireRate / 100) * client.metrics.totalProjects) : 0,
                       totalOrders: client.metrics.totalProjects,
-                    })}
-                    size="sm"
+                    }}
+                    badgeSize="sm"
                   />
                 </div>
               </div>
@@ -252,13 +254,14 @@ export default function ClientProfilePage() {
                     </div>
                   )}
                   <div className="mt-2">
-                    <LevelBadge
-                      level={getClientLevel({
+                    <LevelInfoPopover
+                      stats={{
+                        type: "client",
                         totalSpent: client.metrics.totalSpent,
                         totalHires: client.metrics.hireRate > 0 ? Math.round((client.metrics.hireRate / 100) * client.metrics.totalProjects) : 0,
                         totalOrders: client.metrics.totalProjects,
-                      })}
-                      size="sm"
+                      }}
+                      badgeSize="sm"
                     />
                   </div>
                 </div>

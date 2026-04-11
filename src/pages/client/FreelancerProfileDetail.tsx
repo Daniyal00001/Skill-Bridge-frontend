@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { InviteFreelancerModal } from "@/components/modals/InviteFreelancerModal";
 import { getFreelancerLevel } from "@/lib/levelUtils";
 import { LevelBadge } from "@/components/common/LevelBadge";
+import { LevelInfoPopover } from "@/components/common/LevelInfoPopover";
 
 /* ─── Proficiency bar ─────────────────────────────────────────── */
 const ProficiencyBar = ({ level = 3 }) => (
@@ -569,14 +570,15 @@ const FreelancerProfileDetail = () => {
               </div>
               <div className="mt-4 pt-4 border-t border-slate-100">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Platform Level</p>
-                <LevelBadge
-                  level={getFreelancerLevel({
+                <LevelInfoPopover
+                  stats={{
+                    type: "freelancer",
                     totalEarnings: freelancer.totalEarnings ?? 0,
                     clientsCount: freelancer.totalReviews ?? 0,
                     projectsCount: freelancer.completedContracts ?? freelancer.totalReviews ?? 0,
                     averageRating: freelancer.averageRating ?? 0,
-                  })}
-                  size="md"
+                  }}
+                  badgeSize="md"
                 />
               </div>
             </div>

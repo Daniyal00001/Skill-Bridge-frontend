@@ -28,6 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getClientDashboardStats } from "@/services/dashboard.service";
 import { getClientLevel } from "@/lib/levelUtils";
 import { LevelBadge } from "@/components/common/LevelBadge";
+import { LevelInfoPopover } from "@/components/common/LevelInfoPopover";
 
 const PROPOSAL_COLORS: Record<string, string> = {
   PENDING: "bg-amber-500/10 text-amber-600 border-amber-500/20",
@@ -87,13 +88,14 @@ export default function ClientDashboard() {
                 <h1 className="text-4xl font-black tracking-tight">
                   Welcome back! 👋
                 </h1>
-                <LevelBadge
-                  level={getClientLevel({
+                <LevelInfoPopover
+                  stats={{
+                    type: "client",
                     totalSpent: stats.committedBudget,
                     totalHires: Math.round((stats.hireRate / 100) * stats.totalProjects),
                     totalOrders: stats.totalProjects,
-                  })}
-                  size="sm"
+                  }}
+                  badgeSize="sm"
                 />
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-muted-foreground text-lg">
