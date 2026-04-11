@@ -40,6 +40,10 @@ import {
   Inbox,
   UserCheck,
   ShieldCheck,
+  Layers,
+  DollarSign,
+  History,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
@@ -270,19 +274,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               { icon: UserCheck, label: "ID Approvals", href: "/admin/verifications" },
               { icon: FolderOpen, label: "Projects", href: "/admin/projects" },
               { icon: Star, label: "Skills", href: "/admin/skills" },
-              {
-                icon: AlertTriangle,
-                label: "Disputes",
-                href: "/admin/disputes",
-                badge: 3,
-              },
+              { icon: Layers, label: "Categories", href: "/admin/categories" },
+              { icon: AlertTriangle, label: "Disputes", href: "/admin/disputes" },
+            ],
+          },
+          {
+            label: "Finance",
+            items: [
+              { icon: DollarSign, label: "Payments", href: "/admin/payments" },
             ],
           },
           {
             label: "System",
             items: [
-              { icon: Shield, label: "Security", href: "/admin/security" },
-              { icon: Settings, label: "Settings", href: "/settings" },
+              { icon: History, label: "Admin Logs", href: "/admin/logs" },
+              { icon: SlidersHorizontal, label: "Platform Settings", href: "/admin/settings" },
             ],
           },
         ];

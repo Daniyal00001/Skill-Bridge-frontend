@@ -26,10 +26,11 @@ export function ProtectedRoute() {
 // Wraps routes that require a specific role
 // If wrong role → redirect to their correct dashboard
 interface RoleRouteProps {
-  allowedRole: 'CLIENT' | 'FREELANCER' | 'ADMIN'
+  allowedRole?: 'CLIENT' | 'FREELANCER' | 'ADMIN'
+  allowedRoles?: ('CLIENT' | 'FREELANCER' | 'ADMIN')[]
 }
 
-export function RoleRoute({ allowedRole }: RoleRouteProps) {
+export function RoleRoute({ allowedRole, allowedRoles }: RoleRouteProps) {
   const { user, isLoading } = useAuth()
   const location = useLocation()
 
@@ -41,8 +42,12 @@ export function RoleRoute({ allowedRole }: RoleRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  // Check if role is allowed
+  const roles = allowedRoles || (allowedRole ? [allowedRole] : [])
+  const isAllowed = roles.includes(user.role as any)
+
   // Wrong role → redirect to correct dashboard
-  if (user.role !== allowedRole) {
+  if (!isAllowed) {
     switch (user.role) {
       case 'CLIENT':
         return <Navigate to="/client" replace />

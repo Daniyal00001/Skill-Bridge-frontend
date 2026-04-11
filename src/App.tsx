@@ -77,10 +77,13 @@ import ProjectModeration from "./pages/admin/ProjectModeration";
 import DisputeManagement from "./pages/admin/DisputeManagement";
 import AdminDisputeDetail from "./pages/admin/AdminDisputeDetail";
 import Analytics from "./pages/admin/Analytics";
-import Security from "./pages/admin/Security";
 import AdminSkills from "./pages/admin/AdminSkills";
 import AdminUserDetail from "./pages/admin/AdminUserDetail";
 import AdminVerifications from "./pages/admin/AdminVerifications";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminPayments from "./pages/admin/AdminPayments";
+import AdminLogs from "./pages/admin/AdminLogs";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 import NotFound from "./pages/NotFound";
 
@@ -203,13 +206,21 @@ const App = () => (
                     element={<AIAssistantPage />}
                   />
                 </Route>
-                {/* ── Freelancer Only ───────────────────────────────── */}
-                <Route element={<RoleRoute allowedRole="FREELANCER" />}>
-                  <Route path="/freelancer" element={<FreelancerDashboard />} />
+                {/* ── Freelancer & Admin Shared (for Moderation) ──── */}
+                <Route element={<RoleRoute allowedRoles={["FREELANCER", "ADMIN"]} />}>
                   <Route
                     path="/freelancer/browse"
                     element={<FreelancerBrowseProjects />}
                   />
+                  <Route
+                    path="/freelancer/projects/:projectId"
+                    element={<FreelancerProjectDetails />}
+                  />
+                </Route>
+
+                {/* ── Freelancer Only ───────────────────────────────── */}
+                <Route element={<RoleRoute allowedRole="FREELANCER" />}>
+                  <Route path="/freelancer" element={<FreelancerDashboard />} />
                   <Route
                     path="/freelancer/proposals"
                     element={<FreelancerProposalsPage />}
@@ -233,10 +244,6 @@ const App = () => (
                   <Route
                     path="/freelancer/profile"
                     element={<FreelancerProfile />}
-                  />
-                  <Route
-                    path="/freelancer/projects/:projectId"
-                    element={<FreelancerProjectDetails />}
                   />
                   <Route
                     path="/freelancer/projects/:projectId/proposal"
@@ -288,7 +295,10 @@ const App = () => (
                   <Route path="/admin/verifications" element={<AdminVerifications />} />
                   <Route path="/admin/skills" element={<AdminSkills />} />
                   <Route path="/admin/analytics" element={<Analytics />} />
-                  <Route path="/admin/security" element={<Security />} />
+                  <Route path="/admin/categories" element={<AdminCategories />} />
+                  <Route path="/admin/payments" element={<AdminPayments />} />
+                  <Route path="/admin/logs" element={<AdminLogs />} />
+                  <Route path="/admin/settings" element={<AdminSettings />} />
                 </Route>
               </Route>
 

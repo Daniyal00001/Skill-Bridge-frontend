@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService, VerificationUser, StatusCounts } from "@/services/admin.service";
@@ -240,9 +241,15 @@ export default function AdminVerifications() {
                   <CardHeader className="bg-muted/40 pb-4 border-b">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <CardTitle className="text-base truncate" title={v.name}>
-                          {v.name}
-                        </CardTitle>
+                        <Link 
+                          to={`/admin/users/${v.id}`}
+                          className="hover:text-primary transition-colors block group"
+                        >
+                          <CardTitle className="text-base truncate flex items-center gap-1.5" title={v.name}>
+                            {v.name}
+                            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </CardTitle>
+                        </Link>
                         <CardDescription className="truncate text-xs mt-0.5" title={v.email}>
                           {v.email}
                         </CardDescription>
