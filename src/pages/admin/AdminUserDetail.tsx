@@ -55,6 +55,9 @@ export default function AdminUserDetail() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [banDialogOpen, setBanDialogOpen] = useState(false);
+  const [banReason, setBanReason] = useState("");
+  const [isBanning, setIsBanning] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -69,6 +72,26 @@ export default function AdminUserDetail() {
     };
     fetchUser();
   }, [id]);
+
+  const handleBanToggle = async () => {
+    try {
+      setIsBanning(true);
+      const isUnbanning = user.isBanned;
+      await adminService.banUser(user.id, !isUnbanning, banReason);
+      
+      toast.success(isUnbanning ? "Access restored for user" : "User access suspended");
+      setBanDialogOpen(false);
+      setBanReason("");
+      
+      // Refresh user data
+      const updatedUser = await adminService.getUserProfile(id!);
+      setUser(updatedUser);
+    } catch (err) {
+      toast.error("Protocol failure: Unable to update user status");
+    } finally {
+      setIsBanning(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -163,6 +186,11 @@ export default function AdminUserDetail() {
                     {user.isIdVerified && (
                       <ShieldCheck className="w-6 h-6 text-emerald-500" />
                     )}
+                    {user.isBanned && (
+                      <Badge variant="destructive" className="rounded-xl px-3 py-1 font-black text-[10px] tracking-widest uppercase bg-rose-600">
+                        BANNED
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-lg font-bold text-muted-foreground italic leading-none break-words max-w-xl">
                     {isFreelancer
@@ -188,10 +216,14 @@ export default function AdminUserDetail() {
 
               <div className="flex gap-3 pb-2">
                 <Button
-                  variant="outline"
-                  className="rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 shadow-sm"
+                  variant={user.isBanned ? "secondary" : "outline"}
+                  className={cn(
+                    "rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 shadow-sm transition-all",
+                    user.isBanned ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" : "hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200"
+                  )}
+                  onClick={() => setBanDialogOpen(true)}
                 >
-                  Suspend Account
+                  {user.isBanned ? "Restore Access" : "Suspend Account"}
                 </Button>
                 {/* <Button className="rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 shadow-lg shadow-primary/20">
                   Broadcast Notice
@@ -515,6 +547,24 @@ export default function AdminUserDetail() {
 
           {/* ── Right Column: Sidebar Specs ──────────────────────────── */}
           <aside className="lg:col-span-4 space-y-8">
+            {/* Suspension Protocol (Only if banned) */}
+            {user.isBanned && (
+              <Card className="rounded-[2.5rem] border-rose-200 shadow-lg overflow-hidden bg-rose-50/30 animate-in zoom-in-95 duration-300">
+                <CardHeader className="bg-rose-500/10 border-b border-rose-500/10">
+                  <CardTitle className="text-xs font-black uppercase tracking-[0.3em] text-rose-700 flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4" />
+                    Suspension Protocol
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Reason for Terminated Access</p>
+                  <p className="text-xs font-bold text-rose-900 leading-relaxed italic">
+                    "{user.banReason || "No specific reason provided for this protocol termination."}"
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Verification Matrix */}
             <Card className="rounded-[2.5rem] border-border/50 shadow-lg overflow-hidden">
               <CardHeader className="bg-muted/30 border-b border-border/40">
@@ -771,6 +821,76 @@ export default function AdminUserDetail() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Ban/Suspend Confirmation Dialog ─────────────────────────── */}
+      <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
+        <DialogContent className="max-w-md rounded-[2.5rem] border-border/50 shadow-2xl p-0 overflow-hidden">
+          <div className={cn(
+            "h-24 flex flex-col justify-end px-8 pb-4 border-b border-border/40 backdrop-blur-xl",
+            user.isBanned ? "bg-emerald-500/10" : "bg-rose-500/10"
+          )}>
+            <div className="flex items-center gap-3 mb-1">
+              <div className={cn(
+                "w-8 h-8 rounded-xl flex items-center justify-center",
+                user.isBanned ? "bg-emerald-500" : "bg-rose-500"
+              )}>
+                {user.isBanned ? <ShieldCheck className="w-5 h-5 text-white" /> : <ShieldAlert className="w-5 h-5 text-white" />}
+              </div>
+              <Badge variant="outline" className="rounded-xl px-2 py-0.5 font-black tracking-widest text-[8px] uppercase">
+                {user.isBanned ? "ACCESS RESTORATION" : "PROTOCOL SUSPENSION"}
+              </Badge>
+            </div>
+            <DialogTitle className="text-xl font-black italic">
+              {user.isBanned ? "Restore User Protocol?" : "Terminate User Access?"}
+            </DialogTitle>
+          </div>
+
+          <div className="p-8 space-y-6">
+            <DialogDescription className="text-sm font-medium text-muted-foreground leading-relaxed">
+              {user.isBanned 
+                ? "This will restore full access to the platform for this user identity. All system restrictions will be lifted immediately."
+                : "This action will immediately restrict this user from logging in or performing any actions on the platform. This protocol is logged for auditing."
+              }
+            </DialogDescription>
+
+            {!user.isBanned && (
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Reason for Suspension</p>
+                <textarea
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  placeholder="e.g. Terms of Service Violation, Multiple Fraud Reports..."
+                  className="w-full h-24 rounded-2xl bg-muted/30 border border-border/40 p-4 font-medium text-sm placeholder:italic focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                />
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-2xl font-black uppercase text-[10px] tracking-widest h-12"
+                onClick={() => setBanDialogOpen(false)}
+              >
+                Abort Action
+              </Button>
+              <Button 
+                className={cn(
+                  "flex-1 rounded-2xl font-black uppercase text-[10px] tracking-widest h-12 shadow-lg",
+                  user.isBanned ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20" : "bg-rose-600 hover:bg-rose-700 shadow-rose-600/20"
+                )}
+                onClick={handleBanToggle}
+                disabled={isBanning || (!user.isBanned && !banReason.trim())}
+              >
+                {isBanning ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  user.isBanned ? "Restore Identity" : "Execute Suspension"
+                )}
+              </Button>
             </div>
           </div>
         </DialogContent>

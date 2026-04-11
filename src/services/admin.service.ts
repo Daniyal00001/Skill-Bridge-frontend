@@ -13,6 +13,8 @@ export interface AdminUserProfile {
   idRejectionReason?: string | null;
   isPhoneVerified: boolean;
   isPaymentVerified: boolean;
+  isBanned: boolean;
+  banReason?: string | null;
   lastActiveAt?: string;
   clientProfile?: {
     id: string;
@@ -85,6 +87,10 @@ export const adminService = {
   },
   rejectVerification: async (userId: string, reason: string) => {
     const res = await api.post(`/admin/verifications/reject/${userId}`, { reason });
+    return res.data;
+  },
+  banUser: async (userId: string, ban: boolean, reason?: string) => {
+    const res = await api.patch(`/admin/users/${userId}/ban`, { ban, reason });
     return res.data;
   }
 };
