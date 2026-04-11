@@ -49,6 +49,8 @@ import {
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getFreelancerLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 
 interface MilestoneInput {
   title: string;
@@ -420,13 +422,22 @@ const ClientProposalDetail = () => {
                   <div className="flex-1 space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h2 className="text-xl font-black tracking-tight group-hover/flancer:text-primary transition-colors">
                             {freelancer?.name}
                           </h2>
                           <div className="bg-primary/10 text-primary p-1 rounded-lg opacity-0 group-hover/flancer:opacity-100 transition-all scale-75 group-hover:scale-100">
                             <ExternalLink className="w-3 h-3" />
                           </div>
+                          <LevelBadge
+                            level={getFreelancerLevel({
+                              totalEarnings: freelancer?.totalEarnings ?? 0,
+                              clientsCount: freelancer?.totalReviews ?? 0,
+                              projectsCount: freelancer?.completedProjects ?? 0,
+                              averageRating: freelancer?.rating ?? 0,
+                            })}
+                            size="xs"
+                          />
                         </div>
                         <p className="text-muted-foreground font-black text-[10px] uppercase tracking-widest opacity-60">
                           {freelancer?.title || "Professional Developer"}

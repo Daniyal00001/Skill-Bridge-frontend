@@ -45,7 +45,6 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -58,9 +57,7 @@ function formatCurrency(amount: number) {
 }
 
 function timeAgo(date: string | Date) {
-  const seconds = Math.floor(
-    (Date.now() - new Date(date).getTime()) / 1000,
-  );
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
   if (seconds < 60) return "just now";
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
@@ -203,9 +200,7 @@ function WithdrawalsTab() {
             <p className="text-4xl font-black tracking-tight">
               {formatCurrency(balance)}
             </p>
-            <p className="text-white/60 text-xs mt-2">
-              Ready to withdraw
-            </p>
+            <p className="text-white/60 text-xs mt-2">Ready to withdraw</p>
           </CardContent>
         </Card>
 
@@ -238,7 +233,9 @@ function WithdrawalsTab() {
                 Total Withdrawn
               </p>
             </div>
-            <p className="text-2xl font-black">{formatCurrency(totalWithdrawn)}</p>
+            <p className="text-2xl font-black">
+              {formatCurrency(totalWithdrawn)}
+            </p>
             <p className="text-muted-foreground text-xs mt-1">
               Paid out to your account
             </p>
@@ -342,12 +339,14 @@ function WithdrawalsTab() {
                         Amount exceeds available balance
                       </p>
                     )}
-                    {withdrawAmount && witdrawAmountNum < 1 && witdrawAmountNum > 0 && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1">
-                        <AlertTriangle className="h-3 w-3" />
-                        Minimum withdrawal is $1.00
-                      </p>
-                    )}
+                    {withdrawAmount &&
+                      witdrawAmountNum < 1 &&
+                      witdrawAmountNum > 0 && (
+                        <p className="text-xs text-amber-600 flex items-center gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          Minimum withdrawal is $1.00
+                        </p>
+                      )}
                   </div>
 
                   {/* Quick amount buttons */}
@@ -529,7 +528,8 @@ function WithdrawalsTab() {
                   ) : (
                     <div className="divide-y divide-border/50 max-h-80 overflow-y-auto">
                       {withdrawalHistory.map((w: any) => {
-                        const cfg = statusConfig[w.status] ?? statusConfig.PENDING;
+                        const cfg =
+                          statusConfig[w.status] ?? statusConfig.PENDING;
                         return (
                           <div
                             key={w.id}
@@ -784,7 +784,7 @@ const FreelancerSettings = () => {
                       {user.isEmailVerified ? "Verified" : "Unverified"}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between">
+                  {/* <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium">Phone Number</span>
@@ -799,7 +799,7 @@ const FreelancerSettings = () => {
                     >
                       {user.isPhoneVerified ? "Verified" : "Unverified"}
                     </Badge>
-                  </div>
+                  </div> */}
                 </CardContent>
               </Card>
 
@@ -915,7 +915,9 @@ const FreelancerSettings = () => {
                         ) : (
                           <div className="flex flex-col items-center gap-2">
                             <ShieldCheck className="h-8 w-8 text-primary mb-1" />
-                            <p className="text-xs font-semibold">{idFile.name}</p>
+                            <p className="text-xs font-semibold">
+                              {idFile.name}
+                            </p>
                             <p className="text-[10px] text-muted-foreground">
                               Click to change file
                             </p>
@@ -1154,6 +1156,4 @@ const FreelancerSettings = () => {
   );
 };
 
-
 export default FreelancerSettings;
-

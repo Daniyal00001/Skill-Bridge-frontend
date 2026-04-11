@@ -22,6 +22,8 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { InviteFreelancerModal } from "@/components/modals/InviteFreelancerModal";
 import { formatDistanceToNow } from "date-fns";
+import { getFreelancerLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 
 interface Props {
   freelancer: ScoredFreelancer;
@@ -127,6 +129,15 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
               >
                 {f.experienceLevel}
               </span>
+              <LevelBadge
+                level={getFreelancerLevel({
+                  totalEarnings: (f as any).totalEarnings ?? 0,
+                  clientsCount: f.totalReviews ?? 0,
+                  projectsCount: f.completedContracts ?? 0,
+                  averageRating: f.averageRating ?? 0,
+                })}
+                size="xs"
+              />
               <span
                 className={cn(
                   "flex items-center gap-1 text-[10px] font-semibold",
@@ -327,7 +338,7 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
       {/* Body */}
       <div className="px-5 pb-5 flex-1 flex flex-col gap-3">
         {/* Exp level + location */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span
             className={cn(
               "text-[10px] font-semibold border px-2 py-0.5 rounded-md",
@@ -336,6 +347,15 @@ export const FreelancerCard = ({ freelancer: f, view = "grid" }: Props) => {
           >
             {f.experienceLevel}
           </span>
+          <LevelBadge
+            level={getFreelancerLevel({
+              totalEarnings: (f as any).totalEarnings ?? 0,
+              clientsCount: f.totalReviews ?? 0,
+              projectsCount: f.completedContracts ?? 0,
+              averageRating: f.averageRating ?? 0,
+            })}
+            size="xs"
+          />
           {f.location && (
             <span className="flex items-center gap-1 text-[10px] text-slate-400">
               <MapPin className="w-3 h-3 text-blue-400" />

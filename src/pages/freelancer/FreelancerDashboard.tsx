@@ -39,6 +39,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { getFreelancerDashboardStats } from "@/services/dashboard.service";
+import { getFreelancerLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 
 // ─── Status color maps ────────────────────────────────────────────────────────
 
@@ -251,9 +253,20 @@ export default function FreelancerDashboard() {
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-black tracking-tight">
-              Overview
-            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-4xl font-black tracking-tight">
+                Overview
+              </h1>
+              <LevelBadge
+                level={getFreelancerLevel({
+                  totalEarnings: stats.totalEarnings ?? 0,
+                  clientsCount: stats.totalReviews ?? 0,
+                  projectsCount: stats.completedJobs ?? 0,
+                  averageRating: stats.averageRating ?? 0,
+                })}
+                size="sm"
+              />
+            </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-muted-foreground font-medium">
               <p>
                 Track your performance and manage active projects.

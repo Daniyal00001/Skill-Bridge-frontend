@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { FreelancerBrowseFilters } from "@/hooks/useBrowseFreelancers";
+import { FREELANCER_LEVELS, FREELANCER_LEVEL_KEYS } from "@/lib/levelUtils";
 
 interface Props {
   filters: FreelancerBrowseFilters;
@@ -54,7 +55,8 @@ export const FreelancerFilterBar = ({
     filters.region ||
     filters.minRating ||
     filters.hasPortfolio ||
-    filters.isVerified;
+    filters.isVerified ||
+    filters.level;
 
   return (
     <div
@@ -81,7 +83,7 @@ export const FreelancerFilterBar = ({
       {/* Experience Level */}
       <div className="flex items-center gap-1.5 flex-wrap">
         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
-          Level
+          Exp. Level
         </span>
         {EXP_LEVELS.map((level) => (
           <Chip
@@ -100,7 +102,32 @@ export const FreelancerFilterBar = ({
 
       <Divider compact={compact} />
 
-
+      {/* Platform Level */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">
+          Level
+        </span>
+        {FREELANCER_LEVEL_KEYS.map((key) => {
+          const lvl = FREELANCER_LEVELS[key];
+          return (
+            <button
+              key={key}
+              onClick={() =>
+                onFilterChange("level", filters.level === key ? null : key)
+              }
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all border",
+                filters.level === key
+                  ? `${lvl.bg} ${lvl.color} border-current`
+                  : "bg-blue-50/60 border-blue-100 text-slate-500 hover:border-blue-300 hover:text-blue-600",
+              )}
+            >
+              <span>{lvl.emoji}</span>
+              {lvl.label}
+            </button>
+          );
+        })}
+      </div>
 
       <Divider compact={compact} />
 

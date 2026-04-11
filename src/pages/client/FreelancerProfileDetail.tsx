@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { InviteFreelancerModal } from "@/components/modals/InviteFreelancerModal";
+import { getFreelancerLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 
 /* ─── Proficiency bar ─────────────────────────────────────────── */
 const ProficiencyBar = ({ level = 3 }) => (
@@ -253,6 +255,15 @@ const FreelancerProfileDetail = () => {
                         <Sparkles className="w-3 h-3" /> Top Rated
                       </div>
                     )}
+                    <LevelBadge
+                      level={getFreelancerLevel({
+                        totalEarnings: freelancer.totalEarnings ?? 0,
+                        clientsCount: freelancer.totalReviews ?? 0,
+                        projectsCount: freelancer.completedContracts ?? freelancer.totalReviews ?? 0,
+                        averageRating: freelancer.averageRating ?? 0,
+                      })}
+                      size="xs"
+                    />
                   </div>
                   <p className="text-base font-semibold text-slate-500 leading-snug max-w-lg break-words">{freelancer.tagline}</p>
                   <div className="flex flex-wrap items-center gap-3">
@@ -555,6 +566,18 @@ const FreelancerProfileDetail = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Platform Level</p>
+                <LevelBadge
+                  level={getFreelancerLevel({
+                    totalEarnings: freelancer.totalEarnings ?? 0,
+                    clientsCount: freelancer.totalReviews ?? 0,
+                    projectsCount: freelancer.completedContracts ?? freelancer.totalReviews ?? 0,
+                    averageRating: freelancer.averageRating ?? 0,
+                  })}
+                  size="md"
+                />
               </div>
             </div>
           </aside>

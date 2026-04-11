@@ -27,6 +27,8 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import { getFreelancerLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 
 const ProjectProposalsPage = () => {
   const { projectId } = useParams();
@@ -465,7 +467,7 @@ const ProposalCard = ({
               <p className="text-sm text-muted-foreground">
                 {freelancer?.title || "Developer"}
               </p>
-              <div className="flex items-center gap-3 mt-1">
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
                 {freelancer?.rating && (
                   <div className="flex items-center gap-1 text-xs font-black text-amber-500">
                     <Star className="w-3 h-3 fill-amber-500" />{" "}
@@ -478,6 +480,15 @@ const ProposalCard = ({
                     {freelancer.completedProjects} projects
                   </div>
                 )}
+                <LevelBadge
+                  level={getFreelancerLevel({
+                    totalEarnings: freelancer?.totalEarnings ?? 0,
+                    clientsCount: freelancer?.totalReviews ?? 0,
+                    projectsCount: freelancer?.completedProjects ?? 0,
+                    averageRating: freelancer?.rating ?? 0,
+                  })}
+                  size="xs"
+                />
                 {hasMilestones && (
                   <div className="flex items-center gap-1 text-xs font-bold text-primary">
                     <ListChecks className="w-3 h-3" /> {activeMilestones.length}{" "}

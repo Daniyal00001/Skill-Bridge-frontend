@@ -23,6 +23,8 @@ import { ClientProfileModal } from "@/components/modals/ClientProfileModal";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { getClientLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 
 export default function ClientProfilePage() {
   const { user } = useAuth();
@@ -155,9 +157,14 @@ export default function ClientProfilePage() {
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                     {client.name}
                   </h1>
-                  <Badge className="bg-primary/5 text-primary border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
-                    Client Account
-                  </Badge>
+                  <LevelBadge
+                    level={getClientLevel({
+                      totalSpent: client.metrics.totalSpent,
+                      totalHires: client.metrics.hireRate > 0 ? Math.round((client.metrics.hireRate / 100) * client.metrics.totalProjects) : 0,
+                      totalOrders: client.metrics.totalProjects,
+                    })}
+                    size="sm"
+                  />
                 </div>
               </div>
 
@@ -244,6 +251,16 @@ export default function ClientProfilePage() {
                       </span>
                     </div>
                   )}
+                  <div className="mt-2">
+                    <LevelBadge
+                      level={getClientLevel({
+                        totalSpent: client.metrics.totalSpent,
+                        totalHires: client.metrics.hireRate > 0 ? Math.round((client.metrics.hireRate / 100) * client.metrics.totalProjects) : 0,
+                        totalOrders: client.metrics.totalProjects,
+                      })}
+                      size="sm"
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -32,6 +32,8 @@ import {
   FileText,
   DollarSign,
 } from "lucide-react";
+import { getFreelancerLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -184,9 +186,15 @@ export default function FreelancerProfile() {
                       displayProfile.user?.name ||
                       "Unnamed Freelancer"}
                   </h1>
-                  <Badge className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 transition-colors px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg">
-                    Top Rated
-                  </Badge>
+                  <LevelBadge
+                    level={getFreelancerLevel({
+                      totalEarnings: displayProfile.totalEarningsNum ?? displayProfile.totalEarnings,
+                      clientsCount: displayProfile.reviewsTotal ?? displayProfile.totalReviews ?? 0,
+                      projectsCount: displayProfile.projectsCompleted ?? displayProfile.completedContracts ?? 0,
+                      averageRating: displayProfile.reviewsAvg ?? displayProfile.averageRating ?? 0,
+                    })}
+                    size="sm"
+                  />
                 </div>
                 <p className="text-xl font-medium text-muted-foreground italic">
                   {displayProfile.tagline ||
@@ -323,15 +331,31 @@ export default function FreelancerProfile() {
                     icon: TrendingUp,
                     color: "text-purple-500",
                   },
-                ].map((stat) => (
+                  {
+                    label: "Platform Level",
+                    value: null,
+                    icon: Award,
+                    color: "text-primary",
+                    _level: getFreelancerLevel({
+                      totalEarnings: displayProfile.totalEarningsNum ?? displayProfile.totalEarnings,
+                      clientsCount: displayProfile.reviewsTotal ?? displayProfile.totalReviews ?? 0,
+                      projectsCount: displayProfile.projectsCompleted ?? displayProfile.completedContracts ?? 0,
+                      averageRating: displayProfile.reviewsAvg ?? displayProfile.averageRating ?? 0,
+                    }),
+                  },
+                ].map((stat: any) => (
                   <div
                     key={stat.label}
                     className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-primary/5 transition-colors"
                   >
                     <stat.icon className={cn("w-6 h-6", stat.color)} />
                     <div>
-                      <p className="text-2xl font-black">{stat.value}</p>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      {stat._level ? (
+                        <LevelBadge level={stat._level} size="sm" />
+                      ) : (
+                        <p className="text-2xl font-black">{stat.value}</p>
+                      )}
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">
                         {stat.label}
                       </p>
                     </div>

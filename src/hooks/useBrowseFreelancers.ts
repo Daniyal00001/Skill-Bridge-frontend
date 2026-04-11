@@ -75,6 +75,7 @@ export interface FreelancerBrowseFilters {
   minRating: string;
   hasPortfolio: boolean;
   isVerified: boolean;
+  level: string | null;
 }
 
 export type FreelancerSortOption =
@@ -99,6 +100,7 @@ export function useBrowseFreelancers() {
     minRating: "",
     hasPortfolio: false,
     isVerified: false,
+    level: null,
   });
   const [sort, setSort] = useState<FreelancerSortOption>("best_match");
 
@@ -133,6 +135,7 @@ export function useBrowseFreelancers() {
       if (filters.minRating) params.set("minRating", filters.minRating);
       if (filters.hasPortfolio) params.set("hasPortfolio", "true");
       if (filters.isVerified) params.set("isIdVerified", "true");
+      if (filters.level) params.set("level", filters.level);
       return params.toString();
     },
     [filters, sort],
@@ -214,6 +217,7 @@ export function useBrowseFreelancers() {
       minRating: "",
       hasPortfolio: false,
       isVerified: false,
+      level: null,
     });
     setSort("best_match");
   }, []);

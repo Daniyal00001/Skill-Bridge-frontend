@@ -26,6 +26,8 @@ import { cn } from "@/lib/utils";
 
 import { useQuery } from "@tanstack/react-query";
 import { getClientDashboardStats } from "@/services/dashboard.service";
+import { getClientLevel } from "@/lib/levelUtils";
+import { LevelBadge } from "@/components/common/LevelBadge";
 
 const PROPOSAL_COLORS: Record<string, string> = {
   PENDING: "bg-amber-500/10 text-amber-600 border-amber-500/20",
@@ -81,9 +83,19 @@ export default function ClientDashboard() {
         <div className="space-y-8 relative z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-black tracking-tight">
-                Welcome back! 👋
-              </h1>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-4xl font-black tracking-tight">
+                  Welcome back! 👋
+                </h1>
+                <LevelBadge
+                  level={getClientLevel({
+                    totalSpent: stats.committedBudget,
+                    totalHires: Math.round((stats.hireRate / 100) * stats.totalProjects),
+                    totalOrders: stats.totalProjects,
+                  })}
+                  size="sm"
+                />
+              </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-muted-foreground text-lg">
                 <p>
                   Here's what's happening with your projects today
