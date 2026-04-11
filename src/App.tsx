@@ -206,13 +206,21 @@ const App = () => (
                     element={<AIAssistantPage />}
                   />
                 </Route>
-                {/* ── Freelancer Only ───────────────────────────────── */}
-                <Route element={<RoleRoute allowedRole="FREELANCER" />}>
-                  <Route path="/freelancer" element={<FreelancerDashboard />} />
+                {/* ── Freelancer & Admin Shared (for Moderation) ──── */}
+                <Route element={<RoleRoute allowedRoles={["FREELANCER", "ADMIN"]} />}>
                   <Route
                     path="/freelancer/browse"
                     element={<FreelancerBrowseProjects />}
                   />
+                  <Route
+                    path="/freelancer/projects/:projectId"
+                    element={<FreelancerProjectDetails />}
+                  />
+                </Route>
+
+                {/* ── Freelancer Only ───────────────────────────────── */}
+                <Route element={<RoleRoute allowedRole="FREELANCER" />}>
+                  <Route path="/freelancer" element={<FreelancerDashboard />} />
                   <Route
                     path="/freelancer/proposals"
                     element={<FreelancerProposalsPage />}
@@ -236,10 +244,6 @@ const App = () => (
                   <Route
                     path="/freelancer/profile"
                     element={<FreelancerProfile />}
-                  />
-                  <Route
-                    path="/freelancer/projects/:projectId"
-                    element={<FreelancerProjectDetails />}
                   />
                   <Route
                     path="/freelancer/projects/:projectId/proposal"

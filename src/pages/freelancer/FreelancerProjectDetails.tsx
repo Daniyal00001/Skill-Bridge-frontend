@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,6 +60,7 @@ const getDaysLeft = (deadline: string) => {
 export default function FreelancerProjectDetails() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [myProposal, setMyProposal] = useState<any>(null); // existing proposal if any
@@ -126,7 +128,7 @@ export default function FreelancerProjectDetails() {
       <div className="max-w-[1400px] w-full mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-6 min-w-0">
         {/* Breadcrumb */}
         <div className="mb-4">
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             asChild
@@ -136,7 +138,7 @@ export default function FreelancerProjectDetails() {
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
               Back to Browse Projects
             </Link>
-          </Button>
+          </Button> */}
         </div>
 
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8">
@@ -186,7 +188,6 @@ export default function FreelancerProjectDetails() {
                 )}
               </div>
             </div>
-
 
             {/* Description */}
             <div className="space-y-6 py-2">
@@ -393,15 +394,34 @@ export default function FreelancerProjectDetails() {
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-background shadow-md">
-                        <AvatarImage src={client.user?.profileImage || client.profileImage} referrerPolicy="no-referrer" />
+                        <AvatarImage
+                          src={client.user?.profileImage || client.profileImage}
+                          referrerPolicy="no-referrer"
+                        />
                         <AvatarFallback className="bg-primary/20 text-primary font-black">
-                          {client.user?.name?.[0] || client.name?.[0] || client.fullName?.[0] || "?"}
+                          {client.user?.name?.[0] ||
+                            client.name?.[0] ||
+                            client.fullName?.[0] ||
+                            "?"}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-black leading-tight text-foreground">
-                          {client.user?.name || client.name || client.fullName}
-                        </p>
+                        {user?.role === "ADMIN" ? (
+                          <Link
+                            to={`/admin/users/${client.user?.id || client.id}`}
+                            className="font-black leading-tight text-primary hover:underline"
+                          >
+                            {client.user?.name ||
+                              client.name ||
+                              client.fullName}
+                          </Link>
+                        ) : (
+                          <p className="font-black leading-tight text-foreground">
+                            {client.user?.name ||
+                              client.name ||
+                              client.fullName}
+                          </p>
+                        )}
                         <div className="flex items-center gap-1 mt-0.5">
                           <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                           <span className="text-xs font-bold">
@@ -417,48 +437,82 @@ export default function FreelancerProjectDetails() {
                       {client.user?.isIdVerified ? (
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                           <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-                          <span className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">Identity Verified</span>
+                          <span className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">
+                            Identity Verified
+                          </span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 border border-border/50 rounded-lg">
                           <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
-                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">Identity Unverified</span>
+                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">
+                            Identity Unverified
+                          </span>
                         </div>
                       )}
-                      
+
                       {client.user?.isPaymentVerified ? (
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                           <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
-                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Payment Verified</span>
+                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">
+                            Payment Verified
+                          </span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 border border-border/50 rounded-lg">
                           <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
-                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">Payment Unverified</span>
+                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">
+                            Payment Unverified
+                          </span>
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-y-4 gap-x-2 pt-4 border-t border-border/50">
                       <div className="space-y-1">
-                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Member Since</p>
-                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><Calendar className="w-3 h-3 text-primary"/> {client.createdAt ? new Date(client.createdAt).getFullYear() : 'N/A'}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">
+                          Member Since
+                        </p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5">
+                          <Calendar className="w-3 h-3 text-primary" />{" "}
+                          {client.createdAt
+                            ? new Date(client.createdAt).getFullYear()
+                            : "N/A"}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Hired</p>
-                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><Users className="w-3 h-3 text-primary"/> {client.totalHires || 0}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">
+                          Total Hired
+                        </p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5">
+                          <Users className="w-3 h-3 text-primary" />{" "}
+                          {client.totalHires || 0}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total Released</p>
-                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><DollarSign className="w-3 h-3 text-emerald-500"/> ${client.totalSpent?.toLocaleString() || 0}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">
+                          Total Released
+                        </p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5">
+                          <DollarSign className="w-3 h-3 text-emerald-500" /> $
+                          {client.totalSpent?.toLocaleString() || 0}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Hire Rate</p>
-                        <p className="font-bold text-sm leading-none flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-emerald-500"/> {client.hireRate ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%` : 'N/A'}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">
+                          Hire Rate
+                        </p>
+                        <p className="font-bold text-sm leading-none flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />{" "}
+                          {client.hireRate
+                            ? `${Math.round(client.hireRate <= 1 ? client.hireRate * 100 : client.hireRate)}%`
+                            : "N/A"}
+                        </p>
                       </div>
                       {client.location && (
                         <div className="space-y-1 col-span-2 text-center flex flex-col items-center pt-2 border-t border-border/30 mt-2">
-                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Location</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">
+                            Location
+                          </p>
                           <p className="font-bold text-sm leading-none flex items-center gap-1.5 justify-center mt-1">
                             <MapPin className="w-3 h-3 text-primary" />
                             {client.location}
@@ -512,6 +566,16 @@ export default function FreelancerProjectDetails() {
                   <AlertCircle className="w-10 h-10 text-muted-foreground/40 mx-auto" />
                   <p className="font-black text-muted-foreground">
                     This project is no longer accepting proposals.
+                  </p>
+                </Card>
+              ) : user?.role === "ADMIN" ? (
+                <Card className="bg-primary/5 border-primary/20 backdrop-blur-2xl rounded-[2rem] shadow-xl overflow-hidden border-t-8 border-t-primary p-6 text-center space-y-4">
+                  <h3 className="text-2xl font-black tracking-tight">
+                    Moderator View
+                  </h3>
+                  <p className="text-muted-foreground font-medium pb-2 text-sm">
+                    You are viewing this project as an administrator. Standard
+                    application protocols do not apply to your profile.
                   </p>
                 </Card>
               ) : (
