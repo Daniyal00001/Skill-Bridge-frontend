@@ -233,9 +233,9 @@ export default function FreelancerProfile() {
               </div>
 
               <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
-                <Button className="rounded-xl h-12 px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all">
+                {/* <Button className="rounded-xl h-12 px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all">
                   Contact for Project
-                </Button>
+                </Button> */}
                 <Button
                   variant="outline"
                   className="rounded-xl h-12 px-6 font-bold hover:bg-accent active:scale-95 transition-all"
