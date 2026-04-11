@@ -37,6 +37,11 @@ export interface AdminUserProfile {
   };
   reviews: any[];
   disputeHistory: any[];
+  _count?: {
+    reviewsReceived: number;
+    disputesAsClient: number;
+    disputesAsFreelancer: number;
+  };
 }
 
 export interface VerificationUser {

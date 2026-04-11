@@ -164,7 +164,7 @@ export default function AdminUserDetail() {
                       <ShieldCheck className="w-6 h-6 text-emerald-500" />
                     )}
                   </div>
-                  <p className="text-lg font-bold text-muted-foreground italic leading-none">
+                  <p className="text-lg font-bold text-muted-foreground italic leading-none break-words max-w-xl">
                     {isFreelancer
                       ? profile?.tagline
                       : profile?.company || "Independent Client"}
@@ -315,7 +315,7 @@ export default function AdminUserDetail() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-8">
-                    <p className="text-base text-muted-foreground font-medium leading-relaxed italic whitespace-pre-wrap">
+                    <p className="text-base text-muted-foreground font-medium leading-relaxed italic whitespace-pre-wrap break-words">
                       "
                       {profile?.bio ||
                         "No detailed summary provided for this user identity."}
@@ -424,7 +424,7 @@ export default function AdminUserDetail() {
                               <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                             </div>
                           </div>
-                          <p className="text-sm text-foreground/80 font-medium italic leading-relaxed pl-1">
+                          <p className="text-sm text-foreground/80 font-medium italic leading-relaxed pl-1 break-words">
                             "
                             {review.comment ||
                               "The reviewer left no written comments, but provided a high-quality rating for the interaction."}

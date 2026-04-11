@@ -70,6 +70,9 @@ interface Contract {
   refundedAmount?: number;
   milestonesModifiedByClient: boolean;
   disputeInfo?: DisputeInfo;
+  totalMilestoneAmount: number;
+  totalMilestones: number;
+  completedMilestones: number;
 }
 
 const statusConfig: Record<MilestoneStatus, { label: string; color: string; icon: any }> = {
@@ -375,7 +378,7 @@ export default function FreelancerContractDetail() {
               <Badge className="bg-rose-600 text-white border-none font-black px-3 h-6">
                 {existingDispute.status.replace(/_/g, " ")}
               </Badge>
-            </div>
+            </CardHeader>
             <CardContent className="p-0">
               <div className="p-5 grid md:grid-cols-2 gap-6 border-b border-rose-100">
                 {/* Case Details */}
@@ -702,6 +705,9 @@ export default function FreelancerContractDetail() {
             const canStart = milestone.status === "FUNDED";
             const canSubmit = ["IN_PROGRESS", "FUNDED", "REVISION_REQUESTED"].includes(milestone.status);
             const history = Array.isArray(milestone.history) ? milestone.history : [];
+            const submissionHistory = history.filter((h: any) => h.type === "SUBMISSION");
+            const revisionHistory = history.filter((h: any) => h.type === "REVISION_REQUEST");
+            const cfg = statusConfig[milestone.status];
 
             return (
               <Card
@@ -1087,6 +1093,7 @@ export default function FreelancerContractDetail() {
                       {canSubmit && !canStart && <Button size="sm" className="rounded-xl font-black" onClick={() => setSubmitModal({open: true, milestoneId: milestone.id, deliverables: "", files: []})}>Submit Work</Button>}
                    </div>
                 </div>
+                  )}
               </Card>
             );
           })}
@@ -1103,14 +1110,90 @@ export default function FreelancerContractDetail() {
            </DialogContent>
         </Dialog>
 
-        <Dialog open={disputeModal} onOpenChange={o => !o && setDisputeModal(false)}>
-           <DialogContent className="rounded-2xl max-w-lg">
-              <DialogHeader><DialogTitle className="font-black">Open Dispute</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                 <Textarea placeholder="Reason for dispute..." value={disputeForm.details} onChange={e => setDisputeForm(p => ({...p, details: e.target.value}))} />
-                 <Button className="w-full rounded-xl font-black bg-rose-600 text-white" onClick={handleOpenDispute}>Submit Case</Button>
+        <Dialog open={disputeModal} onOpenChange={(o) => !o && setDisputeModal(false)}>
+          <DialogContent className="rounded-2xl max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-black">Open Dispute Case</DialogTitle>
+              <DialogDescription className="text-xs font-bold uppercase tracking-widest text-rose-500">
+                Resolution Center
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Dispute Category</label>
+                <Select
+                  value={disputeForm.disputeType}
+                  onValueChange={(v: DisputeType) =>
+                    setDisputeForm((p) => ({ ...p, disputeType: v }))
+                  }
+                >
+                  <SelectTrigger className="rounded-xl h-12 border-border/40 font-bold">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-border/40">
+                    <SelectItem value="PAYMENT" className="font-bold">Payment Issue</SelectItem>
+                    <SelectItem value="SCOPE" className="font-bold">Scope Conflict</SelectItem>
+                    <SelectItem value="DEADLINE" className="font-bold">Deadline Breach</SelectItem>
+                    <SelectItem value="QUALITY" className="font-bold">Quality Standard</SelectItem>
+                    <SelectItem value="REVISION" className="font-bold">Revision Loop</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-           </DialogContent>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Core Reason</label>
+                <Textarea
+                  placeholder="Summarize the issue in one sentence..."
+                  className="rounded-xl border-border/40 font-bold resize-none min-h-[60px]"
+                  value={disputeForm.reason}
+                  onChange={(e) =>
+                    setDisputeForm((p) => ({ ...p, reason: e.target.value }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Additional Context</label>
+                <Textarea
+                  placeholder="Provide detailed evidence or background context..."
+                  className="rounded-xl border-border/40 font-bold min-h-[120px]"
+                  value={disputeForm.details}
+                  onChange={(e) =>
+                    setDisputeForm((p) => ({ ...p, details: e.target.value }))
+                  }
+                />
+              </div>
+
+              <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3">
+                <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-rose-800 leading-relaxed font-bold">
+                  Opening a dispute will involve our trust team. Please ensure you've tried discussing this with the client in the workspace first.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-xl font-black h-12"
+                  onClick={() => setDisputeModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 rounded-xl font-black bg-rose-600 hover:bg-rose-700 text-white h-12 gap-2"
+                  onClick={handleOpenDispute}
+                  disabled={disputeSubmitting}
+                >
+                  {disputeSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Gavel className="w-4 h-4" />
+                  )}
+                  Open Case
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
         </Dialog>
       </div>
     </DashboardLayout>
