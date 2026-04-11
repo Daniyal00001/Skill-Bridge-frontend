@@ -76,9 +76,12 @@ export const adminService = {
     const res = await api.get<{ success: boolean; users: VerificationUser[] }>(`/admin/verifications/pending`);
     return res.data.users;
   },
-  getAllVerifications: async (status?: string) => {
-    const params = status && status !== 'ALL' ? `?status=${status}` : '';
-    const res = await api.get<{ success: boolean; users: VerificationUser[]; statusCounts: StatusCounts }>(`/admin/verifications${params}`);
+  getAllVerifications: async (status?: string, page: number = 1, search?: string, role?: string) => {
+    const params = new URLSearchParams({ page: String(page), limit: "12" });
+    if (status && status !== 'ALL') params.set('status', status);
+    if (search) params.set('search', search);
+    if (role && role !== 'ALL') params.set('role', role);
+    const res = await api.get<{ success: boolean; users: VerificationUser[]; total: number; statusCounts: StatusCounts }>(`/admin/verifications?${params.toString()}`);
     return res.data;
   },
   approveVerification: async (userId: string) => {

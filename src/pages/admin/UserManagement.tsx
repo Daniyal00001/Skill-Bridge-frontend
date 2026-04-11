@@ -81,7 +81,8 @@ const fetchUsers = async (
   banned: boolean, 
   startDate: string, 
   endDate: string,
-  role: RoleFilter
+  role: RoleFilter,
+  page: number
 ): Promise<{ users: AdminUser[]; total: number }> => {
   const params = new URLSearchParams();
   if (role && role !== "ALL") params.set("role", role);
@@ -89,6 +90,7 @@ const fetchUsers = async (
   if (banned) params.set("banned", "true");
   if (startDate) params.set("startDate", startDate);
   if (endDate) params.set("endDate", endDate);
+  params.set("page", page.toString());
   params.set("limit", "20");
   const res = await api.get(`/admin/users?${params.toString()}`);
   return { users: res.data.users, total: res.data.total };
@@ -102,6 +104,7 @@ export default function UserManagement() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showBanned, setShowBanned] = useState(false);
+  const [page, setPage] = useState(1);
   const [banDialog, setBanDialog] = useState<{ open: boolean; user?: AdminUser; action: "ban" | "unban" }>({
     open: false,
     action: "ban",
@@ -109,8 +112,8 @@ export default function UserManagement() {
   const [banReason, setBanReason] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["adminUsers", search, showBanned, startDate, endDate, roleFilter],
-    queryFn: () => fetchUsers(search, showBanned, startDate, endDate, roleFilter),
+    queryKey: ["adminUsers", search, showBanned, startDate, endDate, roleFilter, page],
+    queryFn: () => fetchUsers(search, showBanned, startDate, endDate, roleFilter, page),
     staleTime: 30_000,
   });
 
@@ -180,12 +183,18 @@ export default function UserManagement() {
                   placeholder="Search by name or email..."
                   className="pl-9 h-9"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
                 />
               </div>
               {/* Multi-tier Filters */}
               <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-                 <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as RoleFilter)}>
+                 <Select value={roleFilter} onValueChange={(v) => {
+                    setRoleFilter(v as RoleFilter);
+                    setPage(1);
+                 }}>
                     <SelectTrigger className="w-[130px] h-9 rounded-xl font-bold text-xs bg-muted/30 border-border/40">
                        <SelectValue placeholder="Protocol Role" />
                     </SelectTrigger>
@@ -201,14 +210,20 @@ export default function UserManagement() {
                     <input 
                       type="date" 
                       value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      onChange={(e) => {
+                        setStartDate(e.target.value);
+                        setPage(1);
+                      }}
                       className="bg-transparent text-xs font-bold outline-none border-none dark:color-scheme-dark"
                     />
                     <span className="text-muted-foreground text-[10px] font-black">TO</span>
                     <input 
                       type="date" 
                       value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                      onChange={(e) => {
+                        setEndDate(e.target.value);
+                        setPage(1);
+                      }}
                       className="bg-transparent text-xs font-bold outline-none border-none dark:color-scheme-dark"
                     />
                  </div>
@@ -217,7 +232,10 @@ export default function UserManagement() {
                   size="sm"
                   variant={showBanned ? "destructive" : "outline"}
                   className="h-9 px-4 text-xs font-bold rounded-xl"
-                  onClick={() => setShowBanned(!showBanned)}
+                  onClick={() => {
+                    setShowBanned(!showBanned);
+                    setPage(1);
+                  }}
                 >
                   <Flag className="h-3.5 w-3.5 mr-2" />
                   Banned Only
@@ -234,6 +252,7 @@ export default function UserManagement() {
                       setSearch("");
                       setShowBanned(false);
                       setRoleFilter("ALL");
+                      setPage(1);
                     }}
                   >
                     Reset
@@ -376,6 +395,38 @@ export default function UserManagement() {
               </Table>
             )}
           </CardContent>
+
+          {/* Pagination Controls */}
+          {!isLoading && total > 20 && (
+            <div className="px-6 py-4 border-t border-border/30 bg-muted/5 flex items-center justify-between">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                Showing {((page - 1) * 20) + 1} - {Math.min(page * 20, total)} of {total}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-xl px-4 font-bold text-xs disabled:opacity-30"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                >
+                  Previous
+                </Button>
+                <div className="px-3 h-8 flex items-center justify-center bg-background border border-border/40 rounded-xl text-xs font-black">
+                  {page}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-xl px-4 font-bold text-xs disabled:opacity-30"
+                  disabled={page * 20 >= total}
+                  onClick={() => setPage(p => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       </div>
 

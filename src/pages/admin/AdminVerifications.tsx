@@ -62,21 +62,16 @@ export default function AdminVerifications() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
 
+  const [page, setPage] = useState(1);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["admin", "all_verifications", activeTab],
-    queryFn: () => adminService.getAllVerifications(activeTab),
+    queryKey: ["admin", "all_verifications", activeTab, page, searchQuery, roleFilter],
+    queryFn: () => adminService.getAllVerifications(activeTab, page, searchQuery, roleFilter),
   });
 
   const verifications: VerificationUser[] = data?.users || [];
+  const total = data?.total || 0;
   const statusCounts: StatusCounts = data?.statusCounts || { ALL: 0, PENDING: 0, APPROVED: 0, REJECTED: 0 };
-
-  const filteredVerifications = verifications.filter((v) => {
-    const matchesSearch =
-      v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = roleFilter === "ALL" || v.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
 
   const approveMutation = useMutation({
     mutationFn: (userId: string) => adminService.approveVerification(userId),
@@ -143,7 +138,10 @@ export default function AdminVerifications() {
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  setPage(1);
+                }}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px",
                   isActive
@@ -182,10 +180,16 @@ export default function AdminVerifications() {
               placeholder="Search by name or email..."
               className="pl-9 bg-background/50"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <Select value={roleFilter} onValueChange={(v) => {
+            setRoleFilter(v);
+            setPage(1);
+          }}>
             <SelectTrigger className="w-full md:w-[150px] bg-background/50">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
@@ -199,7 +203,11 @@ export default function AdminVerifications() {
             <Button
               variant="ghost"
               className="px-3"
-              onClick={() => { setSearchQuery(""); setRoleFilter("ALL"); }}
+              onClick={() => { 
+                setSearchQuery(""); 
+                setRoleFilter("ALL"); 
+                setPage(1);
+              }}
             >
               <FilterX className="h-4 w-4 mr-2" /> Clear
             </Button>
@@ -211,7 +219,7 @@ export default function AdminVerifications() {
           <div className="flex justify-center items-center h-[40vh]">
             <Loader2 className="animate-spin h-8 w-8 text-primary" />
           </div>
-        ) : filteredVerifications.length === 0 ? (
+        ) : verifications.length === 0 ? (
           <Card className="flex flex-col items-center justify-center p-12 text-center">
             <ShieldCheck className="h-12 w-12 text-muted-foreground mb-4 opacity-30" />
             <h3 className="text-lg font-semibold">
@@ -232,8 +240,9 @@ export default function AdminVerifications() {
             </p>
           </Card>
         ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredVerifications.map((v) => {
+            {verifications.map((v) => {
               const statusCfg = STATUS_CONFIG[v.idVerificationStatus];
               const StatusIcon = statusCfg?.icon ?? AlertCircle;
               return (
@@ -356,6 +365,37 @@ export default function AdminVerifications() {
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {total > 12 && (
+            <div className="flex items-center justify-between bg-muted/30 p-4 rounded-xl border border-border/50">
+              <p className="text-xs text-muted-foreground font-medium">
+                Showing {((page - 1) * 12) + 1} - {Math.min(page * 12, total)} of {total}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                >
+                  Previous
+                </Button>
+                <div className="h-8 w-8 flex items-center justify-center bg-background rounded-md border text-xs font-bold">
+                  {page}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page * 12 >= total}
+                  onClick={() => setPage(p => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+          </>
         )}
       </div>
 

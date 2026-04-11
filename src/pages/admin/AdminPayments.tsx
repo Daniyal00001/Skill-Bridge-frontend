@@ -75,15 +75,17 @@ const WITHDRAWAL_STATUS_COLORS: Record<string, string> = {
   FAILED: "bg-red-50 text-red-600 border-red-200",
 };
 
-const fetchPayments = async (status: string): Promise<{ payments: Payment[]; total: number; stats: PaymentStats }> => {
-  const params = status !== "ALL" ? `?status=${status}` : "";
-  const res = await api.get(`/admin/payments${params}`);
+const fetchPayments = async (status: string, page: number): Promise<{ payments: Payment[]; total: number; stats: PaymentStats }> => {
+  const params = new URLSearchParams({ page: String(page), limit: "20" });
+  if (status !== "ALL") params.set("status", status);
+  const res = await api.get(`/admin/payments?${params.toString()}`);
   return res.data;
 };
 
-const fetchWithdrawals = async (status: string): Promise<{ withdrawals: Withdrawal[]; total: number }> => {
-  const params = status !== "ALL" ? `?status=${status}` : "";
-  const res = await api.get(`/admin/withdrawals${params}`);
+const fetchWithdrawals = async (status: string, page: number): Promise<{ withdrawals: Withdrawal[]; total: number }> => {
+  const params = new URLSearchParams({ page: String(page), limit: "20" });
+  if (status !== "ALL") params.set("status", status);
+  const res = await api.get(`/admin/withdrawals?${params.toString()}`);
   return res.data;
 };
 
@@ -91,16 +93,18 @@ export default function AdminPayments() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("payments");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("ALL");
   const [withdrawalStatusFilter, setWithdrawalStatusFilter] = useState("ALL");
+  const [paymentPage, setPaymentPage] = useState(1);
+  const [withdrawalPage, setWithdrawalPage] = useState(1);
 
   const { data: paymentsData, isLoading: paymentsLoading } = useQuery({
-    queryKey: ["adminPayments", paymentStatusFilter],
-    queryFn: () => fetchPayments(paymentStatusFilter),
+    queryKey: ["adminPayments", paymentStatusFilter, paymentPage],
+    queryFn: () => fetchPayments(paymentStatusFilter, paymentPage),
     enabled: activeTab === "payments",
   });
 
   const { data: withdrawalsData, isLoading: withdrawalsLoading } = useQuery({
-    queryKey: ["adminWithdrawals", withdrawalStatusFilter],
-    queryFn: () => fetchWithdrawals(withdrawalStatusFilter),
+    queryKey: ["adminWithdrawals", withdrawalStatusFilter, withdrawalPage],
+    queryFn: () => fetchWithdrawals(withdrawalStatusFilter, withdrawalPage),
     enabled: activeTab === "withdrawals",
   });
 
@@ -166,7 +170,10 @@ export default function AdminPayments() {
                     size="sm"
                     variant={paymentStatusFilter === s ? "default" : "outline"}
                     className="h-7 text-xs font-semibold"
-                    onClick={() => setPaymentStatusFilter(s)}
+                    onClick={() => {
+                      setPaymentStatusFilter(s);
+                      setPaymentPage(1);
+                    }}
                   >
                     {s.replace("_", " ")}
                   </Button>
@@ -234,6 +241,35 @@ export default function AdminPayments() {
                 </Table>
               )}
             </CardContent>
+
+            {/* Pagination */}
+            {!paymentsLoading && (paymentsData?.total || 0) > 20 && (
+              <div className="px-6 py-3 border-t border-border/30 bg-muted/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  Showing {((paymentPage - 1) * 20) + 1} - {Math.min(paymentPage * 20, paymentsData?.total || 0)} of {paymentsData?.total}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-3"
+                    disabled={paymentPage === 1}
+                    onClick={() => setPaymentPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-3"
+                    disabled={paymentPage * 20 >= (paymentsData?.total || 0)}
+                    onClick={() => setPaymentPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         )}
 
@@ -247,7 +283,10 @@ export default function AdminPayments() {
                     size="sm"
                     variant={withdrawalStatusFilter === s ? "default" : "outline"}
                     className="h-7 text-xs font-semibold"
-                    onClick={() => setWithdrawalStatusFilter(s)}
+                    onClick={() => {
+                      setWithdrawalStatusFilter(s);
+                      setWithdrawalPage(1);
+                    }}
                   >
                     {s}
                   </Button>
@@ -326,6 +365,35 @@ export default function AdminPayments() {
                 </Table>
               )}
             </CardContent>
+
+            {/* Pagination */}
+            {!withdrawalsLoading && (withdrawalsData?.total || 0) > 20 && (
+              <div className="px-6 py-3 border-t border-border/30 bg-muted/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  Showing {((withdrawalPage - 1) * 20) + 1} - {Math.min(withdrawalPage * 20, withdrawalsData?.total || 0)} of {withdrawalsData?.total}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-3"
+                    disabled={withdrawalPage === 1}
+                    onClick={() => setWithdrawalPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-3"
+                    disabled={withdrawalPage * 20 >= (withdrawalsData?.total || 0)}
+                    onClick={() => setWithdrawalPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         )}
       </div>

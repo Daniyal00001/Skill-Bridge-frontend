@@ -14,8 +14,16 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, XCircle, Loader2, Sparkles, Ban, Clock } from 'lucide-react';
+import { 
+  CheckCircle2, 
+  XCircle, 
+  Loader2, 
+  Sparkles, 
+  Ban, 
+  Clock 
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Skill {
   id: string;
@@ -25,31 +33,27 @@ interface Skill {
 }
 
 export default function AdminSkills() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('PENDING');
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    fetchSkills();
-  }, [activeTab]);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['adminSkills', activeTab, page],
+    queryFn: async () => {
+      const res = await api.get(`/admin/skills?status=${activeTab}&page=${page}&limit=20`);
+      return res.data;
+    },
+    staleTime: 30_000,
+  });
 
-  const fetchSkills = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get(`/admin/skills?status=${activeTab}`);
-      setSkills(res.data.skills || []);
-    } catch (error) {
-      toast.error(`Failed to load ${activeTab.toLowerCase()} skills.`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const skills = data?.skills || [];
+  const total = data?.total || 0;
 
   const handleUpdateStatus = async (id: string, status: 'APPROVED' | 'REJECTED') => {
     try {
       await api.patch(`/admin/skills/${id}/status`, { status });
       toast.success(`Skill ${status.toLowerCase()} successfully`);
-      setSkills(skills.filter(s => s.id !== id));
+      queryClient.invalidateQueries({ queryKey: ['adminSkills'] });
     } catch (error) {
       toast.error('Failed to update status');
     }
@@ -66,7 +70,10 @@ export default function AdminSkills() {
           </p>
         </div>
 
-        <Tabs defaultValue="PENDING" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs defaultValue="PENDING" value={activeTab} onValueChange={(v) => {
+          setActiveTab(v);
+          setPage(1);
+        }} className="space-y-6">
           <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-14">
             <TabsTrigger value="PENDING" className="rounded-xl px-8 h-full font-black uppercase text-[10px] tracking-widest gap-2 data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all">
               <Clock className="w-3.5 h-3.5" /> Pending
@@ -165,6 +172,38 @@ export default function AdminSkills() {
                 </div>
               )}
             </CardContent>
+
+            {/* Pagination */}
+            {!loading && total > 20 && (
+              <div className="px-8 py-4 border-t border-border/40 bg-muted/5 flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Capturing sequence {((page - 1) * 20) + 1} - {Math.min(page * 20, total)} of {total}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-xl px-4 font-bold text-xs"
+                    disabled={page === 1}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <div className="px-3 h-8 flex items-center justify-center bg-white border border-border/40 rounded-xl text-xs font-black">
+                    {page}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-xl px-4 font-bold text-xs"
+                    disabled={page * 20 >= total}
+                    onClick={() => setPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         </Tabs>
       </div>

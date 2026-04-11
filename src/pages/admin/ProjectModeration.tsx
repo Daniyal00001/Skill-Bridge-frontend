@@ -72,13 +72,15 @@ export default function ProjectModeration() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["adminProjects", statusFilter, search],
+    queryKey: ["adminProjects", statusFilter, search, page],
     queryFn: async () => {
-      const params = new URLSearchParams({ limit: "50" });
+      const params = new URLSearchParams({ limit: "20" });
       if (statusFilter !== "ALL") params.set("status", statusFilter);
       if (search) params.set("search", search);
+      params.set("page", String(page));
       const res = await api.get(`/admin/projects?${params.toString()}`);
       return res.data;
     },
@@ -145,7 +147,10 @@ export default function ProjectModeration() {
                   placeholder="Search projects..."
                   className="pl-9 h-9 border-border/50 bg-background/50"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
                 />
               </div>
 
@@ -157,10 +162,12 @@ export default function ProjectModeration() {
                     size="sm"
                     variant={statusFilter === s ? "default" : "outline"}
                     className={cn(
-                      "h-8 text-[11px] font-bold tracking-tight px-3 transition-all",
                       statusFilter === s ? "" : "bg-background/50"
                     )}
-                    onClick={() => setStatusFilter(s)}
+                    onClick={() => {
+                      setStatusFilter(s);
+                      setPage(1);
+                    }}
                   >
                     {s.replace("_", " ")}
                   </Button>
@@ -170,7 +177,11 @@ export default function ProjectModeration() {
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2 text-muted-foreground"
-                    onClick={() => { setSearch(""); setStatusFilter("ALL"); }}
+                    onClick={() => { 
+                      setSearch(""); 
+                      setStatusFilter("ALL"); 
+                      setPage(1);
+                    }}
                   >
                     <FilterX className="h-4 w-4 mr-1" />
                     Reset
@@ -308,6 +319,38 @@ export default function ProjectModeration() {
             )
           }
           </CardContent>
+
+          {/* Pagination Controls */}
+          {!isLoading && total > 20 && (
+            <div className="px-6 py-4 border-t border-border/30 bg-muted/10 flex items-center justify-between">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                Showing {((page - 1) * 20) + 1} - {Math.min(page * 20, total)} of {total}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-xl px-4 font-bold text-xs"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                >
+                  Previous
+                </Button>
+                <div className="px-3 h-8 flex items-center justify-center bg-background border border-border/40 rounded-xl text-xs font-black">
+                  {page}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-xl px-4 font-bold text-xs"
+                  disabled={page * 20 >= total}
+                  onClick={() => setPage(p => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       </div>
     </DashboardLayout>
