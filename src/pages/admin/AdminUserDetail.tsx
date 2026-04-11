@@ -171,7 +171,10 @@ export default function AdminUserDetail() {
           <CardContent className="relative px-8 pb-10 -mt-16">
             <div className="flex flex-col md:flex-row gap-8 items-end justify-between">
               <div className="flex flex-col md:flex-row gap-8 items-end">
-                <Avatar className="w-40 h-40 ring-8 ring-background border-border/50 border shadow-2xl">
+                <Avatar className={cn(
+                  "w-40 h-40 ring-8 border border-border/50 shadow-2xl transition-all",
+                  user.isBanned ? "ring-rose-500/30 border-rose-500 animate-pulse" : "ring-background"
+                )}>
                   <AvatarImage src={user.profileImage} />
                   <AvatarFallback className="text-4xl font-black bg-muted text-muted-foreground">
                     {initials}
@@ -187,9 +190,10 @@ export default function AdminUserDetail() {
                       <ShieldCheck className="w-6 h-6 text-emerald-500" />
                     )}
                     {user.isBanned && (
-                      <Badge variant="destructive" className="rounded-xl px-3 py-1 font-black text-[10px] tracking-widest uppercase bg-rose-600">
-                        BANNED
-                      </Badge>
+                      <div className="flex items-center gap-1.5 bg-rose-600 text-white px-3 py-1 rounded-xl shadow-lg shadow-rose-600/20 animate-in zoom-in-90 duration-300">
+                         <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                         <span className="font-black text-[10px] tracking-[0.2em] uppercase">BANNED</span>
+                      </div>
                     )}
                   </div>
                   <p className="text-lg font-bold text-muted-foreground italic leading-none break-words max-w-xl">
@@ -223,7 +227,7 @@ export default function AdminUserDetail() {
                   )}
                   onClick={() => setBanDialogOpen(true)}
                 >
-                  {user.isBanned ? "Restore Access" : "Suspend Account"}
+                  {user.isBanned ? "Unsuspend Account" : "Suspend Account"}
                 </Button>
                 {/* <Button className="rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 shadow-lg shadow-primary/20">
                   Broadcast Notice
@@ -841,11 +845,11 @@ export default function AdminUserDetail() {
                 {user.isBanned ? <ShieldCheck className="w-5 h-5 text-white" /> : <ShieldAlert className="w-5 h-5 text-white" />}
               </div>
               <Badge variant="outline" className="rounded-xl px-2 py-0.5 font-black tracking-widest text-[8px] uppercase">
-                {user.isBanned ? "ACCESS RESTORATION" : "PROTOCOL SUSPENSION"}
+                {user.isBanned ? "PROTOCOL UNSUSPENSION" : "PROTOCOL SUSPENSION"}
               </Badge>
             </div>
             <DialogTitle className="text-xl font-black italic">
-              {user.isBanned ? "Restore User Protocol?" : "Terminate User Access?"}
+              {user.isBanned ? "Unsuspend User Protocol?" : "Terminate User Access?"}
             </DialogTitle>
           </div>
 
@@ -888,7 +892,7 @@ export default function AdminUserDetail() {
                 {isBanning ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  user.isBanned ? "Restore Identity" : "Execute Suspension"
+                  user.isBanned ? "Unsuspend Account" : "Execute Suspension"
                 )}
               </Button>
             </div>

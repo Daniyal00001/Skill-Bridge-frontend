@@ -29,6 +29,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
   Search,
@@ -38,9 +45,10 @@ import {
   Eye,
   Loader2,
   Users,
-  Shield,
-  Flag,
   Mail,
+  Calendar as CalendarIcon,
+  Flag,
+  Shield,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -64,15 +72,24 @@ interface AdminUser {
   lastActiveAt?: string;
 }
 
-const ROLE_FILTER = ["ALL", "CLIENT", "FREELANCER", "ADMIN"] as const;
+// Scalable Identity Filters
+const ROLE_FILTER = ["ALL", "CLIENT", "FREELANCER"] as const;
 type RoleFilter = (typeof ROLE_FILTER)[number];
 
-const fetchUsers = async (role: RoleFilter, search: string, banned: boolean): Promise<{ users: AdminUser[]; total: number }> => {
+const fetchUsers = async (
+  search: string, 
+  banned: boolean, 
+  startDate: string, 
+  endDate: string,
+  role: RoleFilter
+): Promise<{ users: AdminUser[]; total: number }> => {
   const params = new URLSearchParams();
-  if (role !== "ALL") params.set("role", role);
+  if (role && role !== "ALL") params.set("role", role);
   if (search) params.set("search", search);
   if (banned) params.set("banned", "true");
-  params.set("limit", "50");
+  if (startDate) params.set("startDate", startDate);
+  if (endDate) params.set("endDate", endDate);
+  params.set("limit", "20");
   const res = await api.get(`/admin/users?${params.toString()}`);
   return { users: res.data.users, total: res.data.total };
 };
@@ -82,6 +99,8 @@ export default function UserManagement() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [showBanned, setShowBanned] = useState(false);
   const [banDialog, setBanDialog] = useState<{ open: boolean; user?: AdminUser; action: "ban" | "unban" }>({
     open: false,
@@ -90,8 +109,8 @@ export default function UserManagement() {
   const [banReason, setBanReason] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["adminUsers", roleFilter, search, showBanned],
-    queryFn: () => fetchUsers(roleFilter, search, showBanned),
+    queryKey: ["adminUsers", search, showBanned, startDate, endDate, roleFilter],
+    queryFn: () => fetchUsers(search, showBanned, startDate, endDate, roleFilter),
     staleTime: 30_000,
   });
 
@@ -127,31 +146,28 @@ export default function UserManagement() {
             </p>
             <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isLoading ? "Loading..." : `${total.toLocaleString()} total users`}
+              {isLoading ? "Loading..." : `${total.toLocaleString()} identities matching protocol`}
             </p>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: "Total", value: total, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: "Clients", value: users.filter(u => u.role === "CLIENT").length, icon: Users, color: "text-violet-600", bg: "bg-violet-50" },
-            { label: "Freelancers", value: users.filter(u => u.role === "FREELANCER").length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
-            { label: "Banned", value: users.filter(u => u.isBanned).length, icon: Shield, color: "text-red-600", bg: "bg-red-50" },
-          ].map(({ label, value, icon: Icon, color, bg }) => (
-            <Card key={label} className="border border-border/50 rounded-2xl">
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0", bg)}>
-                  <Icon className={cn("h-4 w-4", color)} />
-                </div>
-                <div>
-                  <p className="text-xl font-bold">{value}</p>
-                  <p className="text-[11px] text-muted-foreground font-medium">{label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Stats Summary */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="border border-border/50 rounded-2xl bg-primary/[0.02]">
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-black tracking-tight">{total.toLocaleString()}</p>
+                <p className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Identities in Protocol</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="sm:col-span-2 flex items-center px-4 text-xs font-medium text-muted-foreground italic">
+            Showing the most recent activity logs. Use the temporal filters to explore historical data.
+          </div>
         </div>
 
         <Card className="border border-border/50 rounded-2xl overflow-hidden">
@@ -167,28 +183,62 @@ export default function UserManagement() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              {/* Filters */}
-              <div className="flex flex-wrap gap-2">
-                {ROLE_FILTER.map((r) => (
-                  <Button
-                    key={r}
-                    size="sm"
-                    variant={roleFilter === r ? "default" : "outline"}
-                    className="h-8 text-xs font-semibold"
-                    onClick={() => setRoleFilter(r)}
-                  >
-                    {r}
-                  </Button>
-                ))}
+              {/* Multi-tier Filters */}
+              <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                 <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as RoleFilter)}>
+                    <SelectTrigger className="w-[130px] h-9 rounded-xl font-bold text-xs bg-muted/30 border-border/40">
+                       <SelectValue placeholder="Protocol Role" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl font-bold">
+                       <SelectItem value="ALL">All Roles</SelectItem>
+                       <SelectItem value="CLIENT">Clients</SelectItem>
+                       <SelectItem value="FREELANCER">Freelancers</SelectItem>
+                    </SelectContent>
+                 </Select>
+
+                 <div className="flex items-center gap-2 bg-muted/30 px-3 h-9 rounded-xl border border-border/40">
+                    <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                    <input 
+                      type="date" 
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="bg-transparent text-xs font-bold outline-none border-none dark:color-scheme-dark"
+                    />
+                    <span className="text-muted-foreground text-[10px] font-black">TO</span>
+                    <input 
+                      type="date" 
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="bg-transparent text-xs font-bold outline-none border-none dark:color-scheme-dark"
+                    />
+                 </div>
+
                 <Button
                   size="sm"
                   variant={showBanned ? "destructive" : "outline"}
-                  className="h-8 text-xs font-semibold"
+                  className="h-9 px-4 text-xs font-bold rounded-xl"
                   onClick={() => setShowBanned(!showBanned)}
                 >
-                  <Flag className="h-3 w-3 mr-1" />
+                  <Flag className="h-3.5 w-3.5 mr-2" />
                   Banned Only
                 </Button>
+
+                {(startDate || endDate || search || showBanned) && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-9 px-4 text-xs font-bold rounded-xl text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      setStartDate("");
+                      setEndDate("");
+                      setSearch("");
+                      setShowBanned(false);
+                      setRoleFilter("ALL");
+                    }}
+                  >
+                    Reset
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -300,14 +350,14 @@ export default function UserManagement() {
                                   onClick={() => setBanDialog({ open: true, user, action: "unban" })}
                                   className="text-emerald-600"
                                 >
-                                  <UserCheck className="h-4 w-4 mr-2" /> Unban User
+                                  <UserCheck className="h-4 w-4 mr-2" /> Unsuspend Account
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
                                   onClick={() => setBanDialog({ open: true, user, action: "ban" })}
                                   className="text-destructive"
                                 >
-                                  <UserX className="h-4 w-4 mr-2" /> Ban User
+                                  <UserX className="h-4 w-4 mr-2" /> Suspend Account
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
@@ -334,7 +384,7 @@ export default function UserManagement() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {banDialog.action === "ban" ? "Ban User" : "Unban User"}
+              {banDialog.action === "ban" ? "Suspend Account" : "Unsuspend Account"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
@@ -352,9 +402,9 @@ export default function UserManagement() {
             )}
             {banDialog.action === "ban" && (
               <div className="space-y-1.5">
-                <Label>Ban Reason</Label>
+                <Label>Suspension Reason</Label>
                 <Input
-                  placeholder="Reason for banning (optional)"
+                  placeholder="Reason for suspension (optional)"
                   value={banReason}
                   onChange={(e) => setBanReason(e.target.value)}
                 />
@@ -362,8 +412,8 @@ export default function UserManagement() {
             )}
             <p className="text-xs text-muted-foreground">
               {banDialog.action === "ban"
-                ? "Banning this user will prevent them from logging in and accessing the platform."
-                : "Unbanning will restore the user's access to the platform."}
+                ? "Suspending this user will prevent them from logging in and accessing the platform."
+                : "Unsuspending will restore the user's access to the platform."}
             </p>
           </div>
           <DialogFooter>
@@ -380,7 +430,7 @@ export default function UserManagement() {
               })}
             >
               {banMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {banDialog.action === "ban" ? "Confirm Ban" : "Unban User"}
+              {banDialog.action === "ban" ? "Execute Suspension" : "Unsuspend Account"}
             </Button>
           </DialogFooter>
         </DialogContent>
