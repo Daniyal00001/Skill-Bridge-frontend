@@ -53,19 +53,6 @@ import { useCategories } from "@/hooks/useCategories";
 import { useMetadata } from "@/hooks/useMetadata";
 import { SkillAutocomplete } from "@/components/common/SkillAutocomplete";
 
-const SKILL_SUGGESTIONS = [
-  "React",
-  "TypeScript",
-  "Node.js",
-  "Python",
-  "UI/UX",
-  "MongoDB",
-  "AWS",
-  "Tailwind CSS",
-  "Next.js",
-  "Solidity",
-];
-
 const VALIDATION = {
   title: { min: 5, max: 80 },
   shortDesc: { min: 10, max: 120 },
@@ -78,13 +65,13 @@ const PostProjectPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
-  // ✅ Load categories from DB
+  // âœ… Load categories from DB
   const { categories, loading: catsLoading } = useCategories();
 
   const [formData, setFormData] = useState({
     title: "",
-    categoryId: "", // ✅ now stores DB id
-    subCategoryId: "", // ✅ now stores DB id
+    categoryId: "", // âœ… now stores DB id
+    subCategoryId: "", // âœ… now stores DB id
     shortDesc: "",
     fullDesc: "",
     functionalReq: "",
@@ -109,7 +96,7 @@ const PostProjectPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(null);
 
-  // ── Pre-fill form when navigating from Drafts page ──
+  // â”€â”€ Pre-fill form when navigating from Drafts page â”€â”€
   const [searchParams] = useSearchParams();
   useEffect(() => {
     const urlDraftId = searchParams.get("draftId");
@@ -155,10 +142,10 @@ const PostProjectPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ Load metadata (languages/locations) from DB
+  // âœ… Load metadata (languages/locations) from DB
   const { languages, locations, loading: metaLoading } = useMetadata();
 
-  // ── Sync IDs when metadata loads ─────────────────────────────────
+  // â”€â”€ Sync IDs when metadata loads â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     if (!metaLoading && locations.length > 0) {
       // Find "Any location" record
@@ -175,7 +162,7 @@ const PostProjectPage = () => {
     }
   }, [metaLoading, locations, languages]);
 
-  // ── Extract unique regions for dropdown ──────────────────────────
+  // â”€â”€ Extract unique regions for dropdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const uniqueRegions = Array.from(
     new Set(locations.map((l) => l.region).filter(Boolean)),
   ).sort();
@@ -187,10 +174,10 @@ const PostProjectPage = () => {
       ?.id,
   }));
 
-  // ✅ Helper to get selected category object
+  // âœ… Helper to get selected category object
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
 
-  // ✅ Helper to get selected subcategory object
+  // âœ… Helper to get selected subcategory object
   const selectedSubCategory = selectedCategory?.subCategories.find(
     (s) => s.id === formData.subCategoryId,
   );
@@ -280,7 +267,7 @@ const PostProjectPage = () => {
       let res;
       if (draftId) {
         res = await api.patch(`/projects/${draftId}`, payload);
-        toast.info("Draft updated ✓");
+        toast.info("Draft updated âœ“");
       } else {
         res = await api.post("/projects", payload);
         setDraftId(res.data.project.id);
@@ -361,9 +348,9 @@ const PostProjectPage = () => {
           </div>
 
           <div className="animate-fade-up">
-            {/* ─────────────────────────────────────────
+            {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 Step 1: Basics
-            ───────────────────────────────────────── */}
+            â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {step === 1 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
@@ -404,7 +391,7 @@ const PostProjectPage = () => {
 
                   {/* Category + SubCategory */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* ✅ Main Category — loaded from DB */}
+                    {/* âœ… Main Category â€” loaded from DB */}
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">
                         Main Category *
@@ -438,7 +425,7 @@ const PostProjectPage = () => {
                       )}
                     </div>
 
-                    {/* ✅ Sub Category — filtered from selected category */}
+                    {/* âœ… Sub Category â€” filtered from selected category */}
                     <div className="space-y-2">
                       <label className="text-sm font-semibold">
                         Sub Category *
@@ -525,9 +512,9 @@ const PostProjectPage = () => {
               </Card>
             )}
 
-            {/* ─────────────────────────────────────────
+            {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 Step 2: Description
-            ───────────────────────────────────────── */}
+            â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {step === 2 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
@@ -647,9 +634,11 @@ const PostProjectPage = () => {
                             "application/x-zip-compressed",
                           ];
                           const selected = Array.from(e.target.files);
-                          
+
                           // Check for 10MB limit
-                          const oversized = selected.filter(f => f.size > 10 * 1024 * 1024);
+                          const oversized = selected.filter(
+                            (f) => f.size > 10 * 1024 * 1024,
+                          );
                           if (oversized.length > 0) {
                             toast.error("Some files exceed the 10MB limit.");
                             return;
@@ -663,7 +652,7 @@ const PostProjectPage = () => {
                           );
                           if (invalid.length > 0)
                             toast.error(
-                              `${invalid.length} file(s) skipped — only JPG, PNG, PDF, Word, TXT, and ZIP are allowed.`,
+                              `${invalid.length} file(s) skipped â€” only JPG, PNG, PDF, Word, TXT, and ZIP are allowed.`,
                             );
                           if (valid.length > 0)
                             updateFormData({
@@ -744,9 +733,9 @@ const PostProjectPage = () => {
               </Card>
             )}
 
-            {/* ─────────────────────────────────────────
+            {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 Step 3: Budget & Timeline
-            ───────────────────────────────────────── */}
+            â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {step === 3 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl">
                 <CardHeader>
@@ -963,31 +952,10 @@ const PostProjectPage = () => {
                           </button>
                         </Badge>
                       ))}
-                      {formData.skills.length === 0 && (
-                        <span className="text-xs text-muted-foreground italic mt-1">
-                          Add skills below...
-                        </span>
-                      )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 pt-2">
-                      {SKILL_SUGGESTIONS.filter(
-                        (s) => !formData.skills.includes(s),
-                      )
-                        .slice(0, 5)
-                        .map((skill) => (
-                          <button
-                            key={skill}
-                            onClick={() =>
-                              updateFormData({
-                                skills: [...formData.skills, skill],
-                              })
-                            }
-                            className="text-[11px] bg-background hover:bg-muted py-1.5 px-3 rounded-full transition-colors border border-border/40 shrink-0"
-                          >
-                            + {skill}
-                          </button>
-                        ))}
-                      <div className="flex flex-col gap-1">
+
+                    <div className="flex flex-col items-center justify-center gap-2 pt-1 border-t border-border/5 mb-1">
+                      <div className="flex flex-col items-center gap-1.5 w-full max-w-md">
                         <SkillAutocomplete
                           value={customSkill}
                           onChange={(val) => {
@@ -1010,11 +978,14 @@ const PostProjectPage = () => {
                             }
                             setCustomSkill("");
                           }}
-                          placeholder="Type custom skill & press Enter..."
-                          className="w-[240px] [&_.relative>input]:h-8 [&_.relative>input]:text-xs [&_.relative>input]:rounded-full [&_.relative>input]:border-dashed [&_.relative>input]:focus-visible:ring-primary/30"
+                          placeholder="Type a skill (e.g. React) and press Enter..."
+                          className="w-full [&_.relative>input]:h-14 [&_.relative>input]:text-base [&_.relative>input]:rounded-2xl [&_.relative>input]:border-primary/20 [&_.relative>input]:focus-visible:ring-primary/40 [&_.relative>input]:bg-muted/30 [&_.relative>input]:px-6"
                         />
-                        <div className="flex justify-end w-[240px] pr-2">
-                          <p className="text-[10px] text-muted-foreground">
+                        <div className="flex justify-between w-full px-2">
+                          <p className="text-[10px] text-muted-foreground italic">
+                            Press enter to add to stack
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-mono">
                             {customSkill.length} / {VALIDATION.skill.max}
                           </p>
                         </div>
@@ -1259,9 +1230,9 @@ const PostProjectPage = () => {
               </Card>
             )}
 
-            {/* ─────────────────────────────────────────
+            {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 Step 5: Review & Post
-            ───────────────────────────────────────── */}
+            â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {step === 5 && (
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl relative overflow-hidden">
                 <CardHeader className="text-center pb-2">
@@ -1292,9 +1263,9 @@ const PostProjectPage = () => {
                       <h2 className="text-xl font-bold mb-1 break-words">
                         {formData.title}
                       </h2>
-                      {/* ✅ Show category name from DB object */}
+                      {/* âœ… Show category name from DB object */}
                       <Badge variant="outline" className="mb-1">
-                        {selectedCategory?.name ?? "—"}
+                        {selectedCategory?.name ?? "â€”"}
                       </Badge>
                       {selectedSubCategory && (
                         <Badge variant="secondary" className="mb-3 ml-1">
@@ -1474,7 +1445,7 @@ const PostProjectPage = () => {
                         try {
                           const fd = new FormData();
                           fd.append("title", formData.title);
-                          // ✅ send IDs to backend
+                          // âœ… send IDs to backend
                           fd.append("categoryId", formData.categoryId);
                           fd.append("subCategoryId", formData.subCategoryId);
                           fd.append("shortDesc", formData.shortDesc);
@@ -1526,7 +1497,7 @@ const PostProjectPage = () => {
                           }
 
                           toast.success(
-                            "Project is now live on SkillBridge! 🎉",
+                            "Project is now live on SkillBridge! ðŸŽ‰",
                           );
                           navigate("/client/projects");
                         } catch (err: any) {
