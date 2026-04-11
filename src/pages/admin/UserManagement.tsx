@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -221,7 +222,13 @@ export default function UserManagement() {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="text-sm font-semibold text-foreground">{user.name}</p>
+                              <Link 
+                                to={`/admin/users/${user.id}`}
+                                className="text-sm font-semibold text-foreground hover:text-primary transition-colors flex items-center gap-1.5 group"
+                              >
+                                {user.name}
+                                <Eye className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </Link>
                               <p className="text-[11px] text-muted-foreground">{user.email}</p>
                             </div>
                           </div>
