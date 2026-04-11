@@ -173,12 +173,14 @@ export default function AdminDashboard() {
                 Platform Overview
               </h1>
               {stats.lastLoginAt && (
-                 <>
-                  <span className="hidden sm:inline text-border font-light">|</span>
+                <>
+                  <span className="hidden sm:inline text-border font-light">
+                    |
+                  </span>
                   <p className="text-sm font-medium text-red-600/80 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
                     Last active: {new Date(stats.lastLoginAt).toLocaleString()}
                   </p>
-                 </>
+                </>
               )}
             </div>
           </div>
@@ -307,52 +309,52 @@ export default function AdminDashboard() {
               ) : (
                 <div className="divide-y divide-border/30">
                   {lists.recentUsers.map((user) => (
-                      <Link
-                        to={`/admin/users/${user.id}`}
-                        className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <Avatar className="h-8 w-8 shrink-0">
-                            <AvatarImage src={user.profileImage || ""} />
-                            <AvatarFallback className="text-xs font-bold">
-                              {user.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
-                              {user.name}
-                              <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </p>
-                            <p className="text-[11px] text-muted-foreground truncate">
-                              {user.email}
-                            </p>
-                          </div>
+                    <Link
+                      to={`/admin/users/${user.id}`}
+                      className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-8 w-8 shrink-0">
+                          <AvatarImage src={user.profileImage || ""} />
+                          <AvatarFallback className="text-xs font-bold">
+                            {user.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
+                            {user.name}
+                            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {user.email}
+                          </p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span
-                            className={cn(
-                              "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border",
-                              ROLE_BADGE[user.role?.toUpperCase() ?? "CLIENT"] ??
-                                "",
-                            )}
-                          >
-                            {user.role || "CLIENT"}
-                          </span>
-                          {user.isBanned ? (
-                            <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border bg-red-50 text-red-600 border-red-200">
-                              Banned
-                            </span>
-                          ) : user.isEmailVerified ? (
-                            <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border bg-green-50 text-green-700 border-green-200">
-                              Verified
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">
-                              Unverified
-                            </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border",
+                            ROLE_BADGE[user.role?.toUpperCase() ?? "CLIENT"] ??
+                              "",
                           )}
-                        </div>
-                      </Link>
+                        >
+                          {user.role || "CLIENT"}
+                        </span>
+                        {user.isBanned ? (
+                          <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border bg-red-50 text-red-600 border-red-200">
+                            Banned
+                          </span>
+                        ) : user.isEmailVerified ? (
+                          <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border bg-green-50 text-green-700 border-green-200">
+                            Verified
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">
+                            Unverified
+                          </span>
+                        )}
+                      </div>
+                    </Link>
                   ))}
                 </div>
               )}

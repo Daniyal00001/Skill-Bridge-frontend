@@ -288,7 +288,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             label: "System",
             items: [
               { icon: History, label: "Admin Logs", href: "/admin/logs" },
-              { icon: SlidersHorizontal, label: "Platform Settings", href: "/admin/settings" },
             ],
           },
         ];
