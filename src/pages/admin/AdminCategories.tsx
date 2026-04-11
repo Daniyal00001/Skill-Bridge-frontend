@@ -88,7 +88,13 @@ export default function AdminCategories() {
   } | null>(null);
 
   // Form state
-  const [catForm, setCatForm] = useState({ name: "", slug: "", icon: "" });
+  const [catForm, setCatForm] = useState({ 
+    name: "", 
+    slug: "", 
+    icon: "",
+    subCategoryName: "",
+    subCategorySlug: ""
+  });
   const [subForm, setSubForm] = useState({ name: "", slug: "" });
 
   const { data: categories = [], isLoading } = useQuery({
@@ -175,7 +181,7 @@ export default function AdminCategories() {
   };
 
   const openCreateCat = () => {
-    setCatForm({ name: "", slug: "", icon: "" });
+    setCatForm({ name: "", slug: "", icon: "", subCategoryName: "", subCategorySlug: "" });
     setCatDialog({ open: true, mode: "create" });
   };
 
@@ -453,12 +459,12 @@ export default function AdminCategories() {
       {/* Category Dialog */}
       <Dialog open={catDialog.open} onOpenChange={(o) => setCatDialog((p) => ({ ...p, open: o }))}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="pb-2">
             <DialogTitle>
               {catDialog.mode === "create" ? "Add New Category" : "Edit Category"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="max-h-[70vh] overflow-y-auto px-1 py-2 space-y-4 scroll-smooth">
             <div className="space-y-1.5">
               <Label htmlFor="cat-name">Name *</Label>
               <Input
@@ -506,6 +512,42 @@ export default function AdminCategories() {
                 ))}
               </div>
             </div>
+
+            {catDialog.mode === "create" && (
+              <div className="pt-4 border-t border-border mt-4">
+                <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-primary" />
+                  Initial Subcategory
+                </p>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sub-name">Subcategory Name *</Label>
+                    <Input
+                      id="sub-name"
+                      placeholder="e.g. Frontend Development"
+                      value={catForm.subCategoryName}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCatForm((p) => ({ 
+                          ...p, 
+                          subCategoryName: val, 
+                          subCategorySlug: slugify(val) 
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sub-slug">Subcategory Slug *</Label>
+                    <Input
+                      id="sub-slug"
+                      placeholder="e.g. frontend-development"
+                      value={catForm.subCategorySlug}
+                      onChange={(e) => setCatForm((p) => ({ ...p, subCategorySlug: slugify(e.target.value) }))}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCatDialog({ open: false, mode: "create" })}>
@@ -513,7 +555,13 @@ export default function AdminCategories() {
             </Button>
             <Button
               onClick={handleCatSubmit}
-              disabled={!catForm.name || !catForm.slug || createCat.isPending || updateCat.isPending}
+              disabled={
+                !catForm.name || 
+                !catForm.slug || 
+                (catDialog.mode === 'create' && (!catForm.subCategoryName || !catForm.subCategorySlug)) ||
+                createCat.isPending || 
+                updateCat.isPending
+              }
             >
               {(createCat.isPending || updateCat.isPending) && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {catDialog.mode === "create" ? "Create" : "Save"}
