@@ -11,8 +11,8 @@ import {
   Sparkles, Send, Mic, Bot, Search, Star,
   Zap, Globe, Clock, BrainCircuit, MapPin,
   CheckCircle, Plus, ChevronLeft, ChevronRight,
-  MoreVertical, Trash2, Edit2, Share2,
-  Cpu, Layout, MessageSquare, History, Users
+  MoreVertical, Trash2, Edit2, Share2, Paperclip,
+  Cpu, Layout, MessageSquare, History, Users, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -179,6 +179,9 @@ const AIAssistantPage = () => {
   const [sessions, setSessions] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<{ url: string, name: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback((behavior: "auto" | "smooth" = "smooth") => {
@@ -191,17 +194,20 @@ const AIAssistantPage = () => {
     }
   }, []);
 
-  const handleSend = useCallback(async (content: string = input, selectedId?: string) => {
-    if (!content.trim()) return;
+  const handleSend = useCallback(async (content: string = input, selectedId?: string, attachmentUrl?: string) => {
+    if (!content.trim() && !attachmentUrl) return;
+
+    const attachmentToUse = attachmentUrl || selectedFile?.url;
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      content,
+      content: attachmentToUse ? `${content}\n\n📎 Attached: ${selectedFile?.name || "File"}` : content,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    setSelectedFile(null);
     setIsTyping(true);
 
     try {
@@ -213,7 +219,8 @@ const AIAssistantPage = () => {
           sessionId: sessionId || undefined,
           clientName: user?.name || "Client",
           clientId: user?.id,
-          selectedFreelancerId: selectedId
+          selectedFreelancerId: selectedId,
+          attachments: attachmentToUse ? [attachmentToUse] : []
         }),
       });
 
@@ -340,6 +347,41 @@ const AIAssistantPage = () => {
 
     recognition.start();
   }, [isListening, sessionId, handleSend]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("files", file);
+
+    try {
+      // Use the existing chat attachment endpoint
+      const resp = await fetch(`http://localhost:5000/api/chat/rooms/temp/attachments`, {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData,
+      });
+      const data = await resp.json();
+      if (data.success) {
+        setSelectedFile({
+          url: data.data[0].fileUrl,
+          name: file.name
+        });
+        toast.success("File uploaded and attached!");
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (err: any) {
+      toast.error("Upload failed: " + err.message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     scrollToBottom("smooth");
@@ -599,7 +641,27 @@ const AIAssistantPage = () => {
             {/* Input Overlay */}
             <div className="p-4 lg:p-8 bg-gradient-to-t from-background via-background/95 to-transparent relative">
               <div className="max-w-3xl mx-auto relative z-10">
+                {selectedFile && (
+                  <div className="mb-2 flex items-center gap-2 p-2 bg-primary/5 border border-primary/20 rounded-xl animate-in slide-in-from-bottom-2">
+                    <Paperclip className="h-3 w-3 text-primary" />
+                    <span className="text-[11px] font-bold text-primary truncate max-w-[200px]">{selectedFile.name}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-5 w-5 ml-auto hover:bg-primary/10 text-primary"
+                      onClick={() => setSelectedFile(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
                 <div className="relative flex items-end gap-2 bg-card border rounded-2xl p-2 pr-3 shadow-lg focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-300">
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    onChange={handleFileUpload} 
+                  />
                   <textarea
                     placeholder="Message SkillBridge AI..."
                     className="flex-1 min-h-[48px] max-h-[250px] bg-transparent border-none focus:ring-0 text-[14px] font-medium placeholder:text-muted-foreground/30 px-4 py-3 resize-none scrollbar-none"
@@ -631,6 +693,19 @@ const AIAssistantPage = () => {
                       title="Voice Input"
                     >
                        <Mic className="h-4.5 w-4.5" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      className={cn(
+                        "h-10 w-10 text-muted-foreground hover:text-primary rounded-xl transition-all",
+                        isUploading && "animate-pulse"
+                      )}
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      title="Attach File"
+                    >
+                       <Paperclip className="h-4.5 w-4.5" />
                     </Button>
                     <Button 
                       size="icon"
