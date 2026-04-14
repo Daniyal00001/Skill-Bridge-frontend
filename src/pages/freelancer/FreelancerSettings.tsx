@@ -177,7 +177,7 @@ function WithdrawalsTab() {
   const isValidAmount =
     witdrawAmountNum > 0 &&
     witdrawAmountNum <= balance &&
-    witdrawAmountNum >= 1;
+    witdrawAmountNum >= 25;
 
   const handleWithdraw = () => {
     if (!isValidAmount) return;
@@ -340,7 +340,7 @@ function WithdrawalsTab() {
                       <Input
                         id="withdraw-amount"
                         type="number"
-                        min="1"
+                        min="25"
                         max={balance}
                         step="0.01"
                         placeholder="0.00"
@@ -356,11 +356,11 @@ function WithdrawalsTab() {
                       </p>
                     )}
                     {withdrawAmount &&
-                      witdrawAmountNum < 1 &&
+                      witdrawAmountNum < 25 &&
                       witdrawAmountNum > 0 && (
                         <p className="text-xs text-amber-600 flex items-center gap-1">
                           <AlertTriangle className="h-3 w-3" />
-                          Minimum withdrawal is $1.00
+                          Minimum withdrawal is $25.00
                         </p>
                       )}
                   </div>
