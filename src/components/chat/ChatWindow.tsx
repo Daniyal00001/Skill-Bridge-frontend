@@ -347,7 +347,7 @@ export function ChatWindow({
                 ) : (
                   <div
                     className={cn(
-                      "flex gap-2",
+                      "flex gap-2 w-full",
                       isMe ? "flex-row-reverse" : "flex-row",
                       isGrouped ? "mt-0.5" : "mt-3",
                     )}
