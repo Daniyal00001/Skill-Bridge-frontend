@@ -12,6 +12,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -104,6 +114,7 @@ function WithdrawalsTab() {
   const [activeView, setActiveView] = useState<"withdraw" | "history">(
     "withdraw",
   );
+  const [showConfirmWithdraw, setShowConfirmWithdraw] = useState(false);
 
   const { data: balanceData, isLoading: isLoadingBalance } = useQuery({
     queryKey: ["freelancerBalance"],
@@ -170,6 +181,11 @@ function WithdrawalsTab() {
 
   const handleWithdraw = () => {
     if (!isValidAmount) return;
+    setShowConfirmWithdraw(true);
+  };
+
+  const confirmWithdraw = () => {
+    setShowConfirmWithdraw(false);
     withdrawMutation.mutate(witdrawAmountNum);
   };
 
@@ -379,6 +395,42 @@ function WithdrawalsTab() {
                       ? "Processing..."
                       : `Withdraw ${witdrawAmountNum > 0 ? formatCurrency(witdrawAmountNum) : ""}`}
                   </Button>
+
+                  {/* Confirmation Dialog */}
+                  <AlertDialog
+                    open={showConfirmWithdraw}
+                    onOpenChange={setShowConfirmWithdraw}
+                  >
+                    <AlertDialogContent className="max-w-[400px] border-none bg-card/95 backdrop-blur-xl shadow-2xl">
+                      <AlertDialogHeader>
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                          <Banknote className="h-6 w-6 text-primary" />
+                        </div>
+                        <AlertDialogTitle className="text-xl font-black">
+                          Confirm Withdrawal?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm">
+                          You are about to withdraw{" "}
+                          <span className="font-bold text-foreground">
+                            {formatCurrency(witdrawAmountNum)}
+                          </span>{" "}
+                          to your connected Stripe account. This action cannot
+                          be undone once processed.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="mt-4">
+                        <AlertDialogCancel className="border-none bg-muted/50 hover:bg-muted font-bold rounded-xl">
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={confirmWithdraw}
+                          className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl px-8 shadow-lg shadow-primary/20"
+                        >
+                          Confirm & Withdraw
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
                   <p className="text-center text-[10px] text-muted-foreground">
                     Funds are typically available in your Stripe account within
