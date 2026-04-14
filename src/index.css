@@ -222,6 +222,36 @@
   .animate-pulse-ultra-slow {
     animation: pulse 12s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+
+  .shimmer {
+    @apply bg-muted relative overflow-hidden;
+  }
+  .shimmer::after {
+    @apply absolute inset-0;
+    content: "";
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+  }
+  .dark .shimmer::after {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.03),
+      transparent
+    );
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes float {

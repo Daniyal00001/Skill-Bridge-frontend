@@ -116,15 +116,15 @@ export default function FreelancerProfile() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto py-6 px-4 sm:px-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-8"
+          className="space-y-6"
         >
           {/* HEADER SECTION - NO CARD ENCLOSURE FOR A LIGHTER FEEL */}
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 border-b pb-10 border-border/50">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 border-b pb-6 border-border/50">
             <div className="relative group">
               {/* Circular Progress SVG */}
               <svg className="absolute -inset-3 w-[calc(100%+24px)] h-[calc(100%+24px)] -rotate-90">
@@ -170,7 +170,7 @@ export default function FreelancerProfile() {
                     .substring(0, 2) || "AC"}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute bottom-4 right-4 w-8 h-8 bg-background rounded-xl flex items-center justify-center shadow-lg border border-border">
+              <div className="absolute bottom-2 right-2 w-8 h-8 bg-background rounded-xl flex items-center justify-center shadow-lg border border-border">
                 {displayProfile?.user?.isIdVerified ? (
                   <ShieldCheck className="w-5 h-5 text-blue-500" />
                 ) : (
@@ -179,10 +179,10 @@ export default function FreelancerProfile() {
               </div>
             </div>
 
-            <div className="flex-1 text-center md:text-left space-y-4">
-              <div className="space-y-1">
+            <div className="flex-1 text-center md:text-left space-y-2">
+              <div className="space-y-0.5">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
+                  <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
                     {displayProfile.fullName ||
                       displayProfile.user?.name ||
                       "Unnamed Freelancer"}
@@ -293,15 +293,15 @@ export default function FreelancerProfile() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* MAIN CONTENT AREA */}
-            <div className="lg:col-span-8 space-y-12">
+            <div className="lg:col-span-8 space-y-6">
               {/* DESCRIPTION SECTION */}
               <section className="space-y-4 max-w-full overflow-hidden">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
                   Overview
                 </h3>
-                <p className="text-lg text-muted-foreground leading-relaxed font-medium break-words whitespace-pre-wrap max-w-full">
+                <p className="text-base text-muted-foreground leading-relaxed font-medium break-words whitespace-pre-wrap max-w-full">
                   {displayProfile.bio || "No overview provided."}
                 </p>
               </section>
@@ -359,7 +359,7 @@ export default function FreelancerProfile() {
                 ].map((stat: any) => (
                   <div
                     key={stat.label}
-                    className="p-6 rounded-3xl bg-card border border-border/40 space-y-3 hover:bg-primary/5 transition-colors"
+                    className="p-3 rounded-2xl bg-card border border-border/40 space-y-1.5 hover:bg-primary/5 transition-colors"
                   >
                     <stat.icon className={cn("w-6 h-6", stat.color)} />
                     <div>
@@ -500,11 +500,15 @@ export default function FreelancerProfile() {
                           className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 bg-accent/10 hover:border-primary/30 transition-all flex flex-col hover:shadow-lg"
                         >
                           {isImage ? (
-                            <img
-                              src={gig.fileUrl}
-                              alt={gig.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
+                            <div className="w-full h-full shimmer">
+                              <img
+                                src={gig.fileUrl}
+                                alt={gig.title}
+                                loading="lazy"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                onLoad={(e) => (e.currentTarget.parentElement?.classList.remove("shimmer"))}
+                              />
+                            </div>
                           ) : (
                             <div className="flex-1 flex items-center justify-center bg-primary/5">
                               {isPdf ? (
@@ -553,17 +557,17 @@ export default function FreelancerProfile() {
                   Work History & Reviews
                 </h3>
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {/* Scrollable container for work history logs */}
-                  <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/10">
+                  <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/10">
                     {(displayProfile.workHistory || []).map((work: any) => (
                       <div
                         key={work.id}
-                        className="p-8 rounded-[2.5rem] bg-card border border-border/40 hover:border-primary/20 transition-all space-y-6 group"
+                        className="p-4 rounded-2xl bg-card border border-border/40 hover:border-primary/20 transition-all space-y-3 group"
                       >
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div className="space-y-2">
-                            <h4 className="text-xl font-black group-hover:text-primary transition-colors">
+                            <h4 className="text-lg font-black group-hover:text-primary transition-colors">
                               {work.title}
                             </h4>
                             <div className="flex items-center gap-4 text-sm font-bold text-muted-foreground/60 tracking-wider uppercase">
@@ -581,7 +585,7 @@ export default function FreelancerProfile() {
                             </div>
                           </div>
                           <div className="text-left md:text-right">
-                            <p className="text-2xl font-black text-foreground">
+                            <p className="text-xl font-black text-foreground">
                               ${work.amount.toLocaleString()}
                             </p>
                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
@@ -591,8 +595,8 @@ export default function FreelancerProfile() {
                         </div>
 
                         {work.comment ? (
-                          <div className="bg-accent/30 p-6 rounded-2xl md:ml-4 border-l-4 border-primary/40 italic">
-                            <p className="text-muted-foreground font-medium text-sm leading-relaxed">
+                          <div className="bg-accent/30 p-4 rounded-xl md:ml-4 border-l-4 border-primary/40 italic">
+                            <p className="text-muted-foreground font-medium text-xs leading-relaxed">
                               "{work.comment}"
                             </p>
                             <div className="mt-4 flex items-center gap-2 text-xs font-black uppercase text-foreground">
@@ -633,7 +637,7 @@ export default function FreelancerProfile() {
             </div>
 
             {/* SIDEBAR AREA */}
-            <aside className="lg:col-span-4 space-y-10 lg:pl-4">
+            <aside className="lg:col-span-4 space-y-6 lg:pl-4">
               {/* SKILLS SECTION */}
               <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary">
@@ -731,11 +735,15 @@ export default function FreelancerProfile() {
                           className="group relative aspect-square rounded-2xl overflow-hidden border border-border/50 bg-accent/10 hover:border-primary/30 transition-all flex flex-col"
                         >
                           {isImage ? (
-                            <img
-                              src={cert.credentialUrl}
-                              alt={cert.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
+                            <div className="w-full h-full shimmer">
+                              <img
+                                src={cert.credentialUrl}
+                                alt={cert.title}
+                                loading="lazy"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                onLoad={(e) => (e.currentTarget.parentElement?.classList.remove("shimmer"))}
+                              />
+                            </div>
                           ) : (
                             <div className="flex-1 flex items-center justify-center bg-accent/20">
                               {isPdf ? (

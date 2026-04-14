@@ -688,7 +688,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-6 flex-1 min-w-0">{children}</main>
+        <main className="p-4 md:p-5 flex-1 min-w-0">{children}</main>
       </div>
     </div>
   );
