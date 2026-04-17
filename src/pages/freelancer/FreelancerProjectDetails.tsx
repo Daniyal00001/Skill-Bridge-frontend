@@ -410,7 +410,9 @@ export default function FreelancerProjectDetails() {
                         {user?.role === "ADMIN" ? (
                           <Link
                             to={`/admin/users/${client.user?.id || client.id}`}
-                            className="font-black leading-tight text-primary hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-black leading-tight text-primary hover:underline hover:text-primary/80 transition-colors"
                           >
                             {client.user?.name ||
                               client.name ||

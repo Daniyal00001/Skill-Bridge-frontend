@@ -271,6 +271,8 @@ export default function ProjectModeration() {
                           {project.clientProfile?.user ? (
                             <Link
                               to={`/admin/users/${project.clientProfile.user.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
                               className="flex items-center gap-2 group/user"
                             >
                               <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/user:bg-primary/20 transition-colors">
