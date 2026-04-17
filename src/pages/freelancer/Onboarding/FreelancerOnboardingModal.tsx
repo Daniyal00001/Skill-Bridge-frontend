@@ -42,19 +42,18 @@ import { SkillAutocomplete } from "@/components/common/SkillAutocomplete";
 // Per-field completion weights (must sum to 100)
 // ---------------------------------------------------------------------------
 const WEIGHTS = {
-  nameTagline: 10,   // Full name + tagline
-  phone: 5,          // Phone number
-  location: 5,       // Country
-  hourlyRate: 10,    // Hourly rate
-  bio: 10,           // Bio (≥100 chars)
-  experienceLevel: 5,// Experience level
-  skills: 15,        // Skills (≥1)
-  languages: 5,      // Languages (≥1)
-  education: 5,      // Education (≥1 entry)
-  profileImage: 10,  // Profile image (Reduced from 15)
-  budget: 5,         // Preferred Budget Range (NEW)
-  portfolio: 10,     // Cert / gig / portfolio
-  links: 5,          // Any social link
+  nameTagline: 10, // Full name + tagline
+  phone: 5, // Phone number
+  location: 5, // Country
+  hourlyRate: 10, // Hourly rate
+  bio: 10, // Bio (≥100 chars)
+  skills: 20, // Skills (≥1) - Increased by 5
+  languages: 5, // Languages (≥1)
+  education: 5, // Education (≥1 entry)
+  profileImage: 10, // Profile image
+  budget: 5, // Preferred Budget Range
+  portfolio: 10, // Cert / gig / portfolio
+  links: 5, // Any social link
 } as const;
 
 function computeLocalCompletion(
@@ -73,7 +72,6 @@ function computeLocalCompletion(
   if (formData.location?.trim()) score += WEIGHTS.location;
   if (Number(formData.hourlyRate) >= 5) score += WEIGHTS.hourlyRate;
   if (formData.bio?.trim().length >= 100) score += WEIGHTS.bio;
-  if (formData.experienceLevel) score += WEIGHTS.experienceLevel;
   if (formData.skills.length > 0) score += WEIGHTS.skills;
   if (formData.languages.length > 0) score += WEIGHTS.languages;
   if (formData.educations.some((e: any) => e.school?.trim() && e.degree?.trim()))
@@ -157,7 +155,6 @@ export function FreelancerOnboardingModal({
     hourlyRate: profile?.hourlyRate?.toString() || "",
     bio: profile?.bio || "",
     availability: profile?.availability || "AVAILABLE",
-    experienceLevel: profile?.experienceLevel || "ENTRY",
     skills:
       profile?.skills?.map((s: any) => ({
         name: s.skill?.name || s.name,
@@ -200,9 +197,12 @@ export function FreelancerOnboardingModal({
             hourlyRate: Number(formData.hourlyRate),
             bio: formData.bio,
             availability: formData.availability,
-            experienceLevel: formData.experienceLevel,
-            preferredBudgetMin: formData.preferredBudgetMin ? Number(formData.preferredBudgetMin) : undefined,
-            preferredBudgetMax: formData.preferredBudgetMax ? Number(formData.preferredBudgetMax) : undefined,
+            preferredBudgetMin: formData.preferredBudgetMin
+              ? Number(formData.preferredBudgetMin)
+              : undefined,
+            preferredBudgetMax: formData.preferredBudgetMax
+              ? Number(formData.preferredBudgetMax)
+              : undefined,
           });
         } catch (e) {
           console.error("Auto-save Step 2 failed", e);
@@ -283,7 +283,7 @@ export function FreelancerOnboardingModal({
       id: 2,
       label: "Professional",
       icon: Briefcase,
-      weight: WEIGHTS.hourlyRate + WEIGHTS.bio + WEIGHTS.experienceLevel + WEIGHTS.budget,
+      weight: WEIGHTS.hourlyRate + WEIGHTS.bio + WEIGHTS.budget,
       isComplete: !!(
         Number(formData.hourlyRate) >= 5 &&
         formData.bio?.trim().length >= 100 &&
@@ -367,9 +367,12 @@ export function FreelancerOnboardingModal({
           hourlyRate: Number(formData.hourlyRate),
           bio: formData.bio,
           availability: formData.availability,
-          experienceLevel: formData.experienceLevel,
-          preferredBudgetMin: formData.preferredBudgetMin ? Number(formData.preferredBudgetMin) : undefined,
-          preferredBudgetMax: formData.preferredBudgetMax ? Number(formData.preferredBudgetMax) : undefined,
+          preferredBudgetMin: formData.preferredBudgetMin
+            ? Number(formData.preferredBudgetMin)
+            : undefined,
+          preferredBudgetMax: formData.preferredBudgetMax
+            ? Number(formData.preferredBudgetMax)
+            : undefined,
         });
       } else if (step === 3) {
         await freelancerService.updateOnboardingStep3({
@@ -752,25 +755,7 @@ export function FreelancerOnboardingModal({
                   className="h-32"
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="flex w-full items-center">Experience Level <WeightBadge pct={WEIGHTS.experienceLevel} isComplete={!!formData.experienceLevel} /></Label>
-                  <Select
-                    onValueChange={(val) =>
-                      setFormData((p) => ({ ...p, experienceLevel: val }))
-                    }
-                    value={formData.experienceLevel}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ENTRY">Entry Level</SelectItem>
-                      <SelectItem value="MID">Intermediate</SelectItem>
-                      <SelectItem value="SENIOR">Expert</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Label>Availability</Label>
                   <Select

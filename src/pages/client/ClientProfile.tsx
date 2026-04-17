@@ -254,20 +254,18 @@ export default function ClientProfilePage() {
                         </span>
                       </div>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg h-7 px-3 font-bold hover:bg-accent active:scale-95 transition-all text-[10px] uppercase border shadow-sm"
+                      onClick={() => handleOpenModal("about")}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <Pencil className="w-3 h-3" /> Edit Profile
+                      </div>
+                    </Button>
                   </div>
                 </div>
-              </div>
-
-              <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-4">
-                <Button
-                  variant="outline"
-                  className="rounded-xl h-11 px-6 font-bold hover:bg-accent active:scale-95 transition-all"
-                  onClick={() => handleOpenModal("about")}
-                >
-                  <div className="flex items-center gap-2">
-                    <Pencil className="w-4 h-4" /> Edit Profile
-                  </div>
-                </Button>
               </div>
             </div>
           </div>
