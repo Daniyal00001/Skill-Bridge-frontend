@@ -21,6 +21,8 @@ import {
   Loader2,
   AlertCircle,
   Plus,
+  CreditCard,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -40,16 +42,24 @@ interface StripeAddMethodModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  /** 
+   * The backend endpoint to create a SetupIntent.
+   * - CLIENT:     "/stripe/create-setup-intent"   (default)
+   * - FREELANCER: "/stripe/freelancer/setup-intent"
+   */
+  setupEndpoint?: string;
+  title?: string;
+  description?: string;
 }
 
 function SetupForm({
   clientSecret,
   onSuccess,
-  onBack,
+  onClose,
 }: {
   clientSecret: string;
   onSuccess: () => void;
-  onBack: () => void;
+  onClose: () => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -74,11 +84,10 @@ function SetupForm({
       const cardElement = elements.getElement(CardElement);
       if (!cardElement) throw new Error("Card element not found");
 
-      const { error: stripeError } = await stripe.confirmCardSetup(clientSecret, {
-        payment_method: {
-          card: cardElement,
-        },
-      });
+      const { error: stripeError, setupIntent } = await stripe.confirmCardSetup(
+        clientSecret,
+        { payment_method: { card: cardElement } }
+      );
 
       if (stripeError) {
         setError(stripeError.message || "Setup failed.");
@@ -86,8 +95,10 @@ function SetupForm({
         return;
       }
 
-      toast.success("Payment method added successfully!");
-      onSuccess();
+      if (setupIntent?.status === "succeeded") {
+        toast.success("Payment method saved successfully!");
+        onSuccess();
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save payment method.");
       setLoading(false);
@@ -97,7 +108,9 @@ function SetupForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-3">
-        <p className="text-sm font-black">Method Details</p>
+        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+          Card Details
+        </p>
         <div
           className={cn(
             "rounded-xl border border-border/60 p-4 transition-all min-h-[60px]",
@@ -110,12 +123,14 @@ function SetupForm({
               options={{
                 style: {
                   base: {
-                    fontSize: '16px',
-                    color: isDark ? '#e2e8f0' : '#1a1a1a',
-                    '::placeholder': { color: isDark ? '#64748b' : '#a1a1aa' },
+                    fontSize: "16px",
+                    color: isDark ? "#e2e8f0" : "#1a1a1a",
+                    "::placeholder": {
+                      color: isDark ? "#64748b" : "#a1a1aa",
+                    },
                     fontFamily: "Inter, system-ui, sans-serif",
                   },
-                  invalid: { color: '#f87171' },
+                  invalid: { color: "#f87171" },
                 },
               }}
               onReady={() => setReady(true)}
@@ -138,7 +153,7 @@ function SetupForm({
 
       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground italic">
         <Lock className="w-3 h-3" />
-        <span>Your sensitive data is never stored on our servers.</span>
+        <span>Card details are never stored on our servers.</span>
       </div>
 
       <div className="flex gap-3">
@@ -146,7 +161,7 @@ function SetupForm({
           type="button"
           variant="outline"
           className="rounded-xl flex-1"
-          onClick={onBack}
+          onClick={onClose}
           disabled={loading}
         >
           Cancel
@@ -161,7 +176,7 @@ function SetupForm({
           ) : (
             <Plus className="w-4 h-4 mr-2" />
           )}
-          {loading ? "Saving..." : "Save Method"}
+          {loading ? "Saving..." : "Save Card"}
         </Button>
       </div>
     </form>
@@ -172,6 +187,9 @@ export function StripeAddMethodModal({
   open,
   onClose,
   onSuccess,
+  setupEndpoint = "/stripe/create-setup-intent",
+  title = "Add Payment Method",
+  description = "Securely add a credit or debit card.",
 }: StripeAddMethodModalProps) {
   const { theme } = useTheme();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -182,10 +200,12 @@ export function StripeAddMethodModal({
       const initSetup = async () => {
         setLoading(true);
         try {
-          const res = await api.post("/stripe/create-setup-intent");
+          const res = await api.post(setupEndpoint);
           setClientSecret(res.data.clientSecret);
         } catch (err: any) {
-          toast.error("Failed to initialize payment setup.");
+          toast.error(
+            err?.response?.data?.message || "Failed to initialize card setup."
+          );
           onClose();
         } finally {
           setLoading(false);
@@ -195,7 +215,7 @@ export function StripeAddMethodModal({
     } else {
       setClientSecret(null);
     }
-  }, [open, onClose]);
+  }, [open, setupEndpoint, onClose]);
 
   const isDark =
     theme === "dark" ||
@@ -204,52 +224,64 @@ export function StripeAddMethodModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md rounded-2xl p-0 overflow-hidden border-border/60 gap-0">
-        <div className="bg-primary p-6 text-white text-center">
-            <DialogHeader>
-                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-3">
-                    <Shield className="w-6 h-6" />
-                </div>
-                <DialogTitle className="text-white text-xl font-black">
-                    Add Payment Method
-                </DialogTitle>
-                <DialogDescription className="text-primary-foreground/70 text-xs mt-1">
-                    Securely add a credit or debit card.
-                </DialogDescription>
-            </DialogHeader>
+      <DialogContent className="sm:max-w-md rounded-2xl p-0 overflow-hidden border-border/60 gap-0 shadow-2xl">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 text-white text-center">
+          <DialogHeader>
+            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-3">
+              <CreditCard className="w-7 h-7" />
+            </div>
+            <DialogTitle className="text-white text-xl font-black">
+              {title}
+            </DialogTitle>
+            <DialogDescription className="text-white/70 text-xs mt-1">
+              {description}
+            </DialogDescription>
+          </DialogHeader>
         </div>
 
         <div className="p-6">
-            {loading ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                    <p className="text-sm font-medium animate-pulse">Initializing Secure Session...</p>
-                </div>
-            ) : clientSecret ? (
-                <Elements
-                    stripe={getStripe()}
-                    options={{
-                        clientSecret,
-                        appearance: {
-                            theme: isDark ? "night" : "stripe",
-                            variables: {
-                                colorPrimary: "#6366f1",
-                                colorBackground: isDark ? "#1e1e2e" : "#ffffff",
-                                borderRadius: "12px",
-                            },
-                        },
-                    }}
-                >
-                    <SetupForm
-                        clientSecret={clientSecret}
-                        onSuccess={() => {
-                            onSuccess();
-                            onClose();
-                        }}
-                        onBack={onClose}
-                    />
-                </Elements>
-            ) : null}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+              <p className="text-sm font-medium animate-pulse">
+                Initializing Secure Session...
+              </p>
+            </div>
+          ) : clientSecret ? (
+            <Elements
+              stripe={getStripe()}
+              options={{
+                clientSecret,
+                appearance: {
+                  theme: isDark ? "night" : "stripe",
+                  variables: {
+                    colorPrimary: "#6366f1",
+                    colorBackground: isDark ? "#1e1e2e" : "#ffffff",
+                    borderRadius: "12px",
+                  },
+                },
+              }}
+            >
+              <SetupForm
+                clientSecret={clientSecret}
+                onSuccess={() => {
+                  onSuccess();
+                  onClose();
+                }}
+                onClose={onClose}
+              />
+            </Elements>
+          ) : null}
+        </div>
+
+        {/* Security footer */}
+        <div className="px-6 pb-5 flex items-center justify-center gap-2 text-[10px] text-muted-foreground">
+          <Shield className="w-3 h-3 text-indigo-500" />
+          <span>
+            256-bit SSL encrypted · Powered by{" "}
+            <span className="font-bold text-indigo-600">Stripe</span>
+          </span>
         </div>
       </DialogContent>
     </Dialog>

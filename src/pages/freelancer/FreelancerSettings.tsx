@@ -54,6 +54,8 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { StripeAddMethodModal } from "@/components/modals/StripeAddMethodModal";
+import { Plus, Trash2 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -641,6 +643,29 @@ const FreelancerSettings = () => {
     newPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showAddMethod, setShowAddMethod] = useState(false);
+
+  const { data: stripeMethods, isLoading: isLoadingMethods } = useQuery({
+    queryKey: ["freelancerPaymentMethods"],
+    queryFn: async () => {
+      const res = await api.get("/stripe/freelancer/payment-methods");
+      return res.data;
+    },
+  });
+
+  const deleteMethodMutation = useMutation({
+    mutationFn: async (methodId: string) => {
+      const res = await api.delete(`/stripe/freelancer/payment-methods/${methodId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["freelancerPaymentMethods"] });
+      toast.success("Payment method removed.");
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to remove payment method.");
+    },
+  });
 
   const passwordRequirements = useMemo(
     () => [
@@ -804,6 +829,9 @@ const FreelancerSettings = () => {
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
               <Activity className="h-4 w-4" /> Notifications
+            </TabsTrigger>
+            <TabsTrigger value="billing" className="gap-2">
+              <CreditCard className="h-4 w-4" /> Billing
             </TabsTrigger>
           </TabsList>
 
@@ -1202,8 +1230,139 @@ const FreelancerSettings = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent
+            value="billing"
+            className="animate-in fade-in-50 duration-500"
+          >
+            <div className="space-y-6 max-w-2xl mx-auto">
+              <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl overflow-hidden text-left">
+                <CardHeader className="bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Payment Methods</CardTitle>
+                      <CardDescription>
+                        Manage your cards for purchasing SkillTokens.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAddMethod(true)}
+                      className="rounded-xl font-bold"
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> Add Method
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {isLoadingMethods ? (
+                    <div className="p-8 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : stripeMethods?.methods?.length > 0 ? (
+                    <div className="divide-y divide-border/40">
+                      {stripeMethods.methods.map((method: any) => (
+                        <div
+                          key={method.id}
+                          className="p-4 flex items-center justify-between hover:bg-muted/20 transition-colors"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-10 rounded-lg bg-muted flex items-center justify-center border border-border/60">
+                              <CreditCard className="w-5 h-5 text-indigo-500" />
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm capitalize">
+                                {method.brand} •••• {method.last4}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                                Expires {method.expMonth}/{method.expYear}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-black uppercase tracking-tighter"
+                            >
+                              Verified
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              onClick={() =>
+                                deleteMethodMutation.mutate(method.id)
+                              }
+                              disabled={deleteMethodMutation.isPending}
+                            >
+                              {deleteMethodMutation.isPending &&
+                              deleteMethodMutation.variables === method.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div
+                      className="p-12 flex flex-col items-center gap-4 text-muted-foreground cursor-pointer hover:bg-muted/20 transition-all border-y border-dashed mt-[-1px]"
+                      onClick={() => setShowAddMethod(true)}
+                    >
+                      <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center">
+                        <CreditCard className="h-8 w-8 text-primary/40" />
+                      </div>
+                      <div className="text-center">
+                        <p className="font-bold text-foreground">
+                          No payment cards found
+                        </p>
+                        <p className="text-xs">
+                          Attach a card to quickly purchase SkillTokens.
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="rounded-xl mt-2 font-bold px-8"
+                      >
+                        Add My First Method
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 text-left">
+                <ShieldCheck className="w-8 h-8 text-indigo-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-indigo-900">
+                    Industrial-Grade Security
+                  </p>
+                  <p className="text-[11px] text-indigo-700/70 leading-relaxed font-medium">
+                    Payments are encrypted and processed by Stripe. Your sensitive card details are never stored on our servers.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
+
+      <StripeAddMethodModal
+        open={showAddMethod}
+        onClose={() => setShowAddMethod(false)}
+        setupEndpoint="/stripe/freelancer/setup-intent"
+        title="Add Card for Token Purchases"
+        description="Securely save a card to buy SkillTokens instantly."
+        onSuccess={() => {
+          queryClient.invalidateQueries({
+            queryKey: ["freelancerPaymentMethods"],
+          });
+          toast.success("Payment method saved!");
+        }}
+      />
     </DashboardLayout>
   );
 };
