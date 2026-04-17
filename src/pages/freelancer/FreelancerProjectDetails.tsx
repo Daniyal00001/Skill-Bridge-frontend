@@ -50,6 +50,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api } from "@/lib/api";
+import { getClientLevel } from "@/lib/levelUtils";
 
 const getDaysLeft = (deadline: string) => {
   if (!deadline) return null;
@@ -431,6 +432,9 @@ export default function FreelancerProjectDetails() {
                             ({client.totalReviews || 0} reviews)
                           </span>
                         </div>
+                        <div className="mt-2">
+                          <ClientLevelBadge client={client} />
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-1 pb-1">
@@ -740,6 +744,31 @@ const VerificationItem = ({
     </span>
   </div>
 );
+
+const ClientLevelBadge = ({ client }: { client: any }) => {
+  if (!client) return null;
+  const level = getClientLevel({
+    totalSpent: client.totalSpent,
+    totalHires: client.totalHires,
+    totalOrders: client._count?.projects || 0,
+  });
+
+  return (
+    <Badge
+      className={cn(
+        "text-[10px] font-black uppercase tracking-tight px-2.5 py-0.5 border flex items-center gap-1.5 rounded-full shadow-sm transition-all hover:shadow-md cursor-help w-fit",
+        level.color,
+        level.bg,
+        level.border,
+      )}
+    >
+      <span
+        className={cn("w-1.5 h-1.5 rounded-full animate-pulse", level.dot)}
+      />
+      {level.label}
+    </Badge>
+  );
+};
 
 const DetailGridItem = ({
   icon: Icon,

@@ -92,23 +92,24 @@ export default function ClientDashboard() {
                   stats={{
                     type: "client",
                     totalSpent: stats.committedBudget,
-                    totalHires: Math.round((stats.hireRate / 100) * stats.totalProjects),
+                    totalHires: Math.round(
+                      (stats.hireRate / 100) * stats.totalProjects,
+                    ),
                     totalOrders: stats.totalProjects,
                   }}
                   badgeSize="sm"
                 />
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-muted-foreground text-lg">
-                <p>
-                  Here's what's happening with your projects today
-                </p>
+                <p>Here's what's happening with your projects today</p>
                 {stats.lastLoginAt && (
-                   <>
+                  <>
                     <span className="hidden sm:inline text-border">|</span>
                     <p className="text-sm font-medium text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
-                      Last active: {new Date(stats.lastLoginAt).toLocaleString()}
+                      Last active:{" "}
+                      {new Date(stats.lastLoginAt).toLocaleString()}
                     </p>
-                   </>
+                  </>
                 )}
               </div>
             </div>

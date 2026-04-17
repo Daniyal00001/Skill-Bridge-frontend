@@ -44,6 +44,7 @@ import {
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { getClientLevel, LevelInfo } from "@/lib/levelUtils";
 import {
   Dialog,
   DialogContent,
@@ -197,6 +198,29 @@ const InvitationsPage = () => {
     }
   };
 
+  const ClientLevelBadge = ({ stats }: { stats: any }) => {
+    if (!stats) return null;
+    const level = getClientLevel({
+      totalSpent: stats.totalSpent,
+      totalHires: stats.totalHires,
+      totalOrders: stats.totalProjects,
+    });
+
+    return (
+      <Badge
+        className={cn(
+          "text-[10px] font-black uppercase tracking-tight px-2.5 py-0.5 border flex items-center gap-1.5 rounded-full shadow-sm transition-all hover:shadow-md cursor-help",
+          level.color,
+          level.bg,
+          level.border,
+        )}
+      >
+        <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", level.dot)} />
+        {level.label}
+      </Badge>
+    );
+  };
+
   const stats = {
     total: invites.length,
     pending: invites.filter((i) => i.status?.toUpperCase() === "PENDING")
@@ -324,8 +348,9 @@ const InvitationsPage = () => {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-bold text-xs">
+                            <p className="font-bold text-xs flex items-center gap-1.5">
                               {invite.clientName}
+                              <ClientLevelBadge stats={invite.clientStats} />
                             </p>
                           </div>
                         </div>
@@ -437,8 +462,9 @@ const InvitationsPage = () => {
                     </div>
                     <DialogDescription className="text-xs text-foreground/80 mt-1">
                       From{" "}
-                      <span className="font-bold text-foreground">
+                      <span className="font-bold text-foreground flex items-center gap-2">
                         {selectedInvite.clientName}
+                        <ClientLevelBadge stats={selectedInvite.clientStats} />
                       </span>
                       <span className="mx-1.5 opacity-40">·</span>
                       <Link
