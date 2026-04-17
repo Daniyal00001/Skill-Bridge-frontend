@@ -229,40 +229,31 @@ export default function ClientProfilePage() {
                   </span>
                 </div>
                 <div className="w-px h-8 bg-border/40 hidden sm:block" />
-                <div className="flex flex-col items-center md:items-start gap-1">
-                  {client.verification.payment ? (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">
-                        Payment Verified
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg">
-                      <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                      <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter">
-                        Payment Not Verified
-                      </span>
-                    </div>
-                  )}
-                  {client.verification.id && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg mt-2">
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">
-                        Identity Verified
-                      </span>
-                    </div>
-                  )}
-                  <div className="mt-2">
-                    <LevelInfoPopover
-                      stats={{
-                        type: "client",
-                        totalSpent: client.metrics.totalSpent,
-                        totalHires: client.metrics.hireRate > 0 ? Math.round((client.metrics.hireRate / 100) * client.metrics.totalProjects) : 0,
-                        totalOrders: client.metrics.totalProjects,
-                      }}
-                      badgeSize="sm"
-                    />
+                <div className="flex flex-col items-center md:items-start gap-3">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                    {client.verification.payment ? (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">
+                          Payment Verified
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg">
+                        <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                        <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter">
+                          Payment Not Verified
+                        </span>
+                      </div>
+                    )}
+                    {client.verification.id && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">
+                          Identity Verified
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
