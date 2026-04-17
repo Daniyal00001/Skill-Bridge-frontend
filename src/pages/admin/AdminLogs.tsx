@@ -11,7 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, History, User, FolderOpen, Shield, Star, DollarSign } from "lucide-react";
+import { Loader2, History, User, FolderOpen, Shield, Star, DollarSign, Calendar, FilterX } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -28,14 +29,13 @@ interface AdminLog {
   };
 }
 
-const TARGET_TYPES = ["ALL", "User", "Dispute", "Project", "Skill", "Setting"];
+const TARGET_TYPES = ["ALL", "User", "Dispute", "Project", "Skill"];
 
 const TARGET_ICONS: Record<string, React.ElementType> = {
   User: User,
   Dispute: Shield,
   Project: FolderOpen,
   Skill: Star,
-  Setting: DollarSign,
 };
 
 const TARGET_COLORS: Record<string, string> = {
@@ -43,23 +43,26 @@ const TARGET_COLORS: Record<string, string> = {
   Dispute: "bg-rose-50 text-rose-700",
   Project: "bg-violet-50 text-violet-700",
   Skill: "bg-amber-50 text-amber-700",
-  Setting: "bg-emerald-50 text-emerald-700",
 };
 
-const fetchLogs = async (targetType: string, page: number): Promise<{ logs: AdminLog[]; total: number }> => {
+const fetchLogs = async (targetType: string, page: number, startDate?: string, endDate?: string): Promise<{ logs: AdminLog[]; total: number }> => {
   const params = new URLSearchParams({ page: String(page), limit: "30" });
   if (targetType !== "ALL") params.set("targetType", targetType);
+  if (startDate) params.set("startDate", startDate);
+  if (endDate) params.set("endDate", endDate);
   const res = await api.get(`/admin/logs?${params.toString()}`);
   return res.data;
 };
 
 export default function AdminLogs() {
   const [targetFilter, setTargetFilter] = useState("ALL");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["adminLogs", targetFilter, page],
-    queryFn: () => fetchLogs(targetFilter, page),
+    queryKey: ["adminLogs", targetFilter, page, startDate, endDate],
+    queryFn: () => fetchLogs(targetFilter, page, startDate, endDate),
   });
 
   const logs = data?.logs || [];
@@ -85,22 +88,67 @@ export default function AdminLogs() {
 
         <Card className="border border-border/50 rounded-2xl overflow-hidden">
           <CardHeader className="px-5 pt-4 pb-4 border-b border-border/30">
-            <div className="flex flex-wrap gap-2">
-              {TARGET_TYPES.map((t) => (
-                <Button
-                  key={t}
-                  size="sm"
-                  variant={targetFilter === t ? "default" : "outline"}
-                  className="h-7 text-xs font-semibold gap-1.5"
-                  onClick={() => {
-                    setTargetFilter(t);
-                    setPage(1);
-                  }}
-                >
-                  {TARGET_ICONS[t] && (() => { const Icon = TARGET_ICONS[t]; return <Icon className="h-3 w-3" />; })()}
-                  {t}
-                </Button>
-              ))}
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+              <div className="flex flex-wrap gap-2">
+                {TARGET_TYPES.map((t) => (
+                  <Button
+                    key={t}
+                    size="sm"
+                    variant={targetFilter === t ? "default" : "outline"}
+                    className="h-7 text-xs font-semibold gap-1.5"
+                    onClick={() => {
+                      setTargetFilter(t);
+                      setPage(1);
+                    }}
+                  >
+                    {TARGET_ICONS[t] && (() => { const Icon = TARGET_ICONS[t]; return <Icon className="h-3 w-3" />; })()}
+                    {t}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase text-muted-foreground whitespace-nowrap">From</span>
+                  <div className="relative">
+                    <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                      className="h-8 pl-8 text-[11px] font-bold w-36 rounded-xl bg-background/50"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase text-muted-foreground whitespace-nowrap">To</span>
+                  <div className="relative">
+                    <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                      className="h-8 pl-8 text-[11px] font-bold w-36 rounded-xl bg-background/50"
+                    />
+                  </div>
+                </div>
+                {(startDate || endDate || targetFilter !== "ALL") && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-xl hover:bg-muted"
+                    onClick={() => {
+                      setStartDate("");
+                      setEndDate("");
+                      setTargetFilter("ALL");
+                      setPage(1);
+                    }}
+                    title="Reset Filters"
+                  >
+                    <FilterX className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
