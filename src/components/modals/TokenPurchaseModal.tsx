@@ -45,7 +45,7 @@ let stripePromise: Promise<Stripe | null> | null = null;
 const getStripe = () => {
   if (!stripePromise) {
     stripePromise = loadStripe(
-      import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ""
+      import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "",
     );
   }
   return stripePromise;
@@ -124,7 +124,7 @@ function NewCardForm({
 
       const { error: stripeError } = await stripe.confirmCardPayment(
         clientSecret,
-        { payment_method: { card: cardElement } }
+        { payment_method: { card: cardElement } },
       );
 
       if (stripeError) {
@@ -136,9 +136,7 @@ function NewCardForm({
       await api.post("/tokens/buy-with-card/confirm", { paymentIntentId });
       onSuccess();
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || "Payment confirmation failed."
-      );
+      setError(err?.response?.data?.message || "Payment confirmation failed.");
       setLoading(false);
     }
   };
@@ -157,9 +155,7 @@ function NewCardForm({
           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
             You Receive
           </p>
-          <p className="text-xl font-black text-amber-500">
-            {tokens} Tokens
-          </p>
+          <p className="text-xl font-black text-amber-500">{tokens} Tokens</p>
         </div>
       </div>
 
@@ -172,7 +168,7 @@ function NewCardForm({
           className={cn(
             "rounded-xl border border-border/60 p-4 transition-all min-h-[60px]",
             isDark ? "bg-[#1e1e2e]" : "bg-white",
-            !ready && "animate-pulse"
+            !ready && "animate-pulse",
           )}
         >
           <div className={cn(ready ? "block" : "hidden")}>
@@ -253,7 +249,7 @@ export function TokenPurchaseModal({
 
   // Auto-start on CARD tab if freelancer has no earned balance
   const [tab, setTab] = useState<PaymentTab>(() =>
-    moneyBalance > 0 ? "BALANCE" : "CARD"
+    moneyBalance > 0 ? "BALANCE" : "CARD",
   );
   const [amountStr, setAmountStr] = useState("");
   const [cardStep, setCardStep] = useState<CardStep>("select");
@@ -267,6 +263,7 @@ export function TokenPurchaseModal({
 
   // Success state
   const [purchaseComplete, setPurchaseComplete] = useState(false);
+  const [isConfirmingBalance, setIsConfirmingBalance] = useState(false);
 
   // Saved cards
   const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
@@ -289,6 +286,7 @@ export function TokenPurchaseModal({
         setPaymentIntentId(null);
         setPurchaseComplete(false);
         setSelectedCardId(null);
+        setIsConfirmingBalance(false);
       }, 300);
       return () => clearTimeout(t);
     }
@@ -378,7 +376,7 @@ export function TokenPurchaseModal({
       setPurchaseComplete(true);
     } catch (err: any) {
       toast.error(
-        err?.response?.data?.message || err?.message || "Payment failed."
+        err?.response?.data?.message || err?.message || "Payment failed.",
       );
     } finally {
       setLoadingSavedPay(false);
@@ -397,7 +395,7 @@ export function TokenPurchaseModal({
       setCardStep("new_card");
     } catch (err: any) {
       toast.error(
-        err.response?.data?.message || "Failed to initialize payment."
+        err.response?.data?.message || "Failed to initialize payment.",
       );
     } finally {
       setLoadingIntent(false);
@@ -437,7 +435,6 @@ export function TokenPurchaseModal({
 
         {/* ── Scrollable body ─────────────────────────────────────── */}
         <div className="max-h-[72vh] overflow-y-auto p-6 space-y-6">
-
           {/* ── SUCCESS SCREEN ───────────────────────────────────── */}
           {purchaseComplete && (
             <div className="flex flex-col items-center text-center gap-5 py-4 animate-in zoom-in-95 duration-500">
@@ -474,6 +471,7 @@ export function TokenPurchaseModal({
                   setTab(v as PaymentTab);
                   setCardStep("select");
                   setClientSecret(null);
+                  setIsConfirmingBalance(false);
                 }}
               >
                 <TabsList className="grid grid-cols-2 rounded-2xl p-1 bg-muted/40 h-11 mb-1">
@@ -502,7 +500,8 @@ export function TokenPurchaseModal({
                         Earned Balance
                       </p>
                       <p className="text-xl font-black mt-1">
-                        ${moneyBalance.toLocaleString("en-US", {
+                        $
+                        {moneyBalance.toLocaleString("en-US", {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -534,42 +533,86 @@ export function TokenPurchaseModal({
 
                   {/* CTA */}
                   <div className="flex gap-3">
-                    <Button
-                      variant="ghost"
-                      className="flex-1 rounded-xl font-bold"
-                      onClick={onClose}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      className="flex-[2] rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black h-11 shadow-lg shadow-amber-500/20"
-                      disabled={
-                        loadingBalance ||
-                        !isAmountValid ||
-                        hasInsufficientBalance
-                      }
-                      onClick={handleBalancePurchase}
-                    >
-                      {loadingBalance ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      ) : (
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                      )}
-                      {loadingBalance ? "Processing..." : "Purchase with Balance"}
-                    </Button>
+                    {!isConfirmingBalance ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          className="flex-1 rounded-xl font-bold"
+                          onClick={onClose}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          className="flex-[2] rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black h-11 shadow-lg shadow-amber-500/20"
+                          disabled={
+                            loadingBalance ||
+                            !isAmountValid ||
+                            hasInsufficientBalance
+                          }
+                          onClick={() => setIsConfirmingBalance(true)}
+                        >
+                          {loadingBalance ? (
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                          )}
+                          {loadingBalance
+                            ? "Processing..."
+                            : "Purchase with Balance"}
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="flex flex-col w-full gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 text-center">
+                          <p className="text-xs font-bold text-amber-800 dark:text-amber-400">
+                            Confirm purchase of{" "}
+                            <span className="text-amber-600 dark:text-amber-500 font-black">
+                              {tokensToGet.toLocaleString()} SkillTokens
+                            </span>{" "}
+                            for{" "}
+                            <span className="text-amber-600 dark:text-amber-500 font-black">
+                              ${amount}
+                            </span>
+                            ?
+                          </p>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button
+                            variant="outline"
+                            className="flex-1 rounded-xl font-bold border-border/60"
+                            onClick={() => setIsConfirmingBalance(false)}
+                            disabled={loadingBalance}
+                          >
+                            No, Go Back
+                          </Button>
+                          <Button
+                            className="flex-[2] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black h-11 shadow-lg shadow-emerald-500/20"
+                            onClick={handleBalancePurchase}
+                            disabled={loadingBalance}
+                          >
+                            {loadingBalance ? (
+                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            ) : (
+                              <Zap className="w-4 h-4 mr-2" />
+                            )}
+                            Yes, Confirm
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
                 {/* ─ CARD TAB ─────────────────────────────────────── */}
                 <TabsContent value="CARD" className="m-0 space-y-5">
-
                   {/* Step: select / saved-card picker */}
                   {cardStep === "select" && (
                     <>
                       <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-500/5 border border-indigo-100/50">
                         <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
                         <p className="text-xs font-semibold text-indigo-900 dark:text-indigo-300 leading-tight">
-                          Payments processed securely via Stripe. Cards are saved to your Billing tab.
+                          Payments processed securely via Stripe. Cards are
+                          saved to your Billing tab.
                         </p>
                       </div>
 
@@ -606,7 +649,7 @@ export function TokenPurchaseModal({
                                   "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all",
                                   selectedCardId === card.id
                                     ? "border-amber-500 bg-amber-50/50 dark:bg-amber-500/5"
-                                    : "border-border/50 hover:border-border"
+                                    : "border-border/50 hover:border-border",
                                 )}
                                 onClick={() => setSelectedCardId(card.id)}
                               >
@@ -693,7 +736,7 @@ export function TokenPurchaseModal({
                               className="text-primary font-bold underline underline-offset-2"
                               onClick={() =>
                                 toast.info(
-                                  "Go to Settings → Billing to save a card for future use."
+                                  "Go to Settings → Billing to save a card for future use.",
                                 )
                               }
                             >
@@ -827,7 +870,7 @@ function AmountInput({
             className={cn(
               "rounded-xl h-9 font-bold text-sm border-border/40 hover:border-amber-500 hover:bg-amber-500/5",
               Number(value) === v &&
-                "border-amber-500 bg-amber-500/5 text-amber-600"
+                "border-amber-500 bg-amber-500/5 text-amber-600",
             )}
             onClick={() => onChange(v.toString())}
           >
