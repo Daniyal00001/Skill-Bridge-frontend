@@ -825,8 +825,6 @@ const FreelancerProfileDetail = () => {
                   </div>
                 ))}
               </div>
-           
-            */}
             </div>
           </aside>
         </div>
