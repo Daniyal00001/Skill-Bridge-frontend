@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Paperclip, MoreVertical, Phone, Video, Bot, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Message } from "@/types/client";
+import { ChatMessage } from "@/services/chat.service";
 
 interface ChatUIProps {
-  messages: Message[];
+  messages: ChatMessage[];
   currentUser: { id: string; avatar: string };
   otherUser: { id: string; name: string; avatar: string; status: string };
   onSendMessage: (content: string) => void;
@@ -125,7 +125,7 @@ export function ChatUI({ messages, currentUser, otherUser, onSendMessage }: Chat
                         "text-[10px] block text-right mt-1 opacity-60",
                         isRight ? "text-primary-foreground/80" : "text-muted-foreground"
                       )}>
-                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                   </div>

@@ -233,6 +233,12 @@ const AIAssistantPage = () => {
 
       setIsTyping(false);
       
+      if (data.chatRoomId) {
+        toast.success(data.reply);
+        navigate(`/chat/${data.chatRoomId}`);
+        return;
+      }
+
       setMessages((prev) => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "ai",
