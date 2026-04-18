@@ -178,11 +178,15 @@ const FreelancerProfileDetail = () => {
   const memberSince = freelancer.user?.createdAt
     ? new Date(freelancer.user.createdAt).getFullYear()
     : "—";
-  const lastActive = freelancer.user?.lastActiveAt
+  // ── Presence & activity logic ──────────────────────────
+  const lastActiveDate = freelancer.user?.lastActiveAt ? new Date(freelancer.user.lastActiveAt) : null;
+  const isOnline = lastActiveDate && (Date.now() - lastActiveDate.getTime() < 5 * 60 * 1000);
+
+  const lastActive = lastActiveDate
     ? (() => {
-        const diff =
-          Date.now() - new Date(freelancer.user.lastActiveAt).getTime();
+        const diff = Date.now() - lastActiveDate.getTime();
         const mins = Math.floor(diff / 60000);
+        if (mins < 3) return "Now";
         if (mins < 60) return `${mins}m ago`;
         const hrs = Math.floor(mins / 60);
         if (hrs < 24) return `${hrs}h ago`;
@@ -261,8 +265,8 @@ const FreelancerProfileDetail = () => {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  {freelancer.availability === "AVAILABLE" && (
-                    <span className="absolute bottom-1.5 right-1.5 w-4 h-4 bg-emerald-400 rounded-full ring-2 ring-white" />
+                  {isOnline && (
+                    <span className="absolute bottom-1.5 right-1.5 w-4 h-4 bg-emerald-500 rounded-full ring-2 ring-white shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse z-10" />
                   )}
                 </div>
 
@@ -317,8 +321,11 @@ const FreelancerProfileDetail = () => {
                         ({freelancer.totalReviews || 0} reviews)
                       </span>
                     </div>
-                    <span className="text-slate-200">|</span>
+                    <span className="text-slate-300">|</span>
                     <AvailabilityDot status={freelancer.availability} />
+                    {isOnline && (
+                      <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full ml-1">Online</span>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-slate-400 pt-0.5">
@@ -330,8 +337,11 @@ const FreelancerProfileDetail = () => {
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" /> Since {memberSince}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Zap className="w-3.5 h-3.5" /> Active {lastActive}
+                    <span className="flex items-center gap-1.5">
+                      <Zap className={cn("w-3.5 h-3.5", isOnline ? "text-emerald-500" : "text-slate-300")} />
+                      <span className={isOnline ? "text-emerald-600 font-bold" : ""}>
+                        Active {lastActive}
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -815,24 +825,8 @@ const FreelancerProfileDetail = () => {
                   </div>
                 ))}
               </div>
-              {/* <div className="mt-4 pt-4 border-t border-slate-100">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                  Platform Level
-                </p>
-                <LevelInfoPopover
-                  stats={{
-                    type: "freelancer",
-                    totalEarnings: freelancer.totalEarnings ?? 0,
-                    clientsCount: freelancer.totalReviews ?? 0,
-                    projectsCount:
-                      freelancer.completedContracts ??
-                      freelancer.totalReviews ??
-                      0,
-                    averageRating: freelancer.averageRating ?? 0,
-                  }}
-                  badgeSize="md"
-                />
-              </div> */}
+           
+            */}
             </div>
           </aside>
         </div>
