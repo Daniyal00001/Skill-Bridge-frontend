@@ -65,7 +65,14 @@ const STATUS_COLORS: Record<string, string> = {
   DISPUTED: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-const STATUS_FILTERS = ["ALL", "OPEN", "IN_PROGRESS", "COMPLETED", "DISPUTED", "CANCELLED", "DRAFT"];
+const STATUS_FILTERS = [
+  "ALL",
+  "OPEN",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "DISPUTED",
+  "CANCELLED",
+];
 
 export default function ProjectModeration() {
   const navigate = useNavigate();
@@ -107,13 +114,21 @@ export default function ProjectModeration() {
   });
 
   const handleUpdateStatus = (id: string, status: string) => {
-    if (window.confirm(`Are you sure you want to change project status to ${status}?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to change project status to ${status}?`,
+      )
+    ) {
       updateStatusMutation.mutate({ id, status });
     }
   };
 
   const handleDeleteProject = (id: string) => {
-    if (window.confirm("PERMANENT DELETE: This project and all its data will be lost. Continue?")) {
+    if (
+      window.confirm(
+        "PERMANENT DELETE: This project and all its data will be lost. Continue?",
+      )
+    ) {
       deleteProjectMutation.mutate(id);
     }
   };
@@ -130,9 +145,13 @@ export default function ProjectModeration() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
               Content Moderation
             </p>
-            <h1 className="text-2xl font-bold tracking-tight">Platform Projects</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Platform Projects
+            </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isLoading ? "Loading..." : `${total.toLocaleString()} total projects found`}
+              {isLoading
+                ? "Loading..."
+                : `${total.toLocaleString()} total projects found`}
             </p>
           </div>
         </div>
@@ -161,9 +180,7 @@ export default function ProjectModeration() {
                     key={s}
                     size="sm"
                     variant={statusFilter === s ? "default" : "outline"}
-                    className={cn(
-                      statusFilter === s ? "" : "bg-background/50"
-                    )}
+                    className={cn(statusFilter === s ? "" : "bg-background/50")}
                     onClick={() => {
                       setStatusFilter(s);
                       setPage(1);
@@ -177,9 +194,9 @@ export default function ProjectModeration() {
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2 text-muted-foreground"
-                    onClick={() => { 
-                      setSearch(""); 
-                      setStatusFilter("ALL"); 
+                    onClick={() => {
+                      setSearch("");
+                      setStatusFilter("ALL");
                       setPage(1);
                     }}
                   >
@@ -198,133 +215,187 @@ export default function ProjectModeration() {
             ) : projects.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3 opacity-60">
                 <FolderOpen className="h-12 w-12 text-muted-foreground/30" />
-                <p className="text-sm font-medium text-muted-foreground">No projects match your criteria.</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  No projects match your criteria.
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table className="table-fixed w-full">
                   <TableHeader>
                     <TableRow className="border-border/30 hover:bg-transparent bg-muted/5">
-                      <TableHead className="pl-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[35%]">Project</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[20%]">Client</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[15%]">Budget</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[15%]">Status</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[15%] text-right pr-6">Actions</TableHead>
+                      <TableHead className="pl-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[35%]">
+                        Project
+                      </TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[20%]">
+                        Client
+                      </TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[15%]">
+                        Budget
+                      </TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[15%]">
+                        Status
+                      </TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 w-[15%] text-right pr-6">
+                        Actions
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {projects.map((project: Project) => (
-                      <TableRow key={project.id} className="border-border/30 hover:bg-muted/30 group">
+                      <TableRow
+                        key={project.id}
+                        className="border-border/30 hover:bg-muted/30 group"
+                      >
                         <TableCell className="pl-6 py-4 overflow-hidden">
                           <div className="w-full">
-                            <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer break-words line-clamp-2" onClick={() => window.open(`/freelancer/projects/${project.id}`, "_blank")}>
+                            <p
+                              className="text-sm font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer break-words line-clamp-2"
+                              onClick={() =>
+                                window.open(
+                                  `/freelancer/projects/${project.id}`,
+                                  "_blank",
+                                )
+                              }
+                            >
                               {project.title}
                             </p>
                             {project.category && (
-                              <p className="text-[10px] font-medium text-muted-foreground mt-0.5 truncate">{project.category.name}</p>
+                              <p className="text-[10px] font-medium text-muted-foreground mt-0.5 truncate">
+                                {project.category.name}
+                              </p>
                             )}
                           </div>
                         </TableCell>
-                      <TableCell>
-                        {project.clientProfile?.user ? (
-                          <Link 
-                            to={`/admin/users/${project.clientProfile.user.id}`}
-                            className="flex items-center gap-2 group/user"
+                        <TableCell>
+                          {project.clientProfile?.user ? (
+                            <Link
+                              to={`/admin/users/${project.clientProfile.user.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 group/user"
+                            >
+                              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/user:bg-primary/20 transition-colors">
+                                <User className="w-3.5 h-3.5 text-primary" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-foreground truncate group-hover/user:text-primary transition-colors leading-tight">
+                                  {project.clientProfile.user.name}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground truncate leading-tight">
+                                  {project.clientProfile.user.email}
+                                </p>
+                              </div>
+                            </Link>
+                          ) : (
+                            <span className="text-xs text-muted-foreground font-medium italic">
+                              Unassigned
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <p className="font-black text-sm text-foreground">
+                            ${project.budget?.toLocaleString() || "0"}
+                          </p>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                            {project.budgetType}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={cn(
+                              "rounded-lg px-2 py-0.5 text-[10px] font-black tracking-tight border shadow-none",
+                              STATUS_COLORS[project.status] ||
+                                "bg-muted text-muted-foreground",
+                            )}
                           >
-                            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/user:bg-primary/20 transition-colors">
-                              <User className="w-3.5 h-3.5 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-foreground truncate group-hover/user:text-primary transition-colors leading-tight">
-                                {project.clientProfile.user.name}
-                              </p>
-                              <p className="text-[10px] text-muted-foreground truncate leading-tight">
-                                {project.clientProfile.user.email}
-                              </p>
-                            </div>
-                          </Link>
-                        ) : (
-                          <span className="text-xs text-muted-foreground font-medium italic">Unassigned</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <p className="font-black text-sm text-foreground">
-                          ${project.budget?.toLocaleString() || "0"}
-                        </p>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-                          {project.budgetType}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={cn(
-                          "rounded-lg px-2 py-0.5 text-[10px] font-black tracking-tight border shadow-none",
-                          STATUS_COLORS[project.status] || "bg-muted text-muted-foreground"
-                        )}>
-                          {project.status.replace(/_/g, " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-muted font-bold">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-52 rounded-xl p-1 shadow-xl border-border/40">
-                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest px-2 py-1.5 opacity-50">Project Logic</DropdownMenuLabel>
-                            
-                            <DropdownMenuItem 
-                              onClick={() => window.open(`/freelancer/projects/${project.id}`, "_blank")}
-                              className="rounded-lg h-9 px-2 gap-2 font-semibold"
-                            >
-                              <Eye className="h-4 w-4 text-muted-foreground" /> View Public Page
-                            </DropdownMenuItem>
-
-                            <DropdownMenuSeparator className="bg-muted" />
-                            
-                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest px-2 py-1.5 opacity-50">Moderation</DropdownMenuLabel>
-                            
-                            {project.status !== "CANCELLED" && (
-                              <DropdownMenuItem 
-                                onClick={() => handleUpdateStatus(project.id, "CANCELLED")}
-                                className="rounded-lg h-9 px-2 gap-2 text-orange-600 font-semibold focus:bg-orange-50 focus:text-orange-700"
+                            {project.status.replace(/_/g, " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg hover:bg-muted font-bold"
                               >
-                                <Ban className="h-4 w-4" /> Cancel Project
-                              </DropdownMenuItem>
-                            )}
-
-                            {project.status === "CANCELLED" && (
-                              <DropdownMenuItem 
-                                onClick={() => handleUpdateStatus(project.id, "OPEN")}
-                                className="rounded-lg h-9 px-2 gap-2 text-emerald-600 font-semibold focus:bg-emerald-50 focus:text-emerald-700"
-                              >
-                                <FolderOpen className="h-4 w-4" /> Restore Project
-                              </DropdownMenuItem>
-                            )}
-                            
-                            <DropdownMenuItem 
-                              onClick={() => handleDeleteProject(project.id)}
-                              className="rounded-lg h-9 px-2 gap-2 text-red-600 font-semibold focus:bg-red-50 focus:text-red-700"
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-52 rounded-xl p-1 shadow-xl border-border/40"
                             >
-                              <Trash2 className="h-4 w-4" /> Permanent Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            )
-          }
+                              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest px-2 py-1.5 opacity-50">
+                                Project Logic
+                              </DropdownMenuLabel>
+
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  window.open(
+                                    `/freelancer/projects/${project.id}`,
+                                    "_blank",
+                                  )
+                                }
+                                className="rounded-lg h-9 px-2 gap-2 font-semibold"
+                              >
+                                <Eye className="h-4 w-4 text-muted-foreground" />{" "}
+                                View Public Page
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator className="bg-muted" />
+
+                              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest px-2 py-1.5 opacity-50">
+                                Moderation
+                              </DropdownMenuLabel>
+
+                              {project.status !== "CANCELLED" && (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleUpdateStatus(project.id, "CANCELLED")
+                                  }
+                                  className="rounded-lg h-9 px-2 gap-2 text-orange-600 font-semibold focus:bg-orange-50 focus:text-orange-700"
+                                >
+                                  <Ban className="h-4 w-4" /> Cancel Project
+                                </DropdownMenuItem>
+                              )}
+
+                              {project.status === "CANCELLED" && (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleUpdateStatus(project.id, "OPEN")
+                                  }
+                                  className="rounded-lg h-9 px-2 gap-2 text-emerald-600 font-semibold focus:bg-emerald-50 focus:text-emerald-700"
+                                >
+                                  <FolderOpen className="h-4 w-4" /> Restore
+                                  Project
+                                </DropdownMenuItem>
+                              )}
+
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteProject(project.id)}
+                                className="rounded-lg h-9 px-2 gap-2 text-red-600 font-semibold focus:bg-red-50 focus:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" /> Permanent Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
 
           {/* Pagination Controls */}
           {!isLoading && total > 20 && (
             <div className="px-6 py-4 border-t border-border/30 bg-muted/10 flex items-center justify-between">
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                Showing {((page - 1) * 20) + 1} - {Math.min(page * 20, total)} of {total}
+                Showing {(page - 1) * 20 + 1} - {Math.min(page * 20, total)} of{" "}
+                {total}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -332,7 +403,7 @@ export default function ProjectModeration() {
                   size="sm"
                   className="h-8 rounded-xl px-4 font-bold text-xs"
                   disabled={page === 1}
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
                   Previous
                 </Button>
@@ -344,7 +415,7 @@ export default function ProjectModeration() {
                   size="sm"
                   className="h-8 rounded-xl px-4 font-bold text-xs"
                   disabled={page * 20 >= total}
-                  onClick={() => setPage(p => p + 1)}
+                  onClick={() => setPage((p) => p + 1)}
                 >
                   Next
                 </Button>

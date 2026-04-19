@@ -41,7 +41,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
-
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 const ClientProjectDetailsPage = () => {
@@ -80,7 +79,7 @@ const ClientProjectDetailsPage = () => {
       );
       const res = await api.get(`/projects/${projectId}`);
       setProject(res.data.project);
-    } catch { }
+    } catch {}
   };
 
   const handleRevision = async (milestoneId: string) => {
@@ -106,7 +105,7 @@ const ClientProjectDetailsPage = () => {
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message ||
-        "Cannot delete project with active proposals",
+          "Cannot delete project with active proposals",
       );
     }
   };
@@ -116,7 +115,9 @@ const ClientProjectDetailsPage = () => {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh] gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground font-medium">Loading project...</p>
+          <p className="text-muted-foreground font-medium">
+            Loading project...
+          </p>
         </div>
       </DashboardLayout>
     );
@@ -150,8 +151,8 @@ const ClientProjectDetailsPage = () => {
   const proposalsPreview = project.proposals?.slice(0, 3) || [];
   const daysRemaining = project.deadline
     ? Math.ceil(
-      (new Date(project.deadline).getTime() - Date.now()) / (1000 * 86400),
-    )
+        (new Date(project.deadline).getTime() - Date.now()) / (1000 * 86400),
+      )
     : null;
 
   const getStatusBadge = (status: string) => {
@@ -176,7 +177,7 @@ const ClientProjectDetailsPage = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto p-4 md:p-6 space-y-6 animate-fade-in max-w-7xl">
-        <Button
+        {/* <Button
           variant="ghost"
           asChild
           className="gap-2 -ml-4 text-muted-foreground hover:text-foreground"
@@ -184,7 +185,7 @@ const ClientProjectDetailsPage = () => {
           <Link to="/client/projects">
             <ChevronLeft className="w-4 h-4" /> Back to My Projects
           </Link>
-        </Button>
+        </Button> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* ── Main Content ── */}
@@ -433,7 +434,6 @@ const ClientProjectDetailsPage = () => {
                       </div>
                     </div>
                   </TabsContent>
-
                 </Tabs>
               </CardContent>
             </Card>
@@ -507,7 +507,9 @@ const ClientProjectDetailsPage = () => {
                     >
                       <div className="flex items-center gap-4">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={proposal.freelancer?.profileImage} />
+                          <AvatarImage
+                            src={proposal.freelancer?.profileImage}
+                          />
                           <AvatarFallback>
                             {proposal.freelancer?.name?.[0] || "F"}
                           </AvatarFallback>
@@ -612,10 +614,7 @@ const ClientProjectDetailsPage = () => {
                     )}
                   </>
                 ) : project.status === "COMPLETED" ? (
-                  <Button
-                    className="w-full h-12 rounded-xl font-black"
-                    asChild
-                  >
+                  <Button className="w-full h-12 rounded-xl font-black" asChild>
                     <Link to={`/client/contracts/${contract?.id}`}>
                       View Final Contract
                     </Link>

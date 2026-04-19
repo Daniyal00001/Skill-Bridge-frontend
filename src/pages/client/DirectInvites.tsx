@@ -45,6 +45,7 @@ import {
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { getClientLevel, LevelInfo } from "@/lib/levelUtils";
 import {
   Dialog,
   DialogContent,
@@ -66,11 +67,39 @@ const DirectInvitesPage = () => {
   const [selectedInvite, setSelectedInvite] = useState<any | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
-  const fetchInvites = async () => {
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ total: 0, pages: 1 });
+  const [allStats, setAllStats] = useState({
+    total: 0,
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+  });
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const fetchInvites = async (pageNumber = 1) => {
     setLoading(true);
     try {
-      const res = await api.get("/invitations");
+      const res = await api.get("/invitations", {
+        params: {
+          page: pageNumber,
+          limit: 20,
+          search: debouncedSearch,
+          status: statusFilter,
+          dateRange: dateFilter,
+        },
+      });
       setInvites(res.data.data);
+      setPagination(res.data.pagination);
+      setAllStats(res.data.stats);
     } catch (err) {
       toast.error("Failed to load your direct invites");
     } finally {
@@ -78,19 +107,35 @@ const DirectInvitesPage = () => {
     }
   };
 
+  // Fetch when filters or page changes
   useEffect(() => {
-    fetchInvites();
-  }, []);
+    fetchInvites(page);
+  }, [page, debouncedSearch, statusFilter, dateFilter]);
 
   // Handle auto-opening via URL param
   useEffect(() => {
-    if (invitationId && invites.length > 0) {
+    const handleInvitationId = async () => {
+      if (!invitationId) return;
+
       const invite = invites.find((i) => i.id === invitationId);
       if (invite) {
         setSelectedInvite(invite);
         setDetailsModalOpen(true);
+      } else {
+        // Fetch specific invite if not in current page
+        try {
+          const res = await api.get(`/invitations/${invitationId}`);
+          if (res.data.success) {
+            setSelectedInvite(res.data.data);
+            setDetailsModalOpen(true);
+          }
+        } catch (err) {
+          // Gracefully fail if invite not found
+        }
       }
-    }
+    };
+
+    handleInvitationId();
   }, [invitationId, invites]);
 
   const handleCancelInvite = async (id: string) => {
@@ -107,34 +152,8 @@ const DirectInvitesPage = () => {
     }
   };
 
-  const filteredInvites = useMemo(() => {
-    return invites.filter((invite) => {
-      const matchesSearch =
-        invite.projectTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invite.freelancerName?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus =
-        statusFilter === "all" || invite.status?.toLowerCase() === statusFilter;
-
-      let matchesDate = true;
-      if (dateFilter !== "all") {
-        const inviteDate = new Date(invite.createdAt);
-        const now = new Date();
-        if (dateFilter === "today") {
-          matchesDate = inviteDate.toDateString() === now.toDateString();
-        } else if (dateFilter === "week") {
-          const weekAgo = new Date();
-          weekAgo.setDate(now.getDate() - 7);
-          matchesDate = inviteDate >= weekAgo;
-        } else if (dateFilter === "month") {
-          const monthAgo = new Date();
-          monthAgo.setDate(now.getDate() - 30);
-          matchesDate = inviteDate >= monthAgo;
-        }
-      }
-
-      return matchesSearch && matchesStatus && matchesDate;
-    });
-  }, [invites, searchTerm, statusFilter, dateFilter]);
+  // No client-side filtering needed anymore as we do it on the server
+  const filteredInvites = invites;
 
   const getStatusBadge = (status: string) => {
     const baseClass =
@@ -196,15 +215,32 @@ const DirectInvitesPage = () => {
     }
   };
 
-  const stats = {
-    total: invites.length,
-    pending: invites.filter((i) => i.status?.toUpperCase() === "PENDING")
-      .length,
-    accepted: invites.filter((i) => i.status?.toUpperCase() === "ACCEPTED")
-      .length,
-    rejected: invites.filter((i) => i.status?.toUpperCase() === "REJECTED")
-      .length,
+  const ClientLevelBadge = ({ stats }: { stats: any }) => {
+    if (!stats) return null;
+    const level = getClientLevel({
+      totalSpent: stats.totalSpent,
+      totalHires: stats.totalHires,
+      totalOrders: stats.totalProjects,
+    });
+
+    return (
+      <Badge
+        className={cn(
+          "text-[10px] font-black uppercase tracking-tight px-3 py-1 border flex items-center gap-2 rounded-full shadow-sm hover:shadow-md transition-all cursor-default select-none",
+          level.color,
+          level.bg,
+          level.border,
+        )}
+      >
+        <span
+          className={cn("w-2 h-2 rounded-full animate-pulse shadow-sm", level.dot)}
+        />
+        {level.label} Client
+      </Badge>
+    );
   };
+
+  const stats = allStats;
 
   return (
     <DashboardLayout>
@@ -212,9 +248,14 @@ const DirectInvitesPage = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-black tracking-tight">
-              Direct Invites
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-4xl font-black tracking-tight">
+                Direct Invites
+              </h1>
+              {invites.length > 0 && (
+                <ClientLevelBadge stats={invites[0].clientStats} />
+              )}
+            </div>
             <p className="text-muted-foreground mt-1">
               Track and manage all direct invitations sent to freelancers.
             </p>
@@ -241,12 +282,21 @@ const DirectInvitesPage = () => {
               placeholder="Search by project or freelancer..."
               className="pl-9 h-10 rounded-lg bg-background"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto ml-auto">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select
+              value={statusFilter}
+              onValueChange={(val) => {
+                setStatusFilter(val);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="w-[130px] h-10 rounded-lg">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -259,7 +309,13 @@ const DirectInvitesPage = () => {
               </SelectContent>
             </Select>
 
-            <Select value={dateFilter} onValueChange={setDateFilter}>
+            <Select
+              value={dateFilter}
+              onValueChange={(val) => {
+                setDateFilter(val);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="w-[130px] h-10 rounded-lg">
                 <SelectValue placeholder="Timeframe" />
               </SelectTrigger>
@@ -440,6 +496,58 @@ const DirectInvitesPage = () => {
                 </div>
               )}
             </CardContent>
+            {pagination.pages > 1 && (
+              <div className="px-6 py-4 border-t bg-muted/20 flex items-center justify-between">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  Showing Page {page} of {pagination.pages}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-lg font-bold text-[10px] uppercase"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
+                    // Simple page numbers logic
+                    let pageNum = page;
+                    if (page <= 3) pageNum = i + 1;
+                    else if (page >= pagination.pages - 2)
+                      pageNum = pagination.pages - 4 + i;
+                    else pageNum = page - 2 + i;
+
+                    if (pageNum <= 0 || pageNum > pagination.pages) return null;
+
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={page === pageNum ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "h-8 w-8 rounded-lg font-bold text-[10px]",
+                          page === pageNum ? "shadow-md" : "",
+                        )}
+                        onClick={() => setPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-lg font-bold text-[10px] uppercase"
+                    disabled={page === pagination.pages}
+                    onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         )}
       </div>

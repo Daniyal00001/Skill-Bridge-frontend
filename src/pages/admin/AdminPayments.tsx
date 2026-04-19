@@ -130,7 +130,7 @@ export default function AdminPayments() {
             {[
               { label: "Total Released", value: stats.totalReleased, color: "text-emerald-600", bg: "bg-emerald-50", icon: TrendingUp },
               { label: "In Escrow", value: stats.totalInEscrow, color: "text-blue-600", bg: "bg-blue-50", icon: DollarSign },
-              { label: "Platform Revenue (10%)", value: stats.totalReleased * 0.1, color: "text-violet-600", bg: "bg-violet-50", icon: CreditCard },
+              { label: "Platform Revenue", value: (stats as any).platformRevenue || 0, color: "text-violet-600", bg: "bg-violet-50", icon: CreditCard },
               { label: "Refunded", value: stats.totalRefunded, color: "text-red-600", bg: "bg-red-50", icon: ArrowDownLeft },
             ].map(({ label, value, color, bg, icon: Icon }) => (
               <Card key={label} className="border border-border/50 rounded-2xl">

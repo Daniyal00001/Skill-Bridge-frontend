@@ -4,6 +4,16 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { TokenPurchaseModal } from "@/components/modals/TokenPurchaseModal";
 import {
   Coins,
   TrendingUp,
@@ -18,6 +28,7 @@ import {
   Star,
   Users,
   ChevronRight,
+  DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -39,6 +50,7 @@ const reasonLabels: Record<string, string> = {
   PROPOSAL_WITHDRAWN: "Proposal Withdrawn (Refund)",
   ADMIN_GRANT: "Admin Grant",
   ADMIN_DEDUCT: "Admin Deduction",
+  TOKEN_PURCHASE: "Token Purchase",
 };
 
 export default function FreelancerTokens() {
@@ -49,12 +61,15 @@ export default function FreelancerTokens() {
   const [transactions, setTransactions] = useState<TokenTransaction[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [moneyBalance, setMoneyBalance] = useState(0);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
   const fetchHistory = async (pageNum = 1) => {
     try {
       setLoading(true);
       const res = await api.get(`/tokens/history?page=${pageNum}&limit=15`);
       setBalance(res.data.balance);
+      setMoneyBalance(res.data.moneyBalance || 0);
       setTotalEarned(res.data.totalEarned);
       setTotalSpent(res.data.totalSpent);
       setTransactions(res.data.transactions || []);
@@ -87,13 +102,23 @@ export default function FreelancerTokens() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-primary/5 border border-primary/10 rounded-2xl px-5 py-3 animate-in slide-in-from-left duration-500">
-            <div className="p-1.5 rounded-lg bg-primary/10">
-              <Sparkles className="w-4 h-4 text-primary" />
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex items-center gap-3 bg-primary/5 border border-primary/10 rounded-2xl px-5 py-3 animate-in slide-in-from-left duration-500 flex-1">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <Sparkles className="w-4 h-4 text-primary" />
+              </div>
+              <p className="text-sm font-bold text-foreground/80">
+                <span className="text-primary">Monthly Reward:</span> You receive <span className="text-primary">10 free SkillTokens</span> every month to keep your bidding active! 🚀
+              </p>
             </div>
-            <p className="text-sm font-bold text-foreground/80">
-              <span className="text-primary">Monthly Reward:</span> You receive <span className="text-primary">10 free SkillTokens</span> every month to keep your bidding active! 🚀
-            </p>
+            
+            <Button 
+              onClick={() => setIsBuyModalOpen(true)}
+              className="rounded-xl px-8 h-12 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all gap-2 shrink-0"
+            >
+              <Zap className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+              Buy Tokens
+            </Button>
           </div>
         </div>
 
@@ -323,6 +348,14 @@ export default function FreelancerTokens() {
           </CardContent>
         </Card>
       </div>
+
+      <TokenPurchaseModal
+        open={isBuyModalOpen}
+        onClose={() => setIsBuyModalOpen(false)}
+        moneyBalance={moneyBalance}
+        currentTokenBalance={balance}
+        onSuccess={() => fetchHistory(page)}
+      />
     </DashboardLayout>
   );
 }
