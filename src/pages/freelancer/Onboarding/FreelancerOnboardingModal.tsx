@@ -47,13 +47,12 @@ const WEIGHTS = {
   location: 5, // Country
   hourlyRate: 10, // Hourly rate
   bio: 10, // Bio (≥100 chars)
-  skills: 20, // Skills (≥1) - Increased by 5
+  skills: 25, // Skills (≥1) - Increased by 10 (originally 20)
   languages: 5, // Languages (≥1)
   education: 5, // Education (≥1 entry)
   profileImage: 10, // Profile image
   budget: 5, // Preferred Budget Range
   portfolio: 10, // Cert / gig / portfolio
-  links: 5, // Any social link
 } as const;
 
 function computeLocalCompletion(
@@ -82,12 +81,6 @@ function computeLocalCompletion(
     gigs.length > 0 ||
     formData.portfolio?.trim()
   ) score += WEIGHTS.portfolio;
-  if (
-    formData.github?.trim() ||
-    formData.linkedin?.trim() ||
-    formData.portfolio?.trim() ||
-    formData.website?.trim()
-  ) score += WEIGHTS.links;
   return Math.min(score, 100);
 }
 
@@ -132,7 +125,7 @@ export function FreelancerOnboardingModal({
     profile?.user?.profileImage &&
     (profile?.certificates?.length > 0 || profile?.gigs?.length > 0)
   )
-    initialStep = 5;
+    initialStep = 4; // Max step is now 4
 
   const [step, setStep] = useState(initialStep);
   const [isLoading, setIsLoading] = useState(false);
@@ -219,7 +212,7 @@ export function FreelancerOnboardingModal({
         } catch (e) {
           console.error("Auto-save Step 3 failed", e);
         }
-      } else if (step === 5) {
+      } else if (step === 4) {
         try {
           await freelancerService.updateOnboardingStep5({
             github: formData.github,
@@ -228,7 +221,7 @@ export function FreelancerOnboardingModal({
             website: formData.website,
           });
         } catch (e) {
-          console.error("Auto-save Step 5 failed", e);
+          console.error("Auto-save links failed", e);
         }
       }
     }, 2000);
@@ -300,21 +293,12 @@ export function FreelancerOnboardingModal({
     },
     {
       id: 4,
-      label: "Media",
+      label: "Media & Links",
       icon: Upload,
       weight: WEIGHTS.profileImage + WEIGHTS.portfolio,
-      isComplete: !!(profile?.user?.profileImage || files.profileImage),
-    },
-    {
-      id: 5,
-      label: "Links",
-      icon: Globe,
-      weight: WEIGHTS.links,
       isComplete: !!(
-        formData.github?.trim() ||
-        formData.linkedin?.trim() ||
-        formData.portfolio?.trim() ||
-        formData.website?.trim()
+        (profile?.user?.profileImage || files.profileImage) &&
+        (certifications.length > 0 || gigs.length > 0 || formData.portfolio?.trim())
       ),
     },
   ];
@@ -384,34 +368,34 @@ export function FreelancerOnboardingModal({
           preferredCategories: formData.preferredCategories,
         });
       } else if (step === 4) {
-        if (!files.profileImage && !profile?.user?.profileImage) {
-          toast.error("Please upload a profile picture.");
-          setIsLoading(false);
-          return;
+        // Handle file uploads (Step 4's original logic)
+        const hasFiles = files.profileImage || files.certFiles.some(f => f) || files.gigFiles.some(f => f);
+        if (hasFiles) {
+          const formPayload = new FormData();
+          if (files.profileImage)
+            formPayload.append("profileImage", files.profileImage);
+
+          files.certFiles.forEach((file, i) => {
+            if (file) {
+              formPayload.append("certFiles", file);
+              formPayload.append(
+                "certTitles",
+                certifications[i]?.title || `Certificate ${i + 1}`,
+              );
+            }
+          });
+
+          files.gigFiles.forEach((file, i) => {
+            if (file) {
+              formPayload.append("gigFiles", file);
+              formPayload.append("gigTitles", gigs[i]?.title || `Gig ${i + 1}`);
+            }
+          });
+
+          await freelancerService.uploadOnboardingFiles(formPayload);
         }
-        const formPayload = new FormData();
-        if (files.profileImage)
-          formPayload.append("profileImage", files.profileImage);
 
-        files.certFiles.forEach((file, i) => {
-          if (file) {
-            formPayload.append("certFiles", file);
-            formPayload.append(
-              "certTitles",
-              certifications[i]?.title || `Certificate ${i + 1}`,
-            );
-          }
-        });
-
-        files.gigFiles.forEach((file, i) => {
-          if (file) {
-            formPayload.append("gigFiles", file);
-            formPayload.append("gigTitles", gigs[i]?.title || `Gig ${i + 1}`);
-          }
-        });
-
-        await freelancerService.uploadOnboardingFiles(formPayload);
-      } else if (step === 5) {
+        // Handle links (Step 5's original logic moved here)
         await freelancerService.updateOnboardingStep5({
           github: formData.github,
           linkedin: formData.linkedin,
@@ -419,15 +403,13 @@ export function FreelancerOnboardingModal({
           website: formData.website,
           preferredCategories: formData.preferredCategories,
         });
+
         toast.success("Profile Updated!", {
           description: "Your changes have been saved.",
         });
-        // Don't close immediately if they want to keep editing tabs
-        // onComplete();
-        // return;
       }
 
-      if (step < 5) {
+      if (step < 4) {
         setStep((prev) => prev + 1);
       }
     } catch (error: any) {
@@ -1350,37 +1332,38 @@ export function FreelancerOnboardingModal({
                   })}
                 </div>
               </div>
-            </div>
-          )}
 
-          {step === 5 && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="flex w-full items-center">Portfolio Link (or any link) <WeightBadge pct={WEIGHTS.links} isComplete={!!(formData.github?.trim() || formData.linkedin?.trim() || formData.portfolio?.trim() || formData.website?.trim())} /></Label>
-                <Input
-                  name="portfolio"
-                  value={formData.portfolio}
-                  onChange={handleChange}
-                  placeholder="https://myportfolio.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>LinkedIn URL</Label>
-                <Input
-                  name="linkedin"
-                  value={formData.linkedin}
-                  onChange={handleChange}
-                  placeholder="https://linkedin.com/in/username"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Personal Website</Label>
-                <Input
-                  name="website"
-                  value={formData.website}
-                  onChange={handleChange}
-                  placeholder="https://mywebsite.com"
-                />
+              <div className="space-y-4 border-t pt-4">
+                <Label className="text-lg font-bold">External Links</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Portfolio URL</Label>
+                    <Input
+                      name="portfolio"
+                      value={formData.portfolio}
+                      onChange={handleChange}
+                      placeholder="https://myportfolio.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">LinkedIn URL</Label>
+                    <Input
+                      name="linkedin"
+                      value={formData.linkedin}
+                      onChange={handleChange}
+                      placeholder="https://linkedin.com/in/username"
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-muted-foreground">Personal Website</Label>
+                    <Input
+                      name="website"
+                      value={formData.website}
+                      onChange={handleChange}
+                      placeholder="https://mywebsite.com"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1414,7 +1397,7 @@ export function FreelancerOnboardingModal({
               className="rounded-xl px-8 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {step === 5 ? "Save Changes" : "Save & Continue"}
+              {step === 4 ? "Save Changes" : "Save & Continue"}
             </Button>
           </div>
         </div>
