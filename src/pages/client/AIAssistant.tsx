@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 // --- Types ---
 interface Message {
@@ -102,44 +103,50 @@ const ChatMessage = memo(({ msg, user }: { msg: Message; user: any }) => {
   );
 });
 
-const FreelancerCard = memo(({ f, onSelect }: { f: FreelancerMatch; onSelect: (name: string, id: string) => void }) => {
+const FreelancerCard = memo(({ f, onDeploy }: { f: FreelancerMatch; onDeploy: (name: string, id: string) => void }) => {
   return (
-    <div className="bg-card/50 backdrop-blur-sm border rounded-[1.5rem] p-6 flex flex-col items-center text-center group hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-xl">
-      <div className="relative mb-4">
-        <Avatar className="h-20 w-20 border-4 border-background shadow-xl">
-          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${f.name}`} />
-          <AvatarFallback>{f.name[0]}</AvatarFallback>
+    <div className="group relative bg-card/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 flex flex-col items-center text-center transition-all duration-500 hover:shadow-[0_20px_50px_rgba(79,70,229,0.15)] hover:border-primary/40 hover:-translate-y-2 overflow-hidden">
+      {/* Decorative top glow */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <div className="relative mb-6">
+        <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <Avatar className="h-28 w-28 border-4 border-background shadow-2xl relative z-10 transition-transform duration-500 group-hover:scale-110">
+          <AvatarImage src={f.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${f.name}&backgroundColor=003366,006699,330066`} />
+          <AvatarFallback className="font-black text-2xl">{f.name[0]}</AvatarFallback>
         </Avatar>
-        <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-primary to-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
-          {f.matchScore}%
+        <div className="absolute -bottom-2 right-0 bg-gradient-to-br from-primary to-accent text-white text-[11px] font-black px-3 py-1 rounded-full shadow-lg z-20 border-2 border-background">
+          {f.matchScore}% Match
         </div>
       </div>
 
-      <h3 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors">{f.name}</h3>
-      
-      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {f.location}</span>
-        <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-        <span className="font-bold text-primary">${f.hourlyRate}/hr</span>
+      <div className="space-y-1 mb-4">
+        <h3 className="font-black text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">{f.name}</h3>
+        <div className="flex items-center justify-center gap-3 text-[11px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
+          <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-primary" /> {f.location}</span>
+          <span className="w-1 h-1 rounded-full bg-primary/30" />
+          <span className="text-primary font-black opacity-100">${f.hourlyRate}/hr</span>
+        </div>
       </div>
 
-      <p className="text-xs text-muted-foreground line-clamp-2 mb-5 leading-relaxed italic">
+      <p className="text-sm text-foreground/70 line-clamp-3 mb-6 leading-relaxed italic px-2">
         "{f.matchReason}"
       </p>
 
-      <div className="w-full flex flex-wrap justify-center gap-1.5 mb-6">
+      <div className="w-full flex flex-wrap justify-center gap-2 mb-8">
         {f.skills.slice(0, 3).map(s => (
-          <Badge key={s} variant="secondary" className="text-[9px] bg-primary/5 text-primary border-none hover:bg-primary/10">
+          <Badge key={s} variant="secondary" className="px-3 py-1 text-[10px] bg-primary/5 text-primary border-primary/10 font-bold hover:bg-primary/10 transition-colors rounded-lg">
             {s}
           </Badge>
         ))}
       </div>
 
        <Button 
-          className="w-full mt-auto h-10 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-bold text-[10px] uppercase tracking-widest hover:opacity-90 active:translate-y-0.5 transition-all shadow-md border-none"
-          onClick={() => onSelect(`Pick ${f.name}`, f.id)}
+          className="w-full mt-auto h-14 rounded-2xl bg-gradient-to-r from-primary via-primary/95 to-accent text-white font-black text-[11px] uppercase tracking-[0.15em] hover:shadow-[0_10px_30px_rgba(79,70,229,0.3)] active:scale-[0.98] transition-all duration-300 border-none shadow-xl"
+          onClick={() => onDeploy(f.name, f.id)}
        >
-          Select Strategist
+          <Sparkles className="w-4 h-4 mr-2" />
+          Deploy Strategist
        </Button>
     </div>
   );
@@ -181,8 +188,10 @@ const AIAssistantPage = () => {
   const [isListening, setIsListening] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<{ url: string, name: string } | null>(null);
+  const [pendingFreelancerId, setPendingFreelancerId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = useCallback((behavior: "auto" | "smooth" = "smooth") => {
     if (scrollContainerRef.current) {
@@ -198,6 +207,7 @@ const AIAssistantPage = () => {
     if (!content.trim() && !attachmentUrl) return;
 
     const attachmentToUse = attachmentUrl || selectedFile?.url;
+    const freelancerIdToUse = selectedId || pendingFreelancerId;
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -208,24 +218,20 @@ const AIAssistantPage = () => {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setSelectedFile(null);
+    setPendingFreelancerId(null);
     setIsTyping(true);
 
     try {
-      const response = await fetch(`${API_URL}/message`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: content,
-          sessionId: sessionId || undefined,
-          clientName: user?.name || "Client",
-          clientId: user?.id,
-          selectedFreelancerId: selectedId,
-          attachments: attachmentToUse ? [attachmentToUse] : []
-        }),
+      const resp = await api.post("/ai/assistant/message", {
+        message: content,
+        sessionId: sessionId || undefined,
+        clientName: user?.name || "Client",
+        clientId: user?.id,
+        selectedFreelancerId: freelancerIdToUse || undefined,
+        attachments: attachmentToUse ? [attachmentToUse] : []
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Something went wrong");
+      const data = resp.data;
 
       if (data.sessionId) setSessionId(data.sessionId);
       if (data.stage) setStage(data.stage);
@@ -268,8 +274,8 @@ const AIAssistantPage = () => {
     
     setIsTyping(true);
     try {
-       const resp = await fetch(`${API_URL}/session/${sid}`);
-       const data = await resp.json();
+       const resp = await api.get(`/ai/assistant/session/${sid}`);
+       const data = resp.data;
        if (data.success) {
           setSessionId(data.sessionId);
           setStage(data.stage);
@@ -363,15 +369,13 @@ const AIAssistantPage = () => {
     formData.append("files", file);
 
     try {
-      // Use the existing chat attachment endpoint
-      const resp = await fetch(`http://localhost:5000/api/chat/rooms/temp/attachments`, {
-        method: "POST",
+      // Use the existing chat attachment endpoint via auto-auth api client
+      const resp = await api.post(`/chat/rooms/temp/attachments`, formData, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData,
+          'Content-Type': 'multipart/form-data'
+        }
       });
-      const data = await resp.json();
+      const data = resp.data;
       if (data.success) {
         setSelectedFile({
           url: data.data[0].fileUrl,
@@ -379,7 +383,7 @@ const AIAssistantPage = () => {
         });
         toast.success("File uploaded and attached!");
       } else {
-        throw new Error(data.message);
+        throw new Error(data.message || "Upload failed");
       }
     } catch (err: any) {
       toast.error("Upload failed: " + err.message);
@@ -397,8 +401,8 @@ const AIAssistantPage = () => {
     if (user?.id) {
        const fetchSessions = async () => {
         try {
-          const resp = await fetch(`${API_URL}/sessions?clientId=${user?.id}`);
-          const data = await resp.json();
+          const resp = await api.get(`/ai/assistant/sessions?clientId=${user?.id}`);
+          const data = resp.data;
           if (data.success) {
             setSessions(data.sessions || []);
           }
@@ -410,12 +414,33 @@ const AIAssistantPage = () => {
     }
   }, [user]);
 
+  const handleDeploy = (name: string, id: string) => {
+    const draftContent = `I have selected ${name} as my project strategist. Let's initialize the coordination and discuss the next steps!`;
+    setInput(draftContent);
+    setPendingFreelancerId(id);
+    
+    // Auto-expand textarea
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        textareaRef.current.focus();
+      }
+    }, 100);
+
+    toast.info(`Message pre-filled for ${name}`, {
+      description: "Review and send the message to start formal coordination.",
+      icon: <Bot className="h-4 w-4 text-primary" />,
+    });
+  };
+
   const handleNewChat = () => {
     setMessages([]);
     setMatches([]);
     setSessionId(null);
     setStage("UNDERSTAND");
     setMemory(null);
+    setPendingFreelancerId(null);
   };
 
   return (
@@ -622,7 +647,7 @@ const AIAssistantPage = () => {
                                  animate={{ opacity: 1, scale: 1 }}
                                  exit={{ opacity: 0, scale: 0.9 }}
                                >
-                                 <FreelancerCard f={f} onSelect={handleSend} />
+                                 <FreelancerCard f={f} onDeploy={handleDeploy} />
                                </motion.div>
                             ))}
                           </AnimatePresence>
@@ -669,6 +694,7 @@ const AIAssistantPage = () => {
                     onChange={handleFileUpload} 
                   />
                   <textarea
+                    ref={textareaRef}
                     placeholder="Message SkillBridge AI..."
                     className="flex-1 min-h-[48px] max-h-[250px] bg-transparent border-none focus:ring-0 text-[14px] font-medium placeholder:text-muted-foreground/30 px-4 py-3 resize-none scrollbar-none"
                     rows={1}

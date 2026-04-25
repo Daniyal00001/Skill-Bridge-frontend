@@ -14,6 +14,8 @@ import {
   Loader2,
   FileText,
   ChevronRight,
+  Sparkles,
+  Wand2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatMessage, ChatRoom } from "@/services/chat.service";
@@ -21,6 +23,7 @@ import { AttachmentPreview } from "./AttachmentPreview";
 import { ChatOptions } from "./ChatOptions";
 import { SendContractModal } from "../modals/SendContractModal";
 import { format, isToday, isYesterday } from "date-fns";
+import { api } from "@/lib/api";
 
 interface ChatWindowProps {
   room: ChatRoom;
@@ -87,6 +90,7 @@ export function ChatWindow({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const other = room.otherUser;
 
   // Auto-scroll to bottom on new messages
@@ -106,6 +110,19 @@ export function ChatWindow({
     observer.observe(topRef.current);
     return () => observer.disconnect();
   }, [hasMore, onLoadMore]);
+
+  // Expand textarea auto-height
+  const adjustTextareaHeight = useCallback(() => {
+    const textarea = document.getElementById("chat-textarea") as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 128)}px`;
+    }
+  }, []);
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [input, adjustTextareaHeight]);
 
   const handleSend = () => {
     const trimmed = input.trim();
@@ -139,6 +156,44 @@ export function ChatWindow({
       onSendAttachment(files);
     }
     e.target.value = "";
+  };
+
+  const handleSuggestReply = async () => {
+    if (isSuggesting) return;
+    setIsSuggesting(true);
+    
+    // Add a specialized toast for the process
+    const toastId = toast.loading("AI is analyzing the conversation...", {
+      description: "Generating a strategic next message...",
+      icon: <Sparkles className="h-4 w-4 animate-spin text-amber-500" />
+    });
+
+    try {
+      const response = await api.post("/ai/assistant/suggest-reply", {
+        roomId: room.id,
+        role: currentUserRole
+      });
+      const data = response.data;
+      if (data.success && data.suggestion) {
+        setInput(data.suggestion);
+        onStartTyping();
+        toast.success("Strategic response generated!", {
+          id: toastId,
+          description: "You can now edit the message before sending.",
+          icon: <Wand2 className="h-4 w-4 text-amber-500" />,
+        });
+      } else {
+        throw new Error(data.message || "Failed to generate suggestion");
+      }
+    } catch (err) {
+      console.error("AI Suggestion error:", err);
+      toast.error("AI Suggestion failed", {
+        id: toastId,
+        description: "Please try again in a moment."
+      });
+    } finally {
+      setIsSuggesting(false);
+    }
   };
 
   const handleDrop = useCallback(
@@ -545,8 +600,17 @@ export function ChatWindow({
           </Button>
 
           {/* Text input */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative group">
+            {isSuggesting && (
+                <div className="absolute inset-x-0 -top-10 flex justify-center animate-in slide-in-from-bottom-2">
+                    <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        SkillBridge AI is thinking...
+                    </div>
+                </div>
+            )}
             <textarea
+              id="chat-textarea"
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
@@ -555,41 +619,73 @@ export function ChatWindow({
               }
               disabled={isUploading}
               rows={1}
-              maxLength={2050} // slight buffer for UX
+              maxLength={2050}
               className={cn(
-                "w-full resize-none rounded-2xl border border-border/50 bg-muted/40 px-4 py-2.5",
-                "text-sm leading-relaxed outline-none focus:ring-2 focus:ring-primary/20",
-                input.length > 2000 ? "border-destructive/50 focus:border-destructive/50" : "focus:border-primary/50",
-                "max-h-32 overflow-y-auto transition-all placeholder:text-muted-foreground/60",
+                "w-full resize-none rounded-2xl border border-border bg-card/60 backdrop-blur-sm px-4 py-3",
+                "text-sm leading-relaxed outline-none transition-all duration-300",
+                "focus:ring-4 focus:ring-primary/10 focus:border-primary/50 shadow-inner",
+                input.length > 2000 ? "border-destructive/50" : "",
+                "max-h-48 overflow-y-auto placeholder:text-muted-foreground/50",
               )}
-              style={{ minHeight: "40px" }}
             />
           </div>
 
-          {/* Send */}
+          {/* Send & AI Tools */}
           <div className="flex items-center gap-2 flex-shrink-0">
             {currentUserRole === "CLIENT" &&
               room.otherUser?.role === "FREELANCER" && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-10 w-10 text-primary hover:bg-primary/5 rounded-xl border border-primary/20 shadow-sm transition-all"
+                  className="h-11 w-11 text-primary hover:bg-primary/5 rounded-2xl border border-primary/10 shadow-sm transition-all hover:scale-105 active:scale-95"
                   onClick={() => setIsContractModalOpen(true)}
                   title="Send Contract"
                 >
                   <FileText className="h-5 w-5" />
                 </Button>
               )}
+            
+            {/* 🌟 Premium AI Magic Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-11 w-11 relative overflow-hidden group/ai",
+                "bg-gradient-to-br from-amber-50 via-white to-amber-50/50",
+                "hover:from-amber-100 hover:to-amber-50",
+                "rounded-2xl border border-amber-200/60 shadow-sm transition-all",
+                "hover:shadow-amber-200/50 hover:shadow-lg hover:-translate-y-0.5 active:scale-95",
+                isSuggesting && "pointer-events-none"
+              )}
+              onClick={handleSuggestReply}
+              disabled={isSuggesting || isUploading}
+              title="Generate AI Response"
+            >
+              {isSuggesting ? (
+                <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/0 via-amber-500/5 to-amber-500/0 opacity-0 group-hover/ai:opacity-100 transition-opacity" />
+                  <Wand2 className="h-5 w-5 text-amber-600 drop-shadow-sm group-hover/ai:scale-110 transition-transform duration-300" />
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[9px] font-bold rounded opacity-0 group-hover/ai:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    MAGIC SUGGEST
+                  </div>
+                </>
+              )}
+            </Button>
+
             <Button
               size="icon"
               className={cn(
-                "h-10 w-10 rounded-xl transition-all",
-                input.trim() && input.length <= 2000 ? "opacity-100 scale-100" : "opacity-60 scale-95",
+                "h-11 w-11 rounded-2xl transition-all duration-300",
+                input.trim() && input.length <= 2000 
+                  ? "bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-105 active:scale-95" 
+                  : "bg-muted text-muted-foreground opacity-50 pointer-events-none",
               )}
               onClick={handleSend}
               disabled={!input.trim() || input.length > 2000}
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             </Button>
           </div>
         </div>
