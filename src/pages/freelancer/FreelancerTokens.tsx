@@ -28,7 +28,7 @@ import {
   Star,
   Users,
   ChevronRight,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -98,7 +98,8 @@ export default function FreelancerTokens() {
               SkillTokens
             </h1>
             <p className="text-muted-foreground text-base mt-1">
-              Your token wallet — spend tokens to submit proposals and win projects.
+              Your token wallet — spend tokens to submit proposals and win
+              projects.
             </p>
           </div>
 
@@ -108,11 +109,14 @@ export default function FreelancerTokens() {
                 <Sparkles className="w-4 h-4 text-primary" />
               </div>
               <p className="text-sm font-bold text-foreground/80">
-                <span className="text-primary">Monthly Reward:</span> You receive <span className="text-primary">10 free SkillTokens</span> every month to keep your bidding active! 🚀
+                <span className="text-primary">Monthly Reward:</span> You
+                receive{" "}
+                <span className="text-primary">10 free SkillTokens</span> every
+                month to keep your bidding active! 🚀
               </p>
             </div>
-            
-            <Button 
+
+            <Button
               onClick={() => setIsBuyModalOpen(true)}
               className="rounded-xl px-8 h-12 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all gap-2 shrink-0"
             >
@@ -133,8 +137,12 @@ export default function FreelancerTokens() {
                 Current Balance
               </p>
               <div className="flex items-end gap-3 mb-4">
-                <span className="text-6xl font-black leading-none">{loading ? "—" : balance}</span>
-                <span className="text-xl font-bold text-amber-100 mb-1">tokens</span>
+                <span className="text-6xl font-black leading-none">
+                  {loading ? "—" : balance}
+                </span>
+                <span className="text-xl font-bold text-amber-100 mb-1">
+                  tokens
+                </span>
               </div>
               <div className="flex items-center gap-2 bg-white/20 rounded-xl px-4 py-2">
                 <Coins className="w-4 h-4" />
@@ -150,9 +158,15 @@ export default function FreelancerTokens() {
                 <TrendingUp className="w-7 h-7 text-emerald-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Total Earned</p>
-                <p className="text-3xl font-black text-emerald-500">+{totalEarned}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">All credits</p>
+                <p className="text-sm text-muted-foreground font-medium">
+                  Total Earned
+                </p>
+                <p className="text-3xl font-black text-emerald-500">
+                  +{totalEarned}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  All credits
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -164,9 +178,15 @@ export default function FreelancerTokens() {
                 <TrendingDown className="w-7 h-7 text-red-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Total Spent</p>
-                <p className="text-3xl font-black text-red-500">-{totalSpent}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">On proposals</p>
+                <p className="text-sm text-muted-foreground font-medium">
+                  Total Spent
+                </p>
+                <p className="text-3xl font-black text-red-500">
+                  -{totalSpent}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  On proposals
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -188,12 +208,42 @@ export default function FreelancerTokens() {
                   Fixed Budget
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
-                  <div className="flex justify-between"><span>Under $50</span><Badge variant="outline" className="text-[10px] h-4">2 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$50 – $99</span><Badge variant="outline" className="text-[10px] h-4">4 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$100 – $199</span><Badge variant="outline" className="text-[10px] h-4">6 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$200 – $499</span><Badge variant="outline" className="text-[10px] h-4">8 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$500 – $999</span><Badge variant="outline" className="text-[10px] h-4">12 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$1000+</span><Badge variant="outline" className="text-[10px] h-4">16 tokens</Badge></div>
+                  <div className="flex justify-between">
+                    <span>Under $50</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      2 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$50 – $99</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      4 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$100 – $199</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      6 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$200 – $499</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      8 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$500 – $999</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      12 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$1000+</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      16 tokens
+                    </Badge>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2 p-4 bg-background/60 rounded-xl border border-border/50">
@@ -202,12 +252,42 @@ export default function FreelancerTokens() {
                   Hourly Rate
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
-                  <div className="flex justify-between"><span>Under $5/hr</span><Badge variant="outline" className="text-[10px] h-4">1 token</Badge></div>
-                  <div className="flex justify-between"><span>$5 – $9/hr</span><Badge variant="outline" className="text-[10px] h-4">2 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$10 – $19/hr</span><Badge variant="outline" className="text-[10px] h-4">3 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$20 – $39/hr</span><Badge variant="outline" className="text-[10px] h-4">5 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$40 – $79/hr</span><Badge variant="outline" className="text-[10px] h-4">7 tokens</Badge></div>
-                  <div className="flex justify-between"><span>$80+/hr</span><Badge variant="outline" className="text-[10px] h-4">10 tokens</Badge></div>
+                  <div className="flex justify-between">
+                    <span>Under $5/hr</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      1 token
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$5 – $9/hr</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      2 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$10 – $19/hr</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      3 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$20 – $39/hr</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      5 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$40 – $79/hr</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      7 tokens
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>$80+/hr</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      10 tokens
+                    </Badge>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2 p-4 bg-background/60 rounded-xl border border-border/50">
@@ -216,9 +296,24 @@ export default function FreelancerTokens() {
                   Experience Multiplier
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
-                  <div className="flex justify-between"><span>Entry Level</span><Badge variant="outline" className="text-[10px] h-4">×1.0</Badge></div>
-                  <div className="flex justify-between"><span>Intermediate</span><Badge variant="outline" className="text-[10px] h-4">×1.25</Badge></div>
-                  <div className="flex justify-between"><span>Senior / Expert</span><Badge variant="outline" className="text-[10px] h-4">×1.5</Badge></div>
+                  <div className="flex justify-between">
+                    <span>Entry Level</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      ×1.0
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Intermediate</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      ×1.25
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Senior / Expert</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      ×1.5
+                    </Badge>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2 p-4 bg-background/60 rounded-xl border border-border/50">
@@ -227,15 +322,32 @@ export default function FreelancerTokens() {
                   Extra Adjustments
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
-                  <div className="flex justify-between"><span>Featured project</span><Badge variant="outline" className="text-[10px] h-4">+2</Badge></div>
-                  <div className="flex justify-between"><span>High competition (20+ bids)</span><Badge variant="outline" className="text-[10px] h-4">+1</Badge></div>
-                  <div className="flex justify-between"><span>Large project</span><Badge variant="outline" className="text-[10px] h-4">+1</Badge></div>
-                  <div className="flex justify-between text-emerald-600 font-semibold mt-2"><span>Proposal withdrawn</span><Badge className="text-[10px] h-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Refunded!</Badge></div>
+                  {/* <div className="flex justify-between"><span>Featured project</span><Badge variant="outline" className="text-[10px] h-4">+2</Badge></div> */}
+                  <div className="flex justify-between">
+                    <span>High competition (20+ bids)</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      +1
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Large project</span>
+                    <Badge variant="outline" className="text-[10px] h-4">
+                      +1
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-emerald-600 font-semibold mt-2">
+                    <span>Proposal withdrawn</span>
+                    <Badge className="text-[10px] h-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                      Refunded!
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>
             <p className="text-xs text-muted-foreground bg-muted/60 rounded-lg px-4 py-2">
-              <span className="font-semibold text-foreground">💡 Tip:</span> Tokens are refunded if you withdraw a pending or shortlisted proposal. Apply strategically to maximize your chances.
+              <span className="font-semibold text-foreground">💡 Tip:</span>{" "}
+              Tokens are refunded if you withdraw a pending or shortlisted
+              proposal. Apply strategically to maximize your chances.
             </p>
           </CardContent>
         </Card>
@@ -243,7 +355,9 @@ export default function FreelancerTokens() {
         {/* Transaction History */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-bold">Transaction History</CardTitle>
+            <CardTitle className="text-lg font-bold">
+              Transaction History
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
@@ -256,9 +370,13 @@ export default function FreelancerTokens() {
                 <div className="p-5 rounded-full bg-muted/50">
                   <Coins className="w-10 h-10 text-muted-foreground/40" />
                 </div>
-                <p className="font-semibold text-muted-foreground">No transactions yet</p>
+                <p className="font-semibold text-muted-foreground">
+                  No transactions yet
+                </p>
                 <Button asChild size="sm" className="rounded-full">
-                  <Link to="/freelancer/browse">Browse Projects <ChevronRight className="w-4 h-4 ml-1" /></Link>
+                  <Link to="/freelancer/browse">
+                    Browse Projects <ChevronRight className="w-4 h-4 ml-1" />
+                  </Link>
                 </Button>
               </div>
             ) : (
@@ -274,7 +392,7 @@ export default function FreelancerTokens() {
                           "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
                           tx.type === "CREDIT"
                             ? "bg-emerald-500/10"
-                            : "bg-red-500/10"
+                            : "bg-red-500/10",
                         )}
                       >
                         {tx.type === "CREDIT" ? (
@@ -307,10 +425,13 @@ export default function FreelancerTokens() {
                       <p
                         className={cn(
                           "text-lg font-black",
-                          tx.type === "CREDIT" ? "text-emerald-500" : "text-red-500"
+                          tx.type === "CREDIT"
+                            ? "text-emerald-500"
+                            : "text-red-500",
                         )}
                       >
-                        {tx.type === "CREDIT" ? "+" : "-"}{tx.amount}
+                        {tx.type === "CREDIT" ? "+" : "-"}
+                        {tx.amount}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
                         Balance: {tx.balanceAfter}
@@ -328,7 +449,7 @@ export default function FreelancerTokens() {
                   variant="outline"
                   size="sm"
                   disabled={page === 1}
-                  onClick={() => setPage(p => p - 1)}
+                  onClick={() => setPage((p) => p - 1)}
                 >
                   Previous
                 </Button>
@@ -339,7 +460,7 @@ export default function FreelancerTokens() {
                   variant="outline"
                   size="sm"
                   disabled={page === totalPages}
-                  onClick={() => setPage(p => p + 1)}
+                  onClick={() => setPage((p) => p + 1)}
                 >
                   Next
                 </Button>
