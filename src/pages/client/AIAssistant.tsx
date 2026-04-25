@@ -301,32 +301,34 @@ const AIAssistantPage = () => {
   };
 
   const startListening = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window)) {
-      toast.error("Speech recognition is not supported in this browser.");
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      toast.error("Speech recognition is not supported in this browser.", {
+        description: "Please try using Chrome or Edge for voice features."
+      });
       return;
     }
     
     if (isListening) {
-      // @ts-ignore
-      if (window._recognition) window._recognition.stop();
+      if ((window as any)._recognition) (window as any)._recognition.stop();
       setIsListening(false);
       return;
     }
 
-    // @ts-ignore
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.continuous = false; // More efficient for single commands
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
       setIsListening(true);
-      // @ts-ignore
-      window._recognition = recognition;
-      toast.info("AI is listening...", { 
+      (window as any)._recognition = recognition;
+      toast.info("Microphone active", { 
         id: "listening-toast", 
-        duration: 2000, 
-        icon: <Mic className="h-3 w-3 animate-pulse" /> 
+        description: "Speak now, I'm listening...",
+        duration: 3000, 
+        icon: <Mic className="h-4 w-4 animate-pulse text-primary" /> 
       });
     };
     
@@ -337,7 +339,22 @@ const AIAssistantPage = () => {
     recognition.onerror = (event: any) => {
       console.error("Speech Error:", event.error);
       setIsListening(false);
-      toast.error("Voice input error. Please try again.");
+      
+      let message = "Voice input error.";
+      let description = "Please try again.";
+
+      if (event.error === 'not-allowed') {
+        message = "Microphone access denied.";
+        description = "Please enable microphone permissions in your browser settings.";
+      } else if (event.error === 'no-speech') {
+        message = "No speech detected.";
+        description = "I didn't hear anything. Please try speaking again.";
+      } else if (event.error === 'service-not-allowed') {
+        message = "Voice service unavailable.";
+        description = "Your browser or device doesn't allow voice recognition right now.";
+      }
+
+      toast.error(message, { description });
     };
 
     recognition.onresult = (event: any) => {
@@ -350,15 +367,22 @@ const AIAssistantPage = () => {
       
       if (finalTranscript) {
         setInput(finalTranscript);
-        // "Efficiency" — Auto-send if it's at least a small phrase
-        if (finalTranscript.trim().length >= 3) {
-          handleSend(finalTranscript.trim());
+        // Short delay before sending to ensure user is done
+        if (finalTranscript.trim().length >= 4) {
+          setTimeout(() => {
+            handleSend(finalTranscript.trim());
+          }, 500);
         }
       }
     };
 
-    recognition.start();
-  }, [isListening, sessionId, handleSend]);
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error("Recognition start error:", e);
+      setIsListening(false);
+    }
+  }, [isListening, handleSend]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
