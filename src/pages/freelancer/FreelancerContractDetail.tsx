@@ -227,6 +227,7 @@ export default function FreelancerContractDetail() {
     details: "",
   });
   const [existingDispute, setExistingDispute] = useState<any>(null);
+  const [showDisputeDetails, setShowDisputeDetails] = useState(false);
 
   const fetchContract = useCallback(async () => {
     try {
@@ -496,204 +497,224 @@ export default function FreelancerContractDetail() {
 
         {/* Active Dispute Resolution Center */}
         {existingDispute && (
-          <Card className="rounded-2xl border-rose-200 bg-rose-50/30 overflow-hidden animate-in slide-in-from-top-4">
-            <div className="bg-rose-500/10 px-5 py-3 border-b border-rose-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-rose-600" />
-                <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider">
-                  Conflict Resolution Center — Case #
-                  {existingDispute.id.slice(-6).toUpperCase()}
-                </h3>
+          existingDispute.status === "RESOLVED" && !showDisputeDetails ? (
+            <Card className="rounded-2xl border-rose-200 bg-rose-50/30 overflow-hidden animate-in slide-in-from-top-4">
+              <div className="px-5 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider">
+                      Dispute Resolved — Case #{existingDispute.id.slice(-6).toUpperCase()}
+                    </h3>
+                    <p className="text-xs text-rose-600 font-medium">
+                      The conflict has been officially resolved. Click view details to see the official resolution and decision notes.
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-xl border-rose-200 text-rose-600 font-bold h-9 bg-white hover:bg-rose-50 px-4 shrink-0"
+                  onClick={() => setShowDisputeDetails(true)}
+                >
+                  View Details
+                </Button>
               </div>
-              <Badge className="bg-rose-600 text-white border-none font-black px-3 h-6">
-                {existingDispute.status.replace(/_/g, " ")}
-              </Badge>
-            </div>
-            <CardContent className="p-0">
-              <div className="p-5 grid md:grid-cols-2 gap-6 border-b border-rose-100">
-                {/* Case Details */}
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
-                      Status & Filing
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Avatar className="h-8 w-8 border border-rose-200">
-                        <AvatarImage
-                          src={
-                            existingDispute.filedBy === "CLIENT"
-                              ? existingDispute.client?.profileImage
-                              : existingDispute.freelancer?.profileImage
-                          }
-                        />
-                        <AvatarFallback className="bg-rose-100 text-rose-600 font-bold text-xs">
-                          {existingDispute.filedBy === "CLIENT" ? "CL" : "FL"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-xs font-bold text-rose-900">
-                          {existingDispute.filedBy === "CLIENT"
-                            ? "Client"
-                            : "You"}{" "}
-                          filed this case
-                        </p>
-                        <p className="text-[10px] text-rose-500 font-medium">
-                          Opened on{" "}
-                          {new Date(
-                            existingDispute.openedAt,
-                          ).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
-                      Dispute Reason
-                    </p>
-                    <p className="text-sm font-bold text-rose-800 mt-1 break-words">
-                      {existingDispute.reason}
-                    </p>
-                    <div className="p-3 bg-white/60 border border-rose-100 rounded-xl mt-2 italic shadow-sm">
-                      <p className="text-xs text-rose-700 leading-relaxed font-medium break-words">
-                        "{existingDispute.details}"
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Official Resolution Section */}
+            </Card>
+          ) : (
+            <Card className="rounded-2xl border-rose-200 bg-rose-50/30 overflow-hidden animate-in slide-in-from-top-4">
+              <div className="bg-rose-500/10 px-5 py-3 border-b border-rose-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-rose-600" />
+                  <h3 className="text-sm font-black text-rose-900 uppercase tracking-wider">
+                    Conflict Resolution Center — Case #
+                    {existingDispute.id.slice(-6).toUpperCase()}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
                   {existingDispute.status === "RESOLVED" && (
-                    <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-200/50 space-y-3 mt-4">
-                      <div className="flex items-center justify-between">
-                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">
-                            Official Resolution
-                         </p>
-                         <Badge className="bg-emerald-500 text-white border-none font-black text-[9px] h-5 px-2">
-                           {existingDispute.resolution.replace(/_/g, " ")}
-                         </Badge>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-[10px] font-black text-rose-600 hover:text-rose-700 hover:bg-rose-100/50 uppercase tracking-widest px-2"
+                      onClick={() => setShowDisputeDetails(false)}
+                    >
+                      Hide Details
+                    </Button>
+                  )}
+                  <Badge className="bg-rose-600 text-white border-none font-black px-3 h-6">
+                    {existingDispute.status.replace(/_/g, " ")}
+                  </Badge>
+                </div>
+              </div>
+              <CardContent className="p-0">
+                <div className="p-5 grid md:grid-cols-2 gap-6 border-b border-rose-100">
+                  {/* Case Details */}
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
+                        Status & Filing
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Avatar className="h-8 w-8 border border-rose-200">
+                          <AvatarImage
+                            src={
+                              existingDispute.filedBy === "CLIENT"
+                                ? existingDispute.client?.profileImage
+                                : existingDispute.freelancer?.profileImage
+                            }
+                          />
+                          <AvatarFallback className="bg-rose-100 text-rose-600 font-bold text-xs">
+                            {existingDispute.filedBy === "CLIENT" ? "CL" : "FL"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-xs font-bold text-rose-900">
+                            {existingDispute.filedBy === "CLIENT"
+                              ? "Client"
+                              : "You"}{" "}
+                            filed this case
+                          </p>
+                          <p className="text-[10px] text-rose-500 font-medium">
+                            Opened on{" "}
+                            {new Date(
+                              existingDispute.openedAt,
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest">Decision Note</p>
-                        <p className="text-xs font-bold leading-relaxed text-emerald-900/80 bg-white/40 p-3 rounded-xl border border-emerald-100/50 italic break-words">
-                          "{existingDispute.resolutionNote || "No explanatory note provided."}"
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none">
+                        Dispute Reason
+                      </p>
+                      <p className="text-sm font-bold text-rose-800 mt-1 break-words">
+                        {existingDispute.reason}
+                      </p>
+                      <div className="p-3 bg-white/60 border border-rose-100 rounded-xl mt-2 italic shadow-sm">
+                        <p className="text-xs text-rose-700 leading-relaxed font-medium break-words">
+                          "{existingDispute.details}"
                         </p>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Progress Tracker */}
-                <div className="bg-white/40 p-5 rounded-2xl border border-rose-100/50 space-y-4">
-                  <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-4">
-                    Resolution Progress
-                  </p>
-
-                  <div className="space-y-4 relative">
-                    {/* Stepper line */}
-                    <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-rose-200" />
-
-                    {[
-                      {
-                        stage: "Case Opened",
-                        desc: "Conflict submitted for review",
-                        isActive: true,
-                        isDone: true,
-                      },
-                      {
-                        stage: "Mediator Assigned",
-                        desc: "A platform admin is reviewing the logs",
-                        isActive: existingDispute.status !== "OPEN",
-                        isDone: !["OPEN"].includes(existingDispute.status),
-                      },
-                      {
-                        stage: "Evidence Check",
-                        desc: "Project deliverables are being audited",
-                        isActive: [
-                          "UNDER_REVIEW",
-                          "RESOLVED",
-                          "CLOSED",
-                        ].includes(existingDispute.status),
-                        isDone: ["RESOLVED", "CLOSED"].includes(
-                          existingDispute.status,
-                        ),
-                      },
-                      {
-                        stage: "Final Decision",
-                        desc: "Review resolution and next steps",
-                        isActive: ["RESOLVED", "CLOSED"].includes(
-                          existingDispute.status,
-                        ),
-                        isDone:
-                          existingDispute.status === "RESOLVED" ||
-                          existingDispute.status === "CLOSED",
-                      },
-                    ].map((step, idx) => (
-                      <div key={idx} className="flex gap-4 relative z-10">
-                        <div
-                          className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors",
-                            step.isDone
-                              ? "bg-rose-500 border-rose-500 text-white"
-                              : step.isActive
-                                ? "bg-rose-100 border-rose-400 text-rose-600 animate-pulse"
-                                : "bg-white border-rose-200 text-rose-200",
-                          )}
-                        >
-                          {step.isDone ? (
-                            <CheckCircle2 className="w-3 h-3" />
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                          )}
+                    {/* Official Resolution Section */}
+                    {existingDispute.status === "RESOLVED" && (
+                      <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-200/50 space-y-3 mt-4">
+                        <div className="flex items-center justify-between">
+                           <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">
+                              Official Resolution
+                           </p>
+                           <Badge className="bg-emerald-500 text-white border-none font-black text-[9px] h-5 px-2">
+                             {existingDispute.resolution.replace(/_/g, " ")}
+                           </Badge>
                         </div>
-                        <div>
-                          <p
-                            className={cn(
-                              "text-xs font-black",
-                              step.isActive ? "text-rose-900" : "text-rose-300",
-                            )}
-                          >
-                            {step.stage}
-                          </p>
-                          <p
-                            className={cn(
-                              "text-[10px] font-medium",
-                              step.isActive ? "text-rose-600" : "text-rose-200",
-                            )}
-                          >
-                            {step.desc}
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest">Decision Note</p>
+                          <p className="text-xs font-bold leading-relaxed text-emerald-900/80 bg-white/40 p-3 rounded-xl border border-emerald-100/50 italic break-words">
+                            "{existingDispute.resolutionNote || "No explanatory note provided."}"
                           </p>
                         </div>
                       </div>
-                    ))}
+                    )}
                   </div>
-                </div>
-              </div>
 
-              <div className="px-5 py-3 flex flex-wrap items-center justify-between gap-4">
-                {/* <div className="flex items-center gap-2">
-                  <div className="p-1 px-2 bg-rose-100 rounded text-[10px] font-black text-rose-600 uppercase">
-                    Next Step
+                  {/* Progress Tracker */}
+                  <div className="bg-white/40 p-5 rounded-2xl border border-rose-100/50 space-y-4">
+                    <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest leading-none mb-4">
+                      Resolution Progress
+                    </p>
+
+                    <div className="space-y-4 relative">
+                      {/* Stepper line */}
+                      <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-rose-200" />
+
+                      {[
+                        {
+                          stage: "Case Opened",
+                          desc: "Conflict submitted for review",
+                          isActive: true,
+                          isDone: true,
+                        },
+                        {
+                          stage: "Mediator Assigned",
+                          desc: "A platform admin is reviewing the logs",
+                          isActive: existingDispute.status !== "OPEN",
+                          isDone: !["OPEN"].includes(existingDispute.status),
+                        },
+                        {
+                          stage: "Evidence Check",
+                          desc: "Project deliverables are being audited",
+                          isActive: [
+                            "UNDER_REVIEW",
+                            "RESOLVED",
+                            "CLOSED",
+                          ].includes(existingDispute.status),
+                          isDone: ["RESOLVED", "CLOSED"].includes(
+                            existingDispute.status,
+                          ),
+                        },
+                        {
+                          stage: "Final Decision",
+                          desc: "Review resolution and next steps",
+                          isActive: ["RESOLVED", "CLOSED"].includes(
+                            existingDispute.status,
+                          ),
+                          isDone:
+                            existingDispute.status === "RESOLVED" ||
+                            existingDispute.status === "CLOSED",
+                        },
+                      ].map((step, idx) => (
+                        <div key={idx} className="flex gap-4 relative z-10">
+                          <div
+                            className={cn(
+                              "w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors",
+                              step.isDone
+                                ? "bg-rose-500 border-rose-500 text-white"
+                                : step.isActive
+                                  ? "bg-rose-100 border-rose-400 text-rose-600 animate-pulse"
+                                  : "bg-white border-rose-200 text-rose-200",
+                            )}
+                          >
+                            {step.isDone ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : (
+                              <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                            )}
+                          </div>
+                          <div>
+                            <p
+                              className={cn(
+                                "text-xs font-black",
+                                step.isActive ? "text-rose-900" : "text-rose-300",
+                              )}
+                            >
+                              {step.stage}
+                            </p>
+                            <p
+                              className={cn(
+                                "text-[10px] font-medium",
+                                step.isActive ? "text-rose-600" : "text-rose-200",
+                              )}
+                            >
+                              {step.desc}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-sm text-rose-800 dark:text-rose-300 font-bold leading-relaxed">
-                    Mediator is reviewing the case. Check back soon.
-                  </p>
-                </div> */}
-                <div className="flex gap-2">
-                  {/* <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-8 bg-white" asChild>
-                      <Link to="/messages">
-                        <MessageSquare className="w-3 h-3 mr-1" />
-                        Discuss in Workspace
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-600 font-bold h-8 bg-white" asChild>
-                      <Link to="/settings/support">
-                        <Shield className="w-3 h-3 mr-1" />
-                        Help Center
-                      </Link>
-                    </Button> */}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                <div className="px-5 py-3 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex gap-2">
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )
         )}
 
         {/* Offer Approval Banner */}
