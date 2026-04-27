@@ -137,14 +137,13 @@ const ClientContractsPage = () => {
         </div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {[
             { label: "Total Asset Value", value: `$${stats.total.toLocaleString()}`, icon: <DollarSign className="w-5 h-5" />, color: "text-primary", bg: "bg-primary/5 border-primary/10" },
             { label: "Total Released", value: `$${stats.released.toLocaleString()}`, icon: <CheckCircle2 className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-500/5 border-emerald-500/10" },
             { label: "In Escrow", value: `$${stats.escrow.toLocaleString()}`, icon: <Shield className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-500/5 border-blue-500/10" },
             { label: "Active Jobs", value: stats.active.toString(), icon: <TrendingUp className="w-5 h-5" />, color: "text-violet-600", bg: "bg-violet-500/5 border-violet-500/10" },
             { label: "Needs Review", value: stats.needsReview.toString(), icon: <AlertTriangle className="w-5 h-5" />, color: "text-orange-600", bg: "bg-orange-500/5 border-orange-500/10" },
-            { label: "Disputed", value: stats.disputed.toString(), icon: <Shield className="w-5 h-5" />, color: "text-rose-600", bg: "bg-rose-500/5 border-rose-500/10" },
           ].map((s, i) => (
             <Card key={i} className={cn("rounded-2xl border", s.bg)}>
               <CardContent className="p-4 flex items-center gap-3">
@@ -175,7 +174,6 @@ const ClientContractsPage = () => {
               {[
                 { value: "active", label: "Active" },
                 { value: "completed", label: "Completed" },
-                { value: "disputed", label: "Disputed" },
                 { value: "all", label: "All" },
               ].map((t) => (
                 <TabsTrigger key={t.value} value={t.value} className="rounded-xl font-black px-5 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm">
