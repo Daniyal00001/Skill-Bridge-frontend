@@ -326,7 +326,7 @@ function DisputeCard({
 
         {/* Project title */}
         <h3 className="font-semibold text-sm text-foreground mb-1 break-words">
-          📁 {dispute.project?.title || "Project"}
+          {dispute.project?.title || "Project"}
         </h3>
 
         {/* Reason */}
@@ -867,7 +867,7 @@ export default function DisputeManagement() {
               freelancers.
             </p>
           </div>
-          <Button
+          {/* <Button
             size="sm"
             variant="outline"
             className="rounded-xl h-9 gap-2 font-semibold"
@@ -877,7 +877,7 @@ export default function DisputeManagement() {
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh
-          </Button>
+          </Button> */}
         </div>
 
         {/* ── Stats Row ────────────────────────────────────── */}
