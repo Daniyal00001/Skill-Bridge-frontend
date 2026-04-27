@@ -137,11 +137,23 @@
     @apply border-border;
   }
 
-  html,
-  body {
-    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden max-w-full;
-    font-family: "Inter", sans-serif;
+  html {
     scrollbar-gutter: stable;
+    width: 100vw;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: "Inter", sans-serif;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
   }
 
   h1,

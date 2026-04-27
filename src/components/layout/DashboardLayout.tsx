@@ -308,7 +308,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background flex w-full">
       {/* Sidebar */}
       <aside
         className={cn(
