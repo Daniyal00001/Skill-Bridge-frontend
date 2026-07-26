@@ -39,8 +39,6 @@ interface FreelancerMatch {
   estimatedTotal: number;
 }
 
-const API_URL = "http://localhost:5000/api/ai/assistant";
-
 // --- Sub-components ---
 
 const ChatMessage = memo(({ msg, user }: { msg: Message; user: any }) => {

@@ -540,10 +540,10 @@ export default function SignupPage() {
 
               <button
                 type="button"
-                onClick={() =>
-                  (window.location.href =
-                    "http://localhost:5000/api/auth/google")
-                }
+                onClick={() => {
+                  const apiBase = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
+                  window.location.href = `${apiBase}/auth/google`;
+                }}
                 className="w-full flex items-center justify-center gap-3 h-12 px-4 border border-border rounded-xl hover:bg-muted transition-colors"
               >
                 {/* Google SVG Icon */}
