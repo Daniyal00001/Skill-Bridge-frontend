@@ -148,6 +148,7 @@ export function FreelancerOnboardingModal({
     hourlyRate: profile?.hourlyRate?.toString() || "",
     bio: profile?.bio || "",
     availability: profile?.availability || "AVAILABLE",
+    experienceLevel: profile?.experienceLevel || "INTERMEDIATE",
     skills:
       profile?.skills?.map((s: any) => ({
         name: s.skill?.name || s.name,
@@ -190,6 +191,7 @@ export function FreelancerOnboardingModal({
             hourlyRate: Number(formData.hourlyRate),
             bio: formData.bio,
             availability: formData.availability,
+            experienceLevel: formData.experienceLevel,
             preferredBudgetMin: formData.preferredBudgetMin
               ? Number(formData.preferredBudgetMin)
               : undefined,
@@ -351,6 +353,7 @@ export function FreelancerOnboardingModal({
           hourlyRate: Number(formData.hourlyRate),
           bio: formData.bio,
           availability: formData.availability,
+          experienceLevel: formData.experienceLevel,
           preferredBudgetMin: formData.preferredBudgetMin
             ? Number(formData.preferredBudgetMin)
             : undefined,
@@ -737,7 +740,7 @@ export function FreelancerOnboardingModal({
                   className="h-32"
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Availability</Label>
                   <Select
@@ -752,6 +755,24 @@ export function FreelancerOnboardingModal({
                     <SelectContent>
                       <SelectItem value="AVAILABLE">Available</SelectItem>
                       <SelectItem value="UNAVAILABLE">Not Available</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Experience Level</Label>
+                  <Select
+                    onValueChange={(val) =>
+                      setFormData((p) => ({ ...p, experienceLevel: val }))
+                    }
+                    value={formData.experienceLevel}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Experience" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ENTRY">Entry Level</SelectItem>
+                      <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
+                      <SelectItem value="EXPERT">Expert</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
