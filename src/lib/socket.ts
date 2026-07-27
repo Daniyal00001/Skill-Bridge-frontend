@@ -1,7 +1,21 @@
 import { io, Socket } from 'socket.io-client'
 import { getAccessToken } from '@/lib/api'
 
-const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const getSocketUrl = (): string => {
+  if (import.meta.env.VITE_SOCKET_URL) {
+    return import.meta.env.VITE_SOCKET_URL
+  }
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
+  }
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
+    return `${protocol}//${window.location.hostname}:5000`
+  }
+  return 'http://localhost:5000'
+}
+
+const BACKEND_URL = getSocketUrl()
 
 let socket: Socket | null = null
 
