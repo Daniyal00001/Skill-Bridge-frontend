@@ -21,12 +21,15 @@ const BACKEND_URL = getSocketUrl()
 let socket: Socket | null = null
 
 export const getSocket = (): Socket => {
+  const token = getAccessToken()
+
   if (!socket) {
     socket = io(BACKEND_URL, {
       // token is read lazily so it's always fresh when reconnecting
       auth: (cb) => cb({ token: getAccessToken() ?? '' }),
       withCredentials: true,
       transports: ['polling', 'websocket'],
+      autoConnect: Boolean(token),
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
@@ -43,14 +46,31 @@ export const getSocket = (): Socket => {
     })
 
     socket.on('connect_error', (err) => {
+      if (err.message === 'Authentication error' || err.message === 'server error') {
+        if (!getAccessToken()) {
+          console.warn('[Socket] Waiting for valid authentication token...')
+          socket?.disconnect()
+          return
+        }
+      }
       console.error('[Socket] Connection error:', err.message)
     })
   }
+
+  // If token is available now but socket is not connected, trigger connection
+  if (token && !socket.connected) {
+    socket.connect()
+  }
+
   return socket
 }
 
 export const reconnectSocket = () => {
-  if (socket) {
+  const token = getAccessToken()
+  if (!token) return
+  if (!socket) {
+    getSocket()
+  } else {
     socket.disconnect().connect()
   }
 }

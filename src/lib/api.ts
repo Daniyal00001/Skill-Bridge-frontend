@@ -24,11 +24,21 @@ export const api = axios.create({
 // WHY memory and not localStorage?
 // localStorage can be stolen via XSS attacks
 // Memory is wiped when tab closes — much safer
+import { reconnectSocket, disconnectSocket } from './socket'
+
 let _accessToken: string | null = null
 
-export const setAccessToken = (token: string) => { _accessToken = token }
+export const setAccessToken = (token: string) => {
+  _accessToken = token
+  if (token) {
+    reconnectSocket()
+  }
+}
 export const getAccessToken = () => _accessToken
-export const clearAccessToken = () => { _accessToken = null }
+export const clearAccessToken = () => {
+  _accessToken = null
+  disconnectSocket()
+}
 
 // ── Request Interceptor ───────────────────────────────────────
 // Runs BEFORE every request
