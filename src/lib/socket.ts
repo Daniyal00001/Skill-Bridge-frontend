@@ -2,15 +2,16 @@ import { io, Socket } from 'socket.io-client'
 import { getAccessToken } from '@/lib/api'
 
 const getSocketUrl = (): string => {
-  if (import.meta.env.VITE_SOCKET_URL) {
-    return import.meta.env.VITE_SOCKET_URL
+  const socketUrl = import.meta.env.VITE_SOCKET_URL
+  if (socketUrl && socketUrl !== '/api') {
+    return socketUrl
   }
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
+  const apiUrl = import.meta.env.VITE_API_URL
+  if (apiUrl && apiUrl !== '/api') {
+    return apiUrl.replace(/\/api\/?$/, '')
   }
-  if (typeof window !== 'undefined' && window.location?.hostname) {
-    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
-    return `${protocol}//${window.location.hostname}:5000`
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin
   }
   return 'http://localhost:5000'
 }
@@ -25,7 +26,7 @@ export const getSocket = (): Socket => {
       // token is read lazily so it's always fresh when reconnecting
       auth: (cb) => cb({ token: getAccessToken() ?? '' }),
       withCredentials: true,
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
