@@ -4,7 +4,7 @@
 
 SkillBridge is an AI-powered freelance marketplace designed to help clients find suitable freelancers, define project requirements, manage projects, and complete the entire hiring lifecycle through a single platform.
 
-This repository contains the frontend application built with Next.js and React, providing role-based experiences for clients, freelancers, and administrators.
+This repository contains the frontend application built with React, providing role-based experiences for clients, freelancers, and administrators.
 
 ## 🚀 Core Features
 
@@ -149,30 +149,6 @@ Review
 * Socket.IO
 * JWT Authentication
 * Stripe Integration
-
-## 🏗️ Application Architecture
-
-The frontend communicates with the backend through RESTful APIs and uses real-time communication for client-freelancer interactions.
-
-```text
-┌─────────────────────────────┐
-│        Next.js Frontend     │
-├─────────────────────────────┤
-│ Client UI                   │
-│ Freelancer UI               │
-│ Admin Dashboard             │
-│ Authentication              │
-│ Project Management          │
-│ Real-Time Chat              │
-└──────────────┬──────────────┘
-               │
-        REST / Socket.IO
-               │
-               ▼
-┌─────────────────────────────┐
-│      Node.js Backend        │
-└─────────────────────────────┘
-```
 
 ## 🔐 Authentication & Authorization
 
