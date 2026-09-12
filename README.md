@@ -206,19 +206,6 @@ cd <project-directory>
 npm install
 ```
 
-### Configure environment variables
-
-Create a `.env.local` file and configure the required environment variables.
-
-Example:
-
-```env
-NEXT_PUBLIC_API_URL=your_backend_api_url
-NEXT_PUBLIC_SOCKET_URL=your_socket_server_url
-```
-
-Never commit sensitive credentials or secret keys.
-
 ### Run the development server
 
 ```bash
